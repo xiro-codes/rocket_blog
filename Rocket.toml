@@ -1,0 +1,7 @@
+[default]
+
+[default.databases.sea_orm]
+url = "postgres://master:password@localhost/tdavis_dev"
+
+[release]
+secret_key = "IbP06YnohvhdpzC/dHzUci4zUEL44Gl54fouYYvTxMg="
