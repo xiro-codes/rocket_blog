@@ -16,7 +16,6 @@ use rocket::fs::FileServer;
 use rocket::response::Redirect;
 use rocket::{fairing, Build, Request, Rocket};
 use rocket_dyn_templates::{context, Template};
-use sea_orm::*;
 use sea_orm_rocket::Database;
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {

@@ -8,7 +8,10 @@ use rocket::futures::lock::Mutex;
 use sea_orm::*;
 use uuid::Uuid;
 
+use crate::services::base::BaseService;
+
 pub struct Service {
+    base: BaseService,
     token_map: Mutex<HashMap<Token, AccountId>>
 }
 type Token = Uuid;
@@ -16,8 +19,12 @@ type AccountId = Uuid;
 
 impl Service {
     pub fn new() -> Self {
-        Self { token_map: Mutex::new(HashMap::new())}
+        Self { 
+            base: BaseService::new(),
+            token_map: Mutex::new(HashMap::new())
+        }
     }
+    
     pub async fn login(&self, db: &DbConn, data: AccountFormDTO) -> Result<Token, DbErr> {
         let ac = Account::find()
             .filter(account::Column::Username.eq(data.username))
@@ -31,7 +38,7 @@ impl Service {
             }
             let token = {
                 let mut tm = self.token_map.lock().await;
-                let token = Uuid::new_v4();
+                let token = BaseService::generate_id();
                 tm.insert(token, ac.id);
                 token
             };
@@ -39,6 +46,7 @@ impl Service {
         }
         Err(DbErr::Custom("".to_owned()))
     }
+    
     pub async fn check_token(&self, db: &DbConn, token: Token) -> Option<account::Model> {
         let id = {
             let tm = self.token_map.lock().await;
