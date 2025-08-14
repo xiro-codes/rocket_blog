@@ -1,4 +1,5 @@
 use crate::{
+    controllers::base::ControllerBase,
     dto::post::FormDTO,
     services,
     types::{HttpRange, StreamedFile},
@@ -21,12 +22,14 @@ use crate::services::BlogService;
 use crate::{pool::Db, services::CommentService};
 
 pub struct Controller {
-    path: String,
+    base: ControllerBase,
 }
 
 impl Controller {
     pub fn new(path: String) -> Self {
-        Self { path }
+        Self {
+            base: ControllerBase::new(path),
+        }
     }
 }
 
@@ -39,7 +42,7 @@ async fn list_view(
     service: &State<BlogService>,
     flash: Option<FlashMessage<'_>>,
 ) -> Template {
-    let token = jar.get_private("token").map(|c| c.value().to_owned());
+    let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     let (posts, page, page_size, num_pages) = service
         .paginate_with_title(db, page, page_size)
@@ -54,7 +57,7 @@ async fn list_view(
             page_size,
             num_pages,
             token,
-            flash: flash.map(FlashMessage::into_inner)
+            flash: ControllerBase::extract_flash(flash)
         },
     )
 }
@@ -67,7 +70,7 @@ async fn detail_view(
     jar: &CookieJar<'_>,
     id: i32,
 ) -> Result<Template,Status> {
-    let token = jar.get_private("token").map(|c| c.value().to_owned());
+    let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     let (post, account) = service.find_by_seq_id_with_account(db, id).await.unwrap();
 
@@ -88,7 +91,7 @@ async fn detail_view(
             token,
             min_post,
             max_post,
-            flash: flash.map(FlashMessage::into_inner)
+            flash: ControllerBase::extract_flash(flash)
         },
     ))
 }
@@ -156,14 +159,12 @@ async fn create_view(
     flash: Option<FlashMessage<'_>>,
     jar: &CookieJar<'_>,
 ) -> Result<Template, Status> {
-    if let None = jar.get_private("token") {
-        return Err(Status::Unauthorized);
-    }
+    ControllerBase::require_auth(jar)?;
     Ok(Template::render(
         "blog/create",
         context! {
             form_url: "create",
-            flash: flash.map(FlashMessage::into_inner)
+            flash: ControllerBase::extract_flash(flash)
         },
     ))
 }
@@ -176,9 +177,9 @@ async fn create(
     jar: &CookieJar<'_>,
     form_data: Form<FormDTO<'_>>,
 ) -> Result<Flash<Redirect>, Status> {
-    if let Some(token) = jar.get_private("token") {
+    if let Some(token) = ControllerBase::check_auth(jar)? {
         let db = conn.into_inner();
-        let token = Uuid::parse_str(token.value()).unwrap();
+        let token = Uuid::parse_str(&token).unwrap();
         if let Some(account) = auth_service.check_token(db, token).await {
             if !account.admin {
                 return Err(Status::Unauthorized);
@@ -190,9 +191,9 @@ async fn create(
                 .unwrap()
             .seq_id;
 
-            return Ok(Flash::success(
-                Redirect::to(format!("/blog/{id}")),
-                "Post successfully added",
+            return Ok(ControllerBase::success_redirect(
+                format!("/blog/{id}"),
+                "Post successfully added"
             ));
         }
     }
@@ -206,9 +207,7 @@ async fn edit_view(
     service: &State<BlogService>,
     id: i32,
 ) -> Result<Template, Status> {
-    if let None = jar.get_private("token") {
-        return Err(Status::Unauthorized);
-    }
+    ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     let post = service.find_by_seq_id(db, id).await.unwrap();
     Ok(Template::render(
@@ -227,18 +226,16 @@ async fn edit(
     form_data: Form<FormDTO<'_>>,
     jar: &CookieJar<'_>,
 ) -> Result<Flash<Redirect>, Status> {
-    if let None = jar.get_private("token") {
-        return Err(Status::Unauthorized);
-    }
+    ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     let _ = service
         .update_by_seq_id(db, id, form_data.into_inner())
         .await
         .expect("Post does not exist");
-    return Ok(Flash::success(
-        Redirect::to(format!("/blog/{id}")),
-        "Updated Post",
-    ));
+    Ok(ControllerBase::success_redirect(
+        format!("/blog/{id}"),
+        "Updated Post"
+    ))
 }
 #[get("/<id>/delete")]
 async fn delete(
@@ -247,15 +244,10 @@ async fn delete(
     id: i32,
     jar: &CookieJar<'_>,
 ) -> Result<Flash<Redirect>, Status> {
-    if let None = jar.get_private("token") {
-        return Err(Status::Unauthorized);
-    }
+    ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     let _ = service.delete_by_seq_id(db, id).await;
-    return Ok(Flash::success(
-        Redirect::to(format!("/blog")),
-        "Deleted Post",
-    ));
+    Ok(ControllerBase::success_redirect("/blog", "Deleted Post"))
 }
 
 fn routes() -> Vec<Route> {
@@ -271,17 +263,4 @@ fn routes() -> Vec<Route> {
     ]
 }
 
-#[rocket::async_trait]
-impl Fairing for Controller {
-    fn info(&self) -> fairing::Info {
-        fairing::Info {
-            name: "Blog Controller",
-            kind: Kind::Ignite,
-        }
-    }
-    async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        Ok(rocket
-            .manage(BlogService::new())
-            .mount(self.path.to_owned(), routes()))
-    }
-}
+crate::impl_controller_fairing!(Controller, BlogService, "Blog Controller", routes());

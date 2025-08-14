@@ -1,3 +1,6 @@
+mod base;
+pub use base::{BaseController, ControllerBase};
+
 mod index;
 pub use index::Controller as IndexController;
 mod auth;

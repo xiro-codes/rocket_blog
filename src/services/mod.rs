@@ -1,3 +1,6 @@
+mod base;
+pub use base::BaseService;
+
 mod auth;
 pub use auth::Service as AuthService;
 mod blog;

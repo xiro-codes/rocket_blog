@@ -10,15 +10,21 @@ use rocket::{
 use sea_orm_rocket::Connection;
 use uuid::Uuid;
 
-use crate::{pool::Db, services::{CommentService, BlogService}};
+use crate::{
+    controllers::base::ControllerBase,
+    pool::Db, 
+    services::{CommentService, BlogService}
+};
 
 pub struct Controller {
-    path: String,
+    base: ControllerBase,
 }
 
 impl Controller {
     pub fn new(path: String) -> Self {
-        Self { path }
+        Self {
+            base: ControllerBase::new(path),
+        }
     }
 }
 
@@ -33,9 +39,9 @@ async fn create(
     let db = conn.into_inner();
     let _ = service.create(db, post_id, form_data.into_inner()).await;
     let post = blog_service.find_by_id(db, post_id).await.unwrap().unwrap();
-    Ok(Flash::success(
-        Redirect::to(format!("/blog/{}", post.seq_id)),
-        "Comment created",
+    Ok(ControllerBase::success_redirect(
+        format!("/blog/{}", post.seq_id),
+        "Comment created"
     ))
 }
 
@@ -43,17 +49,4 @@ pub fn routes() -> Vec<Route> {
     routes![create]
 }
 
-#[rocket::async_trait]
-impl Fairing for Controller {
-    fn info(&self) -> fairing::Info {
-        fairing::Info {
-            name: "Comment Controller",
-            kind: Kind::Ignite,
-        }
-    }
-    async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        Ok(rocket
-            .manage(CommentService::new())
-            .mount(self.path.to_owned(), routes()))
-    }
-}
+crate::impl_controller_fairing!(Controller, CommentService, "Comment Controller", routes());
