@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # The database service
+  postgres:
+    image: postgres:13 # Using a specific version is recommended
+    restart: always
+    environment:
+      # Sets the default user, password, and database as specified
+      POSTGRES_USER: master
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tdavis_dev
+    volumes:
+      # Persists the database data to a named volume on the host
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # Maps the container's PostgreSQL port to the host's port
+      - "5432:5432"
+
+  # The pgAdmin GUI service
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      # Sets the login credentials for the pgAdmin web interface
+      PGADMIN_DEFAULT_EMAIL: master@example.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      # Maps the container's web server port to a host port (5050)
+      - "5050:80"
+    depends_on:
+      # Ensures the postgres service starts before pgAdmin
+      - postgres
+
+# Define the named volume for data persistence
+volumes:
+  postgres_data:
+

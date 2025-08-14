@@ -1,0 +1,57 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="d-flex flex-column align-items-center justify-content-center">
+	<h1 class="text-white">Articles:</h1>
+	{% if flash %}
+	<h3 class="btn-{{ flash.0 }} btn disabled">
+		{{ flash.1 }}
+	</h3>
+	{% endif %}
+
+	{%if token %}
+	<div class="btn-group">
+		<a class="btn btn-primary" href="/blog/create">Create</a>
+		<a class="btn btn-primary" href="/auth/logout">Logout</a>
+	</div>
+	{%else%}
+	<form action="/auth/" method="post" class="mx-5 px-5">
+		<div class="mx-5 px-5 my-2">
+			<input type="text" name="username" placeholder="username" class="form-control" />
+		</div>
+		<div class="mx-5 px-5 my-2">
+			<input type="password" name="password" placeholder="password" class="form-control" />
+		</div>
+		<div class="mx-5 px-5 my-2 d-flex justify-content-center">
+			<button type="submit" class="btn btn-primary">Login</button>
+		</div>
+	</form>
+	{%endif%}
+</div>
+<ul class="list-group mx-5 my-2">
+	{% for post in posts %}
+	<li class="list-group-item"><a
+			class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+			href="/blog/{{post.seq_id}}">{{post.title}}</a></li>
+	{% endfor %}
+</ul>
+<div class="d-flex justify-content-center m-2">
+	<footer class="btn-group align-items-center">
+		{% if page == 1 %}
+		<button class="btn btn-secondary" disabled>Prev</button>
+		{% else %}
+		<a class="btn btn-primary" href="?page={{page -1}}&page_size={{page_size}}">Prev</a>
+		{%endif%}
+		<button class="btn btn-secondary" disabled>
+			{{page}}
+		</button>
+		{% if page == num_pages %}
+		<button class="btn btn-secondary" disabled>Next</button>
+		{%else%}
+		<a class="btn btn-primary" href="?page={{page +1}}&page_size={{page_size}}">Next</a>
+		{%endif%}
+	</footer>
+</div>
+{% endblock %}
+{% block script %}
+{% endblock %}

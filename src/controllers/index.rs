@@ -1,0 +1,33 @@
+use rocket::{fairing::{Fairing, self, Kind}, Route, response::Redirect, Rocket, Build};
+
+pub struct Controller {
+    path: String
+}
+impl Controller {
+    pub fn new(path: String) -> Self {
+        Self { path }
+    }
+}
+#[get("/")]
+fn index()->Redirect {
+    Redirect::to("/blog")
+}
+pub fn routes() -> Vec<Route> {
+    routes![
+        index
+    ]
+}
+
+#[rocket::async_trait]
+impl Fairing for Controller {
+    fn info(&self) -> fairing::Info {
+        fairing::Info {
+            name: "Index Controller",
+            kind: Kind::Ignite,
+        }
+    }
+    async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
+        Ok(rocket
+           .mount(self.path.to_owned(), routes()))
+    }
+}

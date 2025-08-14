@@ -1,7 +1,7 @@
 {
   description = "Rocket Template";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     fenix.url = "github:nix-community/fenix";
   };
   outputs = { self, nixpkgs, fenix }:
@@ -21,9 +21,12 @@
       devShells.${system}.default = pkgs.mkShell {
         name = "${pname}";
         packages = with pkgs; [
+					lunarvim
+					ffmpeg
+					just
           sea-orm-cli
           cargo-watch
-          rust-analyzer
+          fenix.packages.x86_64-linux.rust-analyzer
           rustc
           cargo
           gcc

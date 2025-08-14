@@ -1,0 +1,60 @@
+{% extends "base" %}
+
+{% block content %}
+{% if post %}
+<center class="text-white">
+	<h1>{{post.title}}</h1>
+	<h4>by {{username}}</h4>
+	{%if token%}
+	<header class="btn-group">
+		<a class="btn btn-warning" href="{{post.seq_id}}/edit">Edit</a>
+		<a class="btn btn-danger" href="{{post.seq_id}}/delete">Delete</a>
+	</header>
+	{%endif%}
+</center>
+<div class="d-flex align-items-center justify-content-center">
+	<video class="object-fit-scale" src="{{post.seq_id}}/video" height="300" controls autoplay></video>
+</div>
+<div class="text-white mx-5">
+	<p>{{post.text | safe}}</p>
+	<h6>{{post.date_published}}</h6>
+</div>
+<div class="d-flex justify-content-center align-items-center">
+	<form action="/comment/create/{{post.id}}" method="post" class="d-flex flex-row mb-2">
+		<div class="form-floating">
+			<input type="text" required id="text" name="text" class="form-control" placeholder="lol" />
+			<label for="text" class="form-label">Post Comment ?</label>
+		</div>
+		<button class="btn btn-primary" type="submit">Submit</button>
+	</form>
+</div>
+<ul class="list-group mx-5">
+	{% for comment in comments %}
+	<li class="list-group-item mx-5"><b>{{comment.text}}</b></li>
+	{%endfor%}
+</ul>
+<div class="d-flex justify-content-center m-2">
+	<footer class="btn-group align-items-center">
+		{%if token%}
+		{% if post.seq_id == min_post %}
+		<button class="btn btn-secondary" disabled>Prev </button>
+		{% else %}
+		<a href="{{post.seq_id - 1}}" class="btn btn-primary">Prev</a>
+		{%endif%}
+		{% if post.seq_id == max_post %}
+		<button class="btn btn-secondary" disabled>Next</button>
+		{%else%}
+		<a href="{{post.seq_id + 1}}" class="btn btn-primary">Next</a>
+		{%endif%}
+		{%else%}
+		<a href="/" class="btn btn-primary">Back</a>
+		{%endif%}
+	</footer>
+</div>
+{% endif %}
+{% if flash %}
+<small class="field-{{ flash.0 }}-flash">
+	{{ flash.1 }}
+</small>
+{% endif %}
+{% endblock %}

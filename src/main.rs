@@ -4,6 +4,8 @@ extern crate rocket;
 
 mod controllers;
 mod middleware;
+mod dto;
+mod types;
 mod pool;
 mod services;
 
@@ -31,10 +33,14 @@ pub fn catch_default() -> Redirect{
 #[launch]
 async fn rocket() -> _ {
     rocket::build()
+        .register("/", catchers![catch_default])
         .attach(Db::init())
         .attach(Template::fairing())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
-        .register("/", catchers![catch_default])
+        .attach(middleware::Seeding::new(Some(0), 50))
         .attach(controllers::IndexController::new("/".to_owned()))
+        .attach(controllers::AuthController::new("/auth".to_owned()))
+        .attach(controllers::BlogController::new("/blog".to_owned()))
+        .attach(controllers::CommentController::new("/comment".to_owned()))
         .mount("/static", FileServer::from("./static/"))
 }

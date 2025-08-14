@@ -1,0 +1,6 @@
+{%extends "base" %}
+{% block content %}
+<div class="row">
+	<p>405 Unauthorized</p>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+{%extends "base" %}
+{% block content %}
+<div class="row">
+	<p>404 Not Found</p>
+</div>
+{% endblock %}

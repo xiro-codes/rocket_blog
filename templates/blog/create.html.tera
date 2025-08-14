@@ -1,0 +1,33 @@
+{% extends "base" %}
+
+{% block content %}
+<center>
+	<h1>Create Article</h1>
+</center>
+<div class="d-flex justify-content-center align-items-center bg-body-secondary">
+	<form action="{{form_url}}" method="post" enctype="multipart/form-data">
+		<div>
+			<label for="title" class="form-label"> Title </label>
+			<input type="text" name="title" id="title" class="form-control" />
+		</div>
+		<div>
+			<label for="text" class="form-label"> Text </label>
+			<textarea name="text" id="text" rows="8" class="form-control"></textarea>
+		</div>
+		<div>
+			<label for="file" class="form-label"> Clip </label>
+			<input type="file" name="file" id="file" class="form-control" accept="video/*" />
+		</div>
+		<div class="justify-content-center d-flex m-1">
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</form>
+</div>
+{% if flash %}
+<small class="field-{{ flash.0 }}-flash">
+	{{ flash.1 }}
+</small>
+{% endif %}
+{% endblock %}
+{% block script %}
+{% endblock %}

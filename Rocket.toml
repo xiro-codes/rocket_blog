@@ -1,4 +1,7 @@
 [default]
+limits.file = "1 GB"
+limits.data-form = "1 GB"
+limits.form = "1 GB"
 
 [default.databases.sea_orm]
 url = "postgres://master:password@localhost/tdavis_dev"

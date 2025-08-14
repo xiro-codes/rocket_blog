@@ -1,0 +1,29 @@
+{% extends "base" %}
+
+{% block content %}
+{%if post%}
+<center>
+	<h1>Edit Article</h1>
+</center>
+<div class="d-flex justify-content-center align-items-center bg-body-secondary">
+	<form action="{{form_url}}" method="post">
+		<div>
+			<label for="title" class="form-label"> Title </label>
+			<input type="text" class="form-control" name="title" id="title" value="{{post.title}}" />
+		</div>
+		<div>
+			<label for="text" class="form-label"> Text </label>
+			<textarea name="text" class="form-control" id="text" rows="8" >{{post.text}}</textarea>
+		</div>
+		<div class="justify-content-center d-flex m-1">
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</form>
+</div>
+{% if flash %}
+<small class="field-{{ flash.0 }}-flash">
+	{{ flash.1 }}
+</small>
+{% endif %}
+{% endif %}
+{% endblock %}
