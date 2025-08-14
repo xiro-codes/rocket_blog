@@ -64,9 +64,9 @@ impl<'r> Responder<'r, 'static> for StreamedFile {
                 .raw_header("Content-Range", format!(
                     "bytes {}-{}/{}", 
                     range.start, 
-                    range.start + bytes_read as u64, 
+                    range.end - 1, 
                     self.size))
-                .raw_header("Content-Length", (bytes_read as u64).to_string())
+                .raw_header("Content-Length", length.to_string())
                 .sized_body(bytes_read, io::Cursor::new(buf));
 
         } else {
@@ -86,8 +86,6 @@ pub struct HttpRange(pub std::ops::Range<u64>);
 impl<'r> FromRequest<'r> for HttpRange {
     type Error = ();
     async fn from_request(req: &'r Request<'_>) -> request::Outcome<Self, Self::Error> {
-        let file_size: u64 = 1_000; 
-
         if let Some(range_header) = req.headers().get_one("Range") {
             let range_str = range_header.trim_start_matches("bytes=");
             let parts: Vec<&str> = range_str.split('-').collect();
@@ -98,32 +96,23 @@ impl<'r> FromRequest<'r> for HttpRange {
             match (start, end) {
                 // Case 1: `Range: bytes=start-end`
                 (Some(start), Some(end)) => {
-                    // Check for invalid ranges
-                    if start >= end || end >= file_size {
+                    // Basic validation - start should be less than end
+                    if start > end {
                         Outcome::Error((Status::RangeNotSatisfiable, ()))
                     } else {
                         // The `Range` struct is exclusive of the end value, so we add 1
                         Outcome::Success(HttpRange(start..end + 1))
                     }
                 }
-                // Case 2: `Range: bytes=start-`
+                // Case 2: `Range: bytes=start-` (open-ended range)
                 (Some(start), None) => {
-                    if start >= file_size {
-                        Outcome::Error((Status::RangeNotSatisfiable, ()))
-                    } else {
-                        // Requesting from start to the end of the file
-                        Outcome::Success(HttpRange(start..file_size))
-                    }
+                    // Use u64::MAX to indicate open-ended range, will be corrected in video handler
+                    Outcome::Success(HttpRange(start..u64::MAX))
                 }
-                // Case 3: `Range: bytes=-end`
-                (None, Some(end)) => {
-                    let start = file_size.saturating_sub(end);
-                    if start >= file_size {
-                        Outcome::Error((Status::RangeNotSatisfiable, ()))
-                    } else {
-                        // Requesting the last `end` bytes of the file
-                        Outcome::Success(HttpRange(start..file_size))
-                    }
+                // Case 3: `Range: bytes=-suffix` (suffix-byte-range-spec)
+                (None, Some(suffix)) => {
+                    // Use u64::MAX for start to indicate suffix range, will be corrected in video handler
+                    Outcome::Success(HttpRange(u64::MAX..suffix))
                 }
                 // Case 4: Invalid format
                 _ => {
