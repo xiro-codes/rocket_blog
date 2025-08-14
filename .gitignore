@@ -5,3 +5,6 @@ result
 # Sea-ORM automation temporary files
 models/custom_code_backup.json
 models/src.backup/
+
+# Python cache files
+scripts/__pycache__/
