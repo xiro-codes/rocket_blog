@@ -20,14 +20,45 @@ use rocket::{
 use sea_orm::*;
 use sea_orm_rocket::Database;
 use slug::slugify;
+use std::fs;
+use std::io::Write;
 
 pub struct Seeding {
     count: usize,
     seed: Option<u32>
 }
+
+const DATA_PATH: &str = "/home/tod/.local/share/blog";
+
 impl Seeding {
     pub fn new(seed: Option<u32>, count: usize) -> Self {
         Self { seed, count }
+    }
+
+    // Helper function to create dummy video files for seeding
+    fn create_dummy_video_files(&self) -> Result<Vec<String>, std::io::Error> {
+        // Create the data directory if it doesn't exist
+        fs::create_dir_all(DATA_PATH)?;
+        
+        let video_names = vec![
+            "intro_video.webm",
+            "tutorial_basics.webm", 
+            "advanced_concepts.webm",
+            "demo_project.webm",
+            "code_review.webm",
+        ];
+        
+        let mut created_paths = Vec::new();
+        
+        for name in video_names {
+            let path = format!("{}/{}", DATA_PATH, name);
+            // Create a small dummy file (just empty for seeding purposes)
+            let mut file = fs::File::create(&path)?;
+            file.write_all(b"dummy video content for seeding")?;
+            created_paths.push(path);
+        }
+        
+        Ok(created_paths)
     }
 }
 #[rocket::async_trait]
@@ -77,6 +108,13 @@ impl Fairing for Seeding {
             created_tags.push(tag);
         }
         
+        // Create dummy video files for seeding
+        let video_paths = self.create_dummy_video_files()
+            .unwrap_or_else(|e| {
+                println!("Warning: Failed to create dummy video files: {}", e);
+                Vec::new()
+            });
+        
         let mut posts = Vec::new();
         let mut comments: Vec<comment::ActiveModel> = Vec::new();
         let mut post_tags: Vec<post_tag::ActiveModel> = Vec::new();
@@ -84,10 +122,20 @@ impl Fairing for Seeding {
         for i in 1..self.count {
             let title_rng = thread_rng();
             let text_rng = thread_rng();
+            
+            // Assign video path to about 30% of posts if video files were created
+            let video_path = if !video_paths.is_empty() && rand::random::<f32>() < 0.3 {
+                let video_index = rand::random::<usize>() % video_paths.len();
+                Some(video_paths[video_index].clone())
+            } else {
+                None
+            };
+            
             let p = post::ActiveModel {
                 id: Set(uuid::Uuid::new_v4()),
                 title: Set(lipsum_words_with_rng(title_rng, 5)),
                 text: Set(lipsum_words_with_rng(text_rng, 50 + (rand::random::<usize>() % 50))),
+                path: Set(video_path),
                 draft: Set(Some(false)),
                 account_id: Set(ac.id),
                 date_published: Set(Local::now().naive_local()),
