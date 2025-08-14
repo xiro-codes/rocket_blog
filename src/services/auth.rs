@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use models::account;
+use models::dto::AccountFormDTO;
 use models::prelude::Account;
 use pwhash::bcrypt;
 use rocket::futures::lock::Mutex;
@@ -17,7 +18,7 @@ impl Service {
     pub fn new() -> Self {
         Self { token_map: Mutex::new(HashMap::new())}
     }
-    pub async fn login(&self, db: &DbConn, data: account::FormDTO) -> Result<Token, DbErr> {
+    pub async fn login(&self, db: &DbConn, data: AccountFormDTO) -> Result<Token, DbErr> {
         let ac = Account::find()
             .filter(account::Column::Username.eq(data.username))
             .one(db)

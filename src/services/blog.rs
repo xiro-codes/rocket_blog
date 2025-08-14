@@ -2,6 +2,7 @@ use crate::dto::post::FormDTO;
 use chrono::Local;
 use models::prelude::{Account, Post};
 use models::{account, post};
+use models::dto::PostTitleResult;
 use sea_orm::ColumnTrait;
 use sea_orm::*;
 use uuid::Uuid;
@@ -112,7 +113,7 @@ impl Service {
             .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", id)))
             .map(Into::into)
     }
-    pub async fn find_many_with_title(&self, db: &DbConn) -> Result<Vec<post::TitleResult>, DbErr> {
+    pub async fn find_many_with_title(&self, db: &DbConn) -> Result<Vec<PostTitleResult>, DbErr> {
         Post::find()
             .select_only()
             .column(post::Column::Id)
@@ -136,7 +137,7 @@ impl Service {
         db: &DbConn,
         page: Option<u64>,
         page_size: Option<u64>,
-    ) -> Result<(Vec<post::TitleResult>, u64, u64, u64), DbErr> {
+    ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
         let page = page.unwrap_or(1);
         let page_size = page_size.unwrap_or(DEFAULT_PAGE_SIZE);
         if page == 0 {

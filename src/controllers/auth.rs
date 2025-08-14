@@ -1,4 +1,4 @@
-use models::account;
+use models::{account, dto::AccountFormDTO};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -27,7 +27,7 @@ async fn login(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
     jar: &CookieJar<'_>,
-    data: Form<account::FormDTO>,
+    data: Form<AccountFormDTO>,
 ) -> Flash<Redirect> {
     let db = conn.into_inner();
     if let Ok(token) = service.login(db, data.into_inner()).await {

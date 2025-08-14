@@ -10,7 +10,7 @@ gen-models:
 	# Remove only generated entity files, preserve dto.rs and other custom files
 	rm ./models/src/account.rs ./models/src/comment.rs ./models/src/post.rs ./models/src/prelude.rs ./models/src/lib.rs || true
 	sea-orm-cli generate entity -l --model-extra-attributes 'serde(crate="rocket::serde")' --with-serde both --with-copy-enums -o  ./models/src
-	./scripts/fix_serde_imports.sh ./models/src
+	sh ./scripts/fix_serde_imports.sh ./models/src
 	# Add dto module to lib.rs if not present
 	echo "" >> ./models/src/lib.rs
 	echo "// Custom DTOs and form structures" >> ./models/src/lib.rs
@@ -22,7 +22,7 @@ gen-models-simple:
 	# Remove only generated entity files, preserve dto.rs and other custom files  
 	rm ./models/src/account.rs ./models/src/comment.rs ./models/src/post.rs ./models/src/prelude.rs ./models/src/lib.rs || true
 	sea-orm-cli generate entity -l --model-extra-attributes 'serde(crate="rocket::serde")' --with-serde both --with-copy-enums -o  ./models/src
-	./scripts/fix_serde_imports.sh ./models/src
+	sh ./scripts/fix_serde_imports.sh ./models/src
 	# Add dto module to lib.rs if not present
 	echo "" >> ./models/src/lib.rs  
 	echo "// Custom DTOs and form structures" >> ./models/src/lib.rs

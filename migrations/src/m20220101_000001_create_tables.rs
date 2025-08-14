@@ -90,7 +90,7 @@ impl MigrationTrait for Migration {
 }
 
 #[derive(DeriveIden)]
-pub enum Account {
+enum Account {
     Table,
     Id,
     Username,

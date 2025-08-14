@@ -2,6 +2,7 @@ use std::fmt::format;
 
 use chrono::Local;
 use models::comment;
+use models::dto::CommentFormDTO;
 use models::prelude::Comment;
 use sea_orm::*;
 use uuid::Uuid;
@@ -12,7 +13,7 @@ impl Service {
     pub fn new() -> Self {
         Self
     }
-    pub async fn create(&self, db: &DbConn, post_id: Uuid, data: comment::FormDTO) -> Result<(), DbErr> {
+    pub async fn create(&self, db: &DbConn, post_id: Uuid, data: CommentFormDTO) -> Result<(), DbErr> {
         let comment = comment::ActiveModel {
             id: Set(Uuid::new_v4()),
             text: Set(data.text),

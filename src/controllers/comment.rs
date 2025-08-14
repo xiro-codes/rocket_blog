@@ -1,4 +1,5 @@
-use models::{account::FormDTO, comment};
+use models::{account, comment};
+use models::dto::CommentFormDTO;
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -27,7 +28,7 @@ async fn create(
     service: &State<CommentService>,
     blog_service: &State<BlogService>,
     post_id: Uuid,
-    form_data: Form<comment::FormDTO>,
+    form_data: Form<CommentFormDTO>,
 ) -> Result<Flash<Redirect>, Status> {
     let db = conn.into_inner();
     let _ = service.create(db, post_id, form_data.into_inner()).await;
