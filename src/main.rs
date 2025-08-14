@@ -8,6 +8,7 @@ mod dto;
 mod types;
 mod pool;
 mod services;
+mod config;
 
 use migrations::MigratorTrait;
 use pool::Db;
@@ -18,6 +19,7 @@ use rocket::{fairing, Build, Request, Rocket};
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Database;
 use services::TagService;
+use config::AppConfig;
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     let conn = &Db::fetch(&rocket).unwrap().conn;
@@ -32,6 +34,9 @@ pub fn catch_default() -> Redirect{
 
 #[launch]
 async fn rocket() -> _ {
+    let figment = rocket::Config::figment();
+    let app_config = AppConfig::from_figment(&figment);
+
     rocket::build()
         .register("/", catchers![catch_default])
         .attach(Db::init())
@@ -39,6 +44,7 @@ async fn rocket() -> _ {
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
         // .attach(middleware::Seeding::new(Some(0), 50))  // Commented out to avoid duplicate key issues in container
         .manage(TagService::new())
+        .manage(app_config)
         .attach(controllers::IndexController::new("/".to_owned()))
         .attach(controllers::AuthController::new("/auth".to_owned()))
         .attach(controllers::BlogController::new("/blog".to_owned()))
