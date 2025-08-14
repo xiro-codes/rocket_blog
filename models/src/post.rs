@@ -2,13 +2,8 @@
 
 use sea_orm::entity::prelude::*;
 
-// manual addition
 use rocket::serde::{Deserialize, Serialize};
-use rocket::serde::{Deserialize, Serialize};
-use sea_orm::DerivePartialModel;
-use sea_orm::FromQueryResult;
-use rocket::FromForm;
-// end manual addition
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "post")]
 #[serde(crate = "rocket::serde")]
@@ -23,18 +18,6 @@ pub struct Model {
     pub date_published: DateTime,
     pub account_id: Uuid,
 }
-// Manual addition
-#[derive(
-    Clone, Debug, PartialEq, Eq, DerivePartialModel, FromQueryResult, Serialize, Deserialize,
-)]
-#[serde(crate = "rocket::serde")]
-#[sea_orm(entity = "Entity")]
-pub struct TitleResult {
-    pub id: Uuid,
-    pub seq_id: i32,
-    pub title: String,
-}
-// end Manual addition
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
