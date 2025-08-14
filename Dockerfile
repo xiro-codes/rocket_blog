@@ -1,23 +1,4 @@
-# Build stage
-FROM rust:1.82 as builder
-
-# Install system dependencies needed for building
-RUN apt-get update && apt-get install -y \
-    pkg-config \
-    libssl-dev \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create app directory
-WORKDIR /app
-
-# Copy all source files first
-COPY . .
-
-# Build the application
-RUN cargo build --release
-
-# Runtime stage
+# Use a Debian slim base image for consistency
 FROM debian:bookworm-slim
 
 # Install runtime dependencies
@@ -33,16 +14,20 @@ RUN useradd -m -u 1000 app
 # Set working directory
 WORKDIR /app
 
-# Copy the binary from builder stage
-COPY --from=builder /app/target/release/rocket-template .
+# Copy static assets and templates
+COPY templates ./templates/
+COPY static ./static/
+COPY Rocket.toml ./
 
-# Copy necessary files
-COPY --from=builder /app/templates ./templates
-COPY --from=builder /app/static ./static
-COPY --from=builder /app/Rocket.toml ./
+# For development, expect binary to be mounted or copied
+# This allows building on host and running in container
+COPY target/release/rocket-template ./rocket-template
 
 # Create data directory for file uploads
-RUN mkdir -p /app/data && chown app:app /app/data
+RUN mkdir -p /app/data && chown -R app:app /app
+
+# Ensure binary is executable if it exists
+RUN if [ -f ./rocket-template ]; then chmod +x ./rocket-template; fi
 
 # Change to app user
 USER app

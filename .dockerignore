@@ -4,8 +4,9 @@
 *.md
 README.*
 
-# Ignore build artifacts
+# Ignore build artifacts except release binary
 target/
+!target/release/rocket-template
 # Don't ignore Cargo.lock - needed for reproducible builds
 # Cargo.lock
 
