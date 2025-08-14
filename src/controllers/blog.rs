@@ -3,6 +3,7 @@ use crate::{
     dto::post::FormDTO,
     services::{self, TagService},
     types::{HttpRange, StreamedFile},
+    config::AppConfig,
 };
 use models::post;
 use rocket::{
@@ -176,6 +177,7 @@ async fn create(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
     auth_service: &State<AuthService>,
+    app_config: &State<AppConfig>,
     jar: &CookieJar<'_>,
     form_data: Form<FormDTO<'_>>,
 ) -> Result<Flash<Redirect>, Status> {
@@ -188,7 +190,7 @@ async fn create(
             }
 
             let id = service
-                .create(db, account.id, &mut form_data.into_inner())
+                .create(db, app_config, account.id, &mut form_data.into_inner())
                 .await
                 .unwrap()
             .seq_id;

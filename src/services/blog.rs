@@ -1,8 +1,10 @@
 use crate::dto::post::FormDTO;
+use crate::config::AppConfig;
 use chrono::Local;
 use models::prelude::{Account, Post, Tag};
 use models::{account, post, tag};
 use models::dto::PostTitleResult;
+use rocket::State;
 use sea_orm::ColumnTrait;
 use sea_orm::*;
 use uuid::Uuid;
@@ -14,7 +16,6 @@ pub struct Service {
 }
 
 const DEFAULT_PAGE_SIZE: u64 = 39;
-const DATA_PATH: &str = "/home/tod/.local/share/blog";
 
 impl Service {
     pub fn new() -> Self {
@@ -26,12 +27,13 @@ impl Service {
     pub async fn create(
         &self,
         db: &DbConn,
+        app_config: &State<AppConfig>,
         id: Uuid,
         data: &mut FormDTO<'_>,
     ) -> Result<post::Model, DbErr> {
         let text = markdown::to_html(data.text.as_str());
         let fid = BaseService::generate_id().to_string();
-        let path = format!("{DATA_PATH}/{}_{}.webm", fid, data.file.name().unwrap());
+        let path = format!("{}/{}_{}.webm", app_config.data_path, fid, data.file.name().unwrap());
 
         data.file
             .copy_to(path.clone())
