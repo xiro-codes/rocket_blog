@@ -1,6 +1,6 @@
 use models::account;
 use rocket::{
-    fairing::{self, Fairing, Kind},
+    fairing::{Fairing, Kind, Info, Result as FairingResult},
     form::Form,
     http::{Cookie, CookieJar},
     response::{Flash, Redirect},
@@ -11,16 +11,8 @@ use sea_orm_rocket::Connection;
 use crate::{
     pool::Db,
     services::AuthService,
+    generic::controller,
 };
-/// This Controller also provide the AuthService
-pub struct Controller {
-    path: String,
-}
-impl Controller {
-    pub fn new(path: String) -> Self {
-        Self { path }
-    }
-}
 
 #[post("/", data = "<data>")]
 async fn login(
@@ -36,8 +28,8 @@ async fn login(
     } else {
         Flash::new(Redirect::to("/blog"), "danger", "Login failed.")
     }
-
 }
+
 #[get("/logout")]
 async fn logout(jar: &CookieJar<'_>) -> Flash<Redirect> {
     jar.remove_private(Cookie::from("token"));
@@ -48,17 +40,5 @@ fn routes() -> Vec<Route> {
     routes![login, logout]
 }
 
-#[rocket::async_trait]
-impl Fairing for Controller {
-    fn info(&self) -> fairing::Info {
-        fairing::Info {
-            name: "Auth Controller",
-            kind: Kind::Ignite,
-        }
-    }
-    async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        Ok(rocket
-            .manage(AuthService::new())
-            .mount(self.path.to_owned(), routes()))
-    }
-}
+// Use the macro to generate the controller boilerplate
+controller!(Controller, AuthService, "Auth Controller", routes());

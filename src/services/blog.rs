@@ -1,4 +1,4 @@
-use crate::{dto::post::FormDTO, generic::{CrudService, PaginationUtils}};
+use crate::{dto::post::FormDTO, generic::{CrudService, PaginationUtils, ErrorUtils}};
 use chrono::Local;
 use models::prelude::{Account, Post};
 use models::{account, post};
@@ -103,8 +103,7 @@ impl Service {
             .filter(post::Column::SeqId.eq(id))
             .one(db)
             .await?
-            .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", id)))
-            .map(Into::into)
+            .ok_or_else(|| ErrorUtils::not_found("Post", id))
     }
 
     pub async fn find_by_seq_id_with_account(
@@ -117,8 +116,7 @@ impl Service {
             .find_also_related(Account)
             .one(db)
             .await?
-            .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", id)))
-            .map(Into::into)
+            .ok_or_else(|| ErrorUtils::not_found("Post", id))
     }
     pub async fn find_many_with_title(&self, db: &DbConn) -> Result<Vec<post::TitleResult>, DbErr> {
         Post::find()
@@ -180,7 +178,7 @@ impl CrudService<post::Model, FormDTO<'_>, FormDTO<'_>, Uuid> for Service {
         let mut p: post::ActiveModel = Post::find_by_id(id)
             .one(db)
             .await?
-            .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", id)))
+            .ok_or_else(|| ErrorUtils::not_found("Post", id))
             .map(Into::into)?;
         p.title = Set(data.title.to_owned());
         p.text = Set(data.text.to_owned());

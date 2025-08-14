@@ -1,9 +1,8 @@
 //! Generic traits and utilities for controllers and services to reduce code duplication
 
 use rocket::{
-    fairing::{Fairing, Info, Kind, Result as FairingResult},
     http::{CookieJar, Status},
-    Build, Rocket, Route, State,
+    State,
 };
 use sea_orm::{DbConn, DbErr};
 use uuid::Uuid;
@@ -25,57 +24,39 @@ pub trait CrudService<Model, CreateDto, UpdateDto, Id = Uuid> {
     async fn delete_by_id(&self, db: &DbConn, id: Id) -> Result<(), DbErr>;
 }
 
-/// Generic trait for controllers to implement common functionality
-pub trait GenericController: Sized {
-    type Service;
-    
-    /// Get the mount path for this controller
-    fn path(&self) -> &str;
-    
-    /// Get the controller name for fairing info
-    fn name() -> &'static str;
-    
-    /// Get routes for this controller
-    fn routes() -> Vec<Route>;
-    
-    /// Create new instance of the service
-    fn create_service() -> Self::Service;
-}
-
-/// Generic controller implementation that provides common fairing behavior
-pub struct BaseController<T> {
-    pub path: String,
-    pub _phantom: std::marker::PhantomData<T>,
-}
-
-impl<T> BaseController<T> {
-    pub fn new(path: String) -> Self {
-        Self {
-            path,
-            _phantom: std::marker::PhantomData,
+/// Macro to generate common controller boilerplate
+macro_rules! controller {
+    ($name:ident, $service:ty, $controller_name:literal, $routes:expr) => {
+        pub struct $name {
+            path: String,
         }
-    }
-}
 
-#[rocket::async_trait]
-impl<T> Fairing for BaseController<T>
-where
-    T: GenericController + Send + Sync + 'static,
-    T::Service: Send + Sync + 'static,
-{
-    fn info(&self) -> Info {
-        Info {
-            name: T::name(),
-            kind: Kind::Ignite,
+        impl $name {
+            pub fn new(path: String) -> Self {
+                Self { path }
+            }
         }
-    }
 
-    async fn on_ignite(&self, rocket: Rocket<Build>) -> FairingResult {
-        Ok(rocket
-            .manage(T::create_service())
-            .mount(self.path.clone(), T::routes()))
-    }
+        #[rocket::async_trait]
+        impl Fairing for $name {
+            fn info(&self) -> Info {
+                Info {
+                    name: $controller_name,
+                    kind: Kind::Ignite,
+                }
+            }
+
+            async fn on_ignite(&self, rocket: Rocket<Build>) -> FairingResult {
+                Ok(rocket
+                    .manage(<$service>::new())
+                    .mount(self.path.to_owned(), $routes))
+            }
+        }
+    };
 }
+
+// Export the macro for use in other modules
+pub(crate) use controller;
 
 /// Authentication utilities to reduce duplication
 pub struct AuthUtils;
@@ -136,5 +117,25 @@ impl PaginationUtils {
         }
         
         Ok((page, page_size))
+    }
+}
+
+/// Error handling utilities
+pub struct ErrorUtils;
+
+impl ErrorUtils {
+    /// Convert common database errors to HTTP status codes
+    pub fn db_error_to_status(err: &DbErr) -> Status {
+        match err {
+            DbErr::RecordNotFound(_) => Status::NotFound,
+            DbErr::Custom(msg) if msg.contains("Unauthorized") => Status::Unauthorized,
+            DbErr::Custom(msg) if msg.contains("Forbidden") => Status::Forbidden,
+            _ => Status::InternalServerError,
+        }
+    }
+    
+    /// Create a not found error message
+    pub fn not_found(entity: &str, id: impl std::fmt::Display) -> DbErr {
+        DbErr::RecordNotFound(format!("{} with id: {}", entity, id))
     }
 }

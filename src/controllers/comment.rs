@@ -1,6 +1,6 @@
 use models::comment;
 use rocket::{
-    fairing::{self, Fairing, Kind},
+    fairing::{Fairing, Kind, Info, Result as FairingResult},
     form::Form,
     http::Status,
     response::{Redirect, Flash},
@@ -9,17 +9,11 @@ use rocket::{
 use sea_orm_rocket::Connection;
 use uuid::Uuid;
 
-use crate::{pool::Db, services::{CommentService, BlogService}};
-
-pub struct Controller {
-    path: String,
-}
-
-impl Controller {
-    pub fn new(path: String) -> Self {
-        Self { path }
-    }
-}
+use crate::{
+    pool::Db, 
+    services::{CommentService, BlogService},
+    generic::controller,
+};
 
 #[post("/create/<post_id>", data = "<form_data>")]
 async fn create(
@@ -38,21 +32,9 @@ async fn create(
     ))
 }
 
-pub fn routes() -> Vec<Route> {
+fn routes() -> Vec<Route> {
     routes![create]
 }
 
-#[rocket::async_trait]
-impl Fairing for Controller {
-    fn info(&self) -> fairing::Info {
-        fairing::Info {
-            name: "Comment Controller",
-            kind: Kind::Ignite,
-        }
-    }
-    async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        Ok(rocket
-            .manage(CommentService::new())
-            .mount(self.path.to_owned(), routes()))
-    }
-}
+// Use the macro to generate the controller boilerplate
+controller!(Controller, CommentService, "Comment Controller", routes());

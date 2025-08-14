@@ -3,7 +3,7 @@ use models::comment;
 use models::prelude::Comment;
 use sea_orm::*;
 use uuid::Uuid;
-use crate::generic::CrudService;
+use crate::generic::{CrudService, ErrorUtils};
 
 pub struct Service;
 
@@ -47,7 +47,7 @@ impl CrudService<comment::Model, comment::FormDTO, comment::FormDTO, Uuid> for S
         let mut comment: comment::ActiveModel = Comment::find_by_id(id)
             .one(db)
             .await?
-            .ok_or(DbErr::RecordNotFound(format!("Comment with id: {}", id)))
+            .ok_or_else(|| ErrorUtils::not_found("Comment", id))
             .map(Into::into)?;
         comment.text = Set(data.text);
         comment.update(db).await
@@ -57,7 +57,7 @@ impl CrudService<comment::Model, comment::FormDTO, comment::FormDTO, Uuid> for S
         let comment = Comment::find_by_id(id)
             .one(db)
             .await?
-            .ok_or(DbErr::RecordNotFound(format!("Comment with id: {}", id)))?;
+            .ok_or_else(|| ErrorUtils::not_found("Comment", id))?;
         comment.delete(db).await.map(|_| ())
     }
 }

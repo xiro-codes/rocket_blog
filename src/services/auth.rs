@@ -6,7 +6,7 @@ use pwhash::bcrypt;
 use rocket::futures::lock::Mutex;
 use sea_orm::*;
 use uuid::Uuid;
-use crate::generic::CrudService;
+use crate::generic::{CrudService, ErrorUtils};
 
 pub struct Service {
     token_map: Mutex<HashMap<Token, AccountId>>
@@ -69,7 +69,7 @@ impl CrudService<account::Model, account::FormDTO, account::FormDTO, Uuid> for S
         let mut account: account::ActiveModel = Account::find_by_id(id)
             .one(db)
             .await?
-            .ok_or(DbErr::RecordNotFound(format!("Account with id: {}", id)))
+            .ok_or_else(|| ErrorUtils::not_found("Account", id))
             .map(Into::into)?;
         account.username = Set(data.username);
         // Note: password would need hashing in a real implementation
@@ -81,7 +81,7 @@ impl CrudService<account::Model, account::FormDTO, account::FormDTO, Uuid> for S
         let account = Account::find_by_id(id)
             .one(db)
             .await?
-            .ok_or(DbErr::RecordNotFound(format!("Account with id: {}", id)))?;
+            .ok_or_else(|| ErrorUtils::not_found("Account", id))?;
         account.delete(db).await.map(|_| ())
     }
 }
