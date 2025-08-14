@@ -43,10 +43,10 @@ just gen-models
 ```
 
 This will:
-1. Remove existing entity files (but NOT dto.rs)
+1. Remove only generated entity files (preserving dto.rs)
 2. Regenerate entities with sea-orm-cli
 3. Fix serde imports to use rocket::serde  
-4. Restore the dto.rs module from git
+4. Add the dto module to lib.rs
 
 ## Scripts
 
@@ -91,7 +91,7 @@ use crate::models::dto::AccountFormDTO;
 
 ## Legacy Scripts (Deprecated)
 
-The `preserve_custom_code.py` script is no longer needed with the new modular approach but is kept for backwards compatibility.
+The `preserve_custom_code.py` script has been removed as it's no longer needed with the new modular approach.
 
 ## Integration with justfile
 
