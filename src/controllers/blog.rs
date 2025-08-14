@@ -115,13 +115,27 @@ async fn video(
             .len();
 
         let final_range = if let Some(HttpRange(mut range)) = range {
-            // Adjust open-ended ranges using the actual file size.
-            if range.end == u64::MAX {
-                range.end = size;
-            }
+            // Handle different range types with actual file size validation
             if range.start == u64::MAX {
-                range.start = size.saturating_sub(range.end);
+                // Suffix-byte-range-spec: bytes=-suffix
+                let suffix_length = range.end;
+                range.start = size.saturating_sub(suffix_length);
                 range.end = size;
+            } else if range.end == u64::MAX {
+                // Open-ended range: bytes=start-
+                if range.start >= size {
+                    return Err(Status::RangeNotSatisfiable);
+                }
+                range.end = size;
+            } else {
+                // Standard range: bytes=start-end
+                if range.start >= size || range.start >= range.end {
+                    return Err(Status::RangeNotSatisfiable);
+                }
+                // Clamp end to file size if it exceeds
+                if range.end > size {
+                    range.end = size;
+                }
             }
             Some(range)
         } else {
