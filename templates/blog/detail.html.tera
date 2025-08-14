@@ -21,9 +21,11 @@
 	</header>
 	{%endif%}
 </center>
+{%if post.path%}
 <div class="d-flex align-items-center justify-content-center">
 	<video class="object-fit-scale" src="{{post.seq_id}}/video" height="300" controls autoplay></video>
 </div>
+{%endif%}
 <div class="text-white mx-5">
 	<p>{{post.text | safe}}</p>
 	<h6>{{post.date_published}}</h6>
