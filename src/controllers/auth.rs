@@ -10,7 +10,7 @@ use sea_orm_rocket::Connection;
 
 use crate::{
     pool::Db,
-    services::{self, AuthService},
+    services::AuthService,
 };
 /// This Controller also provide the AuthService
 pub struct Controller {

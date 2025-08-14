@@ -8,15 +8,15 @@ mod dto;
 mod types;
 mod pool;
 mod services;
+mod generic;
 
 use migrations::MigratorTrait;
 use pool::Db;
 use rocket::fairing::AdHoc;
 use rocket::fs::FileServer;
 use rocket::response::Redirect;
-use rocket::{fairing, Build, Request, Rocket};
-use rocket_dyn_templates::{context, Template};
-use sea_orm::*;
+use rocket::{fairing, Build, Rocket};
+use rocket_dyn_templates::Template;
 use sea_orm_rocket::Database;
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {

@@ -1,4 +1,4 @@
-use models::{account::FormDTO, comment};
+use models::comment;
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,

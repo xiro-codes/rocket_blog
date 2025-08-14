@@ -1,9 +1,8 @@
 use crate::{
     dto::post::FormDTO,
-    services,
     types::{HttpRange, StreamedFile},
+    generic::AuthUtils,
 };
-use models::post;
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -14,7 +13,6 @@ use rocket::{
 };
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
-use uuid::Uuid;
 use std::fs::File;
 use crate::services::AuthService;
 use crate::services::BlogService;
@@ -39,7 +37,7 @@ async fn list_view(
     service: &State<BlogService>,
     flash: Option<FlashMessage<'_>>,
 ) -> Template {
-    let token = jar.get_private("token").map(|c| c.value().to_owned());
+    let token = AuthUtils::get_token(jar);
     let db = conn.into_inner();
     let (posts, page, page_size, num_pages) = service
         .paginate_with_title(db, page, page_size)
@@ -67,7 +65,7 @@ async fn detail_view(
     jar: &CookieJar<'_>,
     id: i32,
 ) -> Result<Template,Status> {
-    let token = jar.get_private("token").map(|c| c.value().to_owned());
+    let token = AuthUtils::get_token(jar);
     let db = conn.into_inner();
     let (post, account) = service.find_by_seq_id_with_account(db, id).await.unwrap();
 
@@ -156,7 +154,7 @@ async fn create_view(
     flash: Option<FlashMessage<'_>>,
     jar: &CookieJar<'_>,
 ) -> Result<Template, Status> {
-    if let None = jar.get_private("token") {
+    if AuthUtils::get_token(jar).is_none() {
         return Err(Status::Unauthorized);
     }
     Ok(Template::render(
@@ -176,27 +174,19 @@ async fn create(
     jar: &CookieJar<'_>,
     form_data: Form<FormDTO<'_>>,
 ) -> Result<Flash<Redirect>, Status> {
-    if let Some(token) = jar.get_private("token") {
-        let db = conn.into_inner();
-        let token = Uuid::parse_str(token.value()).unwrap();
-        if let Some(account) = auth_service.check_token(db, token).await {
-            if !account.admin {
-                return Err(Status::Unauthorized);
-            }
+    let db = conn.into_inner();
+    let account = AuthUtils::check_admin_auth_with_db(db, auth_service, jar).await?;
+    
+    let id = service
+        .create(db, account.id, &mut form_data.into_inner())
+        .await
+        .unwrap()
+        .seq_id;
 
-            let id = service
-                .create(db, account.id, &mut form_data.into_inner())
-                .await
-                .unwrap()
-            .seq_id;
-
-            return Ok(Flash::success(
-                Redirect::to(format!("/blog/{id}")),
-                "Post successfully added",
-            ));
-        }
-    }
-    Err(Status::Unauthorized)
+    Ok(Flash::success(
+        Redirect::to(format!("/blog/{id}")),
+        "Post successfully added",
+    ))
 }
 
 #[get("/<id>/edit")]
@@ -206,7 +196,7 @@ async fn edit_view(
     service: &State<BlogService>,
     id: i32,
 ) -> Result<Template, Status> {
-    if let None = jar.get_private("token") {
+    if AuthUtils::get_token(jar).is_none() {
         return Err(Status::Unauthorized);
     }
     let db = conn.into_inner();
@@ -227,7 +217,7 @@ async fn edit(
     form_data: Form<FormDTO<'_>>,
     jar: &CookieJar<'_>,
 ) -> Result<Flash<Redirect>, Status> {
-    if let None = jar.get_private("token") {
+    if AuthUtils::get_token(jar).is_none() {
         return Err(Status::Unauthorized);
     }
     let db = conn.into_inner();
@@ -247,7 +237,7 @@ async fn delete(
     id: i32,
     jar: &CookieJar<'_>,
 ) -> Result<Flash<Redirect>, Status> {
-    if let None = jar.get_private("token") {
+    if AuthUtils::get_token(jar).is_none() {
         return Err(Status::Unauthorized);
     }
     let db = conn.into_inner();

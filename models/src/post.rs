@@ -4,7 +4,6 @@ use sea_orm::entity::prelude::*;
 
 // manual addition
 use rocket::serde::{Deserialize, Serialize};
-use rocket::serde::{Deserialize, Serialize};
 use sea_orm::DerivePartialModel;
 use sea_orm::FromQueryResult;
 use rocket::FromForm;
