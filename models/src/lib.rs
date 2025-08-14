@@ -4,4 +4,5 @@ pub mod prelude;
 
 pub mod account;
 pub mod comment;
+pub mod event;
 pub mod post;
