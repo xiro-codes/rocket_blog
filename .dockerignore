@@ -1,0 +1,37 @@
+# Ignore git and documentation
+.git
+.gitignore
+*.md
+README.*
+
+# Ignore build artifacts except release binary
+target/
+!target/release/rocket-template
+# Don't ignore Cargo.lock - needed for reproducible builds
+# Cargo.lock
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore temporary files
+.tmp/
+tmp/
+temp/
+
+# Ignore environment files
+.env*
+!.envrc
+
+# Ignore Docker files in the container
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Ignore scripts not needed in container
+scripts/
+justfile
+flake.*
