@@ -14,7 +14,7 @@ pub struct Service {
 }
 
 const DEFAULT_PAGE_SIZE: u64 = 39;
-const DATA_PATH: &str = "/home/tod/.local/share/blog";
+const DATA_PATH: &str = "/app/data";
 
 impl Service {
     pub fn new() -> Self {

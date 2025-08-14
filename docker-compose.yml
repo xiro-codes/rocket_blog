@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # The database service
   postgres:
@@ -13,9 +11,31 @@ services:
     volumes:
       # Persists the database data to a named volume on the host
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    # Only expose port for external access if needed
+    # ports:
+    #   - "5432:5432"
+
+  # The Rust web application
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    restart: always
     ports:
-      # Maps the container's PostgreSQL port to the host's port
-      - "5432:5432"
+      # Map the app's port to host
+      - "8000:8000"
+    environment:
+      # Override database URL to use docker service name
+      ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
+    volumes:
+      # Persist uploaded files
+      - app_data:/app/data
+    depends_on:
+      - postgres
+    networks:
+      - app-network
 
   # The pgAdmin GUI service
   pgadmin:
@@ -31,8 +51,16 @@ services:
     depends_on:
       # Ensures the postgres service starts before pgAdmin
       - postgres
+    networks:
+      - app-network
 
-# Define the named volume for data persistence
+# Define networks for stable inter-container communication
+networks:
+  app-network:
+    driver: bridge
+
+# Define the named volumes for data persistence
 volumes:
   postgres_data:
+  app_data:
 
