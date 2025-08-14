@@ -17,7 +17,7 @@ WORKDIR /app
 # Copy static assets and templates
 COPY templates ./templates/
 COPY static ./static/
-COPY Rocket.toml ./
+COPY Rocket.docker.toml ./Rocket.toml
 
 # For development, expect binary to be mounted or copied
 # This allows building on host and running in container

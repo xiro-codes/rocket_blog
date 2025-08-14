@@ -37,7 +37,7 @@ async fn rocket() -> _ {
         .attach(Db::init())
         .attach(Template::fairing())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
-        .attach(middleware::Seeding::new(Some(0), 50))
+        // .attach(middleware::Seeding::new(Some(0), 50))  // Commented out to avoid duplicate key issues in container
         .manage(TagService::new())
         .attach(controllers::IndexController::new("/".to_owned()))
         .attach(controllers::AuthController::new("/auth".to_owned()))
