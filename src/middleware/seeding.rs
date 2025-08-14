@@ -20,14 +20,29 @@ use rocket::{
 use sea_orm::*;
 use sea_orm_rocket::Database;
 use slug::slugify;
+use std::path::Path;
 
 pub struct Seeding {
     count: usize,
     seed: Option<u32>
 }
+
+const DATA_PATH: &str = "/home/tod/.local/share/blog";
+const SAMPLE_VIDEO_PATH: &str = "static/sample_video.webm";
+
 impl Seeding {
     pub fn new(seed: Option<u32>, count: usize) -> Self {
         Self { seed, count }
+    }
+
+    // Helper function to get the sample video path if it exists
+    fn get_sample_video_path(&self) -> Option<String> {
+        if Path::new(SAMPLE_VIDEO_PATH).exists() {
+            Some(SAMPLE_VIDEO_PATH.to_string())
+        } else {
+            println!("Warning: Sample video file not found at {}. Video posts will be created without video files.", SAMPLE_VIDEO_PATH);
+            None
+        }
     }
 }
 #[rocket::async_trait]
@@ -77,6 +92,9 @@ impl Fairing for Seeding {
             created_tags.push(tag);
         }
         
+        // Get the sample video path if it exists
+        let video_path = self.get_sample_video_path();
+        
         let mut posts = Vec::new();
         let mut comments: Vec<comment::ActiveModel> = Vec::new();
         let mut post_tags: Vec<post_tag::ActiveModel> = Vec::new();
@@ -84,10 +102,19 @@ impl Fairing for Seeding {
         for i in 1..self.count {
             let title_rng = thread_rng();
             let text_rng = thread_rng();
+            
+            // Assign video path to about 30% of posts if sample video exists
+            let post_video_path = if video_path.is_some() && rand::random::<f32>() < 0.3 {
+                video_path.clone()
+            } else {
+                None
+            };
+            
             let p = post::ActiveModel {
                 id: Set(uuid::Uuid::new_v4()),
                 title: Set(lipsum_words_with_rng(title_rng, 5)),
                 text: Set(lipsum_words_with_rng(text_rng, 50 + (rand::random::<usize>() % 50))),
+                path: Set(post_video_path),
                 draft: Set(Some(false)),
                 account_id: Set(ac.id),
                 date_published: Set(Local::now().naive_local()),
@@ -133,6 +160,20 @@ impl Fairing for Seeding {
     }
     async fn on_shutdown(&self, rocket: &Rocket<Orbit>) {
         let conn = &Db::fetch(&rocket).unwrap().conn;
+        
+        // Clean up video files before deleting database records
+        if let Ok(posts_with_videos) = Post::find()
+            .filter(post::Column::Path.is_not_null())
+            .all(conn)
+            .await 
+        {
+            for post in posts_with_videos {
+                if let Some(video_path) = post.path {
+                    let _ = std::fs::remove_file(&video_path);
+                }
+            }
+        }
+        
         let _ = PostTag::delete_many().exec(conn).await;
         let _ = Tag::delete_many().exec(conn).await;
         let _ = Comment::delete_many().exec(conn).await;
