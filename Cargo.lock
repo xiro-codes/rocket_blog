@@ -2767,6 +2767,7 @@ dependencies = [
  "rocket_dyn_templates",
  "sea-orm",
  "sea-orm-rocket",
+ "slug",
  "uuid",
 ]
 

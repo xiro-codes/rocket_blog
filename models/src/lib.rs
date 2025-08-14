@@ -6,6 +6,8 @@ pub mod account;
 pub mod comment;
 pub mod event;
 pub mod post;
+pub mod tag;
+pub mod post_tag;
 
 // Custom DTOs and form structures
 pub mod dto;

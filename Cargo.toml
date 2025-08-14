@@ -16,6 +16,7 @@ pwhash = "1.0.0"
 rand = "0.8.1"
 rand_mt = "5.0.0"
 sea-orm-rocket = "0.5.5"
+slug = "0.1.6"
 
 [dependencies.rocket]
 version = "0.5"
