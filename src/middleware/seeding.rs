@@ -133,6 +133,20 @@ impl Fairing for Seeding {
     }
     async fn on_shutdown(&self, rocket: &Rocket<Orbit>) {
         let conn = &Db::fetch(&rocket).unwrap().conn;
+        
+        // Clean up video files before deleting database records
+        if let Ok(posts_with_videos) = Post::find()
+            .filter(post::Column::Path.is_not_null())
+            .all(conn)
+            .await 
+        {
+            for post in posts_with_videos {
+                if let Some(video_path) = post.path {
+                    let _ = std::fs::remove_file(&video_path);
+                }
+            }
+        }
+        
         let _ = PostTag::delete_many().exec(conn).await;
         let _ = Tag::delete_many().exec(conn).await;
         let _ = Comment::delete_many().exec(conn).await;
