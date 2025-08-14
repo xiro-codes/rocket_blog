@@ -1,7 +1,7 @@
 use crate::dto::post::FormDTO;
 use chrono::Local;
-use models::prelude::{Account, Post};
-use models::{account, post};
+use models::prelude::{Account, Post, Tag};
+use models::{account, post, tag};
 use models::dto::PostTitleResult;
 use sea_orm::ColumnTrait;
 use sea_orm::*;
@@ -22,7 +22,7 @@ impl Service {
             base: BaseService::new(),
         }
     }
-    
+
     pub async fn create(
         &self,
         db: &DbConn,
@@ -48,7 +48,7 @@ impl Service {
             account_id: Set(id),
             ..Default::default()
         }
-        .insert(db)
+            .insert(db)
         .await
     }
 
@@ -67,7 +67,7 @@ impl Service {
         p.text = Set(data.text.to_owned());
         p.update(db).await
     }
-    
+
     pub async fn update_by_seq_id(
         &self,
         db: &DbConn,
@@ -88,7 +88,7 @@ impl Service {
     pub async fn delete_by_id(&self, _db: &DbConn, _id: Uuid) -> Result<DeleteResult, DbErr> {
         todo!()
     }
-    
+
     pub async fn delete_by_seq_id(&self, db: &DbConn, id: i32) -> Result<(), DbErr> {
         let mut p = self.find_by_seq_id(db, id).await?.into_active_model();
         p.draft = Set(Some(true));
@@ -98,7 +98,7 @@ impl Service {
     pub async fn find_by_id(&self, db: &DbConn, id: Uuid) -> Result<Option<post::Model>, DbErr> {
         Post::find_by_id(id).one(db).await
     }
-    
+
     pub async fn find_by_seq_id(
         &self,
         db: &DbConn,
@@ -107,7 +107,7 @@ impl Service {
         let result = Post::find()
             .filter(post::Column::SeqId.eq(id))
             .one(db)
-            .await?;
+        .await?;
         BaseService::handle_not_found(result, "Post")
     }
 
@@ -120,10 +120,23 @@ impl Service {
             .filter(post::Column::SeqId.eq(id))
             .find_also_related(Account)
             .one(db)
-            .await?;
+        .await?;
         BaseService::handle_not_found(result, "Post")
     }
-    
+    pub async fn find_by_seq_id_with_account_and_tags(
+        &self, 
+        db: &DbConn, 
+        id:i32
+    ) -> Result<(post::Model, Option<account::Model>, Option<tag::Model>), DbErr>  {
+
+        let result = Post::find()
+            .filter(post::Column::SeqId.eq(id))
+            .find_also_related(Account)
+            .find_also_related(Tag)
+            .one(db)
+        .await?;
+        BaseService::handle_not_found(result, "Post")
+    }
     pub async fn find_many_with_title(&self, db: &DbConn) -> Result<Vec<PostTitleResult>, DbErr> {
         Post::find()
             .select_only()
@@ -132,9 +145,9 @@ impl Service {
             .column(post::Column::SeqId)
             .into_partial_model()
             .all(db)
-            .await
+        .await
     }
-    
+
     pub async fn find_mm_seq_id(&self, db: &DbConn) -> Result<Option<(i32, i32)>, DbErr> {
         Post::find()
             .select_only()
@@ -142,9 +155,9 @@ impl Service {
             .column_as(post::Column::SeqId.max(), "max_post")
             .into_tuple::<(i32, i32)>()
             .one(db)
-            .await
+        .await
     }
-    
+
     pub async fn paginate_with_title(
         &self,
         db: &DbConn,

@@ -1,7 +1,7 @@
 use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
-    services,
+    services::{self, TagService},
     types::{HttpRange, StreamedFile},
 };
 use models::post;
@@ -66,6 +66,7 @@ async fn detail_view(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
     comment_service: &State<CommentService>,
+    tag_service: &State<TagService>,
     flash: Option<FlashMessage<'_>>,
     jar: &CookieJar<'_>,
     id: i32,
@@ -73,7 +74,7 @@ async fn detail_view(
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     let (post, account) = service.find_by_seq_id_with_account(db, id).await.unwrap();
-
+    let tags = tag_service.find_tags_by_post_id(db, post.id).await.unwrap();
     if post.draft.unwrap() && token.is_none(){
         return Err(Status::NotFound);
     }
@@ -86,6 +87,7 @@ async fn detail_view(
         "blog/detail",
         context! {
             post,
+            tags,
             comments,
             username: account.map(|a| a.username),
             token,

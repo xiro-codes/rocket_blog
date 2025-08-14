@@ -5,6 +5,15 @@
 <center class="text-white">
 	<h1>{{post.title}}</h1>
 	<h4>by {{username}}</h4>
+  {% if tags %}
+  <div class="mb-3">
+      {% for tag in tags %}
+      <span class="badge bg-primary me-1" style="background-color: {{ tag.color }}!important;">
+          {{ tag.name }}
+      </span>
+      {% endfor %}
+  </div>
+  {% endif %}
 	{%if token%}
 	<header class="btn-group">
 		<a class="btn btn-warning" href="{{post.seq_id}}/edit">Edit</a>
