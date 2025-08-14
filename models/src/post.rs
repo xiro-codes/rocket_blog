@@ -30,6 +30,8 @@ pub enum Relation {
     Account,
     #[sea_orm(has_many = "super::comment::Entity")]
     Comment,
+    #[sea_orm(has_many = "super::post_tag::Entity")]
+    PostTag,
 }
 
 impl Related<super::account::Entity> for Entity {
@@ -41,6 +43,17 @@ impl Related<super::account::Entity> for Entity {
 impl Related<super::comment::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Comment.def()
+    }
+}
+
+// Many-to-Many relationship through post_tag
+impl Related<super::tag::Entity> for Entity {
+    fn to() -> RelationDef {
+        super::post_tag::Relation::Tag.def()
+    }
+    
+    fn via() -> Option<RelationDef> {
+        Some(super::post_tag::Relation::Post.def().rev())
     }
 }
 

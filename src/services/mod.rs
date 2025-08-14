@@ -7,3 +7,5 @@ mod blog;
 pub use blog::Service as BlogService;
 mod comment;
 pub use comment::Service as CommentService;
+mod tag;
+pub use tag::TagService;
