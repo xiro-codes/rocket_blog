@@ -1,74 +1,68 @@
 # Sea-ORM Entity Generation Automation
 
-This directory contains scripts to automate the sea-orm entity generation process, solving two key problems:
+This directory contains scripts to automate the sea-orm entity generation process with a clean modular approach.
 
-1. **Serde Import Correction**: Automatically replace `serde::` imports with `rocket::serde::` imports
-2. **Custom Code Preservation**: Preserve manually written code (like DTO structs) when regenerating entities
+## New Modular Architecture (Recommended)
+
+**Key Innovation**: Custom code (DTOs, forms, etc.) is now separated into a dedicated `dto.rs` module, eliminating the need for complex code preservation during entity regeneration.
+
+### Benefits
+- ✅ Custom code never gets lost during regeneration
+- ✅ Clean separation between generated entities and manual code  
+- ✅ Simpler maintenance and easier to understand
+- ✅ No complex backup/restore logic needed
 
 ## Problem
 
-When using `sea-orm-cli generate entity`, two issues occur:
-
-1. The generated code uses `serde::{Deserialize, Serialize}` instead of `rocket::serde::{Deserialize, Serialize}` (required for Rocket integration)
-2. Any manually written code (like FormDTO structs, custom impl blocks) gets overwritten
+When using `sea-orm-cli generate entity`, the generated code uses `serde::{Deserialize, Serialize}` instead of `rocket::serde::{Deserialize, Serialize}` (required for Rocket integration).
 
 ## Solution
 
-### Option 1: Full Automation (Recommended)
+### Current Architecture (Clean & Simple)
 
-Use `preserve_custom_code.py` for complete automation:
+Custom DTOs and forms are now in `models/src/dto.rs`:
+```rust
+// models/src/dto.rs
+pub struct AccountFormDTO { ... }
+pub struct CommentFormDTO { ... } 
+pub struct PostTitleResult { ... }
+```
+
+Entity files contain only generated code:
+```rust
+// models/src/account.rs - only generated entity code
+pub struct Model { ... }
+pub enum Relation { ... }
+impl ActiveModelBehavior for ActiveModel {}
+```
+
+### Usage
 
 ```bash
 just gen-models
 ```
 
 This will:
-1. Backup any custom code from existing entity files
-2. Regenerate all entity files with sea-orm-cli
-3. Fix serde imports to use rocket::serde
-4. Restore all custom code back into the files
-
-### Option 2: Import Fixing Only
-
-Use `fix_serde_imports.sh` for basic serde import fixing:
-
-```bash
-just gen-models-simple
-```
-
-This will:
-1. Regenerate all entity files with sea-orm-cli  
-2. Fix serde imports to use rocket::serde
-3. ⚠️ **Does NOT preserve custom code** - you'll need to manually re-add it
+1. Remove existing entity files (but NOT dto.rs)
+2. Regenerate entities with sea-orm-cli
+3. Fix serde imports to use rocket::serde  
+4. Restore the dto.rs module from git
 
 ## Scripts
 
-### preserve_custom_code.py
-
-**Requirements**: Python 3.6+
+### generate_models.sh (New Simple Script)
 
 **Usage**:
 ```bash
-# Backup custom code
-python3 scripts/preserve_custom_code.py ./models/src
-
-# After regenerating entities, restore custom code
-python3 scripts/preserve_custom_code.py ./models/src restore
+./scripts/generate_models.sh [models_dir]
 ```
 
-**What it preserves**:
-- Custom structs (FormDTO, TitleResult, etc.)
-- Custom derive attributes
-- Custom serde attributes
-- Any struct that contains `FromForm`, `DerivePartialModel`, or `FromQueryResult`
-
-**What it fixes**:
-- `use serde::{...}` → `use rocket::serde::{...}`
-- `use serde::...` → `use rocket::serde::...`
+**What it does**:
+- Regenerates entity files
+- Fixes serde imports
+- Preserves the dto.rs module
 
 ### fix_serde_imports.sh
-
-**Requirements**: bash, sed
 
 **Usage**:
 ```bash
@@ -77,69 +71,29 @@ python3 scripts/preserve_custom_code.py ./models/src restore
 
 **What it fixes**:
 - `use serde::{...}` → `use rocket::serde::{...}`
-- `use serde::...` → `use rocket::serde::...`
 
-## How It Works
+## Migration from Old Approach
 
-1. **Custom Code Detection**: The Python script uses regex patterns to identify custom structs that aren't part of the standard sea-orm generated code (Model, Relation enum, etc.)
+If you have existing entity files with inline custom code, the new `dto.rs` module already contains the extracted DTOs:
 
-2. **Backup Storage**: Custom code is stored in a JSON file with the structure of each entity file preserved
+- `FormDTO` (from account.rs) → `AccountFormDTO`
+- `FormDTO` (from comment.rs) → `CommentFormDTO` 
+- `TitleResult` (from post.rs) → `PostTitleResult`
 
-3. **Import Fixing**: Simple regex replacement of serde imports with rocket::serde imports
-
-4. **Code Restoration**: Custom code is inserted back into the generated files in the correct location (before `impl ActiveModelBehavior`)
-
-## Example
-
-Before regeneration, `account.rs` might contain:
-
+Update your imports:
 ```rust
-use rocket::serde::{Deserialize, Serialize};
+// Old
+use crate::models::account::FormDTO;
 
-// ... generated Model struct ...
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
-#[serde(crate = "rocket::serde")]
-pub struct FormDTO {
-    pub username: String,
-    pub password: String,
-}
-
-impl ActiveModelBehavior for ActiveModel {}
+// New  
+use crate::models::dto::AccountFormDTO;
 ```
 
-After running `sea-orm-cli generate entity`, it becomes:
+## Legacy Scripts (Deprecated)
 
-```rust
-use serde::{Deserialize, Serialize};
-
-// ... generated Model struct ...
-
-impl ActiveModelBehavior for ActiveModel {}
-```
-
-After running our automation, it's restored to:
-
-```rust
-use rocket::serde::{Deserialize, Serialize};
-
-// ... generated Model struct ...
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
-#[serde(crate = "rocket::serde")]
-pub struct FormDTO {
-    pub username: String,
-    pub password: String,
-}
-
-impl ActiveModelBehavior for ActiveModel {}
-```
+The `preserve_custom_code.py` script is no longer needed with the new modular approach but is kept for backwards compatibility.
 
 ## Integration with justfile
 
-The main project `justfile` has been updated with two commands:
-
-- `just gen-models` - Full automation with custom code preservation
-- `just gen-models-simple` - Basic serde fixing only (fallback)
-
-This replaces the old manual process that required remembering to fix imports.
+- `just gen-models` - Generate entities with DTO module preservation
+- `just gen-models-simple` - Same as above (legacy name kept for compatibility)

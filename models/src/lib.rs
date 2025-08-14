@@ -5,3 +5,6 @@ pub mod prelude;
 pub mod account;
 pub mod comment;
 pub mod post;
+
+// Custom DTOs and form structures
+pub mod dto;

@@ -2,9 +2,6 @@
 
 use sea_orm::entity::prelude::*;
 use rocket::serde::{Deserialize, Serialize};
-use sea_orm::DerivePartialModel;
-use sea_orm::FromQueryResult;
-use rocket::FromForm;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "post")]
 #[serde(crate = "rocket::serde")]
@@ -18,16 +15,6 @@ pub struct Model {
     pub draft: Option<bool>,
     pub date_published: DateTime,
     pub account_id: Uuid,
-}
-#[derive(
-    Clone, Debug, PartialEq, Eq, DerivePartialModel, FromQueryResult, Serialize, Deserialize,
-)]
-#[serde(crate = "rocket::serde")]
-#[sea_orm(entity = "Entity")]
-pub struct TitleResult {
-    pub id: Uuid,
-    pub seq_id: i32,
-    pub title: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
