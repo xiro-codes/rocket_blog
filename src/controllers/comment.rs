@@ -1,3 +1,8 @@
+//! Comment controller for managing blog post comment endpoints.
+//!
+//! This controller handles HTTP requests related to comments on blog posts,
+//! including creating new comments and managing comment-related operations.
+
 use models::{account::FormDTO, comment};
 use rocket::{
     fairing::{self, Fairing, Kind},
@@ -11,11 +16,28 @@ use uuid::Uuid;
 
 use crate::{pool::Db, services::{CommentService, BlogService}};
 
+/// Comment controller for handling comment-related HTTP requests.
+///
+/// This controller manages comment operations including:
+/// - Creating new comments on blog posts
+/// - Validating comment form data
+/// - Integration with blog post validation
+/// - Providing user feedback through flash messages
 pub struct Controller {
+    /// The base path for comment routes (typically "/comment")
     path: String,
 }
 
 impl Controller {
+    /// Creates a new CommentController instance.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The base path for comment routes
+    ///
+    /// # Returns
+    ///
+    /// A new Controller instance configured for comment endpoints.
     pub fn new(path: String) -> Self {
         Self { path }
     }

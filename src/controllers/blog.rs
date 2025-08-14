@@ -1,3 +1,13 @@
+//! Blog controller for managing blog post HTTP endpoints.
+//!
+//! This controller handles all blog-related HTTP requests including:
+//! - Listing blog posts with pagination
+//! - Viewing individual blog posts with comments
+//! - Creating new blog posts (authenticated users only)
+//! - Editing existing blog posts (authenticated users only)
+//! - Deleting blog posts (authenticated users only)
+//! - Serving media files associated with posts
+
 use crate::{
     dto::post::FormDTO,
     services,
@@ -20,16 +30,57 @@ use crate::services::AuthService;
 use crate::services::BlogService;
 use crate::{pool::Db, services::CommentService};
 
+/// Blog controller for handling blog post HTTP requests.
+///
+/// This controller manages the complete blog post lifecycle including:
+/// - Public viewing of published posts
+/// - Authenticated creation and editing of posts
+/// - Pagination for post listings
+/// - Integration with comment system
+/// - Media file serving for post attachments
 pub struct Controller {
+    /// The base path for blog routes (typically "/blog")
     path: String,
 }
 
 impl Controller {
+    /// Creates a new BlogController instance.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The base path for blog routes
+    ///
+    /// # Returns
+    ///
+    /// A new Controller instance configured for blog endpoints.
     pub fn new(path: String) -> Self {
         Self { path }
     }
 }
 
+/// Displays a paginated list of blog posts.
+///
+/// This endpoint serves the main blog listing page with pagination support.
+/// Only published posts (non-drafts) are shown to public users.
+/// Authenticated users may see additional options or draft indicators.
+///
+/// # Query Parameters
+///
+/// * `page` - Page number (1-based, defaults to 1)
+/// * `page_size` - Number of posts per page (defaults to service default)
+///
+/// # Arguments
+///
+/// * `conn` - Database connection
+/// * `page` - Optional page number
+/// * `page_size` - Optional page size
+/// * `jar` - Cookie jar for authentication status
+/// * `service` - BlogService for post operations
+/// * `flash` - Optional flash message for user feedback
+///
+/// # Returns
+///
+/// A rendered template with the blog post listing and pagination metadata.
 #[get("/?<page>&<page_size>")]
 async fn list_view(
     conn: Connection<'_, Db>,
@@ -58,6 +109,30 @@ async fn list_view(
         },
     )
 }
+
+/// Displays a detailed view of a single blog post with comments.
+///
+/// Shows the full content of a blog post along with all associated comments.
+/// Draft posts are only visible to authenticated users. Public users will
+/// receive a 404 error when trying to access draft posts.
+///
+/// # Path Parameters
+///
+/// * `id` - Sequence ID of the blog post to display
+///
+/// # Arguments
+///
+/// * `conn` - Database connection
+/// * `service` - BlogService for post retrieval
+/// * `comment_service` - CommentService for loading comments
+/// * `flash` - Optional flash message for user feedback
+/// * `jar` - Cookie jar for authentication status
+/// * `id` - Sequence ID of the post
+///
+/// # Returns
+///
+/// * `Ok(Template)` - Rendered post detail page with comments
+/// * `Err(Status::NotFound)` - Post not found or draft post accessed by unauthenticated user
 #[get("/<id>")]
 async fn detail_view(
     conn: Connection<'_, Db>,

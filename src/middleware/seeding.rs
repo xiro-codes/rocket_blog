@@ -1,3 +1,9 @@
+//! Database seeding middleware for development and testing.
+//!
+//! This middleware automatically populates the database with sample data
+//! during application startup, including admin users, sample blog posts,
+//! and comments. This is useful for development environments and testing.
+
 use crate::pool::Db;
 use chrono::Local;
 use lipsum::lipsum_words_with_rng;
@@ -16,11 +22,33 @@ use rocket::{
 use sea_orm::*;
 use sea_orm_rocket::Database;
 
+/// Seeding fairing for populating the database with development data.
+///
+/// This middleware creates sample data during application startup including:
+/// - An admin user account with known credentials
+/// - A configurable number of sample blog posts with Lorem Ipsum content
+/// - Sample comments on the generated blog posts
+/// 
+/// The seeding process is deterministic when a seed value is provided,
+/// making it useful for consistent testing environments.
 pub struct Seeding {
+    /// Number of sample posts and comments to create
     count: usize,
+    /// Optional seed for deterministic random generation
     seed: Option<u32>
 }
+
 impl Seeding {
+    /// Creates a new Seeding fairing instance.
+    ///
+    /// # Arguments
+    ///
+    /// * `seed` - Optional seed for deterministic random content generation
+    /// * `count` - Number of sample posts and comments to create
+    ///
+    /// # Returns
+    ///
+    /// A new Seeding fairing ready to populate the database.
     pub fn new(seed: Option<u32>, count: usize) -> Self {
         Self { seed, count }
     }
@@ -33,6 +61,26 @@ impl Fairing for Seeding {
             kind: Kind::Ignite | Kind::Shutdown,
         }
     }
+
+    /// Populates the database with sample data during application startup.
+    ///
+    /// This method:
+    /// 1. Creates an admin user account with username "admin" and password "pass"
+    /// 2. Generates the specified number of sample blog posts with Lorem Ipsum content
+    /// 3. Creates sample comments for each blog post
+    /// 4. Uses deterministic random generation if a seed is provided
+    ///
+    /// # Arguments
+    ///
+    /// * `rocket` - The Rocket instance being built
+    ///
+    /// # Returns
+    ///
+    /// The Rocket instance, ready for launch with seeded data.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the admin account cannot be created during seeding.
     async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
         let conn = &Db::fetch(&rocket).unwrap().conn;
         let pw = bcrypt::hash("pass").unwrap();
