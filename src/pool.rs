@@ -1,22 +1,48 @@
+//! Database connection pool configuration for SeaORM.
+//!
+//! This module provides the database connection pool implementation for the application,
+//! handling connection management, timeouts, and configuration for PostgreSQL operations.
+
 use sea_orm::ConnectOptions;
 use sea_orm_rocket::{rocket::figment::Figment, Config, Database};
 use std::time::Duration;
 
+/// Main database connection pool wrapper.
+///
+/// This struct wraps the SeaORM connection pool and implements the Database trait
+/// required by Rocket for automatic injection into request handlers.
 #[derive(Database, Debug)]
 #[database("sea_orm")]
 pub struct Db(SeaOrmPool);
 
+/// SeaORM connection pool implementation.
+///
+/// Contains the actual database connection and manages connection lifecycle.
+/// This pool is configured with connection limits, timeouts, and other 
+/// database-specific settings from the Rocket configuration.
 #[derive(Debug, Clone)]
 pub struct SeaOrmPool {
+    /// The underlying SeaORM database connection
     pub conn: sea_orm::DatabaseConnection,
 }
 
 #[rocket::async_trait]
 impl sea_orm_rocket::Pool for SeaOrmPool {
     type Error = sea_orm::DbErr;
-
     type Connection = sea_orm::DatabaseConnection;
 
+    /// Initialize the database connection pool from Rocket configuration.
+    ///
+    /// Reads database configuration from `Rocket.toml` and establishes a connection pool
+    /// with the specified parameters including connection limits, timeouts, and logging.
+    ///
+    /// # Arguments
+    ///
+    /// * `figment` - Rocket's configuration provider
+    ///
+    /// # Returns
+    ///
+    /// Returns a configured `SeaOrmPool` or a database error if connection fails.
     async fn init(figment: &Figment) -> Result<Self, Self::Error> {
         let config = figment.extract::<Config>().unwrap();
         let mut options: ConnectOptions = config.url.into();
@@ -33,6 +59,10 @@ impl sea_orm_rocket::Pool for SeaOrmPool {
         Ok(SeaOrmPool { conn })
     }
 
+    /// Borrow a reference to the database connection.
+    ///
+    /// This method is called by Rocket to inject the database connection
+    /// into request handlers that need database access.
     fn borrow(&self) -> &Self::Connection {
         &self.conn
     }
