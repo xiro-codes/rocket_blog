@@ -39,6 +39,11 @@
 	<div class="col-md-8">
 		<div class="mx-5 my-2">
 			{% for post in posts %}
+			<li class="list-group-item">
+				{% if post.draft and token %}
+				<span class="badge bg-warning text-dark ms-2">DRAFT</span>
+				{% endif %}
+			</li>
 			<div class="card mb-3 terminal-post">
 				<div class="card-body">
 					<h5 class="card-title">
