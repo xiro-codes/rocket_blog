@@ -6,7 +6,7 @@ use crate::{
     services::{self, AuthService, BlogService, CommentService, TagService},
     types::{HttpRange, StreamedFile},
 };
-use models::post;
+use models::{post, tag};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -16,6 +16,7 @@ use rocket::{
     Build, Rocket, Route, State,
 };
 use rocket_dyn_templates::{context, Template};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use sea_orm_rocket::Connection;
 use std::fs::File;
 use uuid::Uuid;
@@ -39,22 +40,32 @@ async fn list_view(
     page_size: Option<u64>,
     jar: &CookieJar<'_>,
     service: &State<BlogService>,
+    tag_service: &State<TagService>,
     flash: Option<FlashMessage<'_>>,
 ) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     match service.paginate_with_title(db, page, page_size).await {
-        Ok((posts, page, page_size, num_pages)) => Ok(Template::render(
-            "blog/list",
-            context! {
-                posts,
-                page,
-                page_size,
-                num_pages,
-                token,
-                flash: ControllerBase::extract_flash(flash)
-            },
-        )),
+        Ok((posts, page, page_size, num_pages)) => {
+            // Get all tags for the tag cloud
+            let all_tags = match tag_service.find_all_tags(db).await {
+                Ok(tags) => tags,
+                Err(_) => vec![], // Continue even if tag loading fails
+            };
+            
+            Ok(Template::render(
+                "blog/list",
+                context! {
+                    posts,
+                    page,
+                    page_size,
+                    num_pages,
+                    token,
+                    all_tags,
+                    flash: ControllerBase::extract_flash(flash)
+                },
+            ))
+        },
         Err(_) => Err(Status::InternalServerError),
     }
 }
@@ -255,6 +266,7 @@ async fn edit_view(
     jar: &CookieJar<'_>,
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
+    tag_service: &State<TagService>,
     id: i32,
 ) -> Result<Template, Status> {
     ControllerBase::require_auth(jar)?;
@@ -263,10 +275,18 @@ async fn edit_view(
         Ok(post) => post,
         Err(_) => return Err(Status::NotFound),
     };
+    
+    // Get tags for the post
+    let tags = match tag_service.find_tags_by_post_id(db, post.id).await {
+        Ok(tags) => tags,
+        Err(_) => return Err(Status::InternalServerError),
+    };
+    
     Ok(Template::render(
         "blog/edit",
         context! {
             post,
+            tags,
             form_url: ""
         },
     ))
@@ -275,23 +295,112 @@ async fn edit_view(
 async fn edit(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
+    tag_service: &State<TagService>,
     id: i32,
     form_data: Form<FormDTO<'_>>,
     jar: &CookieJar<'_>,
 ) -> Result<Flash<Redirect>, Status> {
     ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
+    
+    // First get the post to get its ID
+    let post = match service.find_by_seq_id(db, id).await {
+        Ok(post) => post,
+        Err(_) => return Err(Status::NotFound),
+    };
+    
+    let form = form_data.into_inner();
+    let tags_str = form.tags.clone();
+    
+    // Update the post
     match service
-        .update_by_seq_id(db, id, form_data.into_inner())
+        .update_by_seq_id(db, id, form)
         .await
     {
-        Ok(_) => Ok(ControllerBase::success_redirect(
-            format!("/blog/{id}"),
-            "Updated Post",
-        )),
+        Ok(_) => {
+            // Handle tag updates
+            if let Some(tags_str) = tags_str {
+                // Remove all existing tags for this post
+                match tag_service.find_tags_by_post_id(db, post.id).await {
+                    Ok(existing_tags) => {
+                        for existing_tag in existing_tags {
+                            let _ = tag_service.remove_tag_from_post(db, post.id, existing_tag.id).await;
+                        }
+                    },
+                    Err(_) => {}, // Continue even if we can't fetch existing tags
+                }
+                
+                // Add new tags
+                for tag_name in tags_str.split(',') {
+                    let tag_name = tag_name.trim();
+                    if !tag_name.is_empty() {
+                        match tag_service.find_or_create_tag(db, tag_name).await {
+                            Ok(tag) => {
+                                let _ = tag_service.add_tag_to_post(db, post.id, tag.id).await;
+                            },
+                            Err(_) => {}, // Continue even if tag creation fails
+                        }
+                    }
+                }
+            }
+            
+            Ok(ControllerBase::success_redirect(
+                format!("/blog/{id}"),
+                "Updated Post",
+            ))
+        },
         Err(_) => Err(Status::NotFound),
     }
 }
+
+#[get("/tag/<slug>?<page>&<page_size>")]
+async fn posts_by_tag(
+    conn: Connection<'_, Db>,
+    service: &State<BlogService>,
+    tag_service: &State<TagService>,
+    slug: String,
+    page: Option<u64>,
+    page_size: Option<u64>,
+    jar: &CookieJar<'_>,
+) -> Result<Template, Status> {
+    let token = ControllerBase::check_auth(jar).unwrap_or_default();
+    let db = conn.into_inner();
+    
+    // Find tag by slug
+    let tag = tag::Entity::find()
+        .filter(tag::Column::Slug.eq(slug))
+        .one(db)
+        .await
+        .map_err(|_| Status::NotFound)?
+        .ok_or(Status::NotFound)?;
+    
+    // Get posts with this tag
+    let (posts, page, page_size, num_pages) = service
+        .paginate_posts_by_tag(db, tag.id, page, page_size)
+        .await
+        .map_err(|_| Status::InternalServerError)?;
+
+    // Get all tags for the tag cloud
+    let all_tags = match tag_service.find_all_tags(db).await {
+        Ok(tags) => tags,
+        Err(_) => vec![], // Continue even if tag loading fails
+    };
+
+    Ok(Template::render(
+        "blog/list",
+        context! {
+            posts,
+            page,
+            page_size,
+            num_pages,
+            token,
+            all_tags,
+            tag_filter: tag.name.clone(),
+            title: format!("Posts tagged with '{}'", tag.name)
+        },
+    ))
+}
+
 #[get("/<id>/delete")]
 async fn delete(
     conn: Connection<'_, Db>,
@@ -311,6 +420,7 @@ fn routes() -> Vec<Route> {
         detail_view,
         create_view,
         edit_view,
+        posts_by_tag,
         video,
         create,
         edit,
