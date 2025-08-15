@@ -1,25 +1,5 @@
-use mockall::mock;
-use sea_orm::{DbConn, DbErr, DeleteResult, EntityTrait, Select};
-use std::sync::Arc;
-
-// Mock database connection for testing
-pub type MockDbConn = sea_orm::MockDatabase;
-
-// Create a mock database for testing
-pub fn create_mock_db() -> MockDbConn {
-    sea_orm::MockDatabase::new(sea_orm::DatabaseBackend::Postgres)
-}
-
-// Mock service trait for dependency injection in tests
-mock! {
-    pub Database {}
-    
-    impl Clone for Database {
-        fn clone(&self) -> Self;
-    }
-}
-
 // Test data factory for creating consistent test data
+
 pub mod test_data {
     use chrono::Local;
     use uuid::Uuid;

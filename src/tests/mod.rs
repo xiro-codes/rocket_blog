@@ -5,6 +5,8 @@ pub mod services_tests;
 pub mod controllers_tests;
 pub mod middleware_tests;
 pub mod main_tests;
+pub mod integration_tests;
+pub mod comprehensive_tests;
 
 // Test utilities and mocks
 pub mod utils;

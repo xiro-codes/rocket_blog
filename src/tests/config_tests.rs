@@ -28,7 +28,7 @@ mod tests {
 
     #[test]
     fn test_app_config_from_figment_empty_figment() {
-        let figment = rocket::Config::default().figment();
+        let figment = rocket::Config::figment();
         
         let config = AppConfig::from_figment(&figment);
         assert_eq!(config.data_path, "/home/tod/.local/share/blog");
