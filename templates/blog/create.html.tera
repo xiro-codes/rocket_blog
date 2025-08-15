@@ -18,6 +18,11 @@
 			<label for="file" class="form-label"> Clip </label>
 			<input type="file" name="file" id="file" class="form-control" accept="video/*" />
 		</div>
+    <div class="mb-3">
+      <label for="tags"  class="form-label">Tags (comma-separated)</label>
+      <input type="text" class="form-control" name="tags" id="tags" placeholder="e.g. rust, web development, tutorial">
+      <div class="form-text"> Separate multiple tags with commas</div>
+    </div>
 		<div class="justify-content-center d-flex m-1">
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</div>

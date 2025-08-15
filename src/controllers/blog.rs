@@ -74,8 +74,14 @@ async fn detail_view(
 ) -> Result<Template,Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
+    debug!("{}", id);
+    let (min_post, max_post) = service.find_mm_seq_id(db).await.unwrap().unwrap();
+    if id < min_post {
+        debug!("Less Than");
+    }
     let (post, account) = service.find_by_seq_id_with_account(db, id).await.unwrap();
     let tags = tag_service.find_tags_by_post_id(db, post.id).await.unwrap();
+    debug!("{:?}", tags);
     if post.draft.unwrap() && token.is_none(){
         return Err(Status::NotFound);
     }
@@ -84,6 +90,7 @@ async fn detail_view(
         .await
         .unwrap();
     let (min_post, max_post) = service.find_mm_seq_id(db).await.unwrap().unwrap();
+     
     Ok(Template::render(
         "blog/detail",
         context! {
@@ -177,6 +184,7 @@ async fn create(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
     auth_service: &State<AuthService>,
+    tag_service: &State<TagService>,
     app_config: &State<AppConfig>,
     jar: &CookieJar<'_>,
     form_data: Form<FormDTO<'_>>,
@@ -188,15 +196,24 @@ async fn create(
             if !account.admin {
                 return Err(Status::Unauthorized);
             }
-
-            let id = service
-                .create(db, app_config, account.id, &mut form_data.into_inner())
+            let mut form = form_data.into_inner(); 
+            let post = service
+                .create(db, app_config, account.id, &mut form)
                 .await
-                .unwrap()
-            .seq_id;
-
+                .unwrap();
+            debug!("{:?}", form);
+            if let Some(tags_str) = form.tags {
+                for tag_name in tags_str.split(",") {
+                    debug!("{:?}", tag_name);
+                    let tag_name = tag_name.trim();
+                    if !tag_name.is_empty() {
+                        let tag = tag_service.find_or_create_tag(db, tag_name).await.unwrap();
+                        let _ = tag_service.add_tag_to_post(db, post.id, tag.id).await.unwrap();
+                    }
+                }
+            }
             return Ok(ControllerBase::success_redirect(
-                format!("/blog/{id}"),
+                format!("/blog/{}", post.seq_id),
                 "Post successfully added"
             ));
         }

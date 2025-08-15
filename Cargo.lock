@@ -150,6 +150,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "app"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "fern",
+ "humantime",
+ "lipsum",
+ "log",
+ "markdown",
+ "migrations",
+ "mime_guess",
+ "models",
+ "pwhash",
+ "rand",
+ "rand_mt",
+ "rocket",
+ "rocket_dyn_templates",
+ "sea-orm",
+ "sea-orm-rocket",
+ "slug",
+ "uuid",
+]
+
+[[package]]
 name = "arrayvec"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1013,6 +1037,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
+name = "fern"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4316185f709b23713e41e3195f90edef7fb00c3ed4adc79769cf09cc762a3b29"
+dependencies = [
+ "log",
+]
+
+[[package]]
 name = "figment"
 version = "0.10.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1451,6 +1484,12 @@ checksum = "6cb51c9a029ddc91b07a787f1d86b53ccfa49b0e86688c946ebe8d3555685dd7"
 dependencies = [
  "libm",
 ]
+
+[[package]]
+name = "humantime"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b112acc8b3adf4b107a8ec20977da0273a8c386765a3ec0229bd500a1443f9f"
 
 [[package]]
 name = "hyper"
@@ -2747,28 +2786,6 @@ dependencies = [
  "uuid",
  "version_check",
  "yansi",
-]
-
-[[package]]
-name = "rocket-template"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "lipsum",
- "log",
- "markdown",
- "migrations",
- "mime_guess",
- "models",
- "pwhash",
- "rand",
- "rand_mt",
- "rocket",
- "rocket_dyn_templates",
- "sea-orm",
- "sea-orm-rocket",
- "slug",
- "uuid",
 ]
 
 [[package]]

@@ -33,18 +33,23 @@ impl Service {
     ) -> Result<post::Model, DbErr> {
         let text = markdown::to_html(data.text.as_str());
         let fid = BaseService::generate_id().to_string();
-        let path = format!("{}/{}_{}.webm", app_config.data_path, fid, data.file.name().unwrap());
+        let path = if let Some(name) = data.file.name() {
+            let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
+            data.file
+                .copy_to(path.clone())
+                .await
+                .map_err(|e| DbErr::Custom(e.to_string()))?;
+            Some(path)
+        } else {
+            None
+        };
 
-        data.file
-            .copy_to(path.clone())
-            .await
-            .map_err(|e| DbErr::Custom(e.to_string()))?;
 
         post::ActiveModel {
             id: Set(BaseService::generate_id()),
             title: Set(data.title.to_owned()),
             text: Set(text),
-            path: Set(Some(path)),
+            path: Set(path),
             draft: Set(Some(true)),
             date_published: Set(Local::now().naive_local()),
             account_id: Set(id),

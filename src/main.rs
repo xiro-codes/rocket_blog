@@ -20,6 +20,7 @@ use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Database;
 use services::TagService;
 use config::AppConfig;
+use std::time::SystemTime;
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     let conn = &Db::fetch(&rocket).unwrap().conn;
@@ -32,11 +33,62 @@ pub fn catch_default() -> Redirect{
     Redirect::to("/")
 }
 
+fn drop_rocket(meta: &log::Metadata) -> bool {
+    let name = meta.target();
+    if name.starts_with("rocket") || name.eq("_") {
+        return false;
+    }
+    true
+}
+fn drop_sea_orm_migration(meta: &log::Metadata) -> bool {
+    let name = meta.target();
+    if name.starts_with("sea_orm_migration") || name.eq("_") {
+        return false;
+    }
+    true
+}
+fn drop_sqlx(meta: &log::Metadata) -> bool {
+    let name = meta.target();
+    if name.starts_with("sqlx") || name.eq("_") {
+        return false;
+    }
+    true
+}
+fn drop_hyper(meta: &log::Metadata) -> bool {
+    let name = meta.target();
+    if name.starts_with("hyper") || name.eq("_") {
+        return false;
+    }
+    true
+
+}
+fn setup_logger() -> Result<(), fern::InitError> {
+    fern::Dispatch::new()
+        .format(|out, message, record| {
+            out.finish(format_args!(
+                "[{} {} {}] {}",
+                humantime::format_rfc3339_seconds(SystemTime::now()),
+                record.level(),
+                record.target(),
+                message
+            ))
+        })
+        .level(log::LevelFilter::Debug)
+        .filter(drop_rocket)
+        .filter(drop_sqlx)
+        .filter(drop_sea_orm_migration)
+        .filter(drop_hyper)
+        .chain(std::io::stdout())
+        .chain(fern::log_file("output.log")?)
+        .apply()?;
+    Ok(())
+}
+
 #[launch]
 async fn rocket() -> _ {
     let figment = rocket::Config::figment();
     let app_config = AppConfig::from_figment(&figment);
-
+    setup_logger().unwrap();
     rocket::build()
         .register("/", catchers![catch_default])
         .attach(Db::init())

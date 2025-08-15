@@ -169,6 +169,9 @@ impl Fairing for Seeding {
         {
             for post in posts_with_videos {
                 if let Some(video_path) = post.path {
+                    if video_path == SAMPLE_VIDEO_PATH {
+                        continue;
+                    }  
                     let _ = std::fs::remove_file(&video_path);
                 }
             }

@@ -24,6 +24,7 @@
 					lunarvim
 					ffmpeg
 					just
+					glow
           sea-orm-cli
           cargo-watch
           fenix.packages.x86_64-linux.rust-analyzer

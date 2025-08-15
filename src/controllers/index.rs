@@ -10,7 +10,7 @@ impl Controller {
 }
 #[get("/")]
 fn index()->Redirect {
-    Redirect::to("/blog")
+    Redirect::to("/blog?page=1")
 }
 pub fn routes() -> Vec<Route> {
     routes![
