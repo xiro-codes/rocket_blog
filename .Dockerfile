@@ -5,6 +5,7 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y \
     libssl3 \
     libpq5 \
+		patchelf \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -28,6 +29,9 @@ RUN mkdir -p /app/data && chown -R app:app /app
 
 # Ensure binary is executable if it exists
 RUN if [ -f ./rocket-template ]; then chmod +x ./rocket-template; fi
+RUN LD_PATH=$(find / -name "ld-linux-x86-64.so.2") && \
+    # Patch the executable to use the Alpine dynamic linker
+    patchelf --set-interpreter "$LD_PATH" ./rocket-template
 
 # Change to app user
 USER app
