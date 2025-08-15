@@ -147,6 +147,7 @@ impl Service {
             .column(post::Column::Id)
             .column(post::Column::Title)
             .column(post::Column::SeqId)
+            .column(post::Column::Draft)
             .into_partial_model()
             .all(db)
             .await
@@ -190,7 +191,8 @@ impl Service {
             .select_only()
             .column(post::Column::Id)
             .column(post::Column::Title)
-            .column(post::Column::SeqId);
+            .column(post::Column::SeqId)
+            .column(post::Column::Draft);
         
         if !include_drafts {
             query = query.filter(post::Column::Draft.eq(false));
@@ -240,6 +242,7 @@ impl Service {
             .column(post::Column::Id)
             .column(post::Column::Title)
             .column(post::Column::SeqId)
+            .column(post::Column::Draft)
             .join(JoinType::InnerJoin, post::Relation::PostTag.def())
             .filter(post_tag::Column::TagId.eq(tag_id));
             
