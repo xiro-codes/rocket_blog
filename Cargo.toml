@@ -40,5 +40,8 @@ features = ["serde"]
 version = "1.4.1"
 features = ["v4", "serde"]
 
+[dev-dependencies]
+# Using only basic test features that don't require external downloads
+
 [workspace]
 members = ["migrations", "models"]

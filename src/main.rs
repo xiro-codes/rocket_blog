@@ -16,6 +16,9 @@ mod pool;
 mod services;
 mod types;
 
+#[cfg(test)]
+mod tests;
+
 use config::AppConfig;
 use migrations::MigratorTrait;
 use pool::Db;
