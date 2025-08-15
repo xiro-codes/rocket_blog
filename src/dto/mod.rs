@@ -5,6 +5,7 @@ pub mod post {
     pub struct FormDTO<'r> {
         pub title: String,
         pub text: String,
+        pub excerpt: Option<String>,
         pub file: TempFile<'r>,
         pub tags: Option<String>,
     }

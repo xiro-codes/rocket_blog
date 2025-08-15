@@ -27,6 +27,35 @@ impl Service {
         }
     }
 
+    /// Generate an excerpt from the text content if no excerpt is provided
+    fn generate_excerpt(text: &str, provided_excerpt: Option<String>) -> Option<String> {
+        if let Some(excerpt) = provided_excerpt {
+            if !excerpt.trim().is_empty() {
+                return Some(excerpt.trim().to_string());
+            }
+        }
+        
+        // Remove markdown formatting and HTML tags for a clean excerpt
+        let clean_text = text
+            .lines()
+            .map(|line| line.trim())
+            .filter(|line| !line.is_empty() && !line.starts_with('#'))
+            .collect::<Vec<&str>>()
+            .join(" ");
+        
+        // Take first 200 characters and try to end at a word boundary
+        if clean_text.len() <= 200 {
+            Some(clean_text)
+        } else {
+            let truncated = &clean_text[..200];
+            if let Some(last_space) = truncated.rfind(' ') {
+                Some(format!("{}...", &truncated[..last_space]))
+            } else {
+                Some(format!("{}...", truncated))
+            }
+        }
+    }
+
     pub async fn create(
         &self,
         db: &DbConn,
@@ -35,6 +64,7 @@ impl Service {
         data: &mut FormDTO<'_>,
     ) -> Result<post::Model, DbErr> {
         let text = markdown::to_html(data.text.as_str());
+        let excerpt = Self::generate_excerpt(&data.text, data.excerpt.clone());
         let fid = BaseService::generate_id().to_string();
         let path = if let Some(name) = data.file.name() {
             let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
@@ -51,6 +81,7 @@ impl Service {
             id: Set(BaseService::generate_id()),
             title: Set(data.title.to_owned()),
             text: Set(text),
+            excerpt: Set(excerpt),
             path: Set(path),
             draft: Set(Some(true)),
             date_published: Set(Local::now().naive_local()),
@@ -72,8 +103,10 @@ impl Service {
             .await?
             .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", id)))
             .map(Into::into)?;
+        let excerpt = Self::generate_excerpt(&data.text, data.excerpt);
         p.title = Set(data.title.to_owned());
         p.text = Set(data.text.to_owned());
+        p.excerpt = Set(excerpt);
         p.update(db).await
     }
 
@@ -89,8 +122,10 @@ impl Service {
             .await?
             .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", id)))
             .map(Into::into)?;
+        let excerpt = Self::generate_excerpt(&data.text, data.excerpt);
         p.title = Set(data.title.to_owned());
         p.text = Set(data.text.to_owned());
+        p.excerpt = Set(excerpt);
         p.update(db).await
     }
 
@@ -147,6 +182,7 @@ impl Service {
             .column(post::Column::Id)
             .column(post::Column::Title)
             .column(post::Column::SeqId)
+            .column(post::Column::Excerpt)
             .into_partial_model()
             .all(db)
             .await
@@ -181,6 +217,7 @@ impl Service {
             .column(post::Column::Id)
             .column(post::Column::Title)
             .column(post::Column::SeqId)
+            .column(post::Column::Excerpt)
             .filter(post::Column::Draft.eq(false))
             .order_by_desc(post::Column::DatePublished)
             .into_partial_model()
@@ -214,6 +251,7 @@ impl Service {
             .column(post::Column::Id)
             .column(post::Column::Title)
             .column(post::Column::SeqId)
+            .column(post::Column::Excerpt)
             .join(JoinType::InnerJoin, post::Relation::PostTag.def())
             .filter(post_tag::Column::TagId.eq(tag_id))
             .filter(post::Column::Draft.eq(false))

@@ -12,6 +12,7 @@ pub struct Model {
     pub seq_id: i32,
     pub title: String,
     pub text: String,
+    pub excerpt: Option<String>,
     pub path: Option<String>,
     pub draft: Option<bool>,
     pub date_published: DateTime,

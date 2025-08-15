@@ -31,13 +31,22 @@
 
 <div class="row">
 	<div class="col-md-8">
-		<ul class="list-group mx-5 my-2">
+		<div class="mx-5 my-2">
 			{% for post in posts %}
-			<li class="list-group-item"><a
-					class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
-					href="/blog/{{post.seq_id}}">{{post.title}}</a></li>
+			<div class="card mb-3">
+				<div class="card-body">
+					<h5 class="card-title">
+						<a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover text-decoration-none"
+						   href="/blog/{{post.seq_id}}">{{post.title}}</a>
+					</h5>
+					{% if post.excerpt %}
+					<p class="card-text text-muted">{{post.excerpt}}</p>
+					{% endif %}
+					<a href="/blog/{{post.seq_id}}" class="btn btn-outline-primary btn-sm">Read More</a>
+				</div>
+			</div>
 			{% endfor %}
-		</ul>
+		</div>
 	</div>
 	<div class="col-md-4">
 		{% if all_tags %}

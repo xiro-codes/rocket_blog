@@ -12,6 +12,11 @@
 			<input type="text" class="form-control" name="title" id="title" value="{{post.title}}" />
 		</div>
 		<div>
+			<label for="excerpt" class="form-label"> Excerpt </label>
+			<textarea name="excerpt" id="excerpt" rows="3" class="form-control" placeholder="Brief summary of the post (optional - will be auto-generated if left empty)">{% if post.excerpt %}{{post.excerpt}}{% endif %}</textarea>
+			<div class="form-text">Optional short summary that will appear in post listings. If left empty, it will be auto-generated from the content.</div>
+		</div>
+		<div>
 			<label for="text" class="form-label"> Text </label>
 			<textarea name="text" class="form-control" id="text" rows="8" >{{post.text}}</textarea>
 		</div>
