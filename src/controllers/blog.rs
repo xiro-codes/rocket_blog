@@ -42,25 +42,25 @@ async fn list_view(
     jar: &CookieJar<'_>,
     service: &State<BlogService>,
     flash: Option<FlashMessage<'_>>,
-) -> Template {
+) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
-    let (posts, page, page_size, num_pages) = service
-        .paginate_with_title(db, page, page_size)
-        .await
-        .unwrap();
-
-    Template::render(
-        "blog/list",
-        context! {
-            posts,
-            page,
-            page_size,
-            num_pages,
-            token,
-            flash: ControllerBase::extract_flash(flash)
+    match service.paginate_with_title(db, page, page_size).await {
+        Ok((posts, page, page_size, num_pages)) => {
+            Ok(Template::render(
+                "blog/list",
+                context! {
+                    posts,
+                    page,
+                    page_size,
+                    num_pages,
+                    token,
+                    flash: ControllerBase::extract_flash(flash)
+                },
+            ))
         },
-    )
+        Err(_) => Err(Status::InternalServerError),
+    }
 }
 #[get("/<id>")]
 async fn detail_view(
@@ -75,21 +75,42 @@ async fn detail_view(
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     debug!("{}", id);
-    let (min_post, max_post) = service.find_mm_seq_id(db).await.unwrap().unwrap();
+    
+    // Get min/max post range - handle errors gracefully
+    let (min_post, max_post) = match service.find_mm_seq_id(db).await {
+        Ok(Some((min, max))) => (min, max),
+        Ok(None) => return Err(Status::NotFound),
+        Err(_) => return Err(Status::InternalServerError),
+    };
+    
     if id < min_post {
         debug!("Less Than");
     }
-    let (post, account) = service.find_by_seq_id_with_account(db, id).await.unwrap();
-    let tags = tag_service.find_tags_by_post_id(db, post.id).await.unwrap();
+    
+    // Get post with account - handle errors gracefully
+    let (post, account) = match service.find_by_seq_id_with_account(db, id).await {
+        Ok(result) => result,
+        Err(_) => return Err(Status::NotFound),
+    };
+    
+    // Get tags for the post - handle errors gracefully
+    let tags = match tag_service.find_tags_by_post_id(db, post.id).await {
+        Ok(tags) => tags,
+        Err(_) => return Err(Status::InternalServerError),
+    };
+    
     debug!("{:?}", tags);
-    if post.draft.unwrap() && token.is_none(){
+    
+    // Check if post is draft and user is not authenticated
+    if post.draft.unwrap_or(false) && token.is_none(){
         return Err(Status::NotFound);
     }
-    let comments = comment_service
-        .find_many_by_post_id(db, post.id)
-        .await
-        .unwrap();
-    let (min_post, max_post) = service.find_mm_seq_id(db).await.unwrap().unwrap();
+    
+    // Get comments for the post - handle errors gracefully
+    let comments = match comment_service.find_many_by_post_id(db, post.id).await {
+        Ok(comments) => comments,
+        Err(_) => return Err(Status::InternalServerError),
+    };
      
     Ok(Template::render(
         "blog/detail",
@@ -113,7 +134,10 @@ async fn video(
     id: i32,
 ) -> Result<StreamedFile, Status> {
     let db = conn.into_inner();
-    let post  = service.find_by_seq_id(db, id).await.unwrap();
+    let post = match service.find_by_seq_id(db, id).await {
+        Ok(post) => post,
+        Err(_) => return Err(Status::NotFound),
+    };
     if let Some(path) = post.path.to_owned() {
         let file = File::open(&path)
             .map_err(|e| {
@@ -191,24 +215,33 @@ async fn create(
 ) -> Result<Flash<Redirect>, Status> {
     if let Some(token) = ControllerBase::check_auth(jar)? {
         let db = conn.into_inner();
-        let token = Uuid::parse_str(&token).unwrap();
+        let token = match Uuid::parse_str(&token) {
+            Ok(uuid) => uuid,
+            Err(_) => return Err(Status::BadRequest),
+        };
         if let Some(account) = auth_service.check_token(db, token).await {
             if !account.admin {
                 return Err(Status::Unauthorized);
             }
             let mut form = form_data.into_inner(); 
-            let post = service
-                .create(db, app_config, account.id, &mut form)
-                .await
-                .unwrap();
+            let post = match service.create(db, app_config, account.id, &mut form).await {
+                Ok(post) => post,
+                Err(_) => return Err(Status::InternalServerError),
+            };
             debug!("{:?}", form);
             if let Some(tags_str) = form.tags {
                 for tag_name in tags_str.split(",") {
                     debug!("{:?}", tag_name);
                     let tag_name = tag_name.trim();
                     if !tag_name.is_empty() {
-                        let tag = tag_service.find_or_create_tag(db, tag_name).await.unwrap();
-                        let _ = tag_service.add_tag_to_post(db, post.id, tag.id).await.unwrap();
+                        let tag = match tag_service.find_or_create_tag(db, tag_name).await {
+                            Ok(tag) => tag,
+                            Err(_) => return Err(Status::InternalServerError),
+                        };
+                        match tag_service.add_tag_to_post(db, post.id, tag.id).await {
+                            Ok(_) => {},
+                            Err(_) => return Err(Status::InternalServerError),
+                        };
                     }
                 }
             }
@@ -230,7 +263,10 @@ async fn edit_view(
 ) -> Result<Template, Status> {
     ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
-    let post = service.find_by_seq_id(db, id).await.unwrap();
+    let post = match service.find_by_seq_id(db, id).await {
+        Ok(post) => post,
+        Err(_) => return Err(Status::NotFound),
+    };
     Ok(Template::render(
         "blog/edit",
         context! {
@@ -249,14 +285,15 @@ async fn edit(
 ) -> Result<Flash<Redirect>, Status> {
     ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
-    let _ = service
-        .update_by_seq_id(db, id, form_data.into_inner())
-        .await
-        .expect("Post does not exist");
-    Ok(ControllerBase::success_redirect(
-        format!("/blog/{id}"),
-        "Updated Post"
-    ))
+    match service.update_by_seq_id(db, id, form_data.into_inner()).await {
+        Ok(_) => {
+            Ok(ControllerBase::success_redirect(
+                format!("/blog/{id}"),
+                "Updated Post"
+            ))
+        },
+        Err(_) => Err(Status::NotFound),
+    }
 }
 #[get("/<id>/delete")]
 async fn delete(
