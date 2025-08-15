@@ -40,12 +40,29 @@ async fn list_view(
     page_size: Option<u64>,
     jar: &CookieJar<'_>,
     service: &State<BlogService>,
+    auth_service: &State<AuthService>,
     tag_service: &State<TagService>,
     flash: Option<FlashMessage<'_>>,
 ) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
-    match service.paginate_with_title(db, page, page_size).await {
+    
+    // Check if user is admin to include drafts
+    let is_admin = if let Some(token_str) = &token {
+        if let Ok(token_uuid) = Uuid::parse_str(token_str) {
+            if let Some(account) = auth_service.check_token(db, token_uuid).await {
+                account.admin
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    } else {
+        false
+    };
+    
+    match service.paginate_with_title_include_drafts(db, page, page_size, is_admin).await {
         Ok((posts, page, page_size, num_pages)) => {
             // Get all tags for the tag cloud
             let all_tags = match tag_service.find_all_tags(db).await {
@@ -73,6 +90,7 @@ async fn list_view(
 async fn detail_view(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
+    auth_service: &State<AuthService>,
     comment_service: &State<CommentService>,
     tag_service: &State<TagService>,
     flash: Option<FlashMessage<'_>>,
@@ -82,6 +100,21 @@ async fn detail_view(
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     debug!("{}", id);
+
+    // Check if user is admin to allow draft access
+    let is_admin = if let Some(token_str) = &token {
+        if let Ok(token_uuid) = Uuid::parse_str(token_str) {
+            if let Some(account) = auth_service.check_token(db, token_uuid).await {
+                account.admin
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    } else {
+        false
+    };
 
     // Get min/max post range - handle errors gracefully
     let (min_post, max_post) = match service.find_mm_seq_id(db).await {
@@ -108,8 +141,8 @@ async fn detail_view(
 
     debug!("{:?}", tags);
 
-    // Check if post is draft and user is not authenticated
-    if post.draft.unwrap_or(false) && token.is_none() {
+    // Check if post is draft and user is not admin
+    if post.draft.unwrap_or(false) && !is_admin {
         return Err(Status::NotFound);
     }
 
@@ -357,6 +390,7 @@ async fn edit(
 async fn posts_by_tag(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
+    auth_service: &State<AuthService>,
     tag_service: &State<TagService>,
     slug: String,
     page: Option<u64>,
@@ -365,6 +399,21 @@ async fn posts_by_tag(
 ) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
+    
+    // Check if user is admin to include drafts
+    let is_admin = if let Some(token_str) = &token {
+        if let Ok(token_uuid) = Uuid::parse_str(token_str) {
+            if let Some(account) = auth_service.check_token(db, token_uuid).await {
+                account.admin
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    } else {
+        false
+    };
     
     // Find tag by slug
     let tag = tag::Entity::find()
@@ -376,7 +425,7 @@ async fn posts_by_tag(
     
     // Get posts with this tag
     let (posts, page, page_size, num_pages) = service
-        .paginate_posts_by_tag(db, tag.id, page, page_size)
+        .paginate_posts_by_tag_include_drafts(db, tag.id, page, page_size, is_admin)
         .await
         .map_err(|_| Status::InternalServerError)?;
 

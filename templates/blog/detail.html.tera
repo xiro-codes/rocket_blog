@@ -4,6 +4,11 @@
 {% if post %}
 <center class="text-white">
 	<h1>{{post.title}}</h1>
+	{% if post.draft and token %}
+	<div class="alert alert-warning mb-3">
+		<strong>🚧 DRAFT POST</strong> - This post is not yet published
+	</div>
+	{% endif %}
 	<h4>by {{username}}</h4>
   {% if tags %}
   <div class="mb-3">
