@@ -4,11 +4,12 @@ use models::{
     account,
     dto::PostTitleResult,
     post,
+    post_tag,
     prelude::{Account, Post, Tag},
     tag,
 };
 use rocket::State;
-use sea_orm::{ColumnTrait, *};
+use sea_orm::{ColumnTrait, JoinType, *};
 use uuid::Uuid;
 
 use crate::services::base::BaseService;
@@ -180,6 +181,41 @@ impl Service {
             .column(post::Column::Id)
             .column(post::Column::Title)
             .column(post::Column::SeqId)
+            .filter(post::Column::Draft.eq(false))
+            .order_by_desc(post::Column::DatePublished)
+            .into_partial_model()
+            .paginate(db, page_size);
+        let num_pages = paginator.num_pages().await?;
+        paginator
+            .fetch_page(page - 1)
+            .await
+            .map(|p| (p, page, page_size, num_pages))
+    }
+    
+    pub async fn paginate_posts_by_tag(
+        &self,
+        db: &DbConn,
+        tag_id: uuid::Uuid,
+        page: Option<u64>,
+        page_size: Option<u64>,
+    ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
+        let page = page.unwrap_or(1);
+        let page_size = page_size.unwrap_or(DEFAULT_PAGE_SIZE);
+        if page == 0 {
+            return Err(DbErr::Custom("Page number cannot be zero".to_owned()));
+        }
+        if page_size == 0 {
+            return Err(DbErr::Custom("Page size cannot be zero".to_owned()));
+        }
+        
+        // Join posts with post_tag to filter by tag_id
+        let paginator = Post::find()
+            .select_only()
+            .column(post::Column::Id)
+            .column(post::Column::Title)
+            .column(post::Column::SeqId)
+            .join(JoinType::InnerJoin, post::Relation::PostTag.def())
+            .filter(post_tag::Column::TagId.eq(tag_id))
             .filter(post::Column::Draft.eq(false))
             .order_by_desc(post::Column::DatePublished)
             .into_partial_model()
