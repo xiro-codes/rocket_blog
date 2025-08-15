@@ -34,8 +34,6 @@
 		<div class="mx-5 my-2">
 			{% for post in posts %}
 			<li class="list-group-item">
-				<a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
-				   href="/blog/{{post.seq_id}}">{{post.title}}</a>
 				{% if post.draft and token %}
 				<span class="badge bg-warning text-dark ms-2">DRAFT</span>
 				{% endif %}
