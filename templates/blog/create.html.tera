@@ -1,43 +1,54 @@
 {% extends "base" %}
 
 {% block content %}
+<div class="terminal-header"></div>
 <center>
-	<h1>Create Article</h1>
+	<h1 class="terminal-cursor">Create Article</h1>
 </center>
-<div class="d-flex justify-content-center align-items-center bg-body-secondary">
-	<form action="{{form_url}}" method="post" enctype="multipart/form-data">
+
+<hr class="terminal-divider">
+
+<div class="d-flex justify-content-center align-items-center">
+	<form action="{{form_url}}" method="post" enctype="multipart/form-data" class="terminal-form">
+		<h3 class="text-center mb-4">[ NEW POST CONFIGURATION ]</h3>
+		
 		<div>
-			<label for="title" class="form-label"> Title </label>
-			<input type="text" name="title" id="title" class="form-control" />
+			<label for="title" class="form-label">Title:</label>
+			<input type="text" name="title" id="title" class="form-control" placeholder="Enter post title..." />
 		</div>
+		
 		<div>
-			<label for="excerpt" class="form-label"> Excerpt </label>
-			<textarea name="excerpt" id="excerpt" rows="3" class="form-control" placeholder="Brief summary of the post (optional - will be auto-generated if left empty)"></textarea>
+			<label for="excerpt" class="form-label">Excerpt:</label>
+			<textarea name="excerpt" id="excerpt" rows="3" class="form-control" 
+			          placeholder="Brief summary of the post (optional - will be auto-generated if left empty)"></textarea>
 			<div class="form-text">Optional short summary that will appear in post listings. If left empty, it will be auto-generated from the content.</div>
 		</div>
+		
 		<div>
-			<label for="text" class="form-label"> Text </label>
-			<textarea name="text" id="text" rows="8" class="form-control"></textarea>
+			<label for="text" class="form-label">Content:</label>
+			<textarea name="text" id="text" rows="8" class="form-control" placeholder="Write your post content here..."></textarea>
 		</div>
+		
 		<div>
-			<label for="file" class="form-label"> Clip </label>
+			<label for="file" class="form-label">Media File:</label>
 			<input type="file" name="file" id="file" class="form-control" accept="video/*" />
 		</div>
-    <div class="mb-3">
-      <label for="tags"  class="form-label">Tags (comma-separated)</label>
-      <input type="text" class="form-control" name="tags" id="tags" placeholder="e.g. rust, web development, tutorial">
-      <div class="form-text"> Separate multiple tags with commas</div>
-    </div>
+		
+		<div class="mb-3">
+			<label for="tags" class="form-label">Tags (comma-separated):</label>
+			<input type="text" class="form-control" name="tags" id="tags" placeholder="e.g. rust, web development, tutorial">
+			<div class="form-text">Separate multiple tags with commas</div>
+		</div>
+		
 		<div class="justify-content-center d-flex m-1">
-			<button type="submit" class="btn btn-primary">Submit</button>
+			<button type="submit" class="btn btn-primary">[PUBLISH POST]</button>
 		</div>
 	</form>
 </div>
+
 {% if flash %}
-<small class="field-{{ flash.0 }}-flash">
+<div class="alert alert-warning text-center">
 	{{ flash.1 }}
-</small>
+</div>
 {% endif %}
-{% endblock %}
-{% block script %}
 {% endblock %}

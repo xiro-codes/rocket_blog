@@ -1,20 +1,428 @@
+/* Terminal-style theme for Rocket Blog */
+
+/* Base terminal styling */
+.terminal-container {
+	background-color: #0c1116;
+	color: #00ff41;
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
+	padding: 20px;
+	min-height: 100vh;
+}
+
+/* Terminal prompt styling */
+.terminal-prompt::before {
+	content: "> ";
+	color: #00ff41;
+	font-weight: bold;
+}
+
+.terminal-header::before {
+	content: "┌─────────────────────────────────────────────────────────────────────┐\A│  🚀 ROCKET BLOG TERMINAL v1.0 - AUTHENTICATED BLOG SYSTEM          │\A│  Type 'help' for available commands | Status: ONLINE               │\A└─────────────────────────────────────────────────────────────────────┘\A";
+	white-space: pre;
+	color: #00ff41;
+	display: block;
+	margin-bottom: 20px;
+	font-size: 0.85em;
+	line-height: 1.2;
+}
+
+/* Additional terminal decorations */
+.terminal-form::before {
+	content: "┌─[ FORM INPUT ]─────────────────────────────────────────────────────┐";
+	color: #00ff41;
+	display: block;
+	margin-bottom: 15px;
+	font-size: 0.9em;
+}
+
+.terminal-form::after {
+	content: "└───────────────────────────────────────────────────────────────────┘";
+	color: #00ff41;
+	display: block;
+	margin-top: 15px;
+	font-size: 0.9em;
+}
+
+.terminal-post {
+	position: relative;
+}
+
+.terminal-post::before {
+	content: "┌─[ POST DATA ]──────────────────────────────────────────────────────┐";
+	color: #333;
+	display: block;
+	margin-bottom: 10px;
+	font-size: 0.8em;
+}
+
+.terminal-comment-form::before {
+	content: "┌─[ COMMENT INPUT ]──────────────────────────────────────────────────┐";
+	color: #00ff41;
+	display: block;
+	margin-bottom: 10px;
+	font-size: 0.8em;
+	position: absolute;
+	top: -25px;
+	left: 0;
+}
+
+/* Override Bootstrap components for terminal look */
+.btn {
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
+	border: 2px solid #00ff41;
+	background-color: transparent;
+	color: #00ff41;
+	padding: 8px 16px;
+	transition: all 0.3s ease;
+	text-transform: uppercase;
+	font-weight: 600;
+	letter-spacing: 1px;
+	border-radius: 0;
+}
+
+.btn:hover {
+	background-color: #00ff41;
+	color: #0c1116;
+	box-shadow: 0 0 10px #00ff41;
+	transform: translateY(-2px);
+}
+
+.btn-primary {
+	border-color: #00ff41;
+	color: #00ff41;
+}
+
+.btn-primary:hover {
+	background-color: #00ff41;
+	border-color: #00ff41;
+	color: #0c1116;
+}
+
+.btn-secondary {
+	border-color: #666;
+	color: #666;
+}
+
+.btn-secondary:hover {
+	background-color: #666;
+	color: #0c1116;
+}
+
+.btn-warning {
+	border-color: #ffb000;
+	color: #ffb000;
+}
+
+.btn-warning:hover {
+	background-color: #ffb000;
+	color: #0c1116;
+}
+
+.btn-danger {
+	border-color: #ff0040;
+	color: #ff0040;
+}
+
+.btn-danger:hover {
+	background-color: #ff0040;
+	color: #0c1116;
+}
+
+/* Form styling */
+.form-control, .form-select {
+	background-color: #1a1f25;
+	border: 2px solid #333;
+	color: #00ff41;
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
+	padding: 12px;
+	border-radius: 0;
+}
+
+.form-control:focus, .form-select:focus {
+	background-color: #1a1f25;
+	border-color: #00ff41;
+	color: #00ff41;
+	box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+.form-control::placeholder {
+	color: #666;
+}
+
+.form-label {
+	color: #00ff41;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	margin-bottom: 8px;
+}
+
+.form-text {
+	color: #888;
+	font-size: 0.85em;
+	font-style: italic;
+}
+
+/* Card styling */
+.card {
+	background-color: #1a1f25;
+	border: 2px solid #333;
+	color: #00ff41;
+	border-radius: 0;
+	margin-bottom: 20px;
+}
+
+.card-header {
+	background-color: #0c1116;
+	border-bottom: 2px solid #333;
+	color: #00ff41;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.card-body {
+	background-color: #1a1f25;
+}
+
+.card-title {
+	color: #00ff41;
+	font-weight: 700;
+}
+
+.card-text {
+	color: #ccc;
+	line-height: 1.6;
+}
+
+/* List styling */
+.list-group-item {
+	background-color: #1a1f25;
+	border: 1px solid #333;
+	color: #00ff41;
+	border-radius: 0;
+	margin-bottom: 2px;
+}
+
+/* Link styling */
+a {
+	color: #00ff41;
+	text-decoration: none;
+	transition: all 0.3s ease;
+}
+
+a:hover {
+	color: #40ff80;
+	text-shadow: 0 0 5px #00ff41;
+}
+
+/* Badge styling */
+.badge {
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
+	font-weight: 600;
+	padding: 6px 12px;
+	border-radius: 0;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	border: 1px solid;
+	background-color: transparent !important;
+	color: inherit;
+}
+
+/* Alert styling */
+.alert {
+	background-color: #1a1f25;
+	border: 2px solid;
+	border-radius: 0;
+	color: #00ff41;
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
+}
+
+.alert-warning {
+	border-color: #ffb000;
+	color: #ffb000;
+}
+
+/* Text colors */
+.text-white {
+	color: #00ff41 !important;
+}
+
+.text-muted {
+	color: #888 !important;
+}
+
+/* Terminal-style headers */
+h1, h2, h3, h4, h5, h6 {
+	color: #00ff41;
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	margin-bottom: 20px;
+}
+
+h1::before {
+	content: "=== ";
+}
+
+h1::after {
+	content: " ===";
+}
+
+h2::before {
+	content: "-- ";
+}
+
+h2::after {
+	content: " --";
+}
+
+h3::before {
+	content: "* ";
+}
+
+/* Terminal-style dividers */
+.terminal-divider {
+	border: none;
+	height: 2px;
+	background: linear-gradient(90deg, transparent, #00ff41, transparent);
+	margin: 30px 0;
+}
+
+/* Animation effects */
+@keyframes terminal-blink {
+	0%, 50% { opacity: 1; }
+	51%, 100% { opacity: 0; }
+}
+
+.terminal-cursor::after {
+	content: "█";
+	animation: terminal-blink 1s infinite;
+	color: #00ff41;
+	margin-left: 5px;
+}
+
+@keyframes terminal-glow {
+	0%, 100% { text-shadow: 0 0 5px #00ff41; }
+	50% { text-shadow: 0 0 20px #00ff41, 0 0 30px #00ff41; }
+}
+
+.terminal-glow {
+	animation: terminal-glow 2s ease-in-out infinite;
+}
+
+/* Footer and header styling */
 footer, header {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	margin-left: 5em;
-	margin-right: 5em;
+	margin-left: 2em;
+	margin-right: 2em;
+	padding: 20px 0;
+	border-top: 1px solid #333;
+	margin-top: 40px;
 }
+
+/* Form layout */
 form {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	background-color: #1a1f25;
+	padding: 30px;
+	border: 2px solid #333;
+	margin: 20px 0;
+	position: relative;
+	max-width: 600px;
+	width: 100%;
 }
+
 form > div {
 	display: flex;
 	flex-direction: column;
+	width: 100%;
+	max-width: 400px;
+	margin-bottom: 20px;
 }
+
 form > div > textarea {
 	resize: none;
+	min-height: 120px;
+}
+
+/* Terminal-style tables */
+table {
+	border-collapse: collapse;
+	width: 100%;
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
+}
+
+th, td {
+	border: 1px solid #333;
+	padding: 12px;
+	text-align: left;
+	background-color: #1a1f25;
+	color: #00ff41;
+}
+
+th {
+	background-color: #0c1116;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+/* Video styling */
+video {
+	border: 2px solid #333;
+	background-color: #1a1f25;
+}
+
+/* Content styling */
+p {
+	line-height: 1.7;
+	color: #ccc;
+	margin-bottom: 16px;
+}
+
+/* Scrollbar styling for webkit browsers */
+::-webkit-scrollbar {
+	width: 12px;
+}
+
+::-webkit-scrollbar-track {
+	background: #1a1f25;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #333;
+	border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #00ff41;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.terminal-header::before {
+		font-size: 0.6em;
+		content: "┌────────────────────────────────────────────┐\A│  🚀 ROCKET BLOG TERMINAL v1.0            │\A│  Status: ONLINE                           │\A└────────────────────────────────────────────┘\A";
+	}
+	
+	footer, header {
+		margin-left: 1em;
+		margin-right: 1em;
+	}
+	
+	form {
+		padding: 20px;
+		margin: 10px;
+	}
+	
+	.terminal-container {
+		padding: 10px;
+	}
 }

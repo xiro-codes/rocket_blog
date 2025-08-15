@@ -1,8 +1,9 @@
 {% extends "base" %}
 
 {% block content %}
+<div class="terminal-header"></div>
 <div class="d-flex flex-column align-items-center justify-content-center">
-	<h1 class="text-white">Articles:</h1>
+	<h1 class="terminal-prompt">Articles</h1>
 	{% if flash %}
 	<h3 class="btn-{{ flash.0 }} btn disabled">
 		{{ flash.1 }}
@@ -11,23 +12,28 @@
 
 	{%if token %}
 	<div class="btn-group">
-		<a class="btn btn-primary" href="/blog/create">Create</a>
-		<a class="btn btn-primary" href="/auth/logout">Logout</a>
+		<a class="btn btn-primary" href="/blog/create">[CREATE POST]</a>
+		<a class="btn btn-primary" href="/auth/logout">[LOGOUT]</a>
 	</div>
 	{%else%}
-	<form action="/auth/" method="post" class="mx-5 px-5">
+	<form action="/auth/" method="post" class="mx-5 px-5 terminal-form">
+		<h3 class="text-center mb-4">[ SYSTEM LOGIN ]</h3>
 		<div class="mx-5 px-5 my-2">
-			<input type="text" name="username" placeholder="username" class="form-control" />
+			<label for="username" class="form-label">Username:</label>
+			<input type="text" name="username" id="username" placeholder="enter username..." class="form-control" />
 		</div>
 		<div class="mx-5 px-5 my-2">
-			<input type="password" name="password" placeholder="password" class="form-control" />
+			<label for="password" class="form-label">Password:</label>
+			<input type="password" name="password" id="password" placeholder="enter password..." class="form-control" />
 		</div>
 		<div class="mx-5 px-5 my-2 d-flex justify-content-center">
-			<button type="submit" class="btn btn-primary">Login</button>
+			<button type="submit" class="btn btn-primary">[AUTHENTICATE]</button>
 		</div>
 	</form>
 	{%endif%}
 </div>
+
+<hr class="terminal-divider">
 
 <div class="row">
 	<div class="col-md-8">
@@ -38,16 +44,20 @@
 				<span class="badge bg-warning text-dark ms-2">DRAFT</span>
 				{% endif %}
 			</li>
-			<div class="card mb-3">
+			<div class="card mb-3 terminal-post">
 				<div class="card-body">
 					<h5 class="card-title">
+						<span class="terminal-prompt"></span>
 						<a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover text-decoration-none"
 						   href="/blog/{{post.seq_id}}">{{post.title}}</a>
+						{% if post.draft and token %}
+						<span class="badge bg-warning text-dark ms-2">[DRAFT]</span>
+						{% endif %}
 					</h5>
 					{% if post.excerpt %}
 					<p class="card-text text-muted">{{post.excerpt}}</p>
 					{% endif %}
-					<a href="/blog/{{post.seq_id}}" class="btn btn-outline-primary btn-sm">Read More</a>
+					<a href="/blog/{{post.seq_id}}" class="btn btn-outline-primary btn-sm">[READ MORE]</a>
 				</div>
 			</div>
 			{% endfor %}
@@ -57,7 +67,7 @@
 		{% if all_tags %}
 		<div class="card">
 			<div class="card-header">
-				<h5>Tags</h5>
+				<h5>[ TAGS ]</h5>
 			</div>
 			<div class="card-body">
 				{% for tag in all_tags %}
@@ -73,20 +83,22 @@
 	</div>
 </div>
 
+<hr class="terminal-divider">
+
 <div class="d-flex justify-content-center m-2">
 	<footer class="btn-group align-items-center">
 		{% if page == 1 %}
-		<button class="btn btn-secondary" disabled>Prev</button>
+		<button class="btn btn-secondary" disabled>[PREV]</button>
 		{% else %}
-		<a class="btn btn-primary" href="?page={{page -1}}&page_size={{page_size}}">Prev</a>
+		<a class="btn btn-primary" href="?page={{page -1}}&page_size={{page_size}}">[PREV]</a>
 		{%endif%}
 		<button class="btn btn-secondary" disabled>
-			{{page}}
+			PAGE {{page}}
 		</button>
 		{% if page == num_pages %}
-		<button class="btn btn-secondary" disabled>Next</button>
+		<button class="btn btn-secondary" disabled>[NEXT]</button>
 		{%else%}
-		<a class="btn btn-primary" href="?page={{page +1}}&page_size={{page_size}}">Next</a>
+		<a class="btn btn-primary" href="?page={{page +1}}&page_size={{page_size}}">[NEXT]</a>
 		{%endif%}
 	</footer>
 </div>
