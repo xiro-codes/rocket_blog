@@ -40,5 +40,8 @@ features = ["serde"]
 version = "1.4.1"
 features = ["v4", "serde"]
 
+[dev-dependencies]
+tokio-test = "0.4"
+
 [workspace]
 members = ["migrations", "models"]
