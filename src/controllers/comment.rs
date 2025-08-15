@@ -38,11 +38,16 @@ async fn create(
 ) -> Result<Flash<Redirect>, Status> {
     let db = conn.into_inner();
     let _ = service.create(db, post_id, form_data.into_inner()).await;
-    let post = blog_service.find_by_id(db, post_id).await.unwrap().unwrap();
-    Ok(ControllerBase::success_redirect(
-        format!("/blog/{}", post.seq_id),
-        "Comment created"
-    ))
+    match blog_service.find_by_id(db, post_id).await {
+        Ok(Some(post)) => {
+            Ok(ControllerBase::success_redirect(
+                format!("/blog/{}", post.seq_id),
+                "Comment created"
+            ))
+        },
+        Ok(None) => Err(Status::NotFound),
+        Err(_) => Err(Status::InternalServerError),
+    }
 }
 
 pub fn routes() -> Vec<Route> {
