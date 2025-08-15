@@ -29,19 +29,3 @@ gen-models-simple:
 	echo "pub mod dto;" >> ./models/src/lib.rs
 	echo "✅ Models generated with fixed serde imports and preserved DTO module"
 
-# Test commands
-test:
-	cargo test --tests
-
-test-unit:
-	cargo test --tests base_service_tests auth_service_tests blog_service_tests tag_service_tests
-
-test-integration: 
-	cargo test --tests integration_tests route_tests
-
-test-verbose:
-	cargo test --tests --verbose
-
-test-nocapture:
-	cargo test --tests -- --nocapture
-
