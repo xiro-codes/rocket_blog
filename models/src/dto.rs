@@ -1,11 +1,11 @@
 //! Data Transfer Objects and Form structures for the blog application.
-//! 
+//!
 //! This module contains custom structs that are used alongside the generated
 //! SeaORM entities but are not part of the database schema generation.
 
-use sea_orm::{DerivePartialModel, FromQueryResult};
 use rocket::serde::{Deserialize, Serialize};
 use rocket::FromForm;
+use sea_orm::{DerivePartialModel, FromQueryResult};
 use uuid::Uuid;
 
 /// Form DTO for account authentication and registration
@@ -28,15 +28,7 @@ pub struct AccountFormDTO {
 }
 
 /// Form DTO for comment creation
-#[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Serialize,
-    Deserialize,
-    FromForm,
-)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
 #[serde(crate = "rocket::serde")]
 pub struct CommentFormDTO {
     pub text: String,

@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
-use models::account;
-use models::dto::AccountFormDTO;
-use models::prelude::Account;
+use models::{account, dto::AccountFormDTO, prelude::Account};
 use pwhash::bcrypt;
 use rocket::futures::lock::Mutex;
 use sea_orm::*;
@@ -12,29 +10,29 @@ use crate::services::base::BaseService;
 
 pub struct Service {
     base: BaseService,
-    token_map: Mutex<HashMap<Token, AccountId>>
+    token_map: Mutex<HashMap<Token, AccountId>>,
 }
 type Token = Uuid;
 type AccountId = Uuid;
 
 impl Service {
     pub fn new() -> Self {
-        Self { 
+        Self {
             base: BaseService::new(),
-            token_map: Mutex::new(HashMap::new())
+            token_map: Mutex::new(HashMap::new()),
         }
     }
-    
+
     pub async fn login(&self, db: &DbConn, data: AccountFormDTO) -> Result<Token, DbErr> {
         let ac = Account::find()
             .filter(account::Column::Username.eq(data.username))
             .one(db)
             .await
             .unwrap();
-        if let Some(ac)= ac {
-            let auth = bcrypt::verify( data.password, &ac.password);
+        if let Some(ac) = ac {
+            let auth = bcrypt::verify(data.password, &ac.password);
             if !auth {
-                return Err(DbErr::Custom("".to_owned()))
+                return Err(DbErr::Custom("".to_owned()));
             }
             let token = {
                 let mut tm = self.token_map.lock().await;
@@ -42,11 +40,11 @@ impl Service {
                 tm.insert(token, ac.id);
                 token
             };
-            return Ok(token)
+            return Ok(token);
         }
         Err(DbErr::Custom("".to_owned()))
     }
-    
+
     pub async fn check_token(&self, db: &DbConn, token: Token) -> Option<account::Model> {
         let id = {
             let tm = self.token_map.lock().await;
@@ -54,7 +52,7 @@ impl Service {
         };
         if let Some(id) = id {
             let account = Account::find_by_id(id).one(db).await;
-            return account.unwrap()
+            return account.unwrap();
         }
         None
     }

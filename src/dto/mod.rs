@@ -1,6 +1,5 @@
 pub mod post {
-    use rocket::FromForm;
-    use rocket::fs::TempFile;
+    use rocket::{fs::TempFile, FromForm};
 
     #[derive(FromForm, Debug)]
     pub struct FormDTO<'r> {

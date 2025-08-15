@@ -1,9 +1,10 @@
 use crate::{
+    config::AppConfig,
     controllers::base::ControllerBase,
     dto::post::FormDTO,
-    services::{self, TagService},
+    pool::Db,
+    services::{self, AuthService, BlogService, CommentService, TagService},
     types::{HttpRange, StreamedFile},
-    config::AppConfig,
 };
 use models::post;
 use rocket::{
@@ -16,11 +17,8 @@ use rocket::{
 };
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
-use uuid::Uuid;
 use std::fs::File;
-use crate::services::AuthService;
-use crate::services::BlogService;
-use crate::{pool::Db, services::CommentService};
+use uuid::Uuid;
 
 pub struct Controller {
     base: ControllerBase,
@@ -46,19 +44,17 @@ async fn list_view(
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     match service.paginate_with_title(db, page, page_size).await {
-        Ok((posts, page, page_size, num_pages)) => {
-            Ok(Template::render(
-                "blog/list",
-                context! {
-                    posts,
-                    page,
-                    page_size,
-                    num_pages,
-                    token,
-                    flash: ControllerBase::extract_flash(flash)
-                },
-            ))
-        },
+        Ok((posts, page, page_size, num_pages)) => Ok(Template::render(
+            "blog/list",
+            context! {
+                posts,
+                page,
+                page_size,
+                num_pages,
+                token,
+                flash: ControllerBase::extract_flash(flash)
+            },
+        )),
         Err(_) => Err(Status::InternalServerError),
     }
 }
@@ -71,47 +67,47 @@ async fn detail_view(
     flash: Option<FlashMessage<'_>>,
     jar: &CookieJar<'_>,
     id: i32,
-) -> Result<Template,Status> {
+) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     debug!("{}", id);
-    
+
     // Get min/max post range - handle errors gracefully
     let (min_post, max_post) = match service.find_mm_seq_id(db).await {
         Ok(Some((min, max))) => (min, max),
         Ok(None) => return Err(Status::NotFound),
         Err(_) => return Err(Status::InternalServerError),
     };
-    
+
     if id < min_post {
         debug!("Less Than");
     }
-    
+
     // Get post with account - handle errors gracefully
     let (post, account) = match service.find_by_seq_id_with_account(db, id).await {
         Ok(result) => result,
         Err(_) => return Err(Status::NotFound),
     };
-    
+
     // Get tags for the post - handle errors gracefully
     let tags = match tag_service.find_tags_by_post_id(db, post.id).await {
         Ok(tags) => tags,
         Err(_) => return Err(Status::InternalServerError),
     };
-    
+
     debug!("{:?}", tags);
-    
+
     // Check if post is draft and user is not authenticated
-    if post.draft.unwrap_or(false) && token.is_none(){
+    if post.draft.unwrap_or(false) && token.is_none() {
         return Err(Status::NotFound);
     }
-    
+
     // Get comments for the post - handle errors gracefully
     let comments = match comment_service.find_many_by_post_id(db, post.id).await {
         Ok(comments) => comments,
         Err(_) => return Err(Status::InternalServerError),
     };
-     
+
     Ok(Template::render(
         "blog/detail",
         context! {
@@ -139,12 +135,12 @@ async fn video(
         Err(_) => return Err(Status::NotFound),
     };
     if let Some(path) = post.path.to_owned() {
-        let file = File::open(&path)
-            .map_err(|e| {
-                println!("Error opening file: {}", e);
-                Status::NotFound
-            })?;
-        let size = file.metadata()
+        let file = File::open(&path).map_err(|e| {
+            println!("Error opening file: {}", e);
+            Status::NotFound
+        })?;
+        let size = file
+            .metadata()
             .map_err(|e| {
                 println!("Error getting metadata: {}", e);
                 Status::InternalServerError
@@ -179,7 +175,7 @@ async fn video(
             None
         };
 
-        Ok(StreamedFile::new(&path, final_range).map_err(|e|{
+        Ok(StreamedFile::new(&path, final_range).map_err(|e| {
             println!("Error creating StreamedFile: {}", e);
             Status::InternalServerError
         })?)
@@ -223,7 +219,7 @@ async fn create(
             if !account.admin {
                 return Err(Status::Unauthorized);
             }
-            let mut form = form_data.into_inner(); 
+            let mut form = form_data.into_inner();
             let post = match service.create(db, app_config, account.id, &mut form).await {
                 Ok(post) => post,
                 Err(_) => return Err(Status::InternalServerError),
@@ -239,7 +235,7 @@ async fn create(
                             Err(_) => return Err(Status::InternalServerError),
                         };
                         match tag_service.add_tag_to_post(db, post.id, tag.id).await {
-                            Ok(_) => {},
+                            Ok(_) => {}
                             Err(_) => return Err(Status::InternalServerError),
                         };
                     }
@@ -247,7 +243,7 @@ async fn create(
             }
             return Ok(ControllerBase::success_redirect(
                 format!("/blog/{}", post.seq_id),
-                "Post successfully added"
+                "Post successfully added",
             ));
         }
     }
@@ -285,13 +281,14 @@ async fn edit(
 ) -> Result<Flash<Redirect>, Status> {
     ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
-    match service.update_by_seq_id(db, id, form_data.into_inner()).await {
-        Ok(_) => {
-            Ok(ControllerBase::success_redirect(
-                format!("/blog/{id}"),
-                "Updated Post"
-            ))
-        },
+    match service
+        .update_by_seq_id(db, id, form_data.into_inner())
+        .await
+    {
+        Ok(_) => Ok(ControllerBase::success_redirect(
+            format!("/blog/{id}"),
+            "Updated Post",
+        )),
         Err(_) => Err(Status::NotFound),
     }
 }

@@ -1,19 +1,18 @@
 use rocket::{
+    fs::FileServer,
+    http::Status,
     outcome::Outcome,
     request::{self, FromRequest},
-    http::{
-        Status,
-    },
     response::Responder,
     Request, Response,
-    fs::FileServer,
 };
 use std::{
     fs::File,
-    io::{self, prelude::*, SeekFrom, Cursor},
-    sync::Mutex,
+    io::{self, prelude::*, Cursor, SeekFrom},
     path::{Path, PathBuf},
-};pub struct StreamedFile {
+    sync::Mutex,
+};
+pub struct StreamedFile {
     file: Mutex<File>,
     size: u64,
     range: Option<std::ops::Range<u64>>,
@@ -30,7 +29,7 @@ impl StreamedFile {
             file: Mutex::new(file),
             content_type,
             size,
-            range
+            range,
         })
     }
 }
@@ -60,25 +59,26 @@ impl<'r> Responder<'r, 'static> for StreamedFile {
             let bytes_read = file.read(&mut buf).unwrap();
 
             // Build the response with the partial content.
-            response.status(Status::PartialContent)
-                .raw_header("Content-Range", format!(
-                    "bytes {}-{}/{}", 
-                    range.start, 
-                    range.end - 1, 
-                    self.size))
+            response
+                .status(Status::PartialContent)
+                .raw_header(
+                    "Content-Range",
+                    format!("bytes {}-{}/{}", range.start, range.end - 1, self.size),
+                )
                 .raw_header("Content-Length", length.to_string())
                 .sized_body(bytes_read, io::Cursor::new(buf));
-
         } else {
             // Handle full content (no range header)
             let mut file = self.file.lock().unwrap();
             let mut buf = Vec::new();
             file.read_to_end(&mut buf).unwrap();
-            response.status(Status::Ok)
+            response
+                .status(Status::Ok)
                 .sized_body(self.size as usize, Cursor::new(buf));
         }
 
-        response.ok()    }
+        response.ok()
+    }
 }
 pub struct HttpRange(pub std::ops::Range<u64>);
 
@@ -115,9 +115,7 @@ impl<'r> FromRequest<'r> for HttpRange {
                     Outcome::Success(HttpRange(u64::MAX..suffix))
                 }
                 // Case 4: Invalid format
-                _ => {
-                    Outcome::Error((Status::RangeNotSatisfiable, ()))
-                }
+                _ => Outcome::Error((Status::RangeNotSatisfiable, ())),
             }
         } else {
             // No Range header, so this is a request for the entire file.

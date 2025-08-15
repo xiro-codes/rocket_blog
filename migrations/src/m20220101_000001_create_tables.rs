@@ -15,7 +15,12 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Account::Username).string().not_null())
                     .col(ColumnDef::new(Account::Email).string().not_null())
                     .col(ColumnDef::new(Account::Password).string().not_null())
-                    .col(ColumnDef::new(Account::Admin).boolean().not_null().default(false))
+                    .col(
+                        ColumnDef::new(Account::Admin)
+                            .boolean()
+                            .not_null()
+                            .default(false),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -69,7 +74,7 @@ impl MigrationTrait for Migration {
                             .on_delete(ForeignKeyAction::Cascade)
                             .on_update(ForeignKeyAction::Cascade),
                     )
-                    .to_owned()
+                    .to_owned(),
             )
             .await?;
         Ok(())

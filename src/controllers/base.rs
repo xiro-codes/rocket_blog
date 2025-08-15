@@ -1,6 +1,6 @@
 use rocket::{
     fairing::{self, Fairing, Kind},
-    http::{Status, CookieJar},
+    http::{CookieJar, Status},
     request::FlashMessage,
     response::{Flash, Redirect},
     Build, Rocket, Route, State,
@@ -14,10 +14,10 @@ use crate::{pool::Db, services::AuthService};
 pub trait BaseController {
     /// Get the mount path for this controller
     fn path(&self) -> &str;
-    
+
     /// Get the controller name for fairing info
     fn name(&self) -> &'static str;
-    
+
     /// Get the routes for this controller
     fn routes() -> Vec<Route>;
 }
@@ -31,22 +31,21 @@ impl ControllerBase {
     pub fn new(path: String) -> Self {
         Self { path }
     }
-    
+
     pub fn path(&self) -> &str {
         &self.path
     }
-    
+
     /// Check if user is authenticated and return token
     pub fn check_auth(jar: &CookieJar<'_>) -> Result<Option<String>, Status> {
         Ok(jar.get_private("token").map(|c| c.value().to_owned()))
     }
-    
+
     /// Require authentication and return token, or return Unauthorized status
     pub fn require_auth(jar: &CookieJar<'_>) -> Result<String, Status> {
-        Self::check_auth(jar)?
-            .ok_or(Status::Unauthorized)
+        Self::check_auth(jar)?.ok_or(Status::Unauthorized)
     }
-    
+
     /// Check if user is authenticated and is admin
     pub async fn check_admin_auth(
         conn: Connection<'_, Db>,
@@ -62,7 +61,7 @@ impl ControllerBase {
         }
         Ok(false)
     }
-    
+
     /// Require admin authentication
     pub async fn require_admin_auth(
         conn: Connection<'_, Db>,
@@ -75,17 +74,20 @@ impl ControllerBase {
             Err(Status::Unauthorized)
         }
     }
-    
+
     /// Create a success flash redirect
-    pub fn success_redirect<T: Into<String>, U: Into<String>>(to: T, message: U) -> Flash<Redirect> {
+    pub fn success_redirect<T: Into<String>, U: Into<String>>(
+        to: T,
+        message: U,
+    ) -> Flash<Redirect> {
         Flash::success(Redirect::to(to.into()), message.into())
     }
-    
+
     /// Create a danger flash redirect
     pub fn danger_redirect<T: Into<String>, U: Into<String>>(to: T, message: U) -> Flash<Redirect> {
         Flash::new(Redirect::to(to.into()), "danger", message.into())
     }
-    
+
     /// Extract flash message content for template context
     pub fn extract_flash(flash: Option<FlashMessage<'_>>) -> Option<(String, String)> {
         flash.map(|f| {
@@ -107,7 +109,7 @@ macro_rules! impl_controller_fairing {
                     kind: Kind::Ignite,
                 }
             }
-            
+
             async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
                 Ok(rocket
                     .manage(<$service>::new())

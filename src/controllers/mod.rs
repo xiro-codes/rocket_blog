@@ -9,4 +9,3 @@ mod blog;
 pub use blog::Controller as BlogController;
 mod comment;
 pub use comment::Controller as CommentController;
-

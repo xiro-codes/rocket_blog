@@ -1,25 +1,28 @@
 #![allow(renamed_and_removed_lints)]
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+#![allow(unused_mut)]
+#![allow(dead_code)]
+#![allow(unused_assignments)]
+#![allow(unused_must_use)]
 #[macro_use]
 extern crate rocket;
 
+mod config;
 mod controllers;
-mod middleware;
 mod dto;
-mod types;
+mod middleware;
 mod pool;
 mod services;
-mod config;
+mod types;
 
+use config::AppConfig;
 use migrations::MigratorTrait;
 use pool::Db;
-use rocket::fairing::AdHoc;
-use rocket::fs::FileServer;
-use rocket::response::Redirect;
-use rocket::{fairing, Build, Request, Rocket};
+use rocket::{fairing, fairing::AdHoc, fs::FileServer, response::Redirect, Build, Request, Rocket};
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Database;
 use services::TagService;
-use config::AppConfig;
 use std::time::SystemTime;
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
@@ -29,7 +32,7 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
 }
 
 #[catch(default)]
-pub fn catch_default() -> Redirect{
+pub fn catch_default() -> Redirect {
     Redirect::to("/")
 }
 
@@ -60,7 +63,6 @@ fn drop_hyper(meta: &log::Metadata) -> bool {
         return false;
     }
     true
-
 }
 fn setup_logger() -> Result<(), fern::InitError> {
     fern::Dispatch::new()
@@ -94,7 +96,7 @@ async fn rocket() -> _ {
         .attach(Db::init())
         .attach(Template::fairing())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
-        .attach(middleware::Seeding::new(Some(0), 50))  // Commented out to avoid duplicate key issues in container
+        .attach(middleware::Seeding::new(Some(0), 50)) // Commented out to avoid duplicate key issues in container
         .manage(TagService::new())
         .manage(app_config)
         .attach(controllers::IndexController::new("/".to_owned()))

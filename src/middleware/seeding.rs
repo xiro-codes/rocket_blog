@@ -1,16 +1,11 @@
 use crate::pool::Db;
 use chrono::Local;
 use lipsum::lipsum_words_with_rng;
-use models::account;
-use models::comment;
-use models::post;
-use models::tag;
-use models::post_tag;
-use models::prelude::Account;
-use models::prelude::Comment;
-use models::prelude::Post;
-use models::prelude::Tag;
-use models::prelude::PostTag;
+use models::{
+    account, comment, post, post_tag,
+    prelude::{Account, Comment, Post, PostTag, Tag},
+    tag,
+};
 use pwhash::bcrypt;
 use rand::thread_rng;
 use rocket::{
@@ -24,7 +19,7 @@ use std::path::Path;
 
 pub struct Seeding {
     count: usize,
-    seed: Option<u32>
+    seed: Option<u32>,
 }
 
 const DATA_PATH: &str = "/home/tod/.local/share/blog";
@@ -64,8 +59,9 @@ impl Fairing for Seeding {
             admin: Set(true),
         }
         .insert(conn)
-        .await.expect("Failed to seed account.");
-        
+        .await
+        .expect("Failed to seed account.");
+
         // Create sample tags
         let sample_tags = vec![
             ("Rust", "#CE422B"),
@@ -76,7 +72,7 @@ impl Fairing for Seeding {
             ("Database", "#17A2B8"),
             ("Framework", "#DC3545"),
         ];
-        
+
         let mut created_tags = Vec::new();
         for (tag_name, color) in sample_tags {
             let tag = tag::ActiveModel {
@@ -91,36 +87,39 @@ impl Fairing for Seeding {
             .expect("Failed to seed tag.");
             created_tags.push(tag);
         }
-        
+
         // Get the sample video path if it exists
         let video_path = self.get_sample_video_path();
-        
+
         let mut posts = Vec::new();
         let mut comments: Vec<comment::ActiveModel> = Vec::new();
         let mut post_tags: Vec<post_tag::ActiveModel> = Vec::new();
-        
+
         for i in 1..self.count {
             let title_rng = thread_rng();
             let text_rng = thread_rng();
-            
+
             // Assign video path to about 30% of posts if sample video exists
             let post_video_path = if video_path.is_some() && rand::random::<f32>() < 0.75 {
                 video_path.clone()
             } else {
                 None
             };
-            
+
             let p = post::ActiveModel {
                 id: Set(uuid::Uuid::new_v4()),
                 title: Set(lipsum_words_with_rng(title_rng, 5)),
-                text: Set(lipsum_words_with_rng(text_rng, 50 + (rand::random::<usize>() % 50))),
+                text: Set(lipsum_words_with_rng(
+                    text_rng,
+                    50 + (rand::random::<usize>() % 50),
+                )),
                 path: Set(post_video_path),
                 draft: Set(Some(false)),
                 account_id: Set(ac.id),
                 date_published: Set(Local::now().naive_local()),
                 ..Default::default()
             };
-            
+
             // Add 1-3 random tags to each post
             let num_tags = 1 + (rand::random::<usize>() % 3);
             let mut used_tags = std::collections::HashSet::new();
@@ -130,19 +129,22 @@ impl Fairing for Seeding {
                     tag_index = rand::random::<usize>() % created_tags.len();
                 }
                 used_tags.insert(tag_index);
-                
+
                 let pt = post_tag::ActiveModel {
                     post_id: p.id.clone(),
                     tag_id: Set(created_tags[tag_index].id),
                 };
                 post_tags.push(pt);
             }
-            
+
             for _ in 0..(20 % i) {
                 let text_rng = thread_rng();
                 let c = comment::ActiveModel {
                     id: Set(uuid::Uuid::new_v4()),
-                    text: Set(lipsum_words_with_rng(text_rng, 1 + rand::random::<usize>() % 10)),
+                    text: Set(lipsum_words_with_rng(
+                        text_rng,
+                        1 + rand::random::<usize>() % 10,
+                    )),
                     post_id: p.id.clone(),
                     date_published: Set(Local::now().naive_local()),
                     ..Default::default()
@@ -152,7 +154,7 @@ impl Fairing for Seeding {
 
             posts.push(p);
         }
-        
+
         Post::insert_many(posts).exec(conn).await.unwrap();
         Comment::insert_many(comments).exec(conn).await.unwrap();
         PostTag::insert_many(post_tags).exec(conn).await.unwrap();
@@ -160,23 +162,23 @@ impl Fairing for Seeding {
     }
     async fn on_shutdown(&self, rocket: &Rocket<Orbit>) {
         let conn = &Db::fetch(&rocket).unwrap().conn;
-        
+
         // Clean up video files before deleting database records
         if let Ok(posts_with_videos) = Post::find()
             .filter(post::Column::Path.is_not_null())
             .all(conn)
-            .await 
+            .await
         {
             for post in posts_with_videos {
                 if let Some(video_path) = post.path {
                     if video_path == SAMPLE_VIDEO_PATH {
                         continue;
-                    }  
+                    }
                     let _ = std::fs::remove_file(&video_path);
                 }
             }
         }
-        
+
         let _ = PostTag::delete_many().exec(conn).await;
         let _ = Tag::delete_many().exec(conn).await;
         let _ = Comment::delete_many().exec(conn).await;

@@ -1,7 +1,11 @@
-use rocket::{fairing::{Fairing, self, Kind}, Route, response::Redirect, Rocket, Build};
+use rocket::{
+    fairing::{self, Fairing, Kind},
+    response::Redirect,
+    Build, Rocket, Route,
+};
 
 pub struct Controller {
-    path: String
+    path: String,
 }
 impl Controller {
     pub fn new(path: String) -> Self {
@@ -9,13 +13,11 @@ impl Controller {
     }
 }
 #[get("/")]
-fn index()->Redirect {
+fn index() -> Redirect {
     Redirect::to("/blog?page=1")
 }
 pub fn routes() -> Vec<Route> {
-    routes![
-        index
-    ]
+    routes![index]
 }
 
 #[rocket::async_trait]
@@ -27,7 +29,6 @@ impl Fairing for Controller {
         }
     }
     async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        Ok(rocket
-           .mount(self.path.to_owned(), routes()))
+        Ok(rocket.mount(self.path.to_owned(), routes()))
     }
 }

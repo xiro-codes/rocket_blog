@@ -1,8 +1,8 @@
-use models::{tag, post_tag};
-use sea_orm::*;
-use uuid::Uuid;
 use chrono::Local;
+use models::{post_tag, tag};
+use sea_orm::*;
 use slug::slugify;
+use uuid::Uuid;
 
 use crate::services::base::BaseService;
 
@@ -24,7 +24,7 @@ impl TagService {
         color: Option<String>,
     ) -> Result<tag::Model, DbErr> {
         let slug = slugify(name);
-        
+
         tag::ActiveModel {
             id: Set(BaseService::generate_id()),
             name: Set(name.to_owned()),
@@ -81,19 +81,15 @@ impl TagService {
             .filter(
                 Condition::all()
                     .add(post_tag::Column::PostId.eq(post_id))
-                    .add(post_tag::Column::TagId.eq(tag_id))
+                    .add(post_tag::Column::TagId.eq(tag_id)),
             )
             .exec(db)
             .await
     }
 
-    pub async fn find_or_create_tag(
-        &self,
-        db: &DbConn,
-        name: &str,
-    ) -> Result<tag::Model, DbErr> {
+    pub async fn find_or_create_tag(&self, db: &DbConn, name: &str) -> Result<tag::Model, DbErr> {
         let slug = slugify(name);
-        
+
         if let Ok(existing_tag) = tag::Entity::find()
             .filter(tag::Column::Slug.eq(&slug))
             .one(db)
@@ -103,7 +99,7 @@ impl TagService {
                 return Ok(tag);
             }
         }
-        
+
         self.create_tag(db, name, None).await
     }
 }
