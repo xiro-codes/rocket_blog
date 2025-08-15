@@ -52512,3 +52512,6 @@
 [2025-08-15T08:28:48Z DEBUG app::controllers::blog] []
 [2025-08-15T08:37:15Z DEBUG app::controllers::blog] 1337
 [2025-08-15T08:37:15Z DEBUG app::controllers::blog] Less Than
+[2025-08-15T17:04:05Z ERROR sea_orm_rocket::database] failed to initialize database: Connection Error: pool timed out while waiting for an open connection
+[2025-08-15T17:04:05Z ERROR sea_orm_rocket::database] Attempted to fetch unattached database `[1mapp::pool::Db[0m`.
+[2025-08-15T17:04:05Z INFO sea_orm_rocket::database::_] `[1mapp::pool::Db::init()[0m` fairing must be attached prior to using this database.
