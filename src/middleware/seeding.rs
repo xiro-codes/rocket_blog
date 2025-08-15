@@ -104,7 +104,7 @@ impl Fairing for Seeding {
             let text_rng = thread_rng();
             
             // Assign video path to about 30% of posts if sample video exists
-            let post_video_path = if video_path.is_some() && rand::random::<f32>() < 0.3 {
+            let post_video_path = if video_path.is_some() && rand::random::<f32>() < 0.75 {
                 video_path.clone()
             } else {
                 None

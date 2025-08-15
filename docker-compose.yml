@@ -3,6 +3,8 @@ services:
   postgres:
     image: postgres:13 # Using a specific version is recommended
     restart: always
+    ports:
+      - "5432:5432"
     environment:
       # Sets the default user, password, and database as specified
       POSTGRES_USER: master
@@ -23,26 +25,26 @@ services:
     #   - "5432:5432"
 
   # The Rust web application
-  app:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    restart: always
-    ports:
-      # Map the app's port to host
-      - "8000:8000"
-    environment:
-      # Override database URL to use docker service name
-      ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
-    volumes:
-      # Persist uploaded files
-      - app_data:/app/data
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - app-network
-
+#  app:
+#    build: 
+#      context: .
+#      dockerfile: Dockerfile
+#    restart: always
+#    ports:
+#      # Map the app's port to host
+#      - "8000:8000"
+#    environment:
+#      # Override database URL to use docker service name
+#      ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
+#    volumes:
+#      # Persist uploaded files
+#      - app_data:/app/data
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#    networks:
+#      - app-network
+#
   # The pgAdmin GUI service
   pgadmin:
     image: dpage/pgadmin4
