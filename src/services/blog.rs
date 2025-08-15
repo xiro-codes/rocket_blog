@@ -168,6 +168,16 @@ impl Service {
         page: Option<u64>,
         page_size: Option<u64>,
     ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
+        self.paginate_with_title_include_drafts(db, page, page_size, false).await
+    }
+
+    pub async fn paginate_with_title_include_drafts(
+        &self,
+        db: &DbConn,
+        page: Option<u64>,
+        page_size: Option<u64>,
+        include_drafts: bool,
+    ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
         let page = page.unwrap_or(1);
         let page_size = page_size.unwrap_or(DEFAULT_PAGE_SIZE);
         if page == 0 {
@@ -176,12 +186,17 @@ impl Service {
         if page_size == 0 {
             return Err(DbErr::Custom("Page size cannot be zero".to_owned()));
         }
-        let paginator = Post::find()
+        let mut query = Post::find()
             .select_only()
             .column(post::Column::Id)
             .column(post::Column::Title)
-            .column(post::Column::SeqId)
-            .filter(post::Column::Draft.eq(false))
+            .column(post::Column::SeqId);
+        
+        if !include_drafts {
+            query = query.filter(post::Column::Draft.eq(false));
+        }
+        
+        let paginator = query
             .order_by_desc(post::Column::DatePublished)
             .into_partial_model()
             .paginate(db, page_size);
@@ -199,6 +214,17 @@ impl Service {
         page: Option<u64>,
         page_size: Option<u64>,
     ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
+        self.paginate_posts_by_tag_include_drafts(db, tag_id, page, page_size, false).await
+    }
+    
+    pub async fn paginate_posts_by_tag_include_drafts(
+        &self,
+        db: &DbConn,
+        tag_id: uuid::Uuid,
+        page: Option<u64>,
+        page_size: Option<u64>,
+        include_drafts: bool,
+    ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
         let page = page.unwrap_or(1);
         let page_size = page_size.unwrap_or(DEFAULT_PAGE_SIZE);
         if page == 0 {
@@ -209,14 +235,19 @@ impl Service {
         }
         
         // Join posts with post_tag to filter by tag_id
-        let paginator = Post::find()
+        let mut query = Post::find()
             .select_only()
             .column(post::Column::Id)
             .column(post::Column::Title)
             .column(post::Column::SeqId)
             .join(JoinType::InnerJoin, post::Relation::PostTag.def())
-            .filter(post_tag::Column::TagId.eq(tag_id))
-            .filter(post::Column::Draft.eq(false))
+            .filter(post_tag::Column::TagId.eq(tag_id));
+            
+        if !include_drafts {
+            query = query.filter(post::Column::Draft.eq(false));
+        }
+        
+        let paginator = query
             .order_by_desc(post::Column::DatePublished)
             .into_partial_model()
             .paginate(db, page_size);
