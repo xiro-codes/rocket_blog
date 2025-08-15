@@ -45,4 +45,5 @@ pub struct PostTitleResult {
     pub seq_id: i32,
     pub title: String,
     pub draft: Option<bool>,
+    pub excerpt: Option<String>,
 }

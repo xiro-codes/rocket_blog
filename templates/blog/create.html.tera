@@ -11,6 +11,11 @@
 			<input type="text" name="title" id="title" class="form-control" />
 		</div>
 		<div>
+			<label for="excerpt" class="form-label"> Excerpt </label>
+			<textarea name="excerpt" id="excerpt" rows="3" class="form-control" placeholder="Brief summary of the post (optional - will be auto-generated if left empty)"></textarea>
+			<div class="form-text">Optional short summary that will appear in post listings. If left empty, it will be auto-generated from the content.</div>
+		</div>
+		<div>
 			<label for="text" class="form-label"> Text </label>
 			<textarea name="text" id="text" rows="8" class="form-control"></textarea>
 		</div>

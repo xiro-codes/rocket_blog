@@ -98,10 +98,18 @@ impl Fairing for Seeding {
         for i in 1..self.count {
             let title_rng = thread_rng();
             let text_rng = thread_rng();
+            let excerpt_rng = thread_rng();
 
             // Assign video path to about 30% of posts if sample video exists
             let post_video_path = if video_path.is_some() && rand::random::<f32>() < 0.75 {
                 video_path.clone()
+            } else {
+                None
+            };
+
+            // Add custom excerpts to about 60% of posts, leave others for auto-generation
+            let post_excerpt = if rand::random::<f32>() < 0.6 {
+                Some(lipsum_words_with_rng(excerpt_rng, 15 + (rand::random::<usize>() % 10)))
             } else {
                 None
             };
@@ -113,6 +121,7 @@ impl Fairing for Seeding {
                     text_rng,
                     50 + (rand::random::<usize>() % 50),
                 )),
+                excerpt: Set(post_excerpt),
                 path: Set(post_video_path),
                 draft: Set(Some(false)),
                 account_id: Set(ac.id),
