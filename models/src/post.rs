@@ -31,6 +31,8 @@ pub enum Relation {
     Account,
     #[sea_orm(has_many = "super::comment::Entity")]
     Comment,
+    #[sea_orm(has_many = "super::post_reaction::Entity")]
+    PostReaction,
     #[sea_orm(has_many = "super::post_tag::Entity")]
     PostTag,
 }
@@ -44,6 +46,12 @@ impl Related<super::account::Entity> for Entity {
 impl Related<super::comment::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Comment.def()
+    }
+}
+
+impl Related<super::post_reaction::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::PostReaction.def()
     }
 }
 

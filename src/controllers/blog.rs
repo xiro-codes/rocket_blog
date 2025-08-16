@@ -3,22 +3,23 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{self, AuthService, BlogService, CommentService, TagService},
+    services::{self, AuthService, BlogService, CommentService, ReactionService, TagService},
     types::{HttpRange, StreamedFile},
 };
-use models::{dto::SearchFormDTO, post, tag};
+use models::{dto::SearchFormDTO, post, post_reaction::ReactionType, tag};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
     http::{CookieJar, Status},
-    request::FlashMessage,
+    request::{FlashMessage, FromRequest, Outcome, Request},
     response::{Flash, Redirect},
+    serde::json::{json, Json, Value},
     Build, Rocket, Route, State,
 };
 use rocket_dyn_templates::{context, Template};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use sea_orm_rocket::Connection;
-use std::fs::File;
+use std::{fs::File, net::SocketAddr};
 use uuid::Uuid;
 
 pub struct Controller {
@@ -92,6 +93,7 @@ async fn detail_view(
     service: &State<BlogService>,
     auth_service: &State<AuthService>,
     comment_service: &State<CommentService>,
+    reaction_service: &State<ReactionService>,
     tag_service: &State<TagService>,
     flash: Option<FlashMessage<'_>>,
     jar: &CookieJar<'_>,
@@ -152,6 +154,21 @@ async fn detail_view(
         Err(_) => return Err(Status::InternalServerError),
     };
 
+    // Get reaction data for the post
+    let client_ip = get_client_ip();
+    let reaction_summary = reaction_service
+        .get_post_reaction_summary(db, post.id, &client_ip)
+        .await
+        .unwrap_or_else(|_| {
+            // Default empty reaction summary on error
+            crate::services::PostReactionSummary {
+                post_id: post.id,
+                total_reactions: 0,
+                user_reaction: None,
+                reactions: vec![],
+            }
+        });
+
     Ok(Template::render(
         "blog/detail",
         context! {
@@ -162,6 +179,8 @@ async fn detail_view(
             token,
             min_post,
             max_post,
+            reaction_summary,
+            reaction_types: ReactionType::all(),
             flash: ControllerBase::extract_flash(flash)
         },
     ))
@@ -541,6 +560,117 @@ async fn delete(
     Ok(ControllerBase::success_redirect("/blog", "Deleted Post"))
 }
 
+// Simple client IP extractor (for now we'll just use a default)
+fn get_client_ip() -> String {
+    // For now, return a default IP. In production, you'd extract from headers or connection
+    "127.0.0.1".to_string()
+}
+
+#[post("/<id>/react/<reaction_type>")]
+async fn add_reaction(
+    conn: Connection<'_, Db>,
+    reaction_service: &State<ReactionService>,
+    blog_service: &State<BlogService>,
+    id: i32,
+    reaction_type: String,
+) -> Result<Json<Value>, Status> {
+    let db = conn.into_inner();
+    
+    // Get post by seq_id to get the actual UUID
+    let post = match blog_service.find_by_seq_id(db, id).await {
+        Ok(post) => post,
+        Err(_) => return Err(Status::NotFound),
+    };
+
+    // Validate reaction type
+    if ReactionType::from_str(&reaction_type).is_none() {
+        return Err(Status::BadRequest);
+    }
+
+    let client_ip = get_client_ip();
+    
+    match reaction_service
+        .add_reaction(db, post.id, &reaction_type, &client_ip, None)
+        .await
+    {
+        Ok(_) => {
+            // Get updated reaction summary
+            let summary = reaction_service
+                .get_post_reaction_summary(db, post.id, &client_ip)
+                .await
+                .map_err(|_| Status::InternalServerError)?;
+            
+            Ok(Json(json!({
+                "success": true,
+                "summary": summary
+            })))
+        }
+        Err(_) => Err(Status::InternalServerError),
+    }
+}
+
+#[delete("/<id>/react")]
+async fn remove_reaction(
+    conn: Connection<'_, Db>,
+    reaction_service: &State<ReactionService>,
+    blog_service: &State<BlogService>,
+    id: i32,
+) -> Result<Json<Value>, Status> {
+    let db = conn.into_inner();
+    
+    // Get post by seq_id to get the actual UUID
+    let post = match blog_service.find_by_seq_id(db, id).await {
+        Ok(post) => post,
+        Err(_) => return Err(Status::NotFound),
+    };
+
+    let client_ip = get_client_ip();
+    
+    match reaction_service
+        .remove_reaction(db, post.id, &client_ip)
+        .await
+    {
+        Ok(_) => {
+            // Get updated reaction summary
+            let summary = reaction_service
+                .get_post_reaction_summary(db, post.id, &client_ip)
+                .await
+                .map_err(|_| Status::InternalServerError)?;
+            
+            Ok(Json(json!({
+                "success": true,
+                "summary": summary
+            })))
+        }
+        Err(_) => Err(Status::InternalServerError),
+    }
+}
+
+#[get("/<id>/reactions")]
+async fn get_reactions(
+    conn: Connection<'_, Db>,
+    reaction_service: &State<ReactionService>,
+    blog_service: &State<BlogService>,
+    id: i32,
+) -> Result<Json<Value>, Status> {
+    let db = conn.into_inner();
+    
+    // Get post by seq_id to get the actual UUID
+    let post = match blog_service.find_by_seq_id(db, id).await {
+        Ok(post) => post,
+        Err(_) => return Err(Status::NotFound),
+    };
+
+    let client_ip = get_client_ip();
+    
+    let summary = reaction_service
+        .get_post_reaction_summary(db, post.id, &client_ip)
+        .await
+        .map_err(|_| Status::InternalServerError)?;
+    
+    Ok(Json(json!(summary)))
+}
+
 fn routes() -> Vec<Route> {
     routes![
         list_view,
@@ -553,7 +683,10 @@ fn routes() -> Vec<Route> {
         video,
         create,
         edit,
-        delete
+        delete,
+        add_reaction,
+        remove_reaction,
+        get_reactions
     ]
 }
 
