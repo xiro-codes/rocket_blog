@@ -42,6 +42,7 @@ async fn list_view(
     jar: &CookieJar<'_>,
     service: &State<BlogService>,
     auth_service: &State<AuthService>,
+    reaction_service: &State<ReactionService>,
     tag_service: &State<TagService>,
     flash: Option<FlashMessage<'_>>,
 ) -> Result<Template, Status> {
@@ -71,6 +72,14 @@ async fn list_view(
                 Err(_) => vec![], // Continue even if tag loading fails
             };
             
+            // Get reaction summaries for all posts
+            let post_ids: Vec<Uuid> = posts.iter().map(|p| p.id).collect();
+            let client_ip = get_client_ip();
+            let reaction_summaries = reaction_service
+                .get_posts_reaction_summaries(db, &post_ids, &client_ip)
+                .await
+                .unwrap_or_default();
+            
             Ok(Template::render(
                 "blog/list",
                 context! {
@@ -80,6 +89,7 @@ async fn list_view(
                     num_pages,
                     token,
                     all_tags,
+                    reaction_summaries,
                     flash: ControllerBase::extract_flash(flash)
                 },
             ))
@@ -191,6 +201,7 @@ async fn search_get(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
     auth_service: &State<AuthService>,
+    reaction_service: &State<ReactionService>,
     tag_service: &State<TagService>,
     query: Option<String>,
     page: Option<u64>,
@@ -230,6 +241,18 @@ async fn search_get(
         Err(_) => vec![], // Continue even if tag loading fails
     };
 
+    // Get reaction summaries for search results if any
+    let reaction_summaries = if !results.is_empty() {
+        let post_ids: Vec<Uuid> = results.iter().map(|p| p.id).collect();
+        let client_ip = get_client_ip();
+        reaction_service
+            .get_posts_reaction_summaries(db, &post_ids, &client_ip)
+            .await
+            .unwrap_or_default()
+    } else {
+        std::collections::HashMap::new()
+    };
+
     Ok(Template::render(
         "blog/search",
         context! {
@@ -240,6 +263,7 @@ async fn search_get(
             num_pages,
             token,
             all_tags,
+            reaction_summaries,
             title: if search_query.trim().is_empty() { 
                 "Search Posts".to_string() 
             } else { 
@@ -488,6 +512,7 @@ async fn posts_by_tag(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
     auth_service: &State<AuthService>,
+    reaction_service: &State<ReactionService>,
     tag_service: &State<TagService>,
     slug: String,
     page: Option<u64>,
@@ -532,6 +557,14 @@ async fn posts_by_tag(
         Err(_) => vec![], // Continue even if tag loading fails
     };
 
+    // Get reaction summaries for all posts
+    let post_ids: Vec<Uuid> = posts.iter().map(|p| p.id).collect();
+    let client_ip = get_client_ip();
+    let reaction_summaries = reaction_service
+        .get_posts_reaction_summaries(db, &post_ids, &client_ip)
+        .await
+        .unwrap_or_default();
+
     Ok(Template::render(
         "blog/list",
         context! {
@@ -541,6 +574,7 @@ async fn posts_by_tag(
             num_pages,
             token,
             all_tags,
+            reaction_summaries,
             tag_filter: tag.name.clone(),
             title: format!("Posts tagged with '{}'", tag.name)
         },
