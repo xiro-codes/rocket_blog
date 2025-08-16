@@ -63,10 +63,10 @@
 					{% endif %}
 					
 					<!-- Reaction counts -->
-					{% if reaction_summaries[post.id] %}
+					{% set summary = reaction_summaries | get(key=post.id) %}
+					{% if summary %}
 					<div class="reaction-summary mb-2">
 						<small class="text-muted">
-							{% set summary = reaction_summaries[post.id] %}
 							{% if summary.total_reactions > 0 %}
 							<span class="reactions-count">
 								👍 {{summary.total_reactions}} reaction{% if summary.total_reactions != 1 %}s{% endif %}

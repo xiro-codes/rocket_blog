@@ -179,6 +179,18 @@ async fn detail_view(
             }
         });
 
+    // Prepare reaction types with emoji data for template
+    let reaction_types_with_data: Vec<serde_json::Value> = ReactionType::all()
+        .into_iter()
+        .map(|rt| {
+            serde_json::json!({
+                "type": rt.as_str(),
+                "emoji": rt.emoji(),
+                "title": format!("{:?}", rt)
+            })
+        })
+        .collect();
+
     Ok(Template::render(
         "blog/detail",
         context! {
@@ -190,7 +202,7 @@ async fn detail_view(
             min_post,
             max_post,
             reaction_summary,
-            reaction_types: ReactionType::all(),
+            reaction_types: reaction_types_with_data,
             flash: ControllerBase::extract_flash(flash)
         },
     ))

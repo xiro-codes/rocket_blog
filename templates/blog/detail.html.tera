@@ -50,14 +50,14 @@
 	<div class="reaction-container" data-post-id="{{post.seq_id}}">
 		<div class="reaction-buttons d-flex gap-2 mb-3">
 			{% for reaction_type in reaction_types %}
-			<button class="btn btn-sm reaction-btn {% if reaction_summary.user_reaction == reaction_type.as_str() %}btn-primary{% else %}btn-outline-secondary{% endif %}" 
-			        data-reaction="{{reaction_type.as_str()}}" 
-			        title="{{reaction_type.as_str() | title}}">
-				{{reaction_type.emoji()}} 
-				<span class="reaction-count-{{reaction_type.as_str()}}">
+			<button class="btn btn-sm reaction-btn {% if reaction_summary.user_reaction == reaction_type.type %}btn-primary{% else %}btn-outline-secondary{% endif %}" 
+			        data-reaction="{{reaction_type.type}}" 
+			        title="{{reaction_type.title}}">
+				{{reaction_type.emoji}} 
+				<span class="reaction-count-{{reaction_type.type}}">
 					{% set found_count = 0 %}
 					{% for reaction in reaction_summary.reactions %}
-						{% if reaction.reaction_type == reaction_type.as_str() %}
+						{% if reaction.reaction_type == reaction_type.type %}
 							{{reaction.count}}
 							{% set_global found_count = reaction.count %}
 						{% endif %}
