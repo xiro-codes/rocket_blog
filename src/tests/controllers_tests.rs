@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::controllers::{AuthController, BlogController, CommentController, IndexController, ControllerBase};
+    use crate::controllers::{AuthController, BlogController, CommentController, IndexController, FeedController, ControllerBase};
     use uuid::Uuid;
 
     mod controller_base_tests {
@@ -72,6 +72,19 @@ mod tests {
             
             // Should create successfully
             assert_eq!(std::mem::size_of_val(&controller), std::mem::size_of::<IndexController>());
+        }
+    }
+
+    mod feed_controller_tests {
+        use super::*;
+
+        #[test]
+        fn test_feed_controller_new() {
+            let path = "/feed".to_string();
+            let controller = FeedController::new(path.clone());
+            
+            // Should create successfully
+            assert_eq!(std::mem::size_of_val(&controller), std::mem::size_of::<FeedController>());
         }
     }
 }

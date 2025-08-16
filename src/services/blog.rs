@@ -299,4 +299,20 @@ impl Service {
             .await
             .map(|p| (p, page, page_size, num_pages))
     }
+
+    /// Fetch recent published posts for RSS feed
+    pub async fn find_recent_published_posts(
+        &self,
+        db: &DbConn,
+        limit: Option<u64>,
+    ) -> Result<Vec<post::Model>, DbErr> {
+        let limit = limit.unwrap_or(20); // Default to 20 recent posts
+        
+        Post::find()
+            .filter(post::Column::Draft.eq(false))
+            .order_by_desc(post::Column::DatePublished)
+            .limit(limit)
+            .all(db)
+            .await
+    }
 }

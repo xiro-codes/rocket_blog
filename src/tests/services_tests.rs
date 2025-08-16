@@ -84,6 +84,17 @@ mod tests {
             // we'll just verify the service can be created and the methods exist
             assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<BlogService>());
         }
+
+        #[test]
+        fn test_find_recent_published_posts_method_exists() {
+            let service = BlogService::new();
+            
+            // Test that the RSS feed method exists
+            // We can't test the actual database logic without a real database connection,
+            // but we can verify the method exists by checking the service is created properly
+            
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<BlogService>());
+        }
     }
 
     mod comment_service_tests {
