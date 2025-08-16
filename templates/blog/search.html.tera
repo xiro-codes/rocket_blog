@@ -63,6 +63,22 @@
                                 {% endif %}
                             </div>
                             
+                            <!-- Reaction counts -->
+                            {% set summary = reaction_summaries | get(key=post.id) %}
+                            {% if summary %}
+                            <div class="reaction-summary mt-2">
+                                <small class="text-muted">
+                                    {% if summary.total_reactions > 0 %}
+                                    <span class="reactions-count">
+                                        👍 {{summary.total_reactions}} reaction{% if summary.total_reactions != 1 %}s{% endif %}
+                                    </span>
+                                    {% else %}
+                                    <span class="reactions-count">No reactions yet</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            {% endif %}
+                            
                             <div class="mt-2">
                                 <a href="/blog/{{ post.seq_id }}" 
                                    class="btn btn-sm btn-outline-success"

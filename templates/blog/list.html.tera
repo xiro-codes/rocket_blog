@@ -61,6 +61,23 @@
 					{% if post.excerpt %}
 					<p class="card-text text-muted">{{post.excerpt}}</p>
 					{% endif %}
+					
+					<!-- Reaction counts -->
+					{% set summary = reaction_summaries | get(key=post.id) %}
+					{% if summary %}
+					<div class="reaction-summary mb-2">
+						<small class="text-muted">
+							{% if summary.total_reactions > 0 %}
+							<span class="reactions-count">
+								👍 {{summary.total_reactions}} reaction{% if summary.total_reactions != 1 %}s{% endif %}
+							</span>
+							{% else %}
+							<span class="reactions-count">No reactions yet</span>
+							{% endif %}
+						</small>
+					</div>
+					{% endif %}
+					
 					<a href="/blog/{{post.seq_id}}" class="btn btn-outline-primary btn-sm">[READ MORE]</a>
 				</div>
 			</div>

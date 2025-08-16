@@ -25,7 +25,7 @@ use pool::Db;
 use rocket::{fairing, fairing::AdHoc, fs::FileServer, response::Redirect, Build, Request, Rocket};
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Database;
-use services::TagService;
+use services::{TagService, ReactionService};
 use std::time::SystemTime;
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
@@ -101,6 +101,7 @@ async fn rocket() -> _ {
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
         .attach(middleware::Seeding::new(Some(0), 50)) // Commented out to avoid duplicate key issues in container
         .manage(TagService::new())
+        .manage(ReactionService::new())
         .manage(app_config)
         .attach(controllers::IndexController::new("/".to_owned()))
         .attach(controllers::AuthController::new("/auth".to_owned()))

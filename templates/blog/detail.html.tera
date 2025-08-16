@@ -44,6 +44,37 @@
 	<h6 class="text-muted">Published: {{post.date_published}}</h6>
 </div>
 
+<!-- Reaction Section -->
+<div class="mx-5 my-4">
+	<h4 class="terminal-prompt">Reactions</h4>
+	<div class="reaction-container" data-post-id="{{post.seq_id}}">
+		<div class="reaction-buttons d-flex gap-2 mb-3">
+			{% for reaction_type in reaction_types %}
+			<button class="btn btn-sm reaction-btn {% if reaction_summary.user_reaction == reaction_type.type %}btn-primary{% else %}btn-outline-secondary{% endif %}" 
+			        data-reaction="{{reaction_type.type}}" 
+			        title="{{reaction_type.title}}">
+				{{reaction_type.emoji}} 
+				<span class="reaction-count-{{reaction_type.type}}">
+					{% set found_count = 0 %}
+					{% for reaction in reaction_summary.reactions %}
+						{% if reaction.reaction_type == reaction_type.type %}
+							{{reaction.count}}
+							{% set_global found_count = reaction.count %}
+						{% endif %}
+					{% endfor %}
+					{% if found_count == 0 %}0{% endif %}
+				</span>
+			</button>
+			{% endfor %}
+		</div>
+		<div class="reaction-total">
+			<small class="text-muted">
+				Total reactions: <span class="total-reactions">{{reaction_summary.total_reactions}}</span>
+			</small>
+		</div>
+	</div>
+</div>
+
 <hr class="terminal-divider">
 
 <div class="d-flex justify-content-center align-items-center">
@@ -92,4 +123,80 @@
 	{{ flash.1 }}
 </small>
 {% endif %}
+
+<!-- Reaction JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reactionContainer = document.querySelector('.reaction-container');
+    if (!reactionContainer) return;
+    
+    const postId = reactionContainer.getAttribute('data-post-id');
+    
+    // Handle reaction button clicks
+    reactionContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('reaction-btn') || e.target.closest('.reaction-btn')) {
+            const btn = e.target.classList.contains('reaction-btn') ? e.target : e.target.closest('.reaction-btn');
+            const reactionType = btn.getAttribute('data-reaction');
+            
+            // Disable button temporarily
+            btn.disabled = true;
+            
+            // Check if this reaction is already active (user is removing it)
+            const isActive = btn.classList.contains('btn-primary');
+            
+            const url = isActive 
+                ? `/blog/${postId}/react` 
+                : `/blog/${postId}/react/${reactionType}`;
+            const method = isActive ? 'DELETE' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateReactionUI(data.summary);
+                } else {
+                    console.error('Failed to update reaction');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                btn.disabled = false;
+            });
+        }
+    });
+    
+    function updateReactionUI(summary) {
+        // Update total reactions count
+        document.querySelector('.total-reactions').textContent = summary.total_reactions;
+        
+        // Update individual reaction counts and button states
+        document.querySelectorAll('.reaction-btn').forEach(btn => {
+            const reactionType = btn.getAttribute('data-reaction');
+            const countSpan = btn.querySelector(`.reaction-count-${reactionType}`);
+            
+            // Find count for this reaction type
+            const reactionData = summary.reactions.find(r => r.reaction_type === reactionType);
+            const count = reactionData ? reactionData.count : 0;
+            
+            countSpan.textContent = count;
+            
+            // Update button state based on user's current reaction
+            if (summary.user_reaction === reactionType) {
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-primary');
+            } else {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-secondary');
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
