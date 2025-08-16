@@ -22,6 +22,51 @@ use sea_orm_rocket::Connection;
 use std::{fs::File, net::SocketAddr};
 use uuid::Uuid;
 
+/// Request guard to extract client IP address
+pub struct ClientIp(pub String);
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for ClientIp {
+    type Error = ();
+
+    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        // Check X-Forwarded-For header (from reverse proxies)
+        if let Some(forwarded) = req.headers().get_one("X-Forwarded-For") {
+            // X-Forwarded-For can contain multiple IPs, the first is the original client
+            if let Some(client_ip) = forwarded.split(',').next() {
+                let client_ip = client_ip.trim();
+                if !client_ip.is_empty() && client_ip != "unknown" {
+                    return Outcome::Success(ClientIp(client_ip.to_string()));
+                }
+            }
+        }
+        
+        // Check X-Real-IP header (from nginx/other proxies)
+        if let Some(real_ip) = req.headers().get_one("X-Real-IP") {
+            let real_ip = real_ip.trim();
+            if !real_ip.is_empty() && real_ip != "unknown" {
+                return Outcome::Success(ClientIp(real_ip.to_string()));
+            }
+        }
+        
+        // Check CF-Connecting-IP (from Cloudflare)
+        if let Some(cf_ip) = req.headers().get_one("CF-Connecting-IP") {
+            let cf_ip = cf_ip.trim();
+            if !cf_ip.is_empty() {
+                return Outcome::Success(ClientIp(cf_ip.to_string()));
+            }
+        }
+        
+        // Fall back to connection's remote address
+        if let Some(remote_addr) = req.remote() {
+            return Outcome::Success(ClientIp(remote_addr.ip().to_string()));
+        }
+        
+        // No IP could be determined - this is an error condition
+        Outcome::Error((Status::BadRequest, ()))
+    }
+}
+
 pub struct Controller {
     base: ControllerBase,
 }
@@ -45,6 +90,7 @@ async fn list_view(
     reaction_service: &State<ReactionService>,
     tag_service: &State<TagService>,
     flash: Option<FlashMessage<'_>>,
+    client_ip: ClientIp,
 ) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
@@ -74,9 +120,8 @@ async fn list_view(
             
             // Get reaction summaries for all posts
             let post_ids: Vec<Uuid> = posts.iter().map(|p| p.id).collect();
-            let client_ip = get_client_ip();
             let reaction_summaries = reaction_service
-                .get_posts_reaction_summaries(db, &post_ids, &client_ip)
+                .get_posts_reaction_summaries(db, &post_ids, &client_ip.0)
                 .await
                 .unwrap_or_default();
             
@@ -108,6 +153,7 @@ async fn detail_view(
     flash: Option<FlashMessage<'_>>,
     jar: &CookieJar<'_>,
     id: i32,
+    client_ip: ClientIp,
 ) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
@@ -165,9 +211,8 @@ async fn detail_view(
     };
 
     // Get reaction data for the post
-    let client_ip = get_client_ip();
     let reaction_summary = reaction_service
-        .get_post_reaction_summary(db, post.id, &client_ip)
+        .get_post_reaction_summary(db, post.id, &client_ip.0)
         .await
         .unwrap_or_else(|_| {
             // Default empty reaction summary on error
@@ -180,10 +225,10 @@ async fn detail_view(
         });
 
     // Prepare reaction types with emoji data for template
-    let reaction_types_with_data: Vec<serde_json::Value> = ReactionType::all()
+    let reaction_types_with_data: Vec<Value> = ReactionType::all()
         .into_iter()
         .map(|rt| {
-            serde_json::json!({
+            json!({
                 "type": rt.as_str(),
                 "emoji": rt.emoji(),
                 "title": format!("{:?}", rt)
@@ -219,6 +264,7 @@ async fn search_get(
     page: Option<u64>,
     page_size: Option<u64>,
     jar: &CookieJar<'_>,
+    client_ip: ClientIp,
 ) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
@@ -256,9 +302,8 @@ async fn search_get(
     // Get reaction summaries for search results if any
     let reaction_summaries = if !results.is_empty() {
         let post_ids: Vec<Uuid> = results.iter().map(|p| p.id).collect();
-        let client_ip = get_client_ip();
         reaction_service
-            .get_posts_reaction_summaries(db, &post_ids, &client_ip)
+            .get_posts_reaction_summaries(db, &post_ids, &client_ip.0)
             .await
             .unwrap_or_default()
     } else {
@@ -530,6 +575,7 @@ async fn posts_by_tag(
     page: Option<u64>,
     page_size: Option<u64>,
     jar: &CookieJar<'_>,
+    client_ip: ClientIp,
 ) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
@@ -571,9 +617,8 @@ async fn posts_by_tag(
 
     // Get reaction summaries for all posts
     let post_ids: Vec<Uuid> = posts.iter().map(|p| p.id).collect();
-    let client_ip = get_client_ip();
     let reaction_summaries = reaction_service
-        .get_posts_reaction_summaries(db, &post_ids, &client_ip)
+        .get_posts_reaction_summaries(db, &post_ids, &client_ip.0)
         .await
         .unwrap_or_default();
 
@@ -606,12 +651,6 @@ async fn delete(
     Ok(ControllerBase::success_redirect("/blog", "Deleted Post"))
 }
 
-// Simple client IP extractor (for now we'll just use a default)
-fn get_client_ip() -> String {
-    // For now, return a default IP. In production, you'd extract from headers or connection
-    "127.0.0.1".to_string()
-}
-
 #[post("/<id>/react/<reaction_type>")]
 async fn add_reaction(
     conn: Connection<'_, Db>,
@@ -619,6 +658,7 @@ async fn add_reaction(
     blog_service: &State<BlogService>,
     id: i32,
     reaction_type: String,
+    client_ip: ClientIp,
 ) -> Result<Json<Value>, Status> {
     let db = conn.into_inner();
     
@@ -632,17 +672,15 @@ async fn add_reaction(
     if ReactionType::from_str(&reaction_type).is_none() {
         return Err(Status::BadRequest);
     }
-
-    let client_ip = get_client_ip();
     
     match reaction_service
-        .add_reaction(db, post.id, &reaction_type, &client_ip, None)
+        .add_reaction(db, post.id, &reaction_type, &client_ip.0, None)
         .await
     {
         Ok(_) => {
             // Get updated reaction summary
             let summary = reaction_service
-                .get_post_reaction_summary(db, post.id, &client_ip)
+                .get_post_reaction_summary(db, post.id, &client_ip.0)
                 .await
                 .map_err(|_| Status::InternalServerError)?;
             
@@ -661,6 +699,7 @@ async fn remove_reaction(
     reaction_service: &State<ReactionService>,
     blog_service: &State<BlogService>,
     id: i32,
+    client_ip: ClientIp,
 ) -> Result<Json<Value>, Status> {
     let db = conn.into_inner();
     
@@ -670,16 +709,14 @@ async fn remove_reaction(
         Err(_) => return Err(Status::NotFound),
     };
 
-    let client_ip = get_client_ip();
-    
     match reaction_service
-        .remove_reaction(db, post.id, &client_ip)
+        .remove_reaction(db, post.id, &client_ip.0)
         .await
     {
         Ok(_) => {
             // Get updated reaction summary
             let summary = reaction_service
-                .get_post_reaction_summary(db, post.id, &client_ip)
+                .get_post_reaction_summary(db, post.id, &client_ip.0)
                 .await
                 .map_err(|_| Status::InternalServerError)?;
             
@@ -698,6 +735,7 @@ async fn get_reactions(
     reaction_service: &State<ReactionService>,
     blog_service: &State<BlogService>,
     id: i32,
+    client_ip: ClientIp,
 ) -> Result<Json<Value>, Status> {
     let db = conn.into_inner();
     
@@ -706,11 +744,9 @@ async fn get_reactions(
         Ok(post) => post,
         Err(_) => return Err(Status::NotFound),
     };
-
-    let client_ip = get_client_ip();
     
     let summary = reaction_service
-        .get_post_reaction_summary(db, post.id, &client_ip)
+        .get_post_reaction_summary(db, post.id, &client_ip.0)
         .await
         .map_err(|_| Status::InternalServerError)?;
     
