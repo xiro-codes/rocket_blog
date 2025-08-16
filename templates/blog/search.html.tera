@@ -1,0 +1,109 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="terminal-header"></div>
+<div class="d-flex flex-column align-items-center justify-content-center">
+	{% if no_query %}
+	<h1 class="terminal-prompt">Search Posts</h1>
+	<p class="text-muted">Enter a search term to find posts by title or content.</p>
+	{% else %}
+	<h1 class="terminal-prompt">{{ title }}</h1>
+	<p class="text-muted">Found {{ posts | length }} result{% if posts | length != 1 %}s{% endif %} for "{{ search_query }}"</p>
+	{% endif %}
+
+	{%if token %}
+	<div class="btn-group">
+		<a class="btn btn-primary" href="/blog/create">[CREATE POST]</a>
+		<a class="btn btn-primary" href="/blog">[ALL POSTS]</a>
+		<a class="btn btn-primary" href="/auth/logout">[LOGOUT]</a>
+	</div>
+	{%else%}
+	<div class="btn-group">
+		<a class="btn btn-primary" href="/blog">[ALL POSTS]</a>
+	</div>
+	{%endif%}
+</div>
+
+<hr class="terminal-divider">
+
+<div class="row">
+	<div class="col-md-8">
+		<div class="mx-5 my-2">
+			{% if posts %}
+				{% for post in posts %}
+				<li class="list-group-item">
+					{% if post.draft and token %}
+					<span class="badge bg-warning text-dark ms-2">DRAFT</span>
+					{% endif %}
+				</li>
+				<div class="card mb-3 terminal-post">
+					<div class="card-body">
+						<h5 class="card-title">
+							<span class="terminal-prompt"></span>
+							<a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover text-decoration-none"
+							   href="/blog/{{post.seq_id}}">{{post.title}}</a>
+							{% if post.draft and token %}
+							<span class="badge bg-warning text-dark ms-2">[DRAFT]</span>
+							{% endif %}
+						</h5>
+						{% if post.excerpt %}
+						<p class="card-text text-muted">{{post.excerpt}}</p>
+						{% endif %}
+						<a href="/blog/{{post.seq_id}}" class="btn btn-outline-primary btn-sm">[READ MORE]</a>
+					</div>
+				</div>
+				{% endfor %}
+			{% else %}
+				{% if not no_query %}
+				<div class="text-center">
+					<p class="text-muted">No posts found matching your search.</p>
+					<a href="/blog" class="btn btn-outline-primary">[VIEW ALL POSTS]</a>
+				</div>
+				{% endif %}
+			{% endif %}
+		</div>
+	</div>
+	<div class="col-md-4">
+		{% if all_tags %}
+		<div class="card">
+			<div class="card-header">
+				<h5>[ TAGS ]</h5>
+			</div>
+			<div class="card-body">
+				{% for tag in all_tags %}
+				<a href="/blog/tag/{{ tag.slug }}" 
+				   class="badge text-decoration-none me-1 mb-1"
+				   style="background-color: {{ tag.color }};">
+					{{ tag.name }}
+				</a>
+				{% endfor %}
+			</div>
+		</div>
+		{% endif %}
+	</div>
+</div>
+
+{% if posts and num_pages > 1 %}
+<hr class="terminal-divider">
+
+<div class="d-flex justify-content-center m-2">
+	<footer class="btn-group align-items-center">
+		{% if page == 1 %}
+		<button class="btn btn-secondary" disabled>[PREV]</button>
+		{% else %}
+		<a class="btn btn-primary" href="?q={{ search_query | urlencode }}&page={{page -1}}&page_size={{page_size}}">[PREV]</a>
+		{%endif%}
+		<button class="btn btn-secondary" disabled>
+			PAGE {{page}} OF {{num_pages}}
+		</button>
+		{% if page == num_pages %}
+		<button class="btn btn-secondary" disabled>[NEXT]</button>
+		{%else%}
+		<a class="btn btn-primary" href="?q={{ search_query | urlencode }}&page={{page +1}}&page_size={{page_size}}">[NEXT]</a>
+		{%endif%}
+	</footer>
+</div>
+{% endif %}
+{% endblock %}
+{% block script %}
+{% endblock %}

@@ -299,4 +299,51 @@ impl Service {
             .await
             .map(|p| (p, page, page_size, num_pages))
     }
+
+    pub async fn search_posts(
+        &self,
+        db: &DbConn,
+        query_text: &str,
+        page: Option<u64>,
+        page_size: Option<u64>,
+        include_drafts: bool,
+    ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
+        let page = page.unwrap_or(1);
+        let page_size = page_size.unwrap_or(DEFAULT_PAGE_SIZE);
+        if page == 0 {
+            return Err(DbErr::Custom("Page number cannot be zero".to_owned()));
+        }
+        if page_size == 0 {
+            return Err(DbErr::Custom("Page size cannot be zero".to_owned()));
+        }
+        
+        // Prepare search term for LIKE query
+        let search_term = format!("%{}%", query_text);
+        
+        let mut query = Post::find()
+            .select_only()
+            .column(post::Column::Id)
+            .column(post::Column::Title)
+            .column(post::Column::SeqId)
+            .column(post::Column::Draft)
+            .column(post::Column::Excerpt)
+            .filter(
+                post::Column::Title.like(&search_term)
+                    .or(post::Column::Text.like(&search_term))
+            );
+        
+        if !include_drafts {
+            query = query.filter(post::Column::Draft.eq(false));
+        }
+        
+        let paginator = query
+            .order_by_desc(post::Column::DatePublished)
+            .into_partial_model()
+            .paginate(db, page_size);
+        let num_pages = paginator.num_pages().await?;
+        paginator
+            .fetch_page(page - 1)
+            .await
+            .map(|p| (p, page, page_size, num_pages))
+    }
 }

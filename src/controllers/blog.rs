@@ -450,6 +450,81 @@ async fn posts_by_tag(
     ))
 }
 
+#[get("/search?<q>&<page>&<page_size>")]
+async fn search(
+    conn: Connection<'_, Db>,
+    service: &State<BlogService>,
+    auth_service: &State<AuthService>,
+    tag_service: &State<TagService>,
+    q: Option<String>,
+    page: Option<u64>,
+    page_size: Option<u64>,
+    jar: &CookieJar<'_>,
+) -> Result<Template, Status> {
+    let token = ControllerBase::check_auth(jar).unwrap_or_default();
+    let db = conn.into_inner();
+    
+    // Check if user is admin to include drafts
+    let is_admin = if let Some(token_str) = &token {
+        if let Ok(token_uuid) = Uuid::parse_str(token_str) {
+            if let Some(account) = auth_service.check_token(db, token_uuid).await {
+                account.admin
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    } else {
+        false
+    };
+    
+    let search_query = q.unwrap_or_default();
+    
+    if search_query.trim().is_empty() {
+        // If no search query, redirect to main blog page
+        return Ok(Template::render(
+            "blog/search",
+            context! {
+                posts: Vec::<models::dto::PostTitleResult>::new(),
+                page: 1,
+                page_size: 39,
+                num_pages: 0,
+                token,
+                all_tags: Vec::<models::tag::Model>::new(),
+                search_query: "",
+                no_query: true
+            },
+        ));
+    }
+    
+    // Perform search
+    let (posts, page, page_size, num_pages) = service
+        .search_posts(db, &search_query, page, page_size, is_admin)
+        .await
+        .map_err(|_| Status::InternalServerError)?;
+
+    // Get all tags for the tag cloud
+    let all_tags = match tag_service.find_all_tags(db).await {
+        Ok(tags) => tags,
+        Err(_) => vec![], // Continue even if tag loading fails
+    };
+
+    Ok(Template::render(
+        "blog/search",
+        context! {
+            posts,
+            page,
+            page_size,
+            num_pages,
+            token,
+            all_tags,
+            search_query: search_query.clone(),
+            title: format!("Search results for '{}'", search_query)
+        },
+    ))
+}
+
 #[get("/<id>/delete")]
 async fn delete(
     conn: Connection<'_, Db>,
@@ -470,6 +545,7 @@ fn routes() -> Vec<Route> {
         create_view,
         edit_view,
         posts_by_tag,
+        search,
         video,
         create,
         edit,

@@ -24,6 +24,22 @@ body {
 
 	<body>
 		<div class="container-fluid terminal-container h-100">
+			<!-- Global Navigation Header -->
+			<nav class="navbar terminal-header mb-3">
+				<div class="container-fluid">
+					<a class="navbar-brand text-decoration-none" href="/blog" style="color: #00ff41;">
+						<span class="terminal-prompt">[ROCKET_BLOG]</span>
+					</a>
+					
+					<!-- Search Form -->
+					<form class="d-flex me-auto ms-3" action="/blog/search" method="get" role="search">
+						<input class="form-control me-2" type="search" name="q" placeholder="Search posts..." 
+							   aria-label="Search" style="background-color: #1a1a1a; border-color: #00ff41; color: #00ff41;">
+						<button class="btn btn-outline-primary" type="submit">[SEARCH]</button>
+					</form>
+				</div>
+			</nav>
+			
 			{% block content %}
 			{% endblock %}
 		</div>
