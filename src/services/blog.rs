@@ -432,7 +432,7 @@ impl Service {
     }
 
     /// Prepare a search query for PostgreSQL tsquery format
-    fn prepare_tsquery(query: &str) -> String {
+    pub fn prepare_tsquery(query: &str) -> String {
         // Split by whitespace and clean each term
         let terms: Vec<String> = query
             .split_whitespace()

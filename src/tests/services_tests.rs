@@ -95,6 +95,30 @@ mod tests {
             
             assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<BlogService>());
         }
+
+        #[test]
+        fn test_prepare_tsquery() {
+            // Test basic query preparation
+            assert_eq!(BlogService::prepare_tsquery("hello"), "hello:*");
+            
+            // Test multiple terms
+            assert_eq!(BlogService::prepare_tsquery("hello world"), "hello:* & world:*");
+            
+            // Test with special characters (should be filtered out)
+            assert_eq!(BlogService::prepare_tsquery("hello! @world#"), "hello:* & world:*");
+            
+            // Test with allowed characters
+            assert_eq!(BlogService::prepare_tsquery("hello-world test_case"), "hello-world:* & test_case:*");
+            
+            // Test empty query
+            assert_eq!(BlogService::prepare_tsquery(""), "''");
+            
+            // Test whitespace only
+            assert_eq!(BlogService::prepare_tsquery("   "), "''");
+            
+            // Test with extra whitespace
+            assert_eq!(BlogService::prepare_tsquery("  hello   world  "), "hello:* & world:*");
+        }
     }
 
     mod comment_service_tests {
