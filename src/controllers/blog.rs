@@ -6,7 +6,7 @@ use crate::{
     services::{self, AuthService, BlogService, CommentService, TagService},
     types::{HttpRange, StreamedFile},
 };
-use models::{post, tag};
+use models::{dto::SearchFormDTO, post, tag};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -166,6 +166,84 @@ async fn detail_view(
         },
     ))
 }
+
+#[get("/search?<query>&<page>&<page_size>")]
+async fn search_get(
+    conn: Connection<'_, Db>,
+    service: &State<BlogService>,
+    auth_service: &State<AuthService>,
+    tag_service: &State<TagService>,
+    query: Option<String>,
+    page: Option<u64>,
+    page_size: Option<u64>,
+    jar: &CookieJar<'_>,
+) -> Result<Template, Status> {
+    let token = ControllerBase::check_auth(jar).unwrap_or_default();
+    let db = conn.into_inner();
+    
+    // Check if user is admin to include drafts
+    let is_admin = if let Some(token_str) = &token {
+        if let Ok(token_uuid) = Uuid::parse_str(token_str) {
+            if let Some(account) = auth_service.check_token(db, token_uuid).await {
+                account.admin
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    } else {
+        false
+    };
+
+    let search_query = query.unwrap_or_default();
+    let (results, page, page_size, num_pages) = if !search_query.trim().is_empty() {
+        service.search_posts(db, &search_query, is_admin, page, page_size)
+            .await
+            .map_err(|_| Status::InternalServerError)?
+    } else {
+        (vec![], page.unwrap_or(1), page_size.unwrap_or(10), 0)
+    };
+
+    // Get all tags for the tag cloud
+    let all_tags = match tag_service.find_all_tags(db).await {
+        Ok(tags) => tags,
+        Err(_) => vec![], // Continue even if tag loading fails
+    };
+
+    Ok(Template::render(
+        "blog/search",
+        context! {
+            results,
+            search_query: search_query.clone(),
+            page,
+            page_size,
+            num_pages,
+            token,
+            all_tags,
+            title: if search_query.trim().is_empty() { 
+                "Search Posts".to_string() 
+            } else { 
+                format!("Search results for '{}'", search_query) 
+            }
+        },
+    ))
+}
+
+#[post("/search", data = "<search_form>")]
+async fn search_post(
+    search_form: Form<SearchFormDTO>,
+) -> Redirect {
+    let query = &search_form.query;
+    if query.trim().is_empty() {
+        Redirect::to(uri!("/blog/search"))
+    } else {
+        // Simple URL encoding for the query parameter
+        let encoded = query.replace(' ', "%20").replace('&', "%26").replace('=', "%3D");
+        Redirect::to(format!("/blog/search?query={}", encoded))
+    }
+}
+
 #[get("/<id>/video")]
 async fn video(
     conn: Connection<'_, Db>,
@@ -470,6 +548,8 @@ fn routes() -> Vec<Route> {
         create_view,
         edit_view,
         posts_by_tag,
+        search_get,
+        search_post,
         video,
         create,
         edit,

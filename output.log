@@ -52515,3 +52515,57 @@
 [2025-08-15T17:04:05Z ERROR sea_orm_rocket::database] failed to initialize database: Connection Error: pool timed out while waiting for an open connection
 [2025-08-15T17:04:05Z ERROR sea_orm_rocket::database] Attempted to fetch unattached database `[1mapp::pool::Db[0m`.
 [2025-08-15T17:04:05Z INFO sea_orm_rocket::database::_] `[1mapp::pool::Db::init()[0m` fairing must be attached prior to using this database.
+[2025-08-15T21:36:10Z DEBUG app::controllers::blog] 99
+[2025-08-15T21:36:10Z DEBUG app::controllers::blog] [Model { id: f72de524-6291-4ee0-b4d6-cdbb5b57eda7, name: "Framework", slug: "framework", color: Some("#DC3545"), created_at: 2025-08-15T16:35:28.943986 }, Model { id: f5faabe2-a9c6-4fff-861e-99d4ecfc5a7f, name: "Programming", slug: "programming", color: Some("#6F42C1"), created_at: 2025-08-15T16:35:28.942193 }]
+[2025-08-15T21:39:27Z DEBUG app::controllers::blog] 99
+[2025-08-15T21:39:27Z DEBUG app::controllers::blog] [Model { id: f72de524-6291-4ee0-b4d6-cdbb5b57eda7, name: "Framework", slug: "framework", color: Some("#DC3545"), created_at: 2025-08-15T16:35:28.943986 }, Model { id: f5faabe2-a9c6-4fff-861e-99d4ecfc5a7f, name: "Programming", slug: "programming", color: Some("#6F42C1"), created_at: 2025-08-15T16:35:28.942193 }]
+[2025-08-15T21:40:58Z DEBUG app::controllers::blog] 99
+[2025-08-15T21:40:58Z DEBUG app::controllers::blog] [Model { id: f72de524-6291-4ee0-b4d6-cdbb5b57eda7, name: "Framework", slug: "framework", color: Some("#DC3545"), created_at: 2025-08-15T16:35:28.943986 }, Model { id: f5faabe2-a9c6-4fff-861e-99d4ecfc5a7f, name: "Programming", slug: "programming", color: Some("#6F42C1"), created_at: 2025-08-15T16:35:28.942193 }]
+[2025-08-15T21:49:28Z DEBUG app::controllers::blog] 140
+[2025-08-15T21:49:28Z DEBUG app::controllers::blog] [Model { id: 1b60cb05-48ce-4e12-b174-469dff676664, name: "Backend", slug: "backend", color: Some("#FD7E14"), created_at: 2025-08-15T16:49:14.944231 }]
+[2025-08-15T22:04:10Z DEBUG app::controllers::blog] FormDTO { title: "test", text: "testing", file: File { file_name: Some(FileName("")), content_type: Some(ContentType(MediaType { source: Custom("application/octet-stream"), top: (0, 11), sub: (12, 24), params: Dynamic([]) })), path: Left("/tmp/.tmp3u2t4I"), len: 0 }, tags: Some("testing, testing1, testing2") }
+[2025-08-15T22:04:10Z DEBUG app::controllers::blog] "testing"
+[2025-08-15T22:04:10Z DEBUG app::services::tag] Called
+[2025-08-15T22:04:10Z DEBUG app::controllers::blog] " testing1"
+[2025-08-15T22:04:10Z DEBUG app::services::tag] Called
+[2025-08-15T22:04:10Z DEBUG app::controllers::blog] " testing2"
+[2025-08-15T22:04:10Z DEBUG app::services::tag] Called
+[2025-08-15T22:04:10Z DEBUG app::controllers::blog] 198
+[2025-08-15T22:04:10Z DEBUG app::controllers::blog] [Model { id: a07451db-b6fd-4bea-8413-56a972a4f806, name: "testing", slug: "testing", color: Some("#007bff"), created_at: 2025-08-15T17:04:10.401700 }, Model { id: d03fef21-3a69-4bc7-867c-65445a472a50, name: "testing1", slug: "testing1", color: Some("#007bff"), created_at: 2025-08-15T17:04:10.435799 }, Model { id: f3448aee-bed0-4814-873d-fdfdf3eb3773, name: "testing2", slug: "testing2", color: Some("#007bff"), created_at: 2025-08-15T17:04:10.437516 }]
+[2025-08-15T22:04:23Z DEBUG app::controllers::blog] 198
+[2025-08-15T22:04:23Z DEBUG app::controllers::blog] [Model { id: a07451db-b6fd-4bea-8413-56a972a4f806, name: "testing", slug: "testing", color: Some("#007bff"), created_at: 2025-08-15T17:04:10.401700 }, Model { id: d03fef21-3a69-4bc7-867c-65445a472a50, name: "testing1", slug: "testing1", color: Some("#007bff"), created_at: 2025-08-15T17:04:10.435799 }, Model { id: f3448aee-bed0-4814-873d-fdfdf3eb3773, name: "testing2", slug: "testing2", color: Some("#007bff"), created_at: 2025-08-15T17:04:10.437516 }]
+[2025-08-15T22:09:16Z DEBUG app::controllers::blog] FormDTO { title: "test", text: "test", excerpt: Some(""), file: File { file_name: Some(FileName("")), content_type: Some(ContentType(MediaType { source: Custom("application/octet-stream"), top: (0, 11), sub: (12, 24), params: Dynamic([]) })), path: Left("/tmp/.tmp4dbinh"), len: 0 }, tags: Some("testing, testing1, testing2") }
+[2025-08-15T22:09:16Z DEBUG app::controllers::blog] "testing"
+[2025-08-15T22:09:16Z DEBUG app::services::tag] Called
+[2025-08-15T22:09:16Z DEBUG app::controllers::blog] " testing1"
+[2025-08-15T22:09:16Z DEBUG app::services::tag] Called
+[2025-08-15T22:09:16Z DEBUG app::controllers::blog] " testing2"
+[2025-08-15T22:09:16Z DEBUG app::services::tag] Called
+[2025-08-15T22:09:16Z DEBUG app::controllers::blog] 248
+[2025-08-15T22:09:16Z DEBUG app::controllers::blog] [Model { id: eee3bd13-9f0f-415f-8f5c-c427bbd4b76a, name: "testing", slug: "testing", color: Some("#007bff"), created_at: 2025-08-15T17:09:16.651865 }, Model { id: 4916c90f-77d3-4de4-8e5e-da3ee825a287, name: "testing1", slug: "testing1", color: Some("#007bff"), created_at: 2025-08-15T17:09:16.654250 }, Model { id: 55351a9e-318f-4e1c-88b0-44c8322bb557, name: "testing2", slug: "testing2", color: Some("#007bff"), created_at: 2025-08-15T17:09:16.656410 }]
+[2025-08-15T22:09:25Z DEBUG app::controllers::blog] 247
+[2025-08-15T22:09:25Z DEBUG app::controllers::blog] [Model { id: 2d75c4cf-afc2-4a5d-9c18-11b73049423d, name: "Backend", slug: "backend", color: Some("#FD7E14"), created_at: 2025-08-15T17:08:57.570821 }]
+[2025-08-15T22:09:35Z DEBUG app::controllers::blog] 248
+[2025-08-15T22:09:35Z DEBUG app::controllers::blog] [Model { id: eee3bd13-9f0f-415f-8f5c-c427bbd4b76a, name: "testing", slug: "testing", color: Some("#007bff"), created_at: 2025-08-15T17:09:16.651865 }, Model { id: 4916c90f-77d3-4de4-8e5e-da3ee825a287, name: "testing1", slug: "testing1", color: Some("#007bff"), created_at: 2025-08-15T17:09:16.654250 }, Model { id: 55351a9e-318f-4e1c-88b0-44c8322bb557, name: "testing2", slug: "testing2", color: Some("#007bff"), created_at: 2025-08-15T17:09:16.656410 }]
+[2025-08-15T22:09:41Z WARN app::controllers::blog::_] Data guard `Form < FormDTO < '_ > >` failed: Errors([Error { name: Some("file"), value: None, kind: Missing, entity: Field }]).
+[2025-08-15T22:23:11Z DEBUG app::controllers::blog] 295
+[2025-08-15T22:23:11Z DEBUG app::controllers::blog] [Model { id: a53e605b-52e3-4809-a63f-8ec1b9ebe0f2, name: "Backend", slug: "backend", color: Some("#FD7E14"), created_at: 2025-08-15T17:21:45.383438 }]
+[2025-08-15T22:31:37Z DEBUG app::controllers::blog] 395
+[2025-08-15T22:31:37Z DEBUG app::controllers::blog] [Model { id: 99136fb6-f9ae-4430-9f79-3ff5885eb569, name: "Backend", slug: "backend", color: Some("#FD7E14"), created_at: 2025-08-15T17:29:51.246346 }, Model { id: 29a5864b-dd23-40e2-9b24-d69ec24f02e3, name: "Tutorial", slug: "tutorial", color: Some("#28A745"), created_at: 2025-08-15T17:29:51.245305 }, Model { id: 91a1cf61-aeeb-4192-bf01-d1fd96cdaf8e, name: "Web Development", slug: "web-development", color: Some("#61DAFB"), created_at: 2025-08-15T17:29:51.244603 }]
+[2025-08-15T22:31:41Z DEBUG app::controllers::blog] 393
+[2025-08-15T22:31:41Z DEBUG app::controllers::blog] [Model { id: f3cfa8e6-ebf5-42c7-b69d-28c392808fc4, name: "Database", slug: "database", color: Some("#17A2B8"), created_at: 2025-08-15T17:29:51.246851 }, Model { id: d19cca15-6435-4204-a1b9-d087f02f60e9, name: "Programming", slug: "programming", color: Some("#6F42C1"), created_at: 2025-08-15T17:29:51.245843 }, Model { id: 29a5864b-dd23-40e2-9b24-d69ec24f02e3, name: "Tutorial", slug: "tutorial", color: Some("#28A745"), created_at: 2025-08-15T17:29:51.245305 }]
+[2025-08-15T22:37:51Z DEBUG app::controllers::blog] 394
+[2025-08-15T22:37:51Z DEBUG app::controllers::blog] [Model { id: 99136fb6-f9ae-4430-9f79-3ff5885eb569, name: "Backend", slug: "backend", color: Some("#FD7E14"), created_at: 2025-08-15T17:29:51.246346 }, Model { id: 62bc0559-89a1-4a8c-95cf-113b3b34b734, name: "Rust", slug: "rust", color: Some("#CE422B"), created_at: 2025-08-15T17:29:51.241233 }]
+[2025-08-15T22:37:56Z DEBUG app::controllers::blog] 390
+[2025-08-15T22:37:56Z DEBUG app::controllers::blog] [Model { id: 29a5864b-dd23-40e2-9b24-d69ec24f02e3, name: "Tutorial", slug: "tutorial", color: Some("#28A745"), created_at: 2025-08-15T17:29:51.245305 }, Model { id: 91a1cf61-aeeb-4192-bf01-d1fd96cdaf8e, name: "Web Development", slug: "web-development", color: Some("#61DAFB"), created_at: 2025-08-15T17:29:51.244603 }]
+[2025-08-15T22:42:21Z DEBUG app::controllers::blog] FormDTO { title: "paige", text: "paige", excerpt: Some("paige"), file: File { file_name: Some(FileName("big_buck_bunny_1080p_h264.mov")), content_type: Some(ContentType(MediaType { source: Custom("application/octet-stream"), top: (0, 11), sub: (12, 24), params: Dynamic([]) })), path: Right("/tmp/.tmpHKXs2L"), len: 725106140 }, tags: Some("web development") }
+[2025-08-15T22:42:21Z DEBUG app::controllers::blog] "web development"
+[2025-08-15T22:42:21Z DEBUG app::services::tag] Called
+[2025-08-15T22:42:21Z DEBUG app::controllers::blog] 396
+[2025-08-15T22:42:21Z DEBUG app::controllers::blog] [Model { id: 91a1cf61-aeeb-4192-bf01-d1fd96cdaf8e, name: "Web Development", slug: "web-development", color: Some("#61DAFB"), created_at: 2025-08-15T17:29:51.244603 }]
+[2025-08-15T22:43:05Z DEBUG app::controllers::blog] 396
+[2025-08-15T22:43:05Z DEBUG app::controllers::blog] [Model { id: 91a1cf61-aeeb-4192-bf01-d1fd96cdaf8e, name: "Web Development", slug: "web-development", color: Some("#61DAFB"), created_at: 2025-08-15T17:29:51.244603 }]
+[2025-08-15T22:43:12Z DEBUG app::controllers::blog] 395
+[2025-08-15T22:43:12Z DEBUG app::controllers::blog] [Model { id: 99136fb6-f9ae-4430-9f79-3ff5885eb569, name: "Backend", slug: "backend", color: Some("#FD7E14"), created_at: 2025-08-15T17:29:51.246346 }, Model { id: 29a5864b-dd23-40e2-9b24-d69ec24f02e3, name: "Tutorial", slug: "tutorial", color: Some("#28A745"), created_at: 2025-08-15T17:29:51.245305 }, Model { id: 91a1cf61-aeeb-4192-bf01-d1fd96cdaf8e, name: "Web Development", slug: "web-development", color: Some("#61DAFB"), created_at: 2025-08-15T17:29:51.244603 }]
+[2025-08-15T22:44:38Z DEBUG app::controllers::blog] 396
+[2025-08-15T22:44:38Z DEBUG app::controllers::blog] [Model { id: 91a1cf61-aeeb-4192-bf01-d1fd96cdaf8e, name: "Web Development", slug: "web-development", color: Some("#61DAFB"), created_at: 2025-08-15T17:29:51.244603 }]

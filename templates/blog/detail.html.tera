@@ -20,6 +20,10 @@
       {% endfor %}
   </div>
   {% endif %}
+	<div class="btn-group mb-2">
+		<a class="btn btn-info" href="/blog">[← BACK TO POSTS]</a>
+		<a class="btn btn-success" href="/blog/search">[SEARCH]</a>
+	</div>
 	{%if token%}
 	<header class="btn-group">
 		<a class="btn btn-warning" href="{{post.seq_id}}/edit">[EDIT]</a>

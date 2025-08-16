@@ -47,3 +47,22 @@ pub struct PostTitleResult {
     pub draft: Option<bool>,
     pub excerpt: Option<String>,
 }
+
+/// Result struct for search results with ranking
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct PostSearchResult {
+    pub id: Uuid,
+    pub seq_id: i32,
+    pub title: String,
+    pub excerpt: Option<String>,
+    pub rank: f32,
+    pub headline: Option<String>,
+}
+
+/// Search form for handling search queries
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct SearchFormDTO {
+    pub query: String,
+}

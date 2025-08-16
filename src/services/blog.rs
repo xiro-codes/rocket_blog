@@ -315,4 +315,150 @@ impl Service {
             .all(db)
             .await
     }
+
+    /// Search posts using PostgreSQL full-text search
+    pub async fn search_posts(
+        &self,
+        db: &DbConn,
+        query: &str,
+        include_drafts: bool,
+        page: Option<u64>,
+        page_size: Option<u64>,
+    ) -> Result<(Vec<models::dto::PostSearchResult>, u64, u64, u64), DbErr> {
+        use models::dto::PostSearchResult;
+        use sea_orm::Statement;
+        
+        let page = page.unwrap_or(1);
+        let page_size = page_size.unwrap_or(DEFAULT_PAGE_SIZE);
+        if page == 0 {
+            return Err(DbErr::Custom("Page number cannot be zero".to_owned()));
+        }
+        if page_size == 0 {
+            return Err(DbErr::Custom("Page size cannot be zero".to_owned()));
+        }
+        
+        if query.trim().is_empty() {
+            return Ok((vec![], 0, page_size, 0));
+        }
+
+        let offset = (page - 1) * page_size;
+        
+        // Sanitize the query - escape special characters and prepare for tsquery
+        let tsquery = Self::prepare_tsquery(query);
+        
+        // Build the search SQL with ranking and headline generation
+        let draft_filter = if include_drafts {
+            ""
+        } else {
+            "AND (draft = false OR draft IS NULL)"
+        };
+        
+        let search_sql = format!(
+            r#"
+            SELECT 
+                p.id,
+                p.seq_id,
+                p.title,
+                p.excerpt,
+                ts_rank_cd(p.search_vector, to_tsquery('english', $1)) as rank,
+                ts_headline('english', 
+                    COALESCE(p.title, '') || ' ' || COALESCE(p.text, '') || ' ' || COALESCE(p.excerpt, ''),
+                    to_tsquery('english', $1),
+                    'StartSel=<mark>, StopSel=</mark>, MaxWords=50, MinWords=10'
+                ) as headline
+            FROM post p 
+            WHERE p.search_vector @@ to_tsquery('english', $1)
+            {}
+            ORDER BY rank DESC, p.date_published DESC
+            LIMIT $2 OFFSET $3
+            "#,
+            draft_filter
+        );
+        
+        let count_sql = format!(
+            r#"
+            SELECT COUNT(*) as count
+            FROM post p 
+            WHERE p.search_vector @@ to_tsquery('english', $1)
+            {}
+            "#,
+            draft_filter
+        );
+
+        // Execute count query first
+        let count_stmt = Statement::from_sql_and_values(
+            sea_orm::DatabaseBackend::Postgres,
+            &count_sql,
+            vec![tsquery.clone().into()]
+        );
+        
+        let count_result: Option<sea_orm::QueryResult> = db.query_one(count_stmt).await?;
+        let total_count = if let Some(row) = count_result {
+            row.try_get::<i64>("", "count")? as u64
+        } else {
+            0
+        };
+        
+        let num_pages = (total_count + page_size - 1) / page_size;
+
+        // Execute search query
+        let search_stmt = Statement::from_sql_and_values(
+            sea_orm::DatabaseBackend::Postgres,
+            &search_sql,
+            vec![
+                tsquery.into(),
+                (page_size as i64).into(),
+                (offset as i64).into()
+            ]
+        );
+        
+        let search_results = db.query_all(search_stmt).await?;
+        
+        // Convert results to PostSearchResult structs
+        let mut results = Vec::new();
+        for row in search_results {
+            let result = PostSearchResult {
+                id: row.try_get("", "id")?,
+                seq_id: row.try_get("", "seq_id")?,
+                title: row.try_get("", "title")?,
+                excerpt: row.try_get("", "excerpt").ok(),
+                rank: row.try_get("", "rank")?,
+                headline: row.try_get("", "headline").ok(),
+            };
+            results.push(result);
+        }
+
+        Ok((results, page, page_size, num_pages))
+    }
+
+    /// Prepare a search query for PostgreSQL tsquery format
+    pub fn prepare_tsquery(query: &str) -> String {
+        // Split by whitespace and clean each term
+        let terms: Vec<String> = query
+            .split_whitespace()
+            .map(|term| {
+                // Remove special characters that could break tsquery, but keep basic ones
+                let cleaned = term
+                    .chars()
+                    .filter(|c| c.is_alphanumeric() || *c == '-' || *c == '_')
+                    .collect::<String>();
+                
+                if cleaned.is_empty() {
+                    String::new()
+                } else {
+                    // Add prefix matching for partial word searches
+                    format!("{}:*", cleaned)
+                }
+            })
+            .filter(|term| !term.is_empty())
+            .collect();
+
+        if terms.is_empty() {
+            // Fallback for empty query
+            String::from("''")
+        } else {
+            // Join terms with AND operator
+            terms.join(" & ")
+        }
+    }
 }

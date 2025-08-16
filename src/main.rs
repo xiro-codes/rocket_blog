@@ -93,7 +93,7 @@ fn setup_logger() -> Result<(), fern::InitError> {
 async fn rocket() -> _ {
     let figment = rocket::Config::figment();
     let app_config = AppConfig::from_figment(&figment);
-    setup_logger().unwrap();
+    //setup_logger().unwrap();
     rocket::build()
         .register("/", catchers![catch_default])
         .attach(Db::init())
