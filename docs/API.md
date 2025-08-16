@@ -208,6 +208,47 @@ GET /tags/{name}             # Posts with specific tag
 GET /api/tags/{name}/posts   # JSON API for tag filtering
 ```
 
+## 📧 RSS Feed Endpoints
+
+### Get RSS Feed
+```http
+GET /feed/rss
+```
+
+Returns an RSS 2.0 XML feed of the 20 most recent published blog posts.
+
+**Response:**
+- **Content-Type**: `application/rss+xml`
+- **Format**: RSS 2.0 XML
+
+**Example Response:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+    <channel>
+        <title>Rocket Blog</title>
+        <link>http://localhost:8000</link>
+        <description>A blog built with Rocket framework</description>
+        <language>en-us</language>
+        <lastBuildDate>Mon, 01 Jan 2024 12:00:00 GMT</lastBuildDate>
+        <generator>Rocket Blog RSS Generator</generator>
+        <item>
+            <title>Sample Blog Post</title>
+            <link>http://localhost:8000/blog/1</link>
+            <description>This is the post excerpt...</description>
+            <pubDate>Mon, 01 Jan 2024 10:00:00 GMT</pubDate>
+            <guid>http://localhost:8000/blog/1</guid>
+        </item>
+    </channel>
+</rss>
+```
+
+**RSS Discovery:**
+The RSS feed is also discoverable via the HTML `<link>` tag in the page header:
+```html
+<link rel="alternate" type="application/rss+xml" title="Rocket Blog RSS Feed" href="/feed/rss" />
+```
+
 ## 📊 Response Formats
 
 ### HTML Responses

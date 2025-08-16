@@ -106,5 +106,6 @@ async fn rocket() -> _ {
         .attach(controllers::AuthController::new("/auth".to_owned()))
         .attach(controllers::BlogController::new("/blog".to_owned()))
         .attach(controllers::CommentController::new("/comment".to_owned()))
+        .attach(controllers::FeedController::new("/feed".to_owned()))
         .mount("/static", FileServer::from("./static/"))
 }

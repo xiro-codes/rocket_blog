@@ -17,11 +17,11 @@ A modern, fast, and feature-rich blog application built with **Rust** and the **
 - 📑 **Draft System** - Save posts as drafts before publishing
 - 🏷️ **Tag System** - Organize posts with colorful, filterable tags
 - 📱 **Responsive Design** - Bootstrap-based UI that works on all devices
+- 📧 **RSS Feed** - Subscribe to blog updates via RSS at `/feed/rss`
 
 ### Planned Features ([See Roadmap](docs/FEATURE_SUGGESTIONS.md))
 - 🔍 **Search Functionality** - Full-text search across posts
 - 📊 **Analytics Dashboard** - Track views and engagement
-- 📧 **RSS Feeds** - Subscribe to blog updates
 - 👤 **User Profiles** - Multi-author support with user profiles
 - ❤️ **Like/Reaction System** - Reader engagement features
 - 🖼️ **Image Upload** - Built-in image management
