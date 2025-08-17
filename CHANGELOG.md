@@ -8,12 +8,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Comprehensive documentation suite including README, Contributing Guide, API docs, Deployment guide, and Architecture overview
-- Enhanced project documentation structure
-- Complete setup and development guides
+- ✨ **WYSIWYG Markdown Editor** - Visual markdown editing with EasyMDE integration
+  - Real-time preview and live editing capabilities
+  - Syntax highlighting and formatting toolbar
+  - Side-by-side and fullscreen editing modes
+  - Custom terminal theme styling matching blog aesthetic
+- 📄 **Post Excerpt/Summary System** - Enhanced content discovery and navigation
+  - Optional custom excerpts or automatic generation from post content
+  - Enhanced list view with modern card layout instead of simple lists
+  - Auto-generated excerpts with intelligent content extraction (200 char limit)
+  - "Read More" buttons for improved user experience
+- 📧 **RSS Feed Generation** - Complete RSS feed implementation
+  - RSS feed available at `/feed/rss` endpoint
+  - Includes post excerpts for better feed content
+  - XML-compliant RSS 2.0 format with proper metadata
+  - Automatic publication date and link generation
+- 📚 **Comprehensive Documentation Suite** - Complete project documentation overhaul
+  - User Guide for content creators and blog users
+  - Architecture Overview with technical system design
+  - API Documentation with comprehensive reference
+  - Feature-specific implementation guides
+  - Enhanced setup and development guides
+
+### Enhanced
+- 🎨 **Blog Post Creation Experience** - Significantly improved content authoring
+  - Visual editor with markdown preview
+  - Excerpt management for better content previews
+  - Enhanced form layouts and user guidance
+- 📱 **User Interface Improvements** - Better content presentation
+  - Modern card-based post listings with excerpts
+  - Responsive design enhancements
+  - Improved readability and navigation
 
 ### Changed
-- Improved documentation organization in `/docs` folder
+- Improved documentation organization in `/docs` folder with comprehensive guides
+- Enhanced README with current feature set and improved navigation
+- Updated post creation and editing workflows to support new features
 
 ## [0.1.0] - 2024-01-15
 
@@ -157,7 +187,6 @@ The implementation includes thorough analysis of:
 - 🔍 **Full-text Search** - Search across blog posts and comments
 - 📡 **REST API** - JSON endpoints for all blog operations
 - 🏷️ **Tag UI Integration** - Complete tag filtering and management interface
-- 📧 **RSS Feed Generation** - Subscribe to blog updates
 - 🖼️ **Image Upload Support** - Built-in image management
 - ❤️ **Like/Reaction System** - Reader engagement features
 - 🛡️ **CSRF Protection** - Enhanced security for form submissions
