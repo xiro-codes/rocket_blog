@@ -77,13 +77,18 @@ impl Service {
             None
         };
 
+        let is_draft = match data.action.as_deref() {
+            Some("publish") => Some(false),
+            _ => Some(true), // default to draft
+        };
+
         post::ActiveModel {
             id: Set(BaseService::generate_id()),
             title: Set(data.title.to_owned()),
             text: Set(text),
             excerpt: Set(excerpt),
             path: Set(path),
-            draft: Set(Some(true)),
+            draft: Set(is_draft),
             date_published: Set(Local::now().naive_local()),
             account_id: Set(id),
             ..Default::default()
@@ -124,6 +129,16 @@ impl Service {
             .map(Into::into)?;
         let text = markdown::to_html(data.text.as_str());
         let excerpt = Self::generate_excerpt(&data.text, data.excerpt);
+        
+        // Handle draft/publish action if provided
+        if let Some(action) = &data.action {
+            match action.as_str() {
+                "publish" => p.draft = Set(Some(false)),
+                "draft" => p.draft = Set(Some(true)),
+                _ => {} // Keep existing draft status
+            }
+        }
+        
         p.title = Set(data.title.to_owned());
         p.text = Set(text);
         p.excerpt = Set(excerpt);
@@ -138,6 +153,19 @@ impl Service {
         let mut p = self.find_by_seq_id(db, id).await?.into_active_model();
         p.draft = Set(Some(true));
         p.save(db).await.map(|_| ())
+    }
+
+    pub async fn publish_by_seq_id(&self, db: &DbConn, id: i32) -> Result<post::Model, DbErr> {
+        let mut p: post::ActiveModel = Post::find()
+            .filter(post::Column::SeqId.eq(id))
+            .one(db)
+            .await?
+            .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", id)))
+            .map(Into::into)?;
+        
+        p.draft = Set(Some(false));
+        p.date_published = Set(Local::now().naive_local());
+        p.update(db).await
     }
 
     pub async fn find_by_id(&self, db: &DbConn, id: Uuid) -> Result<Option<post::Model>, DbErr> {

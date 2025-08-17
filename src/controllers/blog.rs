@@ -95,6 +95,9 @@ async fn list_view(
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     
+    // Check if any accounts exist for the admin creation button
+    let has_accounts = auth_service.has_any_accounts(db).await;
+    
     // Check if user is admin to include drafts
     let is_admin = if let Some(token_str) = &token {
         if let Ok(token_uuid) = Uuid::parse_str(token_str) {
@@ -135,6 +138,7 @@ async fn list_view(
                     token,
                     all_tags,
                     reaction_summaries,
+                    has_accounts,
                     flash: ControllerBase::extract_flash(flash)
                 },
             ))
@@ -651,6 +655,43 @@ async fn delete(
     Ok(ControllerBase::success_redirect("/blog", "Deleted Post"))
 }
 
+#[get("/<id>/publish")]
+async fn publish(
+    conn: Connection<'_, Db>,
+    service: &State<BlogService>,
+    auth_service: &State<AuthService>,
+    id: i32,
+    jar: &CookieJar<'_>,
+) -> Result<Flash<Redirect>, Status> {
+    if let Some(token) = ControllerBase::check_auth(jar)? {
+        let db = conn.into_inner();
+        let token = match Uuid::parse_str(&token) {
+            Ok(uuid) => uuid,
+            Err(_) => return Err(Status::BadRequest),
+        };
+        if let Some(account) = auth_service.check_token(db, token).await {
+            if !account.admin {
+                return Err(Status::Unauthorized);
+            }
+            match service.publish_by_seq_id(db, id).await {
+                Ok(_) => {
+                    return Ok(ControllerBase::success_redirect(
+                        format!("/blog/{}", id),
+                        "Post published successfully",
+                    ));
+                }
+                Err(_) => {
+                    return Ok(ControllerBase::danger_redirect(
+                        format!("/blog/{}", id),
+                        "Failed to publish post",
+                    ));
+                }
+            }
+        }
+    }
+    Err(Status::Unauthorized)
+}
+
 #[post("/<id>/react/<reaction_type>")]
 async fn add_reaction(
     conn: Connection<'_, Db>,
@@ -766,6 +807,7 @@ fn routes() -> Vec<Route> {
         create,
         edit,
         delete,
+        publish,
         add_reaction,
         remove_reaction,
         get_reactions

@@ -19,7 +19,11 @@
 	{%else%}
 	<div class="mb-3">
 		<a class="btn btn-success" href="/blog/search">[SEARCH POSTS]</a>
+		{% if not has_accounts %}
+		<a class="btn btn-warning" href="/auth/create-admin">[CREATE ADMIN ACCOUNT]</a>
+		{% endif %}
 	</div>
+	{% if has_accounts %}
 	<form action="/auth/" method="post" class="mx-5 px-5 terminal-form">
 		<h3 class="text-center mb-4">[ SYSTEM LOGIN ]</h3>
 		<div class="mx-5 px-5 my-2">
@@ -34,6 +38,12 @@
 			<button type="submit" class="btn btn-primary">[AUTHENTICATE]</button>
 		</div>
 	</form>
+	{% else %}
+	<div class="alert alert-info text-center mx-5">
+		<h4>🚀 Welcome to your new blog!</h4>
+		<p>No admin account exists yet. Click the "CREATE ADMIN ACCOUNT" button above to get started.</p>
+	</div>
+	{% endif %}
 	{%endif%}
 </div>
 

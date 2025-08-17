@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use models::{account, dto::AccountFormDTO, prelude::Account};
+use models::{account, dto::{AccountFormDTO, AdminCreateFormDTO}, prelude::Account};
 use pwhash::bcrypt;
 use rocket::futures::lock::Mutex;
 use sea_orm::*;
@@ -55,5 +55,32 @@ impl Service {
             return account.unwrap();
         }
         None
+    }
+
+    pub async fn has_any_accounts(&self, db: &DbConn) -> bool {
+        match Account::find().limit(1).one(db).await {
+            Ok(Some(_)) => true,
+            _ => false,
+        }
+    }
+
+    pub async fn create_admin_account(&self, db: &DbConn, data: AdminCreateFormDTO) -> Result<account::Model, DbErr> {
+        // Check if any accounts exist first
+        if self.has_any_accounts(db).await {
+            return Err(DbErr::Custom("Admin account already exists".to_owned()));
+        }
+
+        let pw = bcrypt::hash(&data.password).map_err(|_| DbErr::Custom("Password hashing failed".to_owned()))?;
+        let account = account::ActiveModel {
+            id: Set(BaseService::generate_id()),
+            username: Set(data.username),
+            password: Set(pw),
+            email: Set(data.email),
+            admin: Set(true),
+        }
+        .insert(db)
+        .await?;
+
+        Ok(account)
     }
 }
