@@ -25,7 +25,7 @@ services:
   app:
     build: 
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.fallback
     restart: always
     ports:
       # Expose app port for development
@@ -39,19 +39,14 @@ services:
     volumes:
       # Persist uploaded files
       - app_data:/app/data
-      # Mount source code for live development (uncomment for live reload)
-      # - ./src:/app/src:ro
+      # Optional: Mount source code for development (uncomment as needed)
       # - ./templates:/app/templates:ro
       # - ./static:/app/static:ro
-      # - ./Cargo.toml:/app/Cargo.toml:ro
-      # - ./Cargo.lock:/app/Cargo.lock:ro
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - app-network
-    # Uncomment to enable live development with cargo watch
-    # command: ["cargo", "watch", "-x", "run"]
   
   # The pgAdmin GUI service
   pgadmin:

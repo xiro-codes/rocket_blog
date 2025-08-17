@@ -23,12 +23,12 @@ docker-compose -f docker-compose.dev.yml up --build
 - pgAdmin on http://localhost:5050
 - Optimized for development with proper logging
 
-### Option 2: Live Development with Code Reloading
+### Option 2: Live Development with Template/Static File Reloading
 
-For live development with automatic rebuilds on code changes:
+For live development with automatic template and static file reloading:
 
 ```bash
-# Start development with live reloading
+# Start development with live file reloading
 ./scripts/docker-deploy.sh dev-live
 
 # Or directly with docker-compose
@@ -37,9 +37,8 @@ docker-compose -f docker-compose.dev.live.yml up --build
 
 **Features:**
 - All features from standard development environment
-- Source code mounted into container
-- Automatic rebuilds on Rust file changes using `cargo-watch`
-- Hot reloading for templates and static files
+- Template and static file changes are immediately visible (no rebuild needed)
+- Ideal for frontend development and template modifications
 
 ## Development Files
 
@@ -50,14 +49,14 @@ docker-compose -f docker-compose.dev.live.yml up --build
   - Good for testing built application
   
 - **`docker-compose.dev.live.yml`** - Live development environment  
-  - Mounts source code for live development
-  - Uses `cargo-watch` for automatic rebuilds
-  - Best for active development
+  - Mounts templates and static files for live editing
+  - Immediate updates for frontend changes (no rebuild needed)
+  - Best for template and design development
 
-- **`Dockerfile.dev`** - Development-optimized Dockerfile
-  - Debug builds instead of release builds
-  - Includes `cargo-watch` for live reloading
-  - Faster iteration compared to production Dockerfile
+- **`Dockerfile`** - Production-ready Dockerfile used for all builds
+  - Multi-stage build for optimized production images
+  - Works consistently across all platforms including NixOS
+  - Used by both development and production docker-compose setups
 
 ### Helper Scripts
 

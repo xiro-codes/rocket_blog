@@ -15,7 +15,7 @@ function show_help() {
     echo ""
     echo "Commands:"
     echo "  dev                 Start development environment (no SSL)"
-    echo "  dev-live            Start development with live code reloading"
+    echo "  dev-live            Start development with live template/static reloading"
     echo "  prod                Start production environment (with SSL)"
     echo "  setup-ssl          Generate initial SSL certificates"
     echo "  renew-ssl          Force SSL certificate renewal"
@@ -27,7 +27,7 @@ function show_help() {
     echo ""
     echo "Examples:"
     echo "  $0 dev              # Start development environment"
-    echo "  $0 dev-live         # Start development with live reloading"
+    echo "  $0 dev-live         # Start development with live template reloading"
     echo "  $0 prod             # Start production with SSL"
     echo "  $0 logs nginx       # Show nginx logs only"
     echo "  $0 setup-ssl       # Generate SSL certificates"
@@ -42,22 +42,22 @@ function start_dev() {
     echo "  • pgAdmin: http://localhost:5050"
     echo "  • Database: localhost:5432"
     echo ""
-    echo "This uses debug builds for faster compilation."
-    echo "For live code reloading, use: $0 dev-live"
+    echo "This uses production builds compiled in a clean container environment."
+    echo "For live template/static file editing, use: $0 dev-live"
 }
 
 function start_dev_live() {
-    echo "Starting development environment with live code reloading..."
+    echo "Starting development environment with live template reloading..."
     docker compose -f docker-compose.dev.live.yml up -d --build
     echo ""
     echo "Live development environment started!"
-    echo "  • App: http://localhost:8000 (auto-reloads on code changes)"
+    echo "  • App: http://localhost:8000 (templates/static files auto-reload)"
     echo "  • pgAdmin: http://localhost:5050"
     echo "  • Database: localhost:5432"
     echo ""
-    echo "Your source code is mounted into the container."
-    echo "Changes to Rust files will trigger automatic rebuilds."
-    echo "View live logs with: $0 logs app"
+    echo "Your templates and static files are mounted into the container."
+    echo "Changes to HTML templates and CSS/JS will be immediately visible."
+    echo "View logs with: $0 logs app"
 }
 
 function start_prod() {

@@ -193,12 +193,12 @@ For a complete Docker setup with build instructions, see [Docker Guide](docs/DOC
 # Standard development (debug builds, faster compilation)
 ./scripts/docker-deploy.sh dev
 
-# Live development (auto-reload on code changes)
+# Live development (template/static file auto-reload)
 ./scripts/docker-deploy.sh dev-live
 
 # Or use docker-compose directly:
 docker-compose -f docker-compose.dev.yml up --build      # Standard
-docker-compose -f docker-compose.dev.live.yml up --build # Live reload
+docker-compose -f docker-compose.dev.live.yml up --build # Live template reload
 ```
 
 **Production:**
@@ -209,8 +209,8 @@ docker-compose -f docker-compose.dev.live.yml up --build # Live reload
 ```
 
 **Development Features:**
-- Debug builds for faster compilation (~30s vs 3min)
-- Live code reloading with `cargo-watch` (live mode)
+- Production builds compiled in clean containerized environment (cross-platform)
+- Live template and static file reloading (dev-live mode)
 - Direct database access for development tools
 - Verbose logging for debugging
 - No SSL complexity for faster iteration

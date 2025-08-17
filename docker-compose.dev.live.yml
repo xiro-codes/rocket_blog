@@ -1,5 +1,5 @@
 # Docker Compose for Live Development with Source Code Mounting
-# This version mounts source code for live development with cargo-watch
+# This version mounts source code for live development workflows
 
 services:
   # The database service
@@ -24,11 +24,11 @@ services:
       timeout: 5s
       retries: 5
 
-  # The Rust web application (live development with cargo watch)
+  # The Rust web application (live development with volume mounts)
   app:
     build: 
       context: .
-      dockerfile: Dockerfile.dev.live
+      dockerfile: Dockerfile.fallback
     restart: always
     ports:
       # Expose app port for development
@@ -42,15 +42,9 @@ services:
     volumes:
       # Persist uploaded files
       - app_data:/app/data
-      # Mount source code for live development
-      - ./src:/app/src:ro
+      # Mount templates and static files for live editing
       - ./templates:/app/templates:ro
       - ./static:/app/static:ro
-      - ./Cargo.toml:/app/Cargo.toml:ro
-      - ./Cargo.lock:/app/Cargo.lock:ro
-      - ./migrations:/app/migrations:ro
-      - ./models:/app/models:ro
-      - ./.Rocket.docker.toml:/app/Rocket.toml:ro
     depends_on:
       postgres:
         condition: service_healthy
