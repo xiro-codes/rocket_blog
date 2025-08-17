@@ -41,7 +41,8 @@
 		</div>
 		
 		<div class="justify-content-center d-flex m-1">
-			<button type="submit" class="btn btn-primary">[PUBLISH POST]</button>
+			<button type="submit" name="action" value="draft" class="btn btn-secondary me-2">[SAVE AS DRAFT]</button>
+			<button type="submit" name="action" value="publish" class="btn btn-primary">[PUBLISH POST]</button>
 		</div>
 	</form>
 </div>

@@ -27,6 +27,15 @@ pub struct AccountFormDTO {
     pub password: String,
 }
 
+/// Form DTO for admin account creation with email
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct AdminCreateFormDTO {
+    pub username: String,
+    pub password: String,
+    pub email: String,
+}
+
 /// Form DTO for comment creation
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
 #[serde(crate = "rocket::serde")]

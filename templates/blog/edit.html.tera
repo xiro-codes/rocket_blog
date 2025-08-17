@@ -38,7 +38,13 @@
 		</div>
 		
 		<div class="justify-content-center d-flex m-1">
-			<button type="submit" class="btn btn-primary">[UPDATE POST]</button>
+			{% if post.draft %}
+			<button type="submit" name="action" value="draft" class="btn btn-secondary me-2">[SAVE AS DRAFT]</button>
+			<button type="submit" name="action" value="publish" class="btn btn-primary">[PUBLISH POST]</button>
+			{% else %}
+			<button type="submit" name="action" value="publish" class="btn btn-primary me-2">[UPDATE POST]</button>
+			<button type="submit" name="action" value="draft" class="btn btn-secondary">[SAVE AS DRAFT]</button>
+			{% endif %}
 		</div>
 	</form>
 </div>

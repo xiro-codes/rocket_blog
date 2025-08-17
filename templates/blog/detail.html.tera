@@ -26,6 +26,9 @@
 	</div>
 	{%if token%}
 	<header class="btn-group">
+		{% if post.draft %}
+		<a class="btn btn-success" href="{{post.seq_id}}/publish">[PUBLISH]</a>
+		{% endif %}
 		<a class="btn btn-warning" href="{{post.seq_id}}/edit">[EDIT]</a>
 		<a class="btn btn-danger" href="{{post.seq_id}}/delete">[DELETE]</a>
 	</header>

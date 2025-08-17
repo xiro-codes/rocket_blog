@@ -8,5 +8,6 @@ pub mod post {
         pub excerpt: Option<String>,
         pub file: TempFile<'r>,
         pub tags: Option<String>,
+        pub action: Option<String>, // "draft" or "publish"
     }
 }
