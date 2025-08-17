@@ -9,10 +9,13 @@ This directory contains optimized Docker configurations for development workflow
 For development with debug builds (faster compilation):
 
 ```bash
-# Start development environment
+# Start development environment (using just)
+just docker-dev
+
+# OR using the script directly
 ./scripts/docker-deploy.sh dev
 
-# Or directly with docker-compose
+# OR directly with docker-compose
 docker-compose -f docker-compose.dev.yml up --build
 ```
 
@@ -28,10 +31,13 @@ docker-compose -f docker-compose.dev.yml up --build
 For live development with automatic template and static file reloading:
 
 ```bash
-# Start development with live file reloading
+# Start development with live file reloading (using just)
+just docker-dev-live
+
+# OR using the script directly
 ./scripts/docker-deploy.sh dev-live
 
-# Or directly with docker-compose
+# OR directly with docker-compose
 docker-compose -f docker-compose.dev.live.yml up --build
 ```
 
