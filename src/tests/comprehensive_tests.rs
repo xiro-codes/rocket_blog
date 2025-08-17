@@ -4,9 +4,10 @@ mod comprehensive_tests {
     //! These tests focus on basic functionality and don't require database connections
 
     use crate::config::AppConfig;
-    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService};
-    use crate::controllers::{AuthController, BlogController, CommentController, IndexController, ControllerBase};
+    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, CoordinatorService, ReactionService};
+    use crate::controllers::{AuthController, BlogController, CommentController, IndexController, FeedController, ControllerBase};
     use crate::middleware::Seeding;
+    use crate::registry::ServiceRegistry;
     use crate::{catch_default, should_filter_log};
     
     // Test data helpers
@@ -221,6 +222,41 @@ mod comprehensive_tests {
             // Should build successfully with all components
             assert!(rocket.state::<AppConfig>().is_some());
             assert!(rocket.state::<TagService>().is_some());
+        }
+
+        #[test]
+        fn test_no_duplicate_managed_state_with_service_registry() {
+            // Test the fix for duplicate managed state issue
+            let rocket = rocket::build()
+                .manage(AppConfig::default());
+            
+            // Attach services via ServiceRegistry (this manages all services)
+            let rocket = ServiceRegistry::attach_all_services(rocket);
+            
+            // Verify services are properly managed
+            assert!(rocket.state::<AuthService>().is_some());
+            assert!(rocket.state::<BlogService>().is_some());
+            assert!(rocket.state::<CommentService>().is_some());
+            assert!(rocket.state::<TagService>().is_some());
+            assert!(rocket.state::<CoordinatorService>().is_some());
+            assert!(rocket.state::<ReactionService>().is_some());
+            
+            // Now attach controllers using the new macro - this should NOT duplicate services
+            let rocket = rocket
+                .attach(AuthController::new("/auth".to_owned()))
+                .attach(BlogController::new("/blog".to_owned()))
+                .attach(CommentController::new("/comment".to_owned()))
+                .attach(IndexController::new("/".to_owned()))
+                .attach(FeedController::new("/feed".to_owned()));
+            
+            // Services should still be accessible and not duplicated
+            assert!(rocket.state::<AuthService>().is_some());
+            assert!(rocket.state::<BlogService>().is_some());
+            assert!(rocket.state::<CommentService>().is_some());
+            assert!(rocket.state::<TagService>().is_some());
+            assert!(rocket.state::<CoordinatorService>().is_some());
+            assert!(rocket.state::<ReactionService>().is_some());
+            assert!(rocket.state::<AppConfig>().is_some());
         }
     }
 }

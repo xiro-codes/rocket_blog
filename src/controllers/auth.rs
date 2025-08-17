@@ -109,4 +109,4 @@ fn routes() -> Vec<Route> {
     routes![login_view, login, logout, create_admin_view, create_admin]
 }
 
-crate::impl_controller_fairing!(Controller, AuthService, "Auth Controller", routes());
+crate::impl_controller_routes!(Controller, "Auth Controller", routes());

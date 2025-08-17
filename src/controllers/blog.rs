@@ -752,4 +752,4 @@ fn routes() -> Vec<Route> {
     ]
 }
 
-crate::impl_controller_fairing!(Controller, BlogService, "Blog Controller", routes());
+crate::impl_controller_routes!(Controller, "Blog Controller", routes());
