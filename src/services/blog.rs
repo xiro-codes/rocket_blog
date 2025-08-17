@@ -122,9 +122,10 @@ impl Service {
             .await?
             .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", id)))
             .map(Into::into)?;
+        let text = markdown::to_html(data.text.as_str());
         let excerpt = Self::generate_excerpt(&data.text, data.excerpt);
         p.title = Set(data.title.to_owned());
-        p.text = Set(data.text.to_owned());
+        p.text = Set(text);
         p.excerpt = Set(excerpt);
         p.update(db).await
     }
