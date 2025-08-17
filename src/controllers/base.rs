@@ -1,5 +1,5 @@
 use rocket::{
-    fairing::{self, Fairing, Kind},
+    fairing::{self, Fairing, Info, Kind},
     http::{CookieJar, Status},
     request::FlashMessage,
     response::{Flash, Redirect},
@@ -9,18 +9,6 @@ use sea_orm_rocket::Connection;
 use uuid::Uuid;
 
 use crate::{pool::Db, services::AuthService};
-
-/// Generic controller trait for common functionality
-pub trait BaseController {
-    /// Get the mount path for this controller
-    fn path(&self) -> &str;
-
-    /// Get the controller name for fairing info
-    fn name(&self) -> &'static str;
-
-    /// Get the routes for this controller
-    fn routes() -> Vec<Route>;
-}
 
 /// Common controller functionality
 pub struct ControllerBase {
@@ -47,6 +35,7 @@ impl ControllerBase {
     }
 
     /// Check if user is authenticated and is admin
+    #[allow(dead_code)]
     pub async fn check_admin_auth(
         conn: Connection<'_, Db>,
         auth_service: &State<AuthService>,
@@ -63,6 +52,7 @@ impl ControllerBase {
     }
 
     /// Require admin authentication
+    #[allow(dead_code)]
     pub async fn require_admin_auth(
         conn: Connection<'_, Db>,
         auth_service: &State<AuthService>,

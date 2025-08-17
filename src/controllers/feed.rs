@@ -1,21 +1,23 @@
-use crate::{pool::Db, services::BlogService};
+use crate::{controllers::base::ControllerBase, pool::Db, services::BlogService};
 use chrono::{DateTime, Utc};
 use models::post;
 use rocket::{
     fairing::{self, Fairing, Kind},
-    http::{ContentType, Status},
+    http::Status,
     response::content,
     Build, Rocket, Route, State,
 };
 use sea_orm_rocket::Connection;
 
 pub struct Controller {
-    path: String,
+    base: ControllerBase,
 }
 
 impl Controller {
     pub fn new(path: String) -> Self {
-        Self { path }
+        Self {
+            base: ControllerBase::new(path),
+        }
     }
 }
 
@@ -87,7 +89,7 @@ fn generate_rss_xml(posts: &[post::Model]) -> String {
     )
 }
 
-pub fn routes() -> Vec<Route> {
+fn routes() -> Vec<Route> {
     routes![rss_feed]
 }
 
@@ -101,6 +103,6 @@ impl Fairing for Controller {
     }
     
     async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        Ok(rocket.mount(self.path.to_owned(), routes()))
+        Ok(rocket.mount(self.base.path(), routes()))
     }
 }

@@ -1,10 +1,4 @@
-#![allow(renamed_and_removed_lints)]
-#![allow(unused_variables)]
-#![allow(unused_imports)]
-#![allow(unused_mut)]
-#![allow(dead_code)]
-#![allow(unused_assignments)]
-#![allow(unused_must_use)]
+// Temporarily removed allow directives to identify actual issues
 #[macro_use]
 extern crate rocket;
 
@@ -22,11 +16,10 @@ mod tests;
 use config::AppConfig;
 use migrations::MigratorTrait;
 use pool::Db;
-use rocket::{fairing, fairing::AdHoc, fs::FileServer, response::Redirect, Build, Request, Rocket};
-use rocket_dyn_templates::{context, Template};
+use rocket::{fairing, fairing::AdHoc, fs::FileServer, response::Redirect, Build, Rocket};
+use rocket_dyn_templates::Template;
 use sea_orm_rocket::Database;
 use services::{TagService, ReactionService};
-use std::time::SystemTime;
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     let conn = &Db::fetch(&rocket).unwrap().conn;
@@ -39,34 +32,20 @@ pub fn catch_default() -> Redirect {
     Redirect::to("/")
 }
 
-fn drop_rocket(meta: &log::Metadata) -> bool {
-    let name = meta.target();
-    if name.starts_with("rocket") || name.eq("_") {
-        return false;
-    }
-    true
+use std::time::SystemTime;
+
+/// Unified log filter for noisy dependencies
+fn should_filter_log(meta: &log::Metadata) -> bool {
+    let target = meta.target();
+    // Filter out noisy log targets
+    target.starts_with("rocket") || 
+    target.starts_with("sea_orm_migration") || 
+    target.starts_with("sqlx") || 
+    target.starts_with("hyper") || 
+    target.eq("_")
 }
-fn drop_sea_orm_migration(meta: &log::Metadata) -> bool {
-    let name = meta.target();
-    if name.starts_with("sea_orm_migration") || name.eq("_") {
-        return false;
-    }
-    true
-}
-fn drop_sqlx(meta: &log::Metadata) -> bool {
-    let name = meta.target();
-    if name.starts_with("sqlx") || name.eq("_") {
-        return false;
-    }
-    true
-}
-fn drop_hyper(meta: &log::Metadata) -> bool {
-    let name = meta.target();
-    if name.starts_with("hyper") || name.eq("_") {
-        return false;
-    }
-    true
-}
+
+/// Setup application logging with clean filtering
 fn setup_logger() -> Result<(), fern::InitError> {
     fern::Dispatch::new()
         .format(|out, message, record| {
@@ -79,10 +58,7 @@ fn setup_logger() -> Result<(), fern::InitError> {
             ))
         })
         .level(log::LevelFilter::Debug)
-        .filter(drop_rocket)
-        .filter(drop_sqlx)
-        .filter(drop_sea_orm_migration)
-        .filter(drop_hyper)
+        .filter(|meta| !should_filter_log(meta))
         .chain(std::io::stdout())
         .chain(fern::log_file("output.log")?)
         .apply()?;
@@ -93,7 +69,10 @@ fn setup_logger() -> Result<(), fern::InitError> {
 async fn rocket() -> _ {
     let figment = rocket::Config::figment();
     let app_config = AppConfig::from_figment(&figment);
-    //setup_logger().unwrap();
+    
+    // Setup logging - ignore errors if already initialized
+    let _ = setup_logger();
+    
     let mut rocket = rocket::build()
         .register("/", catchers![catch_default])
         .attach(Db::init())

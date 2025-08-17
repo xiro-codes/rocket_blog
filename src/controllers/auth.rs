@@ -1,4 +1,4 @@
-use models::{account, dto::{AccountFormDTO, AdminCreateFormDTO}};
+use models::dto::{AccountFormDTO, AdminCreateFormDTO};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -12,7 +12,7 @@ use sea_orm_rocket::Connection;
 use crate::{
     controllers::base::ControllerBase,
     pool::Db,
-    services::{self, AuthService},
+    services::AuthService,
 };
 
 /// This Controller also provides the AuthService
@@ -90,7 +90,7 @@ async fn create_admin_view(
 async fn create_admin(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
-    jar: &CookieJar<'_>,
+    _jar: &CookieJar<'_>,
     data: Form<AdminCreateFormDTO>,
 ) -> Flash<Redirect> {
     let db = conn.into_inner();

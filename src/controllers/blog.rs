@@ -3,10 +3,10 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{self, AuthService, BlogService, CommentService, ReactionService, TagService},
+    services::{AuthService, BlogService, CommentService, ReactionService, TagService},
     types::{HttpRange, StreamedFile},
 };
-use models::{dto::SearchFormDTO, post, post_reaction::ReactionType, tag};
+use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -19,7 +19,7 @@ use rocket::{
 use rocket_dyn_templates::{context, Template};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use sea_orm_rocket::Connection;
-use std::{fs::File, net::SocketAddr};
+use std::fs::File;
 use uuid::Uuid;
 
 /// Request guard to extract client IP address
