@@ -28,11 +28,11 @@ COPY models ./models/
 COPY src ./src/
 
 # Build with error handling
-RUN cargo build --release || \
+RUN cargo build || \
     (echo "Build failed, trying with offline mode..." && \
-     cargo build --release --offline) || \
+     cargo build --offline) || \
     (echo "Offline build failed, trying with network retry..." && \
-     sleep 5 && cargo build --release)
+     sleep 5 && cargo build )
 
 # Runtime stage
 FROM debian:bookworm-slim
@@ -51,7 +51,7 @@ COPY templates ./templates/
 COPY static ./static/
 COPY .Rocket.docker.toml ./Rocket.toml
 
-COPY --from=builder /app/target/release/app ./rocket-template
+COPY --from=builder /app/target/debug/app ./rocket-template
 
 RUN mkdir -p /app/data && chown -R app:app /app && chmod +x ./rocket-template
 

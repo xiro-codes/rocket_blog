@@ -31,32 +31,32 @@ gen-models-simple:
 
 # Docker development and deployment commands
 docker-dev:
-	./scripts/docker-deploy.sh dev
+	sh ./scripts/docker-deploy.sh dev
 
 docker-dev-live:
-	./scripts/docker-deploy.sh dev-live
+	sh ./scripts/docker-deploy.sh dev-live
 
 docker-prod:
-	./scripts/docker-deploy.sh prod
+	sh ./scripts/docker-deploy.sh prod
 
 docker-setup-ssl:
-	./scripts/docker-deploy.sh setup-ssl
+	sh ./scripts/docker-deploy.sh setup-ssl
 
 docker-renew-ssl:
-	./scripts/docker-deploy.sh renew-ssl
+	sh ./scripts/docker-deploy.sh renew-ssl
 
 docker-status:
-	./scripts/docker-deploy.sh status
+	sh ./scripts/docker-deploy.sh status
 
 docker-logs SERVICE="":
-	./scripts/docker-deploy.sh logs {{SERVICE}}
+	sh ./scripts/docker-deploy.sh logs {{SERVICE}}
 
 docker-stop:
-	./scripts/docker-deploy.sh stop
+	sh ./scripts/docker-deploy.sh stop
 
 docker-clean:
-	./scripts/docker-deploy.sh clean
+	sh ./scripts/docker-deploy.sh clean
 
 docker-help:
-	./scripts/docker-deploy.sh help
+	sh ./scripts/docker-deploy.sh help
 
