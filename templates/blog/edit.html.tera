@@ -49,4 +49,39 @@
 </div>
 {% endif %}
 {% endif %}
+
+{% endblock %}
+
+{% block script %}
+{%if post%}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const easyMDE = new EasyMDE({
+		element: document.getElementById('text'),
+		spellChecker: false,
+		autofocus: false,
+		placeholder: 'Write your post content here in Markdown...',
+		toolbar: [
+			'bold', 'italic', 'heading', '|',
+			'quote', 'unordered-list', 'ordered-list', '|',
+			'link', 'image', '|',
+			'code', 'table', '|',
+			'preview', 'side-by-side', 'fullscreen', '|',
+			'guide'
+		],
+		status: ['autosave', 'lines', 'words', 'cursor'],
+		renderingConfig: {
+			singleLineBreaks: false,
+			codeSyntaxHighlighting: true,
+		},
+		insertTexts: {
+			horizontalRule: ["", "\n\n-----\n\n"],
+			image: ["![](http://", ")"],
+			link: ["[", "](http://)"],
+			table: ["", "\n\n| Column 1 | Column 2 | Column 3 |\n| -------- | -------- | -------- |\n| Text     | Text     | Text     |\n\n"],
+		}
+	});
+});
+</script>
+{% endif %}
 {% endblock %}
