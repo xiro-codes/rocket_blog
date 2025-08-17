@@ -3,7 +3,7 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{AuthService, BlogService, CommentService, ReactionService, TagService},
+    services::{AuthService, BlogService, CommentService, ReactionService, TagService, CoordinatorService},
     types::{HttpRange, StreamedFile},
 };
 use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag};
@@ -85,66 +85,36 @@ async fn list_view(
     page: Option<u64>,
     page_size: Option<u64>,
     jar: &CookieJar<'_>,
-    service: &State<BlogService>,
-    auth_service: &State<AuthService>,
-    reaction_service: &State<ReactionService>,
-    tag_service: &State<TagService>,
+    coordinator: &State<CoordinatorService>,
     flash: Option<FlashMessage<'_>>,
     client_ip: ClientIp,
 ) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     
-    // Check if any accounts exist for the admin creation button
-    let has_accounts = auth_service.has_any_accounts(db).await;
+    // Use coordinator service to get all data for the list view
+    let list_data = coordinator.get_blog_list_data(
+        db,
+        page,
+        page_size,
+        token.as_deref(),
+        &client_ip.0,
+    ).await.map_err(|_| Status::InternalServerError)?;
     
-    // Check if user is admin to include drafts
-    let is_admin = if let Some(token_str) = &token {
-        if let Ok(token_uuid) = Uuid::parse_str(token_str) {
-            if let Some(account) = auth_service.check_token(db, token_uuid).await {
-                account.admin
-            } else {
-                false
-            }
-        } else {
-            false
-        }
-    } else {
-        false
-    };
-    
-    match service.paginate_with_title_include_drafts(db, page, page_size, is_admin).await {
-        Ok((posts, page, page_size, num_pages)) => {
-            // Get all tags for the tag cloud
-            let all_tags = match tag_service.find_all_tags(db).await {
-                Ok(tags) => tags,
-                Err(_) => vec![], // Continue even if tag loading fails
-            };
-            
-            // Get reaction summaries for all posts
-            let post_ids: Vec<Uuid> = posts.iter().map(|p| p.id).collect();
-            let reaction_summaries = reaction_service
-                .get_posts_reaction_summaries(db, &post_ids, &client_ip.0)
-                .await
-                .unwrap_or_default();
-            
-            Ok(Template::render(
-                "blog/list",
-                context! {
-                    posts,
-                    page,
-                    page_size,
-                    num_pages,
-                    token,
-                    all_tags,
-                    reaction_summaries,
-                    has_accounts,
-                    flash: ControllerBase::extract_flash(flash)
-                },
-            ))
+    Ok(Template::render(
+        "blog/list",
+        context! {
+            posts: list_data.posts,
+            page: list_data.page,
+            page_size: list_data.page_size,
+            num_pages: list_data.num_pages,
+            token,
+            all_tags: list_data.all_tags,
+            reaction_summaries: list_data.reaction_summaries,
+            has_accounts: list_data.has_accounts,
+            flash: ControllerBase::extract_flash(flash)
         },
-        Err(_) => Err(Status::InternalServerError),
-    }
+    ))
 }
 #[get("/<id>")]
 async fn detail_view(

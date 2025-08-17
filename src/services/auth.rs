@@ -83,4 +83,30 @@ impl Service {
 
         Ok(account)
     }
+
+    /// Check if a token belongs to an admin user
+    pub async fn is_admin_token(&self, db: &DbConn, token_str: &str) -> bool {
+        if let Ok(token_uuid) = Uuid::parse_str(token_str) {
+            if let Some(account) = self.check_token(db, token_uuid).await {
+                return account.admin;
+            }
+        }
+        false
+    }
+
+    /// Check if a token is valid and belongs to an admin
+    pub async fn require_admin_token(&self, db: &DbConn, token_str: &str) -> Result<account::Model, DbErr> {
+        let token_uuid = Uuid::parse_str(token_str)
+            .map_err(|_| DbErr::Custom("Invalid token format".to_owned()))?;
+        
+        if let Some(account) = self.check_token(db, token_uuid).await {
+            if account.admin {
+                Ok(account)
+            } else {
+                Err(DbErr::Custom("Admin access required".to_owned()))
+            }
+        } else {
+            Err(DbErr::Custom("Invalid token".to_owned()))
+        }
+    }
 }

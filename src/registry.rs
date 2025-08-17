@@ -1,4 +1,4 @@
-use crate::services::{AuthService, BlogService, CommentService, ReactionService, TagService};
+use crate::services::{AuthService, BlogService, CommentService, ReactionService, TagService, CoordinatorService};
 use crate::controllers;
 use rocket::{fairing::AdHoc, Build, Rocket};
 
@@ -14,6 +14,7 @@ impl ServiceRegistry {
             .manage(CommentService::new())
             .manage(ReactionService::new())
             .manage(TagService::new())
+            .manage(CoordinatorService::new())
     }
     
     /// Create a fairing that initializes services
