@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enhanced list view with modern card layout instead of simple lists
   - Auto-generated excerpts with intelligent content extraction (200 char limit)
   - "Read More" buttons for improved user experience
+- 📧 **RSS Feed Generation** - Complete RSS feed implementation
+  - RSS feed available at `/feed/rss` endpoint
+  - Includes post excerpts for better feed content
+  - XML-compliant RSS 2.0 format with proper metadata
+  - Automatic publication date and link generation
 - 📚 **Comprehensive Documentation Suite** - Complete project documentation overhaul
   - User Guide for content creators and blog users
   - Architecture Overview with technical system design
@@ -182,7 +187,6 @@ The implementation includes thorough analysis of:
 - 🔍 **Full-text Search** - Search across blog posts and comments
 - 📡 **REST API** - JSON endpoints for all blog operations
 - 🏷️ **Tag UI Integration** - Complete tag filtering and management interface
-- 📧 **RSS Feed Generation** - Subscribe to blog updates
 - 🖼️ **Image Upload Support** - Built-in image management
 - ❤️ **Like/Reaction System** - Reader engagement features
 - 🛡️ **CSRF Protection** - Enhanced security for form submissions

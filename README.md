@@ -19,7 +19,7 @@ A modern, fast, and feature-rich blog application built with **Rust** and the **
 - 📑 **Draft System** - Save posts as drafts before publishing
 - 🏷️ **Tag System** - Organize posts with colorful, filterable tags
 - 📱 **Responsive Design** - Bootstrap-based UI that works on all devices
-- 📧 **RSS Feed** - Subscribe to blog updates via RSS at `/feed/rss`
+- 📧 **RSS Feed** - Subscribe to blog updates via RSS at `/feed/rss` with post excerpts
 
 ### Planned Features ([See Roadmap](docs/FEATURE_SUGGESTIONS.md))
 - 🔍 **Search Functionality** - Full-text search across posts
@@ -83,6 +83,13 @@ cargo run
 3. Start creating blog posts!
 
 ## 📖 Usage
+
+### Browsing Blog Posts
+1. **Main Blog Page** - Visit `/blog` to see all posts with excerpts and preview cards
+2. **Post Discovery** - Browse posts with auto-generated or custom excerpts for quick content overview
+3. **Tag Navigation** - Click on tags to filter posts by topic
+4. **RSS Subscription** - Subscribe to `/feed/rss` for updates with excerpt content
+5. **Responsive Design** - Seamless experience across desktop, tablet, and mobile devices
 
 ### Writing Blog Posts
 1. **Navigate** to `/blog` to see all posts
