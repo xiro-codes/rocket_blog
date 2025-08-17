@@ -171,13 +171,34 @@ See [Feature Integration Guide](docs/TAG_INTEGRATION_EXAMPLE.md) for detailed ex
 ## 📦 Deployment
 
 ### Docker Deployment (Recommended)
-```bash
-# Build and run with Docker Compose
-docker-compose up --build
 
-# Or build manually
-docker build -t rocket-blog .
-docker run -p 8000:8000 rocket-blog
+For a complete Docker setup with build instructions, see [Docker Guide](docs/DOCKER.md).
+
+Quick start:
+```bash
+# Development with direct app access
+docker-compose -f docker-compose.dev.yml up --build
+
+# Production with nginx reverse proxy and SSL
+./scripts/setup-ssl.sh  # First time only
+docker-compose up --build -d
+```
+
+**Production Features:**
+- Nginx reverse proxy with SSL termination
+- Automatic SSL certificate generation and renewal
+- Production-optimized container images
+- Secure defaults with proper headers
+
+**NixOS Users:** The Docker approach solves build issues on NixOS by building inside the container. See the [Docker Guide](docs/DOCKER.md) for troubleshooting SSL certificate issues and alternative build strategies.
+
+**Troubleshooting Docker Builds:** If you encounter SSL certificate issues during Docker build, try:
+```bash
+# Use the fallback Dockerfile
+docker build -f Dockerfile.fallback -t rocket-blog .
+
+# Or build with host network
+docker build --network=host -t rocket-blog .
 ```
 
 ### Manual Deployment
