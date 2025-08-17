@@ -1,4 +1,5 @@
 // Test modules for all main crate components
+pub mod admin_tests;
 pub mod config_tests;
 pub mod pool_tests;
 pub mod services_tests;
