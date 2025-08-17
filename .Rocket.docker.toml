@@ -3,7 +3,7 @@ limits.file = "1 GB"
 limits.data-form = "1 GB"
 limits.form = "1 GB"
 data_path = "/app/data"
-
+address = "0.0.0.0"
 [default.databases.sea_orm]
 url = "postgres://master:password@postgres/tdavis_dev"
 
