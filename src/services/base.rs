@@ -39,6 +39,7 @@ where
 }
 
 /// Base service struct that provides common functionality
+#[derive(Clone)]
 pub struct BaseService;
 
 impl BaseService {

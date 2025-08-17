@@ -25,7 +25,7 @@ use pool::Db;
 use rocket::{fairing, fairing::AdHoc, fs::FileServer, response::Redirect, Build, Request, Rocket};
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Database;
-use services::{TagService, ReactionService};
+use services::{TagService, ReactionService, SettingsService};
 use std::time::SystemTime;
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
@@ -109,9 +109,11 @@ async fn rocket() -> _ {
     rocket
         .manage(TagService::new())
         .manage(ReactionService::new())
+        .manage(SettingsService::new())
         .manage(app_config)
         .attach(controllers::IndexController::new("/".to_owned()))
         .attach(controllers::AuthController::new("/auth".to_owned()))
+        .attach(controllers::AdminController::new("/admin".to_owned()))
         .attach(controllers::BlogController::new("/blog".to_owned()))
         .attach(controllers::CommentController::new("/comment".to_owned()))
         .attach(controllers::FeedController::new("/feed".to_owned()))

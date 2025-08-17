@@ -8,6 +8,7 @@ pub mod event;
 pub mod post;
 pub mod post_reaction;
 pub mod post_tag;
+pub mod settings;
 pub mod tag;
 
 // Custom DTOs and form structures

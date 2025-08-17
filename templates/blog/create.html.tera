@@ -6,6 +6,12 @@
 	<h1 class="terminal-cursor">Create Article</h1>
 </center>
 
+{% if generated_title or generated_content %}
+<div class="alert alert-success text-center mt-3">
+	🤖 AI-generated content loaded! Review and edit as needed before publishing.
+</div>
+{% endif %}
+
 <hr class="terminal-divider">
 
 <div class="d-flex justify-content-center align-items-center">
@@ -14,7 +20,8 @@
 		
 		<div>
 			<label for="title" class="form-label">Title:</label>
-			<input type="text" name="title" id="title" class="form-control" placeholder="Enter post title..." />
+			<input type="text" name="title" id="title" class="form-control" placeholder="Enter post title..." 
+			       value="{% if generated_title %}{{ generated_title }}{% endif %}" />
 		</div>
 		
 		<div>
@@ -26,7 +33,7 @@
 		
 		<div>
 			<label for="text" class="form-label">Content:</label>
-			<textarea name="text" id="text" rows="8" class="form-control" placeholder="Write your post content here..."></textarea>
+			<textarea name="text" id="text" rows="8" class="form-control" placeholder="Write your post content here...">{% if generated_content %}{{ generated_content }}{% endif %}</textarea>
 		</div>
 		
 		<div>

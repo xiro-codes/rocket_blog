@@ -1,0 +1,88 @@
+{% extends "base" %}
+
+{% block title %}Generate Post{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4">🤖 Generate Post with AI</h1>
+            
+            <nav class="mb-4">
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <a class="nav-link" href="/admin/settings">Settings</a>
+                    <a class="nav-link active" href="/admin/generate">Generate Post</a>
+                </div>
+            </nav>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>✨ AI Post Generator</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/admin/generate">
+                        <div class="mb-3">
+                            <label for="topic" class="form-label">Topic</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="topic" 
+                                name="topic" 
+                                placeholder="e.g., The future of web development, Best practices for Rust programming..."
+                                required
+                            >
+                            <div class="form-text">
+                                Describe what you want the blog post to be about.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="style" class="form-label">Style (Optional)</label>
+                            <select class="form-control" id="style" name="style">
+                                <option value="">Default style</option>
+                                <option value="Technical and detailed">Technical and detailed</option>
+                                <option value="Conversational and friendly">Conversational and friendly</option>
+                                <option value="Professional and formal">Professional and formal</option>
+                                <option value="Creative and engaging">Creative and engaging</option>
+                                <option value="Educational and informative">Educational and informative</option>
+                            </select>
+                            <div class="form-text">
+                                Choose a writing style or leave blank to use your base prompt.
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg">
+                            🚀 Generate Post
+                        </button>
+                        <a href="/admin/settings" class="btn btn-outline-secondary ms-2">
+                            ⚙️ Settings
+                        </a>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>💡 Tips for Better Results</h3>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>Be specific:</strong> Instead of "programming", try "Advanced Rust error handling patterns"</li>
+                        <li><strong>Include context:</strong> "For beginners" or "for experienced developers"</li>
+                        <li><strong>Mention format:</strong> "Tutorial", "comparison", "best practices guide"</li>
+                        <li><strong>Set the tone:</strong> Use the style dropdown to match your audience</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <h5>🔄 How it works:</h5>
+                <p class="mb-0">
+                    The AI will use your configured base prompt and the topic/style you provide to generate a complete blog post. 
+                    After generation, you'll be redirected to the blog creation page where you can review, edit, and publish the content.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

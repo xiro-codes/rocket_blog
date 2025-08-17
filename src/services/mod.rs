@@ -9,5 +9,7 @@ mod comment;
 pub use comment::Service as CommentService;
 mod reaction;
 pub use reaction::{PostReactionSummary, Service as ReactionService};
+mod settings;
+pub use settings::Service as SettingsService;
 mod tag;
 pub use tag::TagService;

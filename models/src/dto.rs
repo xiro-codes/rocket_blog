@@ -75,3 +75,19 @@ pub struct PostSearchResult {
 pub struct SearchFormDTO {
     pub query: String,
 }
+
+/// Form DTO for settings management
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct SettingsFormDTO {
+    pub openai_api_key: String,
+    pub openai_base_prompt: String,
+}
+
+/// Form DTO for AI post generation
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct GeneratePostFormDTO {
+    pub topic: String,
+    pub style: Option<String>,
+}
