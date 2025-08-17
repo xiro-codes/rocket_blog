@@ -119,6 +119,57 @@ impl CoordinatorService {
         })
     }
 
+    /// Search blog posts with all associated data
+    pub async fn search_blog_posts(
+        &self,
+        db: &DatabaseConnection,
+        query: &str,
+        page: Option<u64>,
+        page_size: Option<u64>,
+        token: Option<&str>,
+        client_ip: &str,
+    ) -> Result<BlogSearchData, String> {
+        // Check if user is admin to include drafts
+        let is_admin = if let Some(token_str) = token {
+            self.auth_service.is_admin_token(db, token_str).await
+        } else {
+            false
+        };
+        
+        // Perform search
+        let (results, page, page_size, num_pages) = if !query.trim().is_empty() {
+            self.blog_service.search_posts(db, query, is_admin, page, page_size)
+                .await
+                .map_err(|e| format!("Search failed: {}", e))?
+        } else {
+            (vec![], page.unwrap_or(1), page_size.unwrap_or(10), 0)
+        };
+        
+        // Get all tags for the tag cloud
+        let all_tags = self.tag_service.find_all_tags(db).await.unwrap_or_default();
+        
+        // Get reaction summaries for search results if any
+        let reaction_summaries = if !results.is_empty() {
+            let post_ids: Vec<Uuid> = results.iter().map(|p| p.id).collect();
+            self.reaction_service
+                .get_posts_reaction_summaries(db, &post_ids, client_ip)
+                .await
+                .map(|hashmap| hashmap.into_values().collect())
+                .unwrap_or_default()
+        } else {
+            vec![]
+        };
+        
+        Ok(BlogSearchData {
+            results,
+            page,
+            page_size,
+            num_pages,
+            all_tags,
+            reaction_summaries,
+        })
+    }
+
     /// Check if token belongs to an admin user
     pub async fn is_admin(&self, db: &DatabaseConnection, token: Option<&str>) -> bool {
         if let Some(token_str) = token {
@@ -152,5 +203,15 @@ pub struct BlogDetailData {
     pub post: Post,
     pub tags: Vec<models::tag::Model>,
     pub comments: Vec<models::comment::Model>,
+    pub reaction_summaries: Vec<crate::services::PostReactionSummary>,
+}
+
+/// Data structure for blog search results
+pub struct BlogSearchData {
+    pub results: Vec<models::dto::PostSearchResult>,
+    pub page: u64,
+    pub page_size: u64,
+    pub num_pages: u64,
+    pub all_tags: Vec<models::tag::Model>,
     pub reaction_summaries: Vec<crate::services::PostReactionSummary>,
 }

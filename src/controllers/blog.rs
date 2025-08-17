@@ -230,10 +230,7 @@ async fn detail_view(
 #[get("/search?<query>&<page>&<page_size>")]
 async fn search_get(
     conn: Connection<'_, Db>,
-    service: &State<BlogService>,
-    auth_service: &State<AuthService>,
-    reaction_service: &State<ReactionService>,
-    tag_service: &State<TagService>,
+    coordinator: &State<CoordinatorService>,
     query: Option<String>,
     page: Option<u64>,
     page_size: Option<u64>,
@@ -243,58 +240,29 @@ async fn search_get(
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     
-    // Check if user is admin to include drafts
-    let is_admin = if let Some(token_str) = &token {
-        if let Ok(token_uuid) = Uuid::parse_str(token_str) {
-            if let Some(account) = auth_service.check_token(db, token_uuid).await {
-                account.admin
-            } else {
-                false
-            }
-        } else {
-            false
-        }
-    } else {
-        false
-    };
-
     let search_query = query.unwrap_or_default();
-    let (results, page, page_size, num_pages) = if !search_query.trim().is_empty() {
-        service.search_posts(db, &search_query, is_admin, page, page_size)
-            .await
-            .map_err(|_| Status::InternalServerError)?
-    } else {
-        (vec![], page.unwrap_or(1), page_size.unwrap_or(10), 0)
-    };
-
-    // Get all tags for the tag cloud
-    let all_tags = match tag_service.find_all_tags(db).await {
-        Ok(tags) => tags,
-        Err(_) => vec![], // Continue even if tag loading fails
-    };
-
-    // Get reaction summaries for search results if any
-    let reaction_summaries = if !results.is_empty() {
-        let post_ids: Vec<Uuid> = results.iter().map(|p| p.id).collect();
-        reaction_service
-            .get_posts_reaction_summaries(db, &post_ids, &client_ip.0)
-            .await
-            .unwrap_or_default()
-    } else {
-        std::collections::HashMap::new()
-    };
+    
+    // Use coordinator service to get search results
+    let search_data = coordinator.search_blog_posts(
+        db,
+        &search_query,
+        page,
+        page_size,
+        token.as_deref(),
+        &client_ip.0,
+    ).await.map_err(|_| Status::InternalServerError)?;
 
     Ok(Template::render(
         "blog/search",
         context! {
-            results,
+            results: search_data.results,
             search_query: search_query.clone(),
-            page,
-            page_size,
-            num_pages,
+            page: search_data.page,
+            page_size: search_data.page_size,
+            num_pages: search_data.num_pages,
             token,
-            all_tags,
-            reaction_summaries,
+            all_tags: search_data.all_tags,
+            reaction_summaries: search_data.reaction_summaries,
             title: if search_query.trim().is_empty() { 
                 "Search Posts".to_string() 
             } else { 
