@@ -5,8 +5,12 @@ extern crate rocket;
 mod config;
 mod controllers;
 mod dto;
+mod features;
+mod guards;
 mod middleware;
 mod pool;
+mod registry;
+mod responders;
 mod services;
 mod types;
 
@@ -14,12 +18,13 @@ mod types;
 mod tests;
 
 use config::AppConfig;
+use features::Features;
+use registry::{ServiceRegistry, ControllerRegistry};
 use migrations::MigratorTrait;
 use pool::Db;
 use rocket::{fairing, fairing::AdHoc, fs::FileServer, response::Redirect, Build, Rocket};
 use rocket_dyn_templates::Template;
 use sea_orm_rocket::Database;
-use services::{TagService, ReactionService};
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     let conn = &Db::fetch(&rocket).unwrap().conn;
@@ -57,7 +62,7 @@ fn setup_logger() -> Result<(), fern::InitError> {
                 message
             ))
         })
-        .level(log::LevelFilter::Debug)
+        .level(Features::log_level())
         .filter(|meta| !should_filter_log(meta))
         .chain(std::io::stdout())
         .chain(fern::log_file("output.log")?)
@@ -73,26 +78,21 @@ async fn rocket() -> _ {
     // Setup logging - ignore errors if already initialized
     let _ = setup_logger();
     
+    // Build the base rocket instance
     let mut rocket = rocket::build()
         .register("/", catchers![catch_default])
         .attach(Db::init())
         .attach(Template::fairing())
-        .attach(AdHoc::try_on_ignite("Migrations", run_migrations));
+        .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
+        .attach(ServiceRegistry::fairing())
+        .manage(app_config);
     
     // Only attach seeding in debug builds (development mode)
-    #[cfg(debug_assertions)]
-    {
+    if Features::enable_seeding() {
         rocket = rocket.attach(middleware::Seeding::new(Some(0), 50));
     }
     
-    rocket
-        .manage(TagService::new())
-        .manage(ReactionService::new())
-        .manage(app_config)
-        .attach(controllers::IndexController::new("/".to_owned()))
-        .attach(controllers::AuthController::new("/auth".to_owned()))
-        .attach(controllers::BlogController::new("/blog".to_owned()))
-        .attach(controllers::CommentController::new("/comment".to_owned()))
-        .attach(controllers::FeedController::new("/feed".to_owned()))
+    // Attach all controllers
+    ControllerRegistry::attach_all_controllers(rocket)
         .mount("/static", FileServer::from("./static/"))
 }
