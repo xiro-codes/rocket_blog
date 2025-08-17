@@ -4,11 +4,9 @@
 *.md
 README.*
 
-# Ignore build artifacts except release binary
+# Ignore build artifacts - we'll build inside container
 target/
-!target/release/rocket-template
-# Don't ignore Cargo.lock - needed for reproducible builds
-# Cargo.lock
+# Keep Cargo.lock - needed for reproducible builds
 
 # Ignore IDE/editor files
 .vscode/
@@ -22,16 +20,22 @@ target/
 tmp/
 temp/
 
-# Ignore environment files
-.env*
-!.envrc
+# Ignore environment files (except those needed for Docker)
+.env
+.env.example
+.envrc
 
-# Ignore Docker files in the container
-Dockerfile*
+# Ignore Docker files not needed in container
+.Dockerfile
 docker-compose*
 .dockerignore
 
-# Ignore scripts not needed in container
+# Ignore scripts and nix files not needed in container
 scripts/
 justfile
 flake.*
+output.log
+
+# Ignore development database data
+*.db
+*.sqlite
