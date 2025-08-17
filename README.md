@@ -1,6 +1,6 @@
 # Rocket Blog
 
-A modern, fast, and feature-rich blog application built with **Rust** and the **Rocket** web framework. This blog platform provides a clean interface for content management with markdown support, user authentication, commenting system, and a powerful tagging system.
+A modern, fast, and feature-rich blog application built with **Rust** and the **Rocket** web framework. This blog platform provides a clean interface for content management with a visual markdown editor, automatic post excerpts, user authentication, commenting system, and a powerful tagging system.
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Rust Version](https://img.shields.io/badge/rust-1.70+-orange)
@@ -10,6 +10,8 @@ A modern, fast, and feature-rich blog application built with **Rust** and the **
 
 ### Current Features
 - 📝 **Blog Management** - Create, edit, delete, and publish blog posts with markdown support
+- ✨ **WYSIWYG Markdown Editor** - Visual markdown editing with EasyMDE, live preview, and terminal theme
+- 📄 **Post Excerpts** - Automatic or custom post summaries for better content discovery
 - 🔐 **Authentication System** - Secure login/logout with admin privileges
 - 💬 **Comment System** - Enable readers to comment on blog posts
 - 🎬 **Media Support** - Video streaming with range requests for optimal performance
@@ -25,6 +27,7 @@ A modern, fast, and feature-rich blog application built with **Rust** and the **
 - 👤 **User Profiles** - Multi-author support with user profiles
 - ❤️ **Like/Reaction System** - Reader engagement features
 - 🖼️ **Image Upload** - Built-in image management
+- 📡 **REST API** - JSON endpoints for all blog operations
 
 ## 🚀 Quick Start
 
@@ -84,10 +87,14 @@ cargo run
 ### Writing Blog Posts
 1. **Navigate** to `/blog` to see all posts
 2. **Create** new posts with the "New Post" button (requires admin login)
-3. **Write** in Markdown - full markdown syntax is supported
-4. **Add Tags** to organize your content (comma-separated)
-5. **Save as Draft** or **Publish** immediately
-6. **Edit** posts anytime with the edit button
+3. **Write** in Markdown with the visual WYSIWYG editor featuring:
+   - Real-time preview and live editing
+   - Syntax highlighting and formatting toolbar
+   - Side-by-side and fullscreen editing modes
+4. **Add Excerpts** - Write custom summaries or let the system auto-generate them
+5. **Add Tags** to organize your content (comma-separated)
+6. **Save as Draft** or **Publish** immediately
+7. **Edit** posts anytime with the edit button
 
 ### User Authentication
 - **Login**: Use the login form at `/auth`
@@ -243,9 +250,22 @@ We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.
 
 ## 📚 Documentation
 
+### Core Documentation
+- [**User Guide**](docs/USER_GUIDE.md) - Complete guide for content creators and blog users
+- [**Architecture Overview**](docs/ARCHITECTURE.md) - Technical architecture and system design
+- [**API Documentation**](docs/API.md) - Comprehensive API reference and examples
+
+### Feature Guides
 - [**Feature Roadmap**](docs/FEATURE_SUGGESTIONS.md) - Planned features and implementation timeline
 - [**Implementation Guide**](docs/IMPLEMENTATION_SUMMARY.md) - Technical architecture details
 - [**Tag Integration Example**](docs/TAG_INTEGRATION_EXAMPLE.md) - Step-by-step feature integration
+- [**Post Excerpt Guide**](docs/POST_EXCERPT_IMPLEMENTATION.md) - Post summary system documentation
+- [**WYSIWYG Editor Guide**](docs/WYSIWYG_EDITOR_IMPLEMENTATION.md) - Visual editor implementation details
+
+### Development Documentation
+- [**Contributing Guide**](docs/CONTRIBUTING.md) - How to contribute to the project
+- [**Deployment Guide**](docs/DEPLOYMENT.md) - Production deployment instructions
+- [**Docker Guide**](docs/DOCKER.md) - Container deployment and development
 - [**Database Migrations**](migrations/README.md) - Managing database changes
 - [**Development Scripts**](scripts/README.md) - Automation and tooling
 
