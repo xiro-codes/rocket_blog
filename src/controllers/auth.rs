@@ -28,6 +28,24 @@ impl Controller {
     }
 }
 
+#[get("/")]
+async fn login_view(
+    conn: Connection<'_, Db>,
+    service: &State<AuthService>,
+) -> Result<Template, Status> {
+    let db = conn.into_inner();
+    
+    // Check if any accounts exist, return 404 if none
+    if !service.has_any_accounts(db).await {
+        return Err(Status::NotFound);
+    }
+    
+    Ok(Template::render(
+        "auth/login",
+        context! {}
+    ))
+}
+
 #[post("/", data = "<data>")]
 async fn login(
     conn: Connection<'_, Db>,
@@ -40,7 +58,7 @@ async fn login(
         jar.add_private(Cookie::new("token", token.to_string()));
         ControllerBase::success_redirect("/blog", "Login successful.")
     } else {
-        ControllerBase::danger_redirect("/blog", "Login failed.")
+        ControllerBase::danger_redirect("/auth/", "Login failed.")
     }
 }
 
@@ -88,7 +106,7 @@ async fn create_admin(
 }
 
 fn routes() -> Vec<Route> {
-    routes![login, logout, create_admin_view, create_admin]
+    routes![login_view, login, logout, create_admin_view, create_admin]
 }
 
 crate::impl_controller_fairing!(Controller, AuthService, "Auth Controller", routes());

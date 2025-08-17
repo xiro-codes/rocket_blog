@@ -21,24 +21,11 @@
 		<a class="btn btn-success" href="/blog/search">[SEARCH POSTS]</a>
 		{% if not has_accounts %}
 		<a class="btn btn-warning" href="/auth/create-admin">[CREATE ADMIN ACCOUNT]</a>
+		{% else %}
+		<a class="btn btn-primary" href="/auth/">[LOGIN]</a>
 		{% endif %}
 	</div>
-	{% if has_accounts %}
-	<form action="/auth/" method="post" class="mx-5 px-5 terminal-form">
-		<h3 class="text-center mb-4">[ SYSTEM LOGIN ]</h3>
-		<div class="mx-5 px-5 my-2">
-			<label for="username" class="form-label">Username:</label>
-			<input type="text" name="username" id="username" placeholder="enter username..." class="form-control" />
-		</div>
-		<div class="mx-5 px-5 my-2">
-			<label for="password" class="form-label">Password:</label>
-			<input type="password" name="password" id="password" placeholder="enter password..." class="form-control" />
-		</div>
-		<div class="mx-5 px-5 my-2 d-flex justify-content-center">
-			<button type="submit" class="btn btn-primary">[AUTHENTICATE]</button>
-		</div>
-	</form>
-	{% else %}
+	{% if not has_accounts %}
 	<div class="alert alert-info text-center mx-5">
 		<h4>🚀 Welcome to your new blog!</h4>
 		<p>No admin account exists yet. Click the "CREATE ADMIN ACCOUNT" button above to get started.</p>
