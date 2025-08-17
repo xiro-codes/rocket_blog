@@ -1,3 +1,6 @@
+# Docker Compose for Live Development with Source Code Mounting
+# This version mounts source code for live development workflows
+
 services:
   # The database service
   postgres:
@@ -21,7 +24,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # The Rust web application (development build)
+  # The Rust web application (live development with volume mounts)
   app:
     build: 
       context: .
@@ -39,9 +42,9 @@ services:
     volumes:
       # Persist uploaded files
       - app_data:/app/data
-      # Optional: Mount source code for development (uncomment as needed)
-      # - ./templates:/app/templates:ro
-      # - ./static:/app/static:ro
+      # Mount templates and static files for live editing
+      - ./templates:/app/templates:ro
+      - ./static:/app/static:ro
     depends_on:
       postgres:
         condition: service_healthy

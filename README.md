@@ -188,15 +188,32 @@ See [Feature Integration Guide](docs/TAG_INTEGRATION_EXAMPLE.md) for detailed ex
 
 For a complete Docker setup with build instructions, see [Docker Guide](docs/DOCKER.md).
 
-Quick start:
+**Development Options:**
 ```bash
-# Development with direct app access
-docker-compose -f docker-compose.dev.yml up --build
+# Standard development (debug builds, faster compilation)
+./scripts/docker-deploy.sh dev
 
+# Live development (template/static file auto-reload)
+./scripts/docker-deploy.sh dev-live
+
+# Or use docker-compose directly:
+docker-compose -f docker-compose.dev.yml up --build      # Standard
+docker-compose -f docker-compose.dev.live.yml up --build # Live template reload
+```
+
+**Production:**
+```bash
 # Production with nginx reverse proxy and SSL
 ./scripts/setup-ssl.sh  # First time only
-docker-compose up --build -d
+./scripts/docker-deploy.sh prod
 ```
+
+**Development Features:**
+- Production builds compiled in clean containerized environment (cross-platform)
+- Live template and static file reloading (dev-live mode)
+- Direct database access for development tools
+- Verbose logging for debugging
+- No SSL complexity for faster iteration
 
 **Production Features:**
 - Nginx reverse proxy with SSL termination
@@ -273,6 +290,7 @@ We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.
 - [**Contributing Guide**](docs/CONTRIBUTING.md) - How to contribute to the project
 - [**Deployment Guide**](docs/DEPLOYMENT.md) - Production deployment instructions
 - [**Docker Guide**](docs/DOCKER.md) - Container deployment and development
+- [**Development Setup**](docs/DEVELOPMENT.md) - Optimized development workflows
 - [**Database Migrations**](migrations/README.md) - Managing database changes
 - [**Development Scripts**](scripts/README.md) - Automation and tooling
 

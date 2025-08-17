@@ -82,10 +82,15 @@ The nginx container automatically:
 
 ## Development Setup
 
-For local development without SSL complexity:
+For local development without SSL complexity, there are two optimized options:
+
+### Standard Development Environment
 
 ```bash
-# Use development compose file
+# Use development compose file with debug builds
+./scripts/docker-deploy.sh dev
+
+# Or directly:
 docker-compose -f docker-compose.dev.yml up --build
 
 # Access points:
@@ -94,11 +99,29 @@ docker-compose -f docker-compose.dev.yml up --build
 # - Database: localhost:5432
 ```
 
-The development setup:
-- Exposes app directly on port 8000
-- Includes test data seeding (debug builds)
-- Exposes database port for external tools
-- No SSL/nginx complexity
+### Live Development with Hot Reloading
+
+```bash
+# Use live development with automatic rebuilds
+./scripts/docker-deploy.sh dev-live
+
+# Or directly:
+docker-compose -f docker-compose.dev.live.yml up --build
+
+# Access points:
+# - App: http://localhost:8000 (auto-reloads on code changes)
+# - pgAdmin: http://localhost:5050
+# - Database: localhost:5432
+```
+
+The development setups provide:
+- **Debug builds** for faster compilation (30s vs 3min for release)
+- **Live code reloading** with cargo-watch (live mode only)
+- **Direct database access** for external tools
+- **No SSL/nginx complexity** for simpler development
+- **Verbose logging** optimized for debugging
+
+For detailed development workflow documentation, see [Development Guide](DEVELOPMENT.md).
 
 ## SSL Certificate Management
 

@@ -29,3 +29,34 @@ gen-models-simple:
 	echo "pub mod dto;" >> ./models/src/lib.rs
 	echo "✅ Models generated with fixed serde imports and preserved DTO module"
 
+# Docker development and deployment commands
+docker-dev:
+	./scripts/docker-deploy.sh dev
+
+docker-dev-live:
+	./scripts/docker-deploy.sh dev-live
+
+docker-prod:
+	./scripts/docker-deploy.sh prod
+
+docker-setup-ssl:
+	./scripts/docker-deploy.sh setup-ssl
+
+docker-renew-ssl:
+	./scripts/docker-deploy.sh renew-ssl
+
+docker-status:
+	./scripts/docker-deploy.sh status
+
+docker-logs SERVICE="":
+	./scripts/docker-deploy.sh logs {{SERVICE}}
+
+docker-stop:
+	./scripts/docker-deploy.sh stop
+
+docker-clean:
+	./scripts/docker-deploy.sh clean
+
+docker-help:
+	./scripts/docker-deploy.sh help
+

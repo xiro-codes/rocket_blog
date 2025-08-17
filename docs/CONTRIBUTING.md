@@ -21,10 +21,14 @@ Thank you for your interest in contributing to Rocket Blog! This guide will help
 
 2. **Database Setup**
    ```bash
-   # Option 1: Docker (Recommended)
+   # Option 1: Docker Development Environment (Recommended)
+   just docker-dev            # Standard development environment
+   just docker-dev-live       # Development with live template/static reloading
+   
+   # Option 2: Docker Database Only
    docker-compose up postgres -d
    
-   # Option 2: Local PostgreSQL
+   # Option 3: Local PostgreSQL
    createdb tdavis_dev
    psql tdavis_dev -c "CREATE USER master WITH PASSWORD 'password';"
    psql tdavis_dev -c "GRANT ALL PRIVILEGES ON DATABASE tdavis_dev TO master;"
@@ -50,6 +54,50 @@ Thank you for your interest in contributing to Rocket Blog! This guide will help
    - Visit `http://localhost:8000/blog`
    - You should see the blog interface
    - Try creating a test post (login as admin)
+
+### Docker Development with Just
+
+The project includes comprehensive Docker support accessible through just commands:
+
+**Development Environments:**
+```bash
+# Standard development environment
+just docker-dev              # App: http://localhost:8000, pgAdmin: http://localhost:5050
+
+# Live development with template/static file reloading  
+just docker-dev-live          # Perfect for frontend development and template editing
+
+# Production environment (with SSL)
+just docker-prod              # Requires SSL setup
+```
+
+**Docker Management:**
+```bash
+# Check status
+just docker-status            # Show running services
+
+# View logs
+just docker-logs              # All services
+just docker-logs app          # Specific service (app, postgres, pgadmin, nginx)
+
+# Stop and cleanup
+just docker-stop              # Stop all services
+just docker-clean             # Stop and remove containers/volumes (WARNING: deletes data)
+
+# SSL management (for production)
+just docker-setup-ssl         # Initial SSL certificate setup
+just docker-renew-ssl         # Force SSL certificate renewal
+
+# Help
+just docker-help              # Show Docker command help
+```
+
+**Benefits of Docker Development:**
+- **Consistent environment** across different machines and operating systems
+- **No local dependencies** - PostgreSQL, pgAdmin, and SSL certificates handled automatically
+- **Live reloading** for templates and static files (with `docker-dev-live`)
+- **Production parity** - same environment as production deployment
+- **Quick teardown** and fresh starts for testing
 
 ## 📋 Development Workflow
 
@@ -80,6 +128,10 @@ Thank you for your interest in contributing to Rocket Blog! This guide will help
    
    # Test the application manually
    cargo run
+   
+   # OR test in Docker environment
+   just docker-dev              # Test with production-like build
+   just docker-dev-live          # Test with live template reloading
    ```
 
 4. **Commit Your Changes**
