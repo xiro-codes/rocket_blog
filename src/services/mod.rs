@@ -1,6 +1,9 @@
 mod base;
 pub use base::BaseService;
 
+mod coordinator;
+pub use coordinator::{CoordinatorService, BlogListData, BlogDetailData, BlogSearchData};
+
 mod auth;
 pub use auth::Service as AuthService;
 mod blog;

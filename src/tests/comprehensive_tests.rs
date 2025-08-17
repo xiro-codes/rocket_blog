@@ -7,7 +7,7 @@ mod comprehensive_tests {
     use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService};
     use crate::controllers::{AuthController, BlogController, CommentController, IndexController, ControllerBase};
     use crate::middleware::Seeding;
-    use crate::{catch_default, drop_rocket, drop_sea_orm_migration, drop_sqlx, drop_hyper};
+    use crate::{catch_default, should_filter_log};
     
     // Test data helpers
     use uuid::Uuid;
@@ -17,7 +17,7 @@ mod comprehensive_tests {
     use rocket::figment::{providers::Serialized, Figment};
 
     // Helper to create test metadata
-    fn create_test_metadata(target: &str) -> Metadata {
+    fn create_test_metadata(target: &str) -> Metadata<'_> {
         Metadata::builder()
             .level(log::Level::Info)
             .target(target)
@@ -63,27 +63,13 @@ mod comprehensive_tests {
 
         #[test]
         fn test_log_filters() {
-            // Test rocket filter
-            let metadata = create_test_metadata("rocket::test");
-            assert!(!drop_rocket(&metadata));
-            
-            let metadata = create_test_metadata("_");
-            assert!(!drop_rocket(&metadata));
-            
-            let metadata = create_test_metadata("app::test");
-            assert!(drop_rocket(&metadata));
-
-            // Test sea_orm_migration filter  
-            let metadata = create_test_metadata("sea_orm_migration::test");
-            assert!(!drop_sea_orm_migration(&metadata));
-
-            // Test sqlx filter
-            let metadata = create_test_metadata("sqlx::test");
-            assert!(!drop_sqlx(&metadata));
-
-            // Test hyper filter
-            let metadata = create_test_metadata("hyper::test");
-            assert!(!drop_hyper(&metadata));
+            // Test unified log filter function
+            assert!(should_filter_log(&create_test_metadata("rocket::test")));
+            assert!(should_filter_log(&create_test_metadata("_")));
+            assert!(should_filter_log(&create_test_metadata("sea_orm_migration::test")));
+            assert!(should_filter_log(&create_test_metadata("sqlx::test")));
+            assert!(should_filter_log(&create_test_metadata("hyper::test")));
+            assert!(!should_filter_log(&create_test_metadata("app::test")));
         }
     }
 

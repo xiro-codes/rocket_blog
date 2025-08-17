@@ -1,5 +1,4 @@
 use rocket::{
-    fs::FileServer,
     http::Status,
     outcome::Outcome,
     request::{self, FromRequest},
@@ -9,7 +8,6 @@ use rocket::{
 use std::{
     fs::File,
     io::{self, prelude::*, Cursor, SeekFrom},
-    path::{Path, PathBuf},
     sync::Mutex,
 };
 pub struct StreamedFile {
@@ -34,7 +32,7 @@ impl StreamedFile {
     }
 }
 impl<'r> Responder<'r, 'static> for StreamedFile {
-    fn respond_to(self, req: &'r Request<'_>) -> rocket::response::Result<'static> {
+    fn respond_to(self, _req: &'r Request<'_>) -> rocket::response::Result<'static> {
         let mut response = Response::build();
         response.raw_header("Accept-Ranges", "bytes");
         response.raw_header("Content-Type", self.content_type);

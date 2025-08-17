@@ -4,19 +4,26 @@ use rocket::{
     Build, Rocket, Route,
 };
 
+use crate::controllers::base::ControllerBase;
+
 pub struct Controller {
-    path: String,
+    base: ControllerBase,
 }
+
 impl Controller {
     pub fn new(path: String) -> Self {
-        Self { path }
+        Self {
+            base: ControllerBase::new(path),
+        }
     }
 }
+
 #[get("/")]
 fn index() -> Redirect {
     Redirect::to("/blog?page=1")
 }
-pub fn routes() -> Vec<Route> {
+
+fn routes() -> Vec<Route> {
     routes![index]
 }
 
@@ -28,7 +35,8 @@ impl Fairing for Controller {
             kind: Kind::Ignite,
         }
     }
+    
     async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        Ok(rocket.mount(self.path.to_owned(), routes()))
+        Ok(rocket.mount(self.base.path(), routes()))
     }
 }

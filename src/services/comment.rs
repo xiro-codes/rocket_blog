@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use chrono::Local;
 use models::{comment, dto::CommentFormDTO, prelude::Comment};
 use sea_orm::*;

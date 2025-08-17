@@ -1,5 +1,5 @@
 use rocket::{
-    fairing::{self, Fairing, Kind},
+    fairing::{self, Fairing, Info, Kind},
     http::{CookieJar, Status},
     request::FlashMessage,
     response::{Flash, Redirect},
@@ -8,19 +8,7 @@ use rocket::{
 use sea_orm_rocket::Connection;
 use uuid::Uuid;
 
-use crate::{pool::Db, services::AuthService};
-
-/// Generic controller trait for common functionality
-pub trait BaseController {
-    /// Get the mount path for this controller
-    fn path(&self) -> &str;
-
-    /// Get the controller name for fairing info
-    fn name(&self) -> &'static str;
-
-    /// Get the routes for this controller
-    fn routes() -> Vec<Route>;
-}
+use crate::{pool::Db, services::CoordinatorService};
 
 /// Common controller functionality
 pub struct ControllerBase {
@@ -46,33 +34,30 @@ impl ControllerBase {
         Self::check_auth(jar)?.ok_or(Status::Unauthorized)
     }
 
-    /// Check if user is authenticated and is admin
+    /// Check if user is authenticated and is admin using coordinator service
+    #[allow(dead_code)]
     pub async fn check_admin_auth(
         conn: Connection<'_, Db>,
-        auth_service: &State<AuthService>,
+        coordinator: &State<CoordinatorService>,
         jar: &CookieJar<'_>,
     ) -> Result<bool, Status> {
-        if let Some(token) = Self::check_auth(jar)? {
-            let db = conn.into_inner();
-            let token_uuid = Uuid::parse_str(&token).map_err(|_| Status::Unauthorized)?;
-            if let Some(account) = auth_service.check_token(db, token_uuid).await {
-                return Ok(account.admin);
-            }
-        }
-        Ok(false)
+        let token = Self::check_auth(jar)?;
+        let db = conn.into_inner();
+        Ok(coordinator.is_admin(db, token.as_deref()).await)
     }
 
-    /// Require admin authentication
+    /// Require admin authentication using coordinator service
+    #[allow(dead_code)]
     pub async fn require_admin_auth(
         conn: Connection<'_, Db>,
-        auth_service: &State<AuthService>,
+        coordinator: &State<CoordinatorService>,
         jar: &CookieJar<'_>,
     ) -> Result<(), Status> {
-        if Self::check_admin_auth(conn, auth_service, jar).await? {
-            Ok(())
-        } else {
-            Err(Status::Unauthorized)
-        }
+        let token = Self::check_auth(jar)?;
+        let db = conn.into_inner();
+        coordinator.require_admin(db, token.as_deref()).await
+            .map_err(|_| Status::Unauthorized)?;
+        Ok(())
     }
 
     /// Create a success flash redirect
