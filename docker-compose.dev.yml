@@ -3,6 +3,8 @@ services:
   postgres:
     image: postgres:13 # Using a specific version is recommended
     restart: always
+    ports:
+      - "5432:5432"  # Expose for development access
     environment:
       # Sets the default user, password, and database as specified
       POSTGRES_USER: master
@@ -18,9 +20,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    # Only expose port for external access if needed
-    # ports:
-    #   - "5432:5432"
 
   # The Rust web application
   app:
@@ -28,54 +27,23 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    # No direct port exposure - nginx will proxy to this
+    ports:
+      # Expose app port for development
+      - "8000:8000"
     environment:
       # Override database URL to use docker service name
       ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
     volumes:
       # Persist uploaded files
       - app_data:/app/data
+      # Mount source code for development (optional)
+      # - ./src:/app/src
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - app-network
-
-  # Nginx reverse proxy with SSL termination
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      # SSL certificates and webroot for certbot
-      - letsencrypt_data:/etc/letsencrypt
-      - certbot_webroot:/var/www/certbot
-      - nginx_logs:/var/log/nginx
-    depends_on:
-      - app
-    networks:
-      - app-network
-
-  # Certbot for SSL certificate management
-  certbot:
-    image: certbot/certbot
-    restart: "no"
-    volumes:
-      - letsencrypt_data:/etc/letsencrypt
-      - certbot_webroot:/var/www/certbot
-    command: >
-      sh -c "
-        while :; do
-          certbot renew --webroot --webroot-path=/var/www/certbot --quiet
-          sleep 12h
-        done
-      "
-    depends_on:
-      - nginx
+  
   # The pgAdmin GUI service
   pgadmin:
     image: dpage/pgadmin4
@@ -102,7 +70,3 @@ networks:
 volumes:
   postgres_data:
   app_data:
-  letsencrypt_data:
-  certbot_webroot:
-  nginx_logs:
-

@@ -176,13 +176,19 @@ For a complete Docker setup with build instructions, see [Docker Guide](docs/DOC
 
 Quick start:
 ```bash
-# Build and run with Docker Compose (includes database)
-docker-compose up --build
+# Development with direct app access
+docker-compose -f docker-compose.dev.yml up --build
 
-# Or build manually
-docker build -t rocket-blog .
-docker run -p 8000:8000 rocket-blog
+# Production with nginx reverse proxy and SSL
+./scripts/setup-ssl.sh  # First time only
+docker-compose up --build -d
 ```
+
+**Production Features:**
+- Nginx reverse proxy with SSL termination
+- Automatic SSL certificate generation and renewal
+- Production-optimized container images
+- Secure defaults with proper headers
 
 **NixOS Users:** The Docker approach solves build issues on NixOS by building inside the container. See the [Docker Guide](docs/DOCKER.md) for troubleshooting SSL certificate issues and alternative build strategies.
 

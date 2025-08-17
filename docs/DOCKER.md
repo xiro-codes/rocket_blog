@@ -1,22 +1,170 @@
 # Docker Build Guide
 
-This guide provides instructions for building and running the Rocket Blog application using Docker, particularly useful for NixOS users who may encounter build issues with native Rust compilation.
+This guide provides instructions for building and running the Rocket Blog application using Docker, with production-ready nginx reverse proxy, automatic SSL certificates, and special consideration for NixOS users who may encounter build issues with native Rust compilation.
+
+## Table of Contents
+- [Quick Start](#quick-start)
+- [Production Deployment with SSL](#production-deployment-with-ssl)
+- [Development Setup](#development-setup)
+- [SSL Certificate Management](#ssl-certificate-management)
+- [Build Strategies](#build-strategies)
+- [Environment Configuration](#environment-configuration)
+- [Troubleshooting](#troubleshooting)
+- [NixOS Specific Instructions](#nixos-specific-instructions)
 
 ## Quick Start
 
-### Option 1: Build from Source (Recommended)
+### Development (Local Testing)
+```bash
+# For local development with direct app access
+docker-compose -f docker-compose.dev.yml up --build
+# Access: http://localhost:8000
+# pgAdmin: http://localhost:5050
+```
+
+### Production (with SSL)
+```bash
+# First time setup: generate SSL certificates
+./scripts/setup-ssl.sh
+
+# Start the full production stack
+docker-compose up --build -d
+# Access: https://blog.tdavis.dev
+```
+
+## Production Deployment with SSL
+
+The production setup includes nginx reverse proxy with automatic SSL certificate generation and renewal using Let's Encrypt.
+
+### Prerequisites
+- Domain name pointing to your server (blog.tdavis.dev)
+- Ports 80 and 443 open on your server
+- Docker and docker-compose installed
+
+### Initial Setup
+
+1. **Clone and configure:**
+```bash
+git clone <repository>
+cd rocket_blog
+```
+
+2. **Generate SSL certificates:**
+```bash
+# Run the SSL setup script (first time only)
+./scripts/setup-ssl.sh
+```
+
+3. **Start production stack:**
+```bash
+# Start all services with nginx proxy
+docker-compose up -d --build
+
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs nginx
+docker-compose logs app
+```
+
+### Services in Production
+- **nginx**: Reverse proxy with SSL termination (ports 80/443)
+- **app**: Rocket blog application (internal only)
+- **postgres**: Database (internal only)
+- **pgAdmin**: Database admin interface (port 5050, optional)
+
+### SSL Certificate Auto-Renewal
+The nginx container automatically:
+- Checks for certificate renewal every 12 hours
+- Renews certificates 30 days before expiry
+- Reloads nginx configuration after renewal
+
+## Development Setup
+
+For local development without SSL complexity:
 
 ```bash
-# Build the Docker image
-docker build -t rocket-blog .
+# Use development compose file
+docker-compose -f docker-compose.dev.yml up --build
 
-# Run with docker-compose (includes database)
-docker-compose up --build
+# Access points:
+# - App: http://localhost:8000
+# - pgAdmin: http://localhost:5050
+# - Database: localhost:5432
+```
 
-# Or run standalone (requires external database)
-docker run -p 8000:8000 \
-  -e ROCKET_DATABASES__SEA_ORM__URL="postgres://user:pass@host/db" \
-  rocket-blog
+The development setup:
+- Exposes app directly on port 8000
+- Includes test data seeding (debug builds)
+- Exposes database port for external tools
+- No SSL/nginx complexity
+
+## SSL Certificate Management
+
+### Manual Certificate Operations
+
+```bash
+# Force certificate renewal
+docker-compose exec nginx certbot renew --force-renewal
+
+# Check certificate status
+docker-compose exec nginx certbot certificates
+
+# Test nginx configuration
+docker-compose exec nginx nginx -t
+
+# Reload nginx after config changes
+docker-compose exec nginx nginx -s reload
+```
+
+### Certificate Troubleshooting
+
+If certificate generation fails:
+
+1. **Check domain DNS:**
+```bash
+nslookup blog.tdavis.dev
+```
+
+2. **Verify port 80 is accessible:**
+```bash
+curl -I http://blog.tdavis.dev/.well-known/acme-challenge/test
+```
+
+3. **Check nginx logs:**
+```bash
+docker-compose logs nginx
+```
+
+4. **Re-run setup:**
+```bash
+# Remove existing certificates and try again
+docker volume rm rocket-blog_letsencrypt_data
+./scripts/setup-ssl.sh
+```
+
+### Manual Certificate Generation
+
+If the automated script fails, you can generate certificates manually:
+
+```bash
+# Create volumes
+docker volume create letsencrypt_data
+docker volume create certbot_webroot
+
+# Generate certificate manually
+docker run --rm \
+  -v letsencrypt_data:/etc/letsencrypt \
+  -v certbot_webroot:/var/www/certbot \
+  -p 80:80 \
+  certbot/certbot \
+  certonly \
+  --standalone \
+  --email me@tdavis.dev \
+  --agree-tos \
+  --no-eff-email \
+  -d blog.tdavis.dev
 ```
 
 ### Option 2: Using the Existing .Dockerfile (Runtime-only)
