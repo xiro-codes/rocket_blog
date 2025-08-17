@@ -1,3 +1,6 @@
+# Docker Compose for Live Development with Source Code Mounting
+# This version mounts source code for live development with cargo-watch
+
 services:
   # The database service
   postgres:
@@ -21,11 +24,11 @@ services:
       timeout: 5s
       retries: 5
 
-  # The Rust web application (development build)
+  # The Rust web application (live development with cargo watch)
   app:
     build: 
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.dev.live
     restart: always
     ports:
       # Expose app port for development
@@ -39,19 +42,20 @@ services:
     volumes:
       # Persist uploaded files
       - app_data:/app/data
-      # Mount source code for live development (uncomment for live reload)
-      # - ./src:/app/src:ro
-      # - ./templates:/app/templates:ro
-      # - ./static:/app/static:ro
-      # - ./Cargo.toml:/app/Cargo.toml:ro
-      # - ./Cargo.lock:/app/Cargo.lock:ro
+      # Mount source code for live development
+      - ./src:/app/src:ro
+      - ./templates:/app/templates:ro
+      - ./static:/app/static:ro
+      - ./Cargo.toml:/app/Cargo.toml:ro
+      - ./Cargo.lock:/app/Cargo.lock:ro
+      - ./migrations:/app/migrations:ro
+      - ./models:/app/models:ro
+      - ./.Rocket.docker.toml:/app/Rocket.toml:ro
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - app-network
-    # Uncomment to enable live development with cargo watch
-    # command: ["cargo", "watch", "-x", "run"]
   
   # The pgAdmin GUI service
   pgadmin:
