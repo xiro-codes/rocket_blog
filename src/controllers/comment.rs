@@ -51,4 +51,4 @@ pub fn routes() -> Vec<Route> {
     routes![create]
 }
 
-crate::impl_controller_fairing!(Controller, CommentService, "Comment Controller", routes());
+crate::impl_controller_routes!(Controller, "Comment Controller", routes());

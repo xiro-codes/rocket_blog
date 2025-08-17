@@ -1,12 +1,11 @@
 use rocket::{
-    fairing::{self, Fairing, Info, Kind},
     http::{CookieJar, Status},
     request::FlashMessage,
     response::{Flash, Redirect},
-    Build, Rocket, Route, State,
+    Build, Rocket, State,
+    fairing::{self, Fairing, Kind},
 };
 use sea_orm_rocket::Connection;
-use uuid::Uuid;
 
 use crate::{pool::Db, services::CoordinatorService};
 
@@ -82,7 +81,7 @@ impl ControllerBase {
     }
 }
 
-/// Macro to implement Fairing for controllers with a service
+/// Macro to implement Fairing for controllers with a service (deprecated - use impl_controller_routes!)
 #[macro_export]
 macro_rules! impl_controller_fairing {
     ($controller:ty, $service:ty, $name:expr, $routes:expr) => {
@@ -99,6 +98,26 @@ macro_rules! impl_controller_fairing {
                 Ok(rocket
                     .manage(<$service>::new())
                     .mount(self.base.path(), $routes))
+            }
+        }
+    };
+}
+
+/// Macro to implement Fairing for controllers that only mount routes (services managed by ServiceRegistry)
+#[macro_export]
+macro_rules! impl_controller_routes {
+    ($controller:ty, $name:expr, $routes:expr) => {
+        #[rocket::async_trait]
+        impl Fairing for $controller {
+            fn info(&self) -> fairing::Info {
+                fairing::Info {
+                    name: $name,
+                    kind: Kind::Ignite,
+                }
+            }
+
+            async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
+                Ok(rocket.mount(self.base.path(), $routes))
             }
         }
     };
