@@ -12,6 +12,8 @@
 		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="/static/style.css" />
 		<link rel="alternate" type="application/rss+xml" title="Rocket Blog RSS Feed" href="/feed/rss" />
+		<!-- EasyMDE Markdown Editor -->
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
 		<style>
 body {
 	background-color: #0c1116;
@@ -19,6 +21,118 @@ body {
 	height: 100vh;
 	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
 	color: #00ff41;
+}
+
+/* EasyMDE Terminal Theme Customization */
+.EasyMDEContainer {
+	border: 2px solid #333 !important;
+	background-color: #1a1f25 !important;
+}
+
+.EasyMDEContainer .editor-toolbar {
+	background-color: #0c1116 !important;
+	border-bottom: 1px solid #333 !important;
+	border-top: none !important;
+	border-left: none !important;
+	border-right: none !important;
+}
+
+.EasyMDEContainer .editor-toolbar button {
+	color: #00ff41 !important;
+	background-color: transparent !important;
+	border: none !important;
+	border-radius: 0 !important;
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+}
+
+.EasyMDEContainer .editor-toolbar button:hover {
+	background-color: #333 !important;
+	color: #40ff80 !important;
+}
+
+.EasyMDEContainer .editor-toolbar button.active {
+	background-color: #00ff41 !important;
+	color: #0c1116 !important;
+}
+
+.EasyMDEContainer .CodeMirror {
+	background-color: #1a1f25 !important;
+	color: #00ff41 !important;
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+	border: none !important;
+	line-height: 1.5 !important;
+}
+
+.EasyMDEContainer .CodeMirror-cursor {
+	border-left: 1px solid #00ff41 !important;
+}
+
+.EasyMDEContainer .CodeMirror-selected {
+	background-color: #333 !important;
+}
+
+.EasyMDEContainer .CodeMirror-line {
+	color: #00ff41 !important;
+}
+
+.EasyMDEContainer .cm-header {
+	color: #40ff80 !important;
+	font-weight: bold !important;
+}
+
+.EasyMDEContainer .cm-quote {
+	color: #888 !important;
+	font-style: italic !important;
+}
+
+.EasyMDEContainer .cm-keyword {
+	color: #00ff41 !important;
+	font-weight: bold !important;
+}
+
+.EasyMDEContainer .cm-link {
+	color: #40ff80 !important;
+}
+
+.EasyMDEContainer .cm-url {
+	color: #40ff80 !important;
+}
+
+.EasyMDEContainer .editor-statusbar {
+	background-color: #0c1116 !important;
+	color: #888 !important;
+	border-top: 1px solid #333 !important;
+	border-bottom: none !important;
+	border-left: none !important;
+	border-right: none !important;
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+}
+
+.EasyMDEContainer .editor-preview, .EasyMDEContainer .editor-preview-active-side {
+	background-color: #1a1f25 !important;
+	color: #ccc !important;
+	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+}
+
+.EasyMDEContainer .editor-preview h1, 
+.EasyMDEContainer .editor-preview h2, 
+.EasyMDEContainer .editor-preview h3, 
+.EasyMDEContainer .editor-preview h4, 
+.EasyMDEContainer .editor-preview h5, 
+.EasyMDEContainer .editor-preview h6 {
+	color: #00ff41 !important;
+	font-weight: 700 !important;
+}
+
+.EasyMDEContainer .editor-preview code {
+	background-color: #0c1116 !important;
+	color: #00ff41 !important;
+	border: 1px solid #333 !important;
+}
+
+.EasyMDEContainer .editor-preview pre {
+	background-color: #0c1116 !important;
+	border: 1px solid #333 !important;
 }
 		</style>
 	</head>
@@ -40,6 +154,8 @@ body {
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
 				integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
 				crossorigin="anonymous"></script>
+		<!-- EasyMDE Markdown Editor -->
+		<script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
 	</body>
 
 </html>
