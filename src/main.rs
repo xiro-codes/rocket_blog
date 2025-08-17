@@ -94,12 +94,19 @@ async fn rocket() -> _ {
     let figment = rocket::Config::figment();
     let app_config = AppConfig::from_figment(&figment);
     //setup_logger().unwrap();
-    rocket::build()
+    let mut rocket = rocket::build()
         .register("/", catchers![catch_default])
         .attach(Db::init())
         .attach(Template::fairing())
-        .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
-        .attach(middleware::Seeding::new(Some(0), 50)) // Commented out to avoid duplicate key issues in container
+        .attach(AdHoc::try_on_ignite("Migrations", run_migrations));
+    
+    // Only attach seeding in debug builds (development mode)
+    #[cfg(debug_assertions)]
+    {
+        rocket = rocket.attach(middleware::Seeding::new(Some(0), 50));
+    }
+    
+    rocket
         .manage(TagService::new())
         .manage(ReactionService::new())
         .manage(app_config)
