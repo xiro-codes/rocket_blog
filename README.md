@@ -171,13 +171,28 @@ See [Feature Integration Guide](docs/TAG_INTEGRATION_EXAMPLE.md) for detailed ex
 ## 📦 Deployment
 
 ### Docker Deployment (Recommended)
+
+For a complete Docker setup with build instructions, see [Docker Guide](docs/DOCKER.md).
+
+Quick start:
 ```bash
-# Build and run with Docker Compose
+# Build and run with Docker Compose (includes database)
 docker-compose up --build
 
 # Or build manually
 docker build -t rocket-blog .
 docker run -p 8000:8000 rocket-blog
+```
+
+**NixOS Users:** The Docker approach solves build issues on NixOS by building inside the container. See the [Docker Guide](docs/DOCKER.md) for troubleshooting SSL certificate issues and alternative build strategies.
+
+**Troubleshooting Docker Builds:** If you encounter SSL certificate issues during Docker build, try:
+```bash
+# Use the fallback Dockerfile
+docker build -f Dockerfile.fallback -t rocket-blog .
+
+# Or build with host network
+docker build --network=host -t rocket-blog .
 ```
 
 ### Manual Deployment

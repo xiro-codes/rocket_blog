@@ -1,30 +1,21 @@
 # Multi-stage Docker build for Rocket Blog
-# Stage 1: Build the application using Ubuntu base instead of Debian
-FROM ubuntu:22.04 AS builder
+# This Dockerfile builds the application from source, solving the NixOS build issue
 
-# Prevent timezone prompt during apt install
-ENV DEBIAN_FRONTEND=noninteractive
+# Stage 1: Build the application
+FROM rust:1.89-bookworm AS builder
 
-# Install Rust and dependencies 
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
-    curl \
-    build-essential \
     pkg-config \
     libssl-dev \
     libpq-dev \
     ca-certificates \
-    git \
     && rm -rf /var/lib/apt/lists/*
-
-# Install Rust and verify installation
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.89.0 && \
-    /root/.cargo/bin/cargo --version
-ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files first for better caching
+# Copy dependency files first for better Docker layer caching
 COPY Cargo.toml Cargo.lock ./
 COPY migrations ./migrations/
 COPY models ./models/
@@ -33,9 +24,11 @@ COPY models ./models/
 COPY src ./src/
 
 # Build the application in release mode
+# Note: If you encounter SSL certificate issues during build,
+# see the README.md for alternative build approaches
 RUN cargo build --release
 
-# Stage 2: Runtime image
+# Stage 2: Runtime image  
 FROM debian:bookworm-slim
 
 # Install runtime dependencies
@@ -57,7 +50,7 @@ COPY static ./static/
 COPY .Rocket.docker.toml ./Rocket.toml
 
 # Copy the built binary from builder stage
-# Note: Cargo.toml defines the binary name as "app"
+# Note: The binary is named "app" in Cargo.toml but we rename it to rocket-template for consistency
 COPY --from=builder /app/target/release/app ./rocket-template
 
 # Create data directory for file uploads

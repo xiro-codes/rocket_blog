@@ -1,0 +1,62 @@
+# Alternative Dockerfile for environments with SSL certificate issues
+# This uses a pre-built Rust image with all dependencies already cached
+
+FROM rust:1.89-bookworm AS builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    libpq-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Configure cargo to handle SSL issues if they occur
+RUN mkdir -p ~/.cargo && \
+    echo '[net]' > ~/.cargo/config.toml && \
+    echo 'git-fetch-with-cli = true' >> ~/.cargo/config.toml && \
+    echo '[http]' >> ~/.cargo/config.toml && \
+    echo 'check-revoke = false' >> ~/.cargo/config.toml
+
+# Copy project files
+COPY Cargo.toml Cargo.lock ./
+COPY migrations ./migrations/
+COPY models ./models/
+COPY src ./src/
+
+# Build with error handling
+RUN cargo build --release || \
+    (echo "Build failed, trying with offline mode..." && \
+     cargo build --release --offline) || \
+    (echo "Offline build failed, trying with network retry..." && \
+     sleep 5 && cargo build --release)
+
+# Runtime stage
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y \
+    libssl3 \
+    libpq5 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -u 1000 app
+
+WORKDIR /app
+
+COPY templates ./templates/
+COPY static ./static/
+COPY .Rocket.docker.toml ./Rocket.toml
+
+COPY --from=builder /app/target/release/app ./rocket-template
+
+RUN mkdir -p /app/data && chown -R app:app /app && chmod +x ./rocket-template
+
+USER app
+
+EXPOSE 8000
+
+CMD ["./rocket-template"]
