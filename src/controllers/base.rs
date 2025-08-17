@@ -1,12 +1,11 @@
 use rocket::{
-    fairing::{self, Fairing, Info, Kind},
     http::{CookieJar, Status},
     request::FlashMessage,
     response::{Flash, Redirect},
-    Build, Rocket, Route, State,
+    Build, Rocket, State,
+    fairing::{self, Fairing, Kind},
 };
 use sea_orm_rocket::Connection;
-use uuid::Uuid;
 
 use crate::{pool::Db, services::CoordinatorService};
 
