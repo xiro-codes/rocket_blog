@@ -1,6 +1,7 @@
 use sea_orm::{DatabaseConnection, EntityTrait, ColumnTrait, QueryFilter, Set, ActiveModelTrait};
 use models::{settings, prelude::Settings};
 use crate::services::BaseService;
+use chrono::Utc;
 
 pub struct SettingsService {
     base: BaseService,
@@ -32,7 +33,7 @@ impl SettingsService {
             // Update existing setting
             let mut active_model: settings::ActiveModel = setting.into();
             active_model.value = Set(Some(value.to_string()));
-            active_model.updated_at = Set(chrono::Utc::now().naive_utc());
+            active_model.updated_at = Set(Utc::now().naive_utc());
             active_model.update(db).await?;
         } else {
             // Create new setting
@@ -41,8 +42,8 @@ impl SettingsService {
                 key: Set(key.to_string()),
                 value: Set(Some(value.to_string())),
                 description: Set(None),
-                created_at: Set(chrono::Utc::now().naive_utc()),
-                updated_at: Set(chrono::Utc::now().naive_utc()),
+                created_at: Set(Utc::now().naive_utc()),
+                updated_at: Set(Utc::now().naive_utc()),
             };
             new_setting.insert(db).await?;
         }

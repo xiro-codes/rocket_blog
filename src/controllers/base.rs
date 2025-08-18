@@ -2,8 +2,7 @@ use rocket::{
     http::{CookieJar, Status},
     request::FlashMessage,
     response::{Flash, Redirect},
-    Build, Rocket, State,
-    fairing::{self, Fairing, Kind},
+    State,
 };
 use sea_orm_rocket::Connection;
 
@@ -108,15 +107,15 @@ macro_rules! impl_controller_fairing {
 macro_rules! impl_controller_routes {
     ($controller:ty, $name:expr, $routes:expr) => {
         #[rocket::async_trait]
-        impl Fairing for $controller {
-            fn info(&self) -> fairing::Info {
-                fairing::Info {
+        impl rocket::fairing::Fairing for $controller {
+            fn info(&self) -> rocket::fairing::Info {
+                rocket::fairing::Info {
                     name: $name,
-                    kind: Kind::Ignite,
+                    kind: rocket::fairing::Kind::Ignite,
                 }
             }
 
-            async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
+            async fn on_ignite(&self, rocket: rocket::Rocket<rocket::Build>) -> rocket::fairing::Result {
                 Ok(rocket.mount(self.base.path(), $routes))
             }
         }
