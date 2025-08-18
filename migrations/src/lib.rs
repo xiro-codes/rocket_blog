@@ -5,6 +5,7 @@ mod m20241201_000001_add_tags;
 mod m20241202_000001_add_excerpt;
 mod m20241203_000001_add_fulltext_search;
 mod m20241204_000001_add_post_reactions;
+mod m20241230_000001_add_settings;
 
 pub struct Migrator;
 
@@ -17,6 +18,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20241202_000001_add_excerpt::Migration),
             Box::new(m20241203_000001_add_fulltext_search::Migration),
             Box::new(m20241204_000001_add_post_reactions::Migration),
+            Box::new(m20241230_000001_add_settings::Migration),
         ]
     }
 }

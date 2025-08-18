@@ -348,17 +348,23 @@ async fn video(
     }
 }
 
-#[get("/create")]
+#[get("/create?<generated_title>&<generated_content>&<generated_excerpt>")]
 async fn create_view(
     flash: Option<FlashMessage<'_>>,
     jar: &CookieJar<'_>,
+    generated_title: Option<String>,
+    generated_content: Option<String>,
+    generated_excerpt: Option<String>,
 ) -> Result<Template, Status> {
     ControllerBase::require_auth(jar)?;
     Ok(Template::render(
         "blog/create",
         context! {
             form_url: "create",
-            flash: ControllerBase::extract_flash(flash)
+            flash: ControllerBase::extract_flash(flash),
+            generated_title: generated_title,
+            generated_content: generated_content,
+            generated_excerpt: generated_excerpt,
         },
     ))
 }

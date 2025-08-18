@@ -1,4 +1,4 @@
-use crate::services::{AuthService, BlogService, CommentService, ReactionService, TagService};
+use crate::services::{AuthService, BlogService, CommentService, OpenAIService, ReactionService, SettingsService, TagService};
 use models::{dto::PostTitleResult, post::Model as Post};
 use sea_orm::DatabaseConnection;
 use uuid::Uuid;
@@ -9,7 +9,9 @@ pub struct CoordinatorService {
     auth_service: AuthService,
     blog_service: BlogService,
     comment_service: CommentService,
+    openai_service: OpenAIService,
     reaction_service: ReactionService,
+    settings_service: SettingsService,
     tag_service: TagService,
 }
 
@@ -19,7 +21,9 @@ impl CoordinatorService {
             auth_service: AuthService::new(),
             blog_service: BlogService::new(),
             comment_service: CommentService::new(),
+            openai_service: OpenAIService::new(),
             reaction_service: ReactionService::new(),
+            settings_service: SettingsService::new(),
             tag_service: TagService::new(),
         }
     }
@@ -184,6 +188,23 @@ impl CoordinatorService {
         let token_str = token.ok_or("Authentication required")?;
         self.auth_service.require_admin_token(db, token_str).await
             .map_err(|e| format!("Admin access required: {}", e))
+    }
+
+    /// Get all settings for admin interface
+    pub async fn get_all_settings(&self, db: &DatabaseConnection) -> Result<Vec<models::settings::Model>, String> {
+        self.settings_service.get_all_settings(db).await
+            .map_err(|e| format!("Failed to get settings: {}", e))
+    }
+
+    /// Update multiple settings
+    pub async fn update_settings(&self, db: &DatabaseConnection, updates: Vec<(String, String)>) -> Result<(), String> {
+        self.settings_service.update_settings(db, updates).await
+            .map_err(|e| format!("Failed to update settings: {}", e))
+    }
+
+    /// Generate a blog post using OpenAI
+    pub async fn generate_blog_post(&self, db: &DatabaseConnection, topic: &str) -> Result<crate::services::GeneratedPost, String> {
+        self.openai_service.generate_post(db, topic).await
     }
 }
 

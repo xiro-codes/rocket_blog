@@ -1,6 +1,8 @@
 mod base;
 pub use base::ControllerBase;
 
+mod admin;
+pub use admin::Controller as AdminController;
 mod index;
 pub use index::Controller as IndexController;
 mod auth;

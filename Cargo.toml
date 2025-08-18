@@ -19,6 +19,10 @@ rand = "0.8.1"
 rand_mt = "5.0.0"
 sea-orm-rocket = "0.5.5"
 slug = "0.1.6"
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+urlencoding = "2.1"
 
 [dependencies.rocket]
 version = "0.5"

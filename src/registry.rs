@@ -1,4 +1,4 @@
-use crate::services::{AuthService, BlogService, CommentService, ReactionService, TagService, CoordinatorService};
+use crate::services::{AuthService, BlogService, CommentService, ReactionService, TagService, CoordinatorService, SettingsService, OpenAIService};
 use crate::controllers;
 use rocket::{fairing::AdHoc, Build, Rocket};
 
@@ -14,6 +14,8 @@ impl ServiceRegistry {
             .manage(CommentService::new())
             .manage(ReactionService::new())
             .manage(TagService::new())
+            .manage(SettingsService::new())
+            .manage(OpenAIService::new())
             .manage(CoordinatorService::new())
     }
     
@@ -37,6 +39,7 @@ impl ControllerRegistry {
             .attach(controllers::BlogController::new("/blog".to_owned()))
             .attach(controllers::CommentController::new("/comment".to_owned()))
             .attach(controllers::FeedController::new("/feed".to_owned()))
+            .attach(controllers::AdminController::new())
     }
     
     /// Create a fairing that initializes controllers

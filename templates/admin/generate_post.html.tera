@@ -1,0 +1,44 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="terminal-header"></div>
+<center>
+    <h1 class="terminal-cursor">Generate Blog Post</h1>
+</center>
+
+<hr class="terminal-divider">
+
+<div class="d-flex justify-content-center align-items-center">
+    <form action="/admin/generate" method="post" class="terminal-form">
+        <h3 class="text-center mb-4">[ AI POST GENERATOR ]</h3>
+        
+        <div>
+            <label for="topic" class="form-label">Topic:</label>
+            <input type="text" name="topic" id="topic" class="form-control" 
+                   placeholder="Enter the topic for your blog post..." required />
+            <div class="form-text">Describe what you want the AI to write about. Be specific for better results.</div>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Generate Post</button>
+            <a href="/admin/settings" class="btn btn-secondary">Settings</a>
+            <a href="/blog" class="btn btn-outline-secondary">Back to Blog</a>
+        </div>
+    </form>
+</div>
+
+<div class="mt-5">
+    <h4>How it works:</h4>
+    <ul class="list-group">
+        <li class="list-group-item">1. Enter a topic you want the AI to write about</li>
+        <li class="list-group-item">2. The AI will generate a complete blog post with title, content, and excerpt</li>
+        <li class="list-group-item">3. You'll be redirected to the blog creation page to review and publish</li>
+        <li class="list-group-item">4. You can edit the generated content before publishing</li>
+    </ul>
+    
+    <div class="alert alert-info mt-3">
+        <strong>Tip:</strong> Make sure you've configured your OpenAI API key in the settings before generating posts.
+    </div>
+</div>
+
+{% endblock %}

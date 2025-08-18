@@ -1,0 +1,56 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="terminal-header"></div>
+<center>
+    <h1 class="terminal-cursor">Admin Settings</h1>
+</center>
+
+<hr class="terminal-divider">
+
+<div class="d-flex justify-content-center align-items-center">
+    <form action="/admin/settings" method="post" class="terminal-form">
+        <h3 class="text-center mb-4">[ OPENAI CONFIGURATION ]</h3>
+        
+        <div>
+            <label for="openai_api_key" class="form-label">OpenAI API Key:</label>
+            <input type="password" name="openai_api_key" id="openai_api_key" class="form-control" 
+                   value="{{ settings.openai_api_key | default(value='') }}" 
+                   placeholder="Enter your OpenAI API key..." />
+            <div class="form-text">Your OpenAI API key for post generation. Keep this secret!</div>
+        </div>
+        
+        <div>
+            <label for="openai_model" class="form-label">OpenAI Model:</label>
+            <select name="openai_model" id="openai_model" class="form-control">
+                <option value="gpt-3.5-turbo" {% if settings.openai_model == "gpt-3.5-turbo" %}selected{% endif %}>GPT-3.5 Turbo</option>
+                <option value="gpt-4" {% if settings.openai_model == "gpt-4" %}selected{% endif %}>GPT-4</option>
+                <option value="gpt-4-turbo-preview" {% if settings.openai_model == "gpt-4-turbo-preview" %}selected{% endif %}>GPT-4 Turbo</option>
+            </select>
+            <div class="form-text">The OpenAI model to use for generating posts.</div>
+        </div>
+        
+        <div>
+            <label for="openai_max_tokens" class="form-label">Max Tokens:</label>
+            <input type="number" name="openai_max_tokens" id="openai_max_tokens" class="form-control" 
+                   value="{{ settings.openai_max_tokens | default(value='1000') }}" 
+                   min="100" max="4000" step="100" />
+            <div class="form-text">Maximum number of tokens for OpenAI responses (100-4000).</div>
+        </div>
+        
+        <div>
+            <label for="openai_temperature" class="form-label">Temperature:</label>
+            <input type="number" name="openai_temperature" id="openai_temperature" class="form-control" 
+                   value="{{ settings.openai_temperature | default(value='0.7') }}" 
+                   min="0.0" max="1.0" step="0.1" />
+            <div class="form-text">Controls randomness in responses (0.0 = deterministic, 1.0 = very random).</div>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+            <a href="/admin/generate" class="btn btn-secondary">Generate Post</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
