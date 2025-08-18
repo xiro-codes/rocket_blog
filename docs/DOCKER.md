@@ -22,6 +22,8 @@ docker-compose -f docker-compose.dev.yml up --build
 # pgAdmin: http://localhost:5050
 ```
 
+**Note**: Development mode bypasses nginx and exposes the app directly, avoiding any SSL/redirect issues.
+
 ### Production (with SSL)
 ```bash
 # First time setup: generate SSL certificates
@@ -31,6 +33,8 @@ docker-compose -f docker-compose.dev.yml up --build
 docker-compose up --build -d
 # Access: https://blog.tdavis.dev
 ```
+
+**Note**: If you experience redirect loops, the nginx configuration will automatically detect missing SSL certificates and serve HTTP-only until SSL is properly configured.
 
 ## Production Deployment with SSL
 
@@ -242,6 +246,40 @@ RUN mkdir -p ~/.cargo && \
     echo '[http]' > ~/.cargo/config.toml && \
     echo 'check-revoke = false' >> ~/.cargo/config.toml
 ```
+
+### Redirect Loop Issues
+
+If you encounter "The page isn't redirecting properly" errors:
+
+#### Solution 1: Use Development Mode
+```bash
+# Bypass nginx entirely for local testing
+./scripts/docker-deploy.sh dev
+# Access: http://localhost:8000
+```
+
+#### Solution 2: Check SSL Certificate Status
+```bash
+# Check if SSL certificates exist
+docker compose exec nginx ls -la /etc/letsencrypt/live/blog.tdavis.dev/
+
+# View nginx logs for SSL-related errors
+docker compose logs nginx
+
+# Force regenerate SSL certificates
+./scripts/setup-ssl.sh
+```
+
+#### Solution 3: Verify nginx Configuration
+```bash
+# Check which nginx config is being used
+docker compose exec nginx nginx -T
+
+# Restart nginx to trigger SSL detection
+docker compose restart nginx
+```
+
+**Note**: The nginx configuration automatically detects missing SSL certificates and serves HTTP-only until SSL is properly configured, preventing redirect loops.
 
 #### Solution 4: Pre-built Binary Approach
 

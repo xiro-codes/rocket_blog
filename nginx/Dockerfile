@@ -1,9 +1,7 @@
 FROM nginx:alpine
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Copy entrypoint script
+# Copy nginx configurations as templates
+COPY nginx.conf /etc/nginx/nginx.ssl.conf
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
