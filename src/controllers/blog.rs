@@ -590,7 +590,7 @@ async fn delete(
     ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     let _ = service.delete_by_seq_id(db, id).await;
-    Ok(ControllerBase::success_redirect("/blog", "Deleted Post"))
+    Ok(ControllerBase::success_redirect("/blog/", "Deleted Post"))
 }
 
 #[get("/<id>/publish")]
