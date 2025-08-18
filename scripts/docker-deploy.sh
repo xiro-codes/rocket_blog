@@ -76,7 +76,7 @@ function start_prod() {
 
 function setup_ssl() {
     echo "Setting up SSL certificates..."
-    ./scripts/setup-ssl.sh
+		sh ./scripts/setup-ssl.sh
 }
 
 function renew_ssl() {
