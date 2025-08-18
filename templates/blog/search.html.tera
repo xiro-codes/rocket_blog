@@ -64,7 +64,12 @@
                             </div>
                             
                             <!-- Reaction counts -->
-                            {% set summary = reaction_summaries | get(key=post.id) %}
+                            {% set summary = false %}
+                            {% for reaction_summary in reaction_summaries %}
+                                {% if reaction_summary.post_id == post.id %}
+                                    {% set_global summary = reaction_summary %}
+                                {% endif %}
+                            {% endfor %}
                             {% if summary %}
                             <div class="reaction-summary mt-2">
                                 <small class="text-muted">
