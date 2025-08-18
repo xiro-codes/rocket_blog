@@ -56,7 +56,7 @@ async fn login(
     let db = conn.into_inner();
     if let Ok(token) = service.login(db, data.into_inner()).await {
         jar.add_private(Cookie::new("token", token.to_string()));
-        ControllerBase::success_redirect("/blog", "Login successful.")
+        ControllerBase::success_redirect("/blog/", "Login successful.")
     } else {
         ControllerBase::danger_redirect("/auth/", "Login failed.")
     }
@@ -65,7 +65,7 @@ async fn login(
 #[get("/logout")]
 async fn logout(jar: &CookieJar<'_>) -> Flash<Redirect> {
     jar.remove_private(Cookie::from("token"));
-    ControllerBase::success_redirect("/blog", "Logout successful.")
+    ControllerBase::success_redirect("/blog/", "Logout successful.")
 }
 
 #[get("/create-admin")]

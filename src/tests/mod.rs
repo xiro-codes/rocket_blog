@@ -7,6 +7,7 @@ pub mod middleware_tests;
 pub mod main_tests;
 pub mod integration_tests;
 pub mod comprehensive_tests;
+pub mod redirect_tests;
 
 // Test utilities and mocks
 pub mod utils;
