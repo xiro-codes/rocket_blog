@@ -1,6 +1,7 @@
-use crate::services::{AuthService, BlogService, CommentService, ReactionService, TagService, CoordinatorService};
+use crate::services::{AuthService, BlogService, CommentService, OpenAIService, ReactionService, TagService, CoordinatorService};
 use crate::controllers;
-use rocket::{fairing::AdHoc, Build, Rocket};
+use crate::config::AppConfig;
+use rocket::{fairing::AdHoc, Build, Rocket, State};
 
 /// Service registry for managing application services
 pub struct ServiceRegistry;
@@ -8,10 +9,16 @@ pub struct ServiceRegistry;
 impl ServiceRegistry {
     /// Register all application services with Rocket
     pub fn attach_all_services(rocket: Rocket<Build>) -> Rocket<Build> {
+        // Get AppConfig to access OpenAI API key
+        let app_config = rocket.state::<AppConfig>()
+            .map(|config| config.openai_api_key.clone())
+            .unwrap_or(None);
+
         rocket
             .manage(AuthService::new())
             .manage(BlogService::new())
             .manage(CommentService::new())
+            .manage(OpenAIService::new(app_config))
             .manage(ReactionService::new())
             .manage(TagService::new())
             .manage(CoordinatorService::new())

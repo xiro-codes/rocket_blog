@@ -3,7 +3,7 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{AuthService, BlogService, CommentService, ReactionService, TagService, CoordinatorService},
+    services::{AuthService, BlogService, CommentService, OpenAIService, ReactionService, TagService, CoordinatorService},
     types::{HttpRange, StreamedFile},
 };
 use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag};
@@ -732,6 +732,99 @@ async fn get_reactions(
     Ok(Json(json!(summary)))
 }
 
+/// Generate AI content for a blog post
+#[post("/generate-content", data = "<generation_request>")]
+async fn generate_ai_content(
+    conn: Connection<'_, Db>,
+    auth_service: &State<AuthService>,
+    openai_service: &State<OpenAIService>,
+    jar: &CookieJar<'_>,
+    generation_request: Json<Value>,
+) -> Result<Json<Value>, Status> {
+    // Check authentication
+    let token = ControllerBase::check_auth(jar)?;
+    let db = conn.into_inner();
+    
+    if let Some(token_str) = token {
+        if let Ok(token_uuid) = uuid::Uuid::parse_str(&token_str) {
+            if auth_service.check_token(db, token_uuid).await.is_none() {
+                return Err(Status::Unauthorized);
+            }
+        } else {
+            return Err(Status::Unauthorized);
+        }
+    } else {
+        return Err(Status::Unauthorized);
+    }
+
+    // Check if OpenAI service is available
+    if !openai_service.is_available() {
+        return Ok(Json(json!({
+            "error": "OpenAI service not configured"
+        })));
+    }
+
+    let request = generation_request.into_inner();
+    let title = request.get("title")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    
+    let prompt = request.get("prompt")
+        .and_then(|v| v.as_str());
+    
+    let generation_type = request.get("type")
+        .and_then(|v| v.as_str())
+        .unwrap_or("content");
+
+    match generation_type {
+        "content" => {
+            match openai_service.generate_post_content(&title, prompt).await {
+                Ok(content) => Ok(Json(json!({
+                    "success": true,
+                    "content": content
+                }))),
+                Err(error) => Ok(Json(json!({
+                    "error": error
+                })))
+            }
+        },
+        "excerpt" => {
+            let content = request.get("content")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            
+            match openai_service.generate_excerpt(content).await {
+                Ok(excerpt) => Ok(Json(json!({
+                    "success": true,
+                    "excerpt": excerpt
+                }))),
+                Err(error) => Ok(Json(json!({
+                    "error": error
+                })))
+            }
+        },
+        "tags" => {
+            let content = request.get("content")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            
+            match openai_service.generate_tags(&title, content).await {
+                Ok(tags) => Ok(Json(json!({
+                    "success": true,
+                    "tags": tags.join(", ")
+                }))),
+                Err(error) => Ok(Json(json!({
+                    "error": error
+                })))
+            }
+        },
+        _ => Ok(Json(json!({
+            "error": "Invalid generation type"
+        })))
+    }
+}
+
 fn routes() -> Vec<Route> {
     routes![
         list_view,
@@ -748,7 +841,8 @@ fn routes() -> Vec<Route> {
         publish,
         add_reaction,
         remove_reaction,
-        get_reactions
+        get_reactions,
+        generate_ai_content
     ]
 }
 
