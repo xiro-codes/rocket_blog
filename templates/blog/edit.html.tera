@@ -17,13 +17,13 @@
 			<label for="title" class="form-label">Title:</label>
 			<div class="d-flex">
 				<input type="text" class="form-control me-2" name="title" id="title" value="{{post.title}}" />
-				{% if openai_available %}
+				{% if ai_available %}
 				<button type="button" id="generate-content-btn" class="btn btn-success">✨ Generate</button>
 				{% endif %}
 			</div>
 		</div>
 		
-		{% if openai_available %}
+		{% if ai_available %}
 		<div id="ai-prompt-section" style="display: none;">
 			<label for="ai-prompt" class="form-label">AI Prompt (Optional):</label>
 			<input type="text" id="ai-prompt" class="form-control" placeholder="Additional context for AI generation..." />
@@ -36,7 +36,7 @@
 			<div class="d-flex">
 				<textarea name="excerpt" id="excerpt" rows="3" class="form-control me-2" 
 				          placeholder="Brief summary of the post (optional - will be auto-generated if left empty)">{% if post.excerpt %}{{post.excerpt}}{% endif %}</textarea>
-				{% if openai_available %}
+				{% if ai_available %}
 				<button type="button" id="generate-excerpt-btn" class="btn btn-outline-success">✨ Generate Excerpt</button>
 				{% endif %}
 			</div>
@@ -53,7 +53,7 @@
 			<div class="d-flex">
 				<input type="text" class="form-control me-2" name="tags" id="tags" placeholder="e.g. rust, web development, tutorial" 
 				       value="{% for tag in tags %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}">
-				{% if openai_available %}
+				{% if ai_available %}
 				<button type="button" id="generate-tags-btn" class="btn btn-outline-success">✨ Generate Tags</button>
 				{% endif %}
 			</div>
@@ -191,8 +191,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	});
 
-	// AI Generation functionality (only if OpenAI is available)
-	{% if openai_available %}
+	// AI Generation functionality (only if any AI service is available)
+	{% if ai_available %}
 	const titleInput = document.getElementById('title');
 	const promptInput = document.getElementById('ai-prompt');
 	const promptSection = document.getElementById('ai-prompt-section');
