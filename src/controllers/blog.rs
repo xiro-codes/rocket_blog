@@ -350,14 +350,22 @@ async fn video(
 
 #[get("/create")]
 async fn create_view(
+    conn: Connection<'_, Db>,
+    openai_service: &State<OpenAIService>,
     flash: Option<FlashMessage<'_>>,
     jar: &CookieJar<'_>,
 ) -> Result<Template, Status> {
     ControllerBase::require_auth(jar)?;
+    let db = conn.into_inner();
+    
+    // Check if OpenAI is available
+    let openai_available = openai_service.is_available(db).await;
+    
     Ok(Template::render(
         "blog/create",
         context! {
             form_url: "create",
+            openai_available,
             flash: ControllerBase::extract_flash(flash)
         },
     ))
@@ -419,6 +427,7 @@ async fn edit_view(
     jar: &CookieJar<'_>,
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
+    openai_service: &State<OpenAIService>,
     tag_service: &State<TagService>,
     id: i32,
 ) -> Result<Template, Status> {
@@ -435,11 +444,15 @@ async fn edit_view(
         Err(_) => return Err(Status::InternalServerError),
     };
     
+    // Check if OpenAI is available
+    let openai_available = openai_service.is_available(db).await;
+    
     Ok(Template::render(
         "blog/edit",
         context! {
             post,
             tags,
+            openai_available,
             form_url: ""
         },
     ))
@@ -758,7 +771,7 @@ async fn generate_ai_content(
     }
 
     // Check if OpenAI service is available
-    if !openai_service.is_available() {
+    if !openai_service.is_available(db).await {
         return Ok(Json(json!({
             "error": "OpenAI service not configured"
         })));
@@ -779,7 +792,7 @@ async fn generate_ai_content(
 
     match generation_type {
         "content" => {
-            match openai_service.generate_post_content(&title, prompt).await {
+            match openai_service.generate_post_content(db, &title, prompt).await {
                 Ok(content) => Ok(Json(json!({
                     "success": true,
                     "content": content
@@ -794,7 +807,7 @@ async fn generate_ai_content(
                 .and_then(|v| v.as_str())
                 .unwrap_or("");
             
-            match openai_service.generate_excerpt(content).await {
+            match openai_service.generate_excerpt(db, content).await {
                 Ok(excerpt) => Ok(Json(json!({
                     "success": true,
                     "excerpt": excerpt
@@ -809,7 +822,7 @@ async fn generate_ai_content(
                 .and_then(|v| v.as_str())
                 .unwrap_or("");
             
-            match openai_service.generate_tags(&title, content).await {
+            match openai_service.generate_tags(db, &title, content).await {
                 Ok(tags) => Ok(Json(json!({
                     "success": true,
                     "tags": tags.join(", ")

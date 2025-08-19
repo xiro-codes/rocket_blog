@@ -16,22 +16,28 @@
 			<label for="title" class="form-label">Title:</label>
 			<div class="d-flex">
 				<input type="text" name="title" id="title" class="form-control me-2" placeholder="Enter post title..." />
+				{% if openai_available %}
 				<button type="button" id="generate-content-btn" class="btn btn-success">✨ Generate</button>
+				{% endif %}
 			</div>
 		</div>
 		
+		{% if openai_available %}
 		<div id="ai-prompt-section" style="display: none;">
 			<label for="ai-prompt" class="form-label">AI Prompt (Optional):</label>
 			<input type="text" id="ai-prompt" class="form-control" placeholder="Additional context for AI generation..." />
 			<div class="form-text">Provide additional context to guide AI content generation</div>
 		</div>
+		{% endif %}
 		
 		<div>
 			<label for="excerpt" class="form-label">Excerpt:</label>
 			<div class="d-flex">
 				<textarea name="excerpt" id="excerpt" rows="3" class="form-control me-2" 
 			          placeholder="Brief summary of the post (optional - will be auto-generated if left empty)"></textarea>
+				{% if openai_available %}
 				<button type="button" id="generate-excerpt-btn" class="btn btn-outline-success">✨ Generate Excerpt</button>
+				{% endif %}
 			</div>
 			<div class="form-text">Optional short summary that will appear in post listings. If left empty, it will be auto-generated from the content.</div>
 		</div>
@@ -50,7 +56,9 @@
 			<label for="tags" class="form-label">Tags (comma-separated):</label>
 			<div class="d-flex">
 				<input type="text" class="form-control me-2" name="tags" id="tags" placeholder="e.g. rust, web development, tutorial">
+				{% if openai_available %}
 				<button type="button" id="generate-tags-btn" class="btn btn-outline-success">✨ Generate Tags</button>
+				{% endif %}
 			</div>
 			<div class="form-text">Separate multiple tags with commas</div>
 		</div>
@@ -99,7 +107,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	});
 
-	// AI Generation functionality
+	// AI Generation functionality (only if OpenAI is available)
+	{% if openai_available %}
 	const titleInput = document.getElementById('title');
 	const promptInput = document.getElementById('ai-prompt');
 	const promptSection = document.getElementById('ai-prompt-section');
@@ -236,6 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			this.textContent = '✨ Generate Tags';
 		}
 	});
+	{% endif %}
 });
 </script>
 {% endblock %}

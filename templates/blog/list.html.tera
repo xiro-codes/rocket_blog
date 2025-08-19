@@ -14,6 +14,7 @@
 	<div class="btn-group mb-3">
 		<a class="btn btn-primary" href="/blog/create">[CREATE POST]</a>
 		<a class="btn btn-success" href="/blog/search">[SEARCH]</a>
+		<a class="btn btn-secondary" href="/settings">[SETTINGS]</a>
 		<a class="btn btn-primary" href="/auth/logout">[LOGOUT]</a>
 	</div>
 	{%else%}

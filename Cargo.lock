@@ -153,7 +153,9 @@ dependencies = [
 name = "app"
 version = "0.1.0"
 dependencies = [
+ "aes-gcm",
  "async-openai",
+ "base64",
  "chrono",
  "fern",
  "humantime",

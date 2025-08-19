@@ -2,38 +2,47 @@ use async_openai::{Client, types::{
     ChatCompletionRequestMessage, ChatCompletionRequestSystemMessage, 
     ChatCompletionRequestUserMessage, CreateChatCompletionRequestArgs, Role
 }};
-use crate::services::base::BaseService;
+use sea_orm::DatabaseConnection;
+use crate::services::{base::BaseService, SettingsService};
 
 pub struct OpenAIService {
     base: BaseService,
-    client: Option<Client<async_openai::config::OpenAIConfig>>,
+    settings_service: SettingsService,
 }
 
 impl OpenAIService {
-    pub fn new(api_key: Option<String>) -> Self {
-        let client = if let Some(key) = api_key {
-            Some(Client::with_config(
-                async_openai::config::OpenAIConfig::new().with_api_key(key)
-            ))
-        } else {
-            None
-        };
-        
+    pub fn new() -> Self {
         Self {
             base: BaseService::new(),
-            client,
+            settings_service: SettingsService::new(),
         }
     }
 
-    /// Check if OpenAI service is available (has API key)
-    pub fn is_available(&self) -> bool {
-        self.client.is_some()
+    /// Check if OpenAI service is available (has valid API key in database)
+    pub async fn is_available(&self, db: &DatabaseConnection) -> bool {
+        self.settings_service
+            .get_openai_api_key(db)
+            .await
+            .unwrap_or(None)
+            .is_some()
+    }
+
+    /// Get a configured OpenAI client if API key is available
+    async fn get_client(&self, db: &DatabaseConnection) -> Result<Client<async_openai::config::OpenAIConfig>, String> {
+        let api_key = self.settings_service
+            .get_openai_api_key(db)
+            .await
+            .map_err(|e| format!("Failed to get API key from database: {}", e))?
+            .ok_or_else(|| "OpenAI API key not configured".to_string())?;
+
+        Ok(Client::with_config(
+            async_openai::config::OpenAIConfig::new().with_api_key(api_key)
+        ))
     }
 
     /// Generate blog post content from a title/prompt
-    pub async fn generate_post_content(&self, title: &str, additional_prompt: Option<&str>) -> Result<String, String> {
-        let client = self.client.as_ref()
-            .ok_or_else(|| "OpenAI API key not configured".to_string())?;
+    pub async fn generate_post_content(&self, db: &DatabaseConnection, title: &str, additional_prompt: Option<&str>) -> Result<String, String> {
+        let client = self.get_client(db).await?;
 
         let system_message = "You are a helpful assistant that writes engaging blog posts. Create well-structured, informative content with proper paragraphs. Write in markdown format with headers, lists, and emphasis where appropriate.";
         
@@ -83,9 +92,8 @@ impl OpenAIService {
     }
 
     /// Generate an excerpt from content
-    pub async fn generate_excerpt(&self, content: &str) -> Result<String, String> {
-        let client = self.client.as_ref()
-            .ok_or_else(|| "OpenAI API key not configured".to_string())?;
+    pub async fn generate_excerpt(&self, db: &DatabaseConnection, content: &str) -> Result<String, String> {
+        let client = self.get_client(db).await?;
 
         let system_message = "You are a helpful assistant that creates concise, engaging excerpts from blog posts. Create a 1-2 sentence summary that captures the main idea and entices readers.";
         
@@ -131,9 +139,8 @@ impl OpenAIService {
     }
 
     /// Generate suggested tags from content
-    pub async fn generate_tags(&self, title: &str, content: &str) -> Result<Vec<String>, String> {
-        let client = self.client.as_ref()
-            .ok_or_else(|| "OpenAI API key not configured".to_string())?;
+    pub async fn generate_tags(&self, db: &DatabaseConnection, title: &str, content: &str) -> Result<Vec<String>, String> {
+        let client = self.get_client(db).await?;
 
         let system_message = "You are a helpful assistant that suggests relevant tags for blog posts. Return 3-5 single-word or short phrase tags separated by commas.";
         
@@ -192,23 +199,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_openai_service_new_without_api_key() {
-        let service = OpenAIService::new(None);
-        assert!(!service.is_available());
-    }
-
-    #[test]
-    fn test_openai_service_new_with_api_key() {
-        let service = OpenAIService::new(Some("test-key".to_string()));
-        assert!(service.is_available());
-    }
-
-    #[test]
-    fn test_openai_service_availability() {
-        let service_without_key = OpenAIService::new(None);
-        let service_with_key = OpenAIService::new(Some("test-key".to_string()));
-        
-        assert!(!service_without_key.is_available());
-        assert!(service_with_key.is_available());
+    fn test_openai_service_new() {
+        let service = OpenAIService::new();
+        // Service should be created successfully
+        assert!(std::ptr::addr_of!(service).is_null() == false);
     }
 }

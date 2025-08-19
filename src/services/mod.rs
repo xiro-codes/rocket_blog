@@ -14,5 +14,7 @@ mod openai;
 pub use openai::OpenAIService;
 mod reaction;
 pub use reaction::{PostReactionSummary, Service as ReactionService};
+mod settings;
+pub use settings::SettingsService;
 mod tag;
 pub use tag::TagService;

@@ -11,3 +11,5 @@ mod comment;
 pub use comment::Controller as CommentController;
 mod feed;
 pub use feed::Controller as FeedController;
+mod settings;
+pub use settings::Controller as SettingsController;

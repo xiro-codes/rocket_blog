@@ -75,3 +75,10 @@ pub struct PostSearchResult {
 pub struct SearchFormDTO {
     pub query: String,
 }
+
+/// Form DTO for settings configuration
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct SettingsFormDTO {
+    pub openai_api_key: String,
+}
