@@ -167,6 +167,16 @@ If you encounter build errors:
    docker-compose -f docker-compose.dev.live.yml logs app
    ```
 
+### Data Persistence
+
+The development environment preserves database data across container restarts:
+
+- **First run**: Creates initial seed data (admin account, sample posts, tags)
+- **Subsequent runs**: Preserves existing data, skips re-seeding
+- **Manual reset**: Use `./scripts/docker-deploy.sh clean` to remove all data and start fresh
+
+**Note**: Data persists in Docker volumes even when containers are stopped and restarted. Only the `clean` command removes volumes and data.
+
 ## Comparison with Production
 
 | Feature | Development | Production |
