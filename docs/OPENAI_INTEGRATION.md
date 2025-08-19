@@ -12,18 +12,29 @@ This document describes how to set up and use the OpenAI integration for automat
 
 ### 2. Configure API Key
 
-Add your OpenAI API key to your environment:
+**New: Database Configuration (Recommended)**
+
+The OpenAI API key is now stored securely in the database and configured through the admin settings page:
+
+1. **Access Settings**: Log in as an admin and navigate to Settings from the admin panel
+2. **Configure API Key**: Enter your OpenAI API key in the settings form  
+3. **Validation**: The system will test the API key before saving
+4. **Enable Features**: AI generation buttons will appear in the blog editor once configured
+
+**Legacy: Environment Variable (Deprecated)**
 
 ```bash
-# In .env file
+# In .env file (no longer recommended)
 OPENAI_API_KEY=your-openai-api-key-here
 ```
 
-Or set as environment variable:
+### Security Features
 
-```bash
-export OPENAI_API_KEY=your-openai-api-key-here
-```
+- API keys are encrypted using AES-256-GCM before database storage
+- Admin-only access to settings configuration
+- API key validation before storage
+- Graceful degradation when API key is not configured
+- No sensitive data exposed in environment variables or logs
 
 ## Features
 
