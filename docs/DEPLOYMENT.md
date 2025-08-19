@@ -32,16 +32,19 @@ The easiest way to deploy Rocket Blog is using Docker and Docker Compose.
 3. **Build and Deploy**
    ```bash
    # Build and start all services
-   docker-compose up -d --build
+   just docker-prod
+   # OR: docker-compose up -d --build
    
    # Check service status
-   docker-compose ps
+   just docker-status
+   # OR: docker-compose ps
    ```
 
 4. **Initialize Database**
    ```bash
    # Run migrations
-   docker-compose exec app cargo run -p migrations
+   just migrate
+   # OR: docker-compose exec app cargo run -p migrations
    ```
 
 5. **Access Your Blog**
@@ -63,7 +66,7 @@ railway up
 
 #### Render
 1. Connect your GitHub repository
-2. Set build command: `cargo build --release`
+2. Set build command: `just build` or `cargo build --release`
 3. Set start command: `./target/release/app`
 4. Add PostgreSQL database
 5. Configure environment variables
@@ -71,7 +74,7 @@ railway up
 #### DigitalOcean App Platform
 1. Create new app from GitHub repository
 2. Configure build settings:
-   - Build Command: `cargo build --release`
+   - Build Command: `just build` or `cargo build --release`
    - Run Command: `./target/release/app`
 3. Add PostgreSQL database
 4. Set environment variables
@@ -135,7 +138,8 @@ sudo -u rocket_blog -s
 
 # Build release version
 cd /opt/rocket_blog
-cargo build --release
+just build
+# OR: cargo build --release
 
 # Create data directory
 mkdir -p /opt/rocket_blog/data
@@ -169,7 +173,8 @@ EOF
 
 #### 6. Run Migrations
 ```bash
-sudo -u rocket_blog /opt/rocket_blog/target/release/migrations
+just migrate
+# OR: sudo -u rocket_blog /opt/rocket_blog/target/release/migrations
 ```
 
 #### 7. Create Systemd Service
@@ -398,10 +403,12 @@ git checkout main
 git pull origin main
 
 # Build new version
-cargo build --release
+just build
+# OR: cargo build --release
 
 # Run migrations
-./target/release/migrations
+just migrate
+# OR: ./target/release/migrations
 
 # Restart service
 sudo systemctl restart rocket-blog
@@ -429,10 +436,12 @@ sudo chown rocket_blog:rocket_blog /opt/rocket_blog/deploy.sh
 /opt/rocket_blog/backup.sh
 
 # Run migrations
-sudo -u rocket_blog /opt/rocket_blog/target/release/migrations
+just migrate
+# OR: sudo -u rocket_blog /opt/rocket_blog/target/release/migrations
 
 # Verify migration status
-sudo -u rocket_blog /opt/rocket_blog/target/release/migrations status
+just migrate-status
+# OR: sudo -u rocket_blog /opt/rocket_blog/target/release/migrations status
 ```
 
 ## 🐛 Troubleshooting
