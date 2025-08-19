@@ -143,7 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Development Environment
 - Docker Compose with PostgreSQL and pgAdmin
 - Development seeding with sample data
-- Hot reload support with `cargo run`
+- Hot reload support with `just run` or `cargo run`
 - Comprehensive logging and error handling
 - Test database setup and utilities
 

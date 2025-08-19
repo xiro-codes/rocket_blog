@@ -79,26 +79,30 @@ docker-compose -f docker-compose.dev.live.yml up --build
 
 1. Start the standard development environment:
    ```bash
-   ./scripts/docker-deploy.sh dev
+   just docker-dev
+   # OR: ./scripts/docker-deploy.sh dev
    ```
 
 2. Make code changes and rebuild when needed:
    ```bash
-   docker-compose -f docker-compose.dev.yml up --build
+   just docker-dev
+   # OR: docker-compose -f docker-compose.dev.yml up --build
    ```
 
 ### For Active Development
 
 1. Start the live development environment:
    ```bash
-   ./scripts/docker-deploy.sh dev-live
+   just docker-dev-live
+   # OR: ./scripts/docker-deploy.sh dev-live
    ```
 
 2. Edit your Rust code - changes will automatically trigger rebuilds
 
 3. View live logs to see compilation and runtime output:
    ```bash
-   ./scripts/docker-deploy.sh logs app
+   just docker-logs app
+   # OR: ./scripts/docker-deploy.sh logs app
    ```
 
 ## Environment Variables
@@ -137,7 +141,8 @@ lsof -i :5432
 lsof -i :5050
 
 # Stop existing services
-./scripts/docker-deploy.sh stop
+just docker-stop
+# OR: ./scripts/docker-deploy.sh stop
 ```
 
 ### Build Issues
@@ -146,20 +151,23 @@ If you encounter build errors:
 
 1. Clean and rebuild:
    ```bash
-   ./scripts/docker-deploy.sh clean
-   ./scripts/docker-deploy.sh dev
+   just docker-clean
+   just docker-dev
+   # OR: ./scripts/docker-deploy.sh clean && ./scripts/docker-deploy.sh dev
    ```
 
 2. Check logs for specific errors:
    ```bash
-   ./scripts/docker-deploy.sh logs app
+   just docker-logs app
+   # OR: ./scripts/docker-deploy.sh logs app
    ```
 
 ### Live Reloading Not Working
 
 1. Ensure you're using the live development setup:
    ```bash
-   ./scripts/docker-deploy.sh dev-live
+   just docker-dev-live
+   # OR: ./scripts/docker-deploy.sh dev-live
    ```
 
 2. Check that cargo-watch is running:
@@ -173,7 +181,7 @@ The development environment preserves database data across container restarts:
 
 - **First run**: Creates initial seed data (admin account, sample posts, tags)
 - **Subsequent runs**: Preserves existing data, skips re-seeding
-- **Manual reset**: Use `./scripts/docker-deploy.sh clean` to remove all data and start fresh
+- **Manual reset**: Use `just docker-clean` (or `./scripts/docker-deploy.sh clean`) to remove all data and start fresh
 
 **Note**: Data persists in Docker volumes even when containers are stopped and restarted. Only the `clean` command removes volumes and data.
 

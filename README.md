@@ -294,6 +294,10 @@ We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.
 - [**Database Migrations**](migrations/README.md) - Managing database changes
 - [**Development Scripts**](scripts/README.md) - Automation and tooling
 
+### Project Documentation
+- [**Changelog**](docs/CHANGELOG.md) - Project history and release notes
+- [**Cleanup Summary**](docs/CLEANUP_SUMMARY.md) - Code cleanup and refactoring notes
+
 ## 🐛 Issues and Support
 
 - **Bug Reports**: [Create an issue](https://github.com/xiro-codes/rocket_blog/issues)

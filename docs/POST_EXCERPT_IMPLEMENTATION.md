@@ -159,10 +159,12 @@ fn generate_excerpt(text: &str, provided_excerpt: Option<String>) -> Option<Stri
 #### Database Migration
 ```bash
 # Apply the migration
-cargo run --bin migration up
+just migrate
+# OR: cargo run --bin migration up
 
-# Rollback if needed
-cargo run --bin migration down
+# Rollback if needed  
+just force-migrate
+# OR: cargo run --bin migration down
 ```
 
 #### Excerpt Generation Algorithm

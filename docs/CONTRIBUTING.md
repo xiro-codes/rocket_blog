@@ -44,10 +44,12 @@ Thank you for your interest in contributing to Rocket Blog! This guide will help
    just gen-models
    
    # Run tests to ensure everything works
-   cargo test
+   just test
+   # OR: cargo test
    
    # Start development server
-   cargo run
+   just run
+   # OR: cargo run
    ```
 
 4. **Verify Setup**
@@ -118,16 +120,20 @@ just docker-help              # Show Docker command help
 3. **Test Your Changes**
    ```bash
    # Run all tests
-   cargo test
+   just test
+   # OR: cargo test
    
    # Check code formatting
-   cargo fmt --check
+   just fmt-check
+   # OR: cargo fmt --check
    
    # Run linter (if available)
-   cargo clippy
+   just clippy
+   # OR: cargo clippy
    
    # Test the application manually
-   cargo run
+   just run
+   # OR: cargo run
    
    # OR test in Docker environment
    just docker-dev              # Test with production-like build
@@ -173,12 +179,14 @@ just docker-help              # Show Docker command help
 
 1. **Use `rustfmt`**
    ```bash
-   cargo fmt
+   just fmt
+   # OR: cargo fmt
    ```
 
 2. **Follow Clippy recommendations**
    ```bash
-   cargo clippy --all-targets --all-features -- -D warnings
+   just clippy
+   # OR: cargo clippy --all-targets --all-features -- -D warnings
    ```
 
 3. **Write documentation**
@@ -288,16 +296,20 @@ impl BlogService {
 ### Running Tests
 ```bash
 # Run all tests
-cargo test
+just test
+# OR: cargo test
 
 # Run specific test
-cargo test test_create_slug
+just test-name test_create_slug
+# OR: cargo test test_create_slug
 
 # Run tests with output
-cargo test -- --nocapture
+just test-verbose
+# OR: cargo test -- --nocapture
 
 # Run integration tests only
-cargo test --test integration_tests
+just test --test integration_tests
+# OR: cargo test --test integration_tests
 ```
 
 ## 📚 Documentation Standards
@@ -321,7 +333,7 @@ cargo test --test integration_tests
 
 ### Before Submitting
 - [ ] Code follows style guidelines
-- [ ] Tests pass (`cargo test`)
+- [ ] Tests pass (`just test`)
 - [ ] Documentation is updated
 - [ ] Commit messages follow conventions
 - [ ] No merge conflicts with main branch

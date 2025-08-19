@@ -4,6 +4,8 @@ force-migrate:
 	sea-orm-cli migrate -d migrations fresh
 new-migration NAME:
   sea-orm-cli migrate -d migrations generate {{NAME}}
+migrate-status:
+	sea-orm-cli migrate -d migrations status
 
 # Generate models with custom code preserved in separate dto module
 gen-models:
@@ -16,6 +18,54 @@ gen-models:
 	echo "// Custom DTOs and form structures" >> ./models/src/lib.rs
 	echo "pub mod dto;" >> ./models/src/lib.rs
 	echo "✅ Models generated with fixed serde imports and preserved DTO module"
+
+# Local development commands
+# Build the application in release mode
+build:
+	cargo build --release
+
+# Build the application in debug mode (faster compilation)
+build-dev:
+	cargo build
+
+# Run all tests
+test:
+	cargo test
+
+# Run specific test by name
+test-name NAME:
+	cargo test {{NAME}}
+
+# Run tests with output
+test-verbose:
+	cargo test -- --nocapture
+
+# Check code without building
+check:
+	cargo check
+
+# Format code
+fmt:
+	cargo fmt
+
+# Check code formatting
+fmt-check:
+	cargo fmt --check
+
+# Run clippy linter
+clippy:
+	cargo clippy --all-targets --all-features -- -D warnings
+
+# Clean build artifacts
+clean:
+	cargo clean
+
+# Run the application locally (development mode)
+run:
+	cargo run
+
+# Alias for run command
+dev: run
 
 # Docker development and deployment commands
 docker-dev:
@@ -109,9 +159,23 @@ help:
 	@echo ""
 	@echo "📊 Database:"
 	@echo "  migrate              Run database migrations"
+	@echo "  migrate-status       Check migration status"
 	@echo "  force-migrate        Fresh migration (drops all data)"
 	@echo "  new-migration NAME   Create new migration"
 	@echo "  gen-models           Generate SeaORM models"
+	@echo ""
+	@echo "🦀 Local Development:"
+	@echo "  build                Build application (release mode)"
+	@echo "  build-dev            Build application (debug mode)"
+	@echo "  run / dev            Run application locally"
+	@echo "  test                 Run all tests"
+	@echo "  test-name NAME       Run specific test by name"
+	@echo "  test-verbose         Run tests with output"
+	@echo "  check                Check code without building"
+	@echo "  fmt                  Format code"
+	@echo "  fmt-check            Check code formatting"
+	@echo "  clippy               Run clippy linter"
+	@echo "  clean                Clean build artifacts"
 	@echo ""
 	@echo "🐳 Docker:"
 	@echo "  docker-dev           Start development environment"

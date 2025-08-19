@@ -179,9 +179,9 @@ fn generate_excerpt(text: &str, provided_excerpt: Option<String>) -> Option<Stri
 ```
 
 ### Compilation Validation
-- `cargo build`: Full compilation success
-- `cargo check`: Type checking passes
-- `cargo test --no-run`: Test compilation verified
+- `just build`: Full compilation success (OR: `cargo build`)
+- `just check`: Type checking passes (OR: `cargo check`)
+- `just test` compilation verified (OR: `cargo test --no-run`)
 
 ### UI Validation
 - Created visual comparison showing before/after

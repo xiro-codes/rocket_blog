@@ -17,7 +17,8 @@ This guide provides instructions for building and running the Rocket Blog applic
 ### Development (Local Testing)
 ```bash
 # For local development with direct app access
-docker-compose -f docker-compose.dev.yml up --build
+just docker-dev
+# OR: docker-compose -f docker-compose.dev.yml up --build
 # Access: http://localhost:8000
 # pgAdmin: http://localhost:5050
 ```
@@ -27,10 +28,12 @@ docker-compose -f docker-compose.dev.yml up --build
 ### Production (with SSL)
 ```bash
 # First time setup: generate SSL certificates
-./scripts/setup-ssl.sh
+just docker-setup-ssl
+# OR: ./scripts/setup-ssl.sh
 
 # Start the full production stack
-docker-compose up --build -d
+just docker-prod
+# OR: docker-compose up --build -d
 # Access: https://blog.tdavis.dev
 ```
 
@@ -62,14 +65,17 @@ cd rocket_blog
 3. **Start production stack:**
 ```bash
 # Start all services with nginx proxy
-docker-compose up -d --build
+just docker-prod
+# OR: docker-compose up -d --build
 
 # Check service status
-docker-compose ps
+just docker-status
+# OR: docker-compose ps
 
 # View logs
-docker-compose logs nginx
-docker-compose logs app
+just docker-logs nginx
+just docker-logs app
+# OR: docker-compose logs nginx && docker-compose logs app
 ```
 
 ### Services in Production
@@ -92,10 +98,9 @@ For local development without SSL complexity, there are two optimized options:
 
 ```bash
 # Use development compose file with debug builds
-./scripts/docker-deploy.sh dev
-
-# Or directly:
-docker-compose -f docker-compose.dev.yml up --build
+just docker-dev
+# OR: ./scripts/docker-deploy.sh dev
+# OR: docker-compose -f docker-compose.dev.yml up --build
 
 # Access points:
 # - App: http://localhost:8000
@@ -107,10 +112,9 @@ docker-compose -f docker-compose.dev.yml up --build
 
 ```bash
 # Use live development with automatic rebuilds
-./scripts/docker-deploy.sh dev-live
-
-# Or directly:
-docker-compose -f docker-compose.dev.live.yml up --build
+just docker-dev-live
+# OR: ./scripts/docker-deploy.sh dev-live
+# OR: docker-compose -f docker-compose.dev.live.yml up --build
 
 # Access points:
 # - App: http://localhost:8000 (auto-reloads on code changes)
