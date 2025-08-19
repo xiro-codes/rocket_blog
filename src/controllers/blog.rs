@@ -3,7 +3,7 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{AuthService, BlogService, CommentService, OpenAIService, ReactionService, TagService, CoordinatorService},
+    services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, TagService, CoordinatorService},
     types::{HttpRange, StreamedFile},
 };
 use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag};
@@ -750,7 +750,7 @@ async fn get_reactions(
 async fn generate_ai_content(
     conn: Connection<'_, Db>,
     auth_service: &State<AuthService>,
-    openai_service: &State<OpenAIService>,
+    ai_service: &State<AIProviderService>,
     jar: &CookieJar<'_>,
     generation_request: Json<Value>,
 ) -> Result<Json<Value>, Status> {
@@ -770,14 +770,32 @@ async fn generate_ai_content(
         return Err(Status::Unauthorized);
     }
 
-    // Check if OpenAI service is available
-    if !openai_service.is_available(db).await {
-        return Ok(Json(json!({
-            "error": "OpenAI service not configured"
-        })));
-    }
-
     let request = generation_request.into_inner();
+    
+    // Get provider preference (optional parameter)
+    let provider_preference = request.get("provider")
+        .and_then(|v| v.as_str());
+
+    // Get an available AI provider
+    let provider = if let Some(pref) = provider_preference {
+        // User requested specific provider
+        ai_service.get_available_providers(db).await
+            .into_iter()
+            .find(|p| p.provider_name().to_lowercase() == pref.to_lowercase())
+    } else {
+        // Use first available provider
+        ai_service.get_available_provider(db).await
+    };
+
+    let provider = match provider {
+        Some(p) => p,
+        None => {
+            return Ok(Json(json!({
+                "error": "No AI service configured or available"
+            })));
+        }
+    };
+
     let title = request.get("title")
         .and_then(|v| v.as_str())
         .unwrap_or("")
@@ -792,10 +810,11 @@ async fn generate_ai_content(
 
     match generation_type {
         "content" => {
-            match openai_service.generate_post_content(db, &title, prompt).await {
+            match provider.generate_post_content(db, &title, prompt).await {
                 Ok(content) => Ok(Json(json!({
                     "success": true,
-                    "content": content
+                    "content": content,
+                    "provider": provider.provider_name()
                 }))),
                 Err(error) => Ok(Json(json!({
                     "error": error
@@ -807,10 +826,11 @@ async fn generate_ai_content(
                 .and_then(|v| v.as_str())
                 .unwrap_or("");
             
-            match openai_service.generate_excerpt(db, content).await {
+            match provider.generate_excerpt(db, content).await {
                 Ok(excerpt) => Ok(Json(json!({
                     "success": true,
-                    "excerpt": excerpt
+                    "excerpt": excerpt,
+                    "provider": provider.provider_name()
                 }))),
                 Err(error) => Ok(Json(json!({
                     "error": error
@@ -822,10 +842,11 @@ async fn generate_ai_content(
                 .and_then(|v| v.as_str())
                 .unwrap_or("");
             
-            match openai_service.generate_tags(db, &title, content).await {
+            match provider.generate_tags(db, &title, content).await {
                 Ok(tags) => Ok(Json(json!({
                     "success": true,
-                    "tags": tags.join(", ")
+                    "tags": tags.join(", "),
+                    "provider": provider.provider_name()
                 }))),
                 Err(error) => Ok(Json(json!({
                     "error": error

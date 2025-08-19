@@ -207,6 +207,53 @@ impl SettingsService {
             }
         }
     }
+
+    /// Get Ollama URL
+    pub async fn get_ollama_url(&self, db: &DatabaseConnection) -> Result<Option<String>, String> {
+        self.get_setting(db, "ollama_url").await
+    }
+
+    /// Set Ollama URL
+    pub async fn set_ollama_url(&self, db: &DatabaseConnection, url: &str) -> Result<(), String> {
+        self.set_setting(db, "ollama_url", url, false).await
+    }
+
+    /// Get Ollama model
+    pub async fn get_ollama_model(&self, db: &DatabaseConnection) -> Result<Option<String>, String> {
+        self.get_setting(db, "ollama_model").await
+    }
+
+    /// Set Ollama model
+    pub async fn set_ollama_model(&self, db: &DatabaseConnection, model: &str) -> Result<(), String> {
+        self.set_setting(db, "ollama_model", model, false).await
+    }
+
+    /// Get Ollama enabled status
+    pub async fn get_ollama_enabled(&self, db: &DatabaseConnection) -> Result<bool, String> {
+        match self.get_setting(db, "ollama_enabled").await? {
+            Some(value) => Ok(value == "true"),
+            None => Ok(false),
+        }
+    }
+
+    /// Set Ollama enabled status
+    pub async fn set_ollama_enabled(&self, db: &DatabaseConnection, enabled: bool) -> Result<(), String> {
+        let value = if enabled { "true" } else { "false" };
+        self.set_setting(db, "ollama_enabled", value, false).await
+    }
+
+    /// Test Ollama connection
+    pub async fn test_ollama_connection(&self, url: &str) -> Result<bool, String> {
+        use reqwest::Client;
+        
+        let client = Client::new();
+        let test_url = format!("{}/api/tags", url);
+        
+        match client.get(&test_url).send().await {
+            Ok(response) => Ok(response.status().is_success()),
+            Err(e) => Err(format!("Ollama connection test failed: {}", e)),
+        }
+    }
 }
 
 #[cfg(test)]
