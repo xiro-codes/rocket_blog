@@ -58,7 +58,7 @@
 			        title="{{reaction_type.title}}">
 				{{reaction_type.emoji}} 
 				<span class="reaction-count-{{reaction_type.type}}">
-					{% set found_count = 0 %}
+					{% set_global found_count = 0 %}
 					{% for reaction in reaction_summary.reactions %}
 						{% if reaction.reaction_type == reaction_type.type %}
 							{{reaction.count}}
