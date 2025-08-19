@@ -82,3 +82,12 @@ pub struct SearchFormDTO {
 pub struct SettingsFormDTO {
     pub openai_api_key: String,
 }
+
+/// Form DTO for Ollama settings configuration
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct OllamaSettingsFormDTO {
+    pub ollama_url: String,
+    pub ollama_model: String,
+    pub ollama_enabled: bool,
+}
