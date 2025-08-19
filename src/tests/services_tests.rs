@@ -142,4 +142,38 @@ mod tests {
             assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<TagService>());
         }
     }
+
+    mod ai_provider_tests {
+        use super::*;
+        use crate::services::{AIProviderService, OpenAIService, OllamaService, AIProvider};
+
+        #[test]
+        fn test_ai_provider_service_new() {
+            let service = AIProviderService::new();
+            // Should create successfully without panicking
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AIProviderService>());
+        }
+
+        #[test]
+        fn test_openai_service_creation() {
+            let service = OpenAIService::new();
+            assert_eq!(service.provider_name(), "OpenAI");
+        }
+
+        #[test]
+        fn test_ollama_service_creation() {
+            let service = OllamaService::new();
+            assert_eq!(service.provider_name(), "Ollama");
+        }
+
+        #[test]
+        fn test_ai_provider_service_with_providers() {
+            let mut service = AIProviderService::new();
+            service.add_provider(Box::new(OpenAIService::new()));
+            service.add_provider(Box::new(OllamaService::new()));
+            
+            // Should have added providers without panicking
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AIProviderService>());
+        }
+    }
 }

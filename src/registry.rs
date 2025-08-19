@@ -1,4 +1,4 @@
-use crate::services::{AuthService, BlogService, CommentService, OpenAIService, ReactionService, SettingsService, TagService, CoordinatorService};
+use crate::services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService};
 use crate::controllers;
 use crate::config::AppConfig;
 use rocket::{fairing::AdHoc, Build, Rocket, State};
@@ -9,11 +9,18 @@ pub struct ServiceRegistry;
 impl ServiceRegistry {
     /// Register all application services with Rocket
     pub fn attach_all_services(rocket: Rocket<Build>) -> Rocket<Build> {
+        // Create AI provider service and add providers
+        let mut ai_service = AIProviderService::new();
+        ai_service.add_provider(Box::new(OpenAIService::new()));
+        ai_service.add_provider(Box::new(OllamaService::new()));
+        
         rocket
             .manage(AuthService::new())
             .manage(BlogService::new())
             .manage(CommentService::new())
-            .manage(OpenAIService::new()) // OpenAI will read from database now
+            .manage(OpenAIService::new()) // Keep for backwards compatibility
+            .manage(OllamaService::new())
+            .manage(ai_service)
             .manage(ReactionService::new())
             .manage(SettingsService::new())
             .manage(TagService::new())

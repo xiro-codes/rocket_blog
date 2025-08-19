@@ -2,8 +2,9 @@ use async_openai::{Client, types::{
     ChatCompletionRequestMessage, ChatCompletionRequestSystemMessage, 
     ChatCompletionRequestUserMessage, CreateChatCompletionRequestArgs, Role
 }};
+use async_trait::async_trait;
 use sea_orm::DatabaseConnection;
-use crate::services::{base::BaseService, SettingsService};
+use crate::services::{ai_provider::AIProvider, base::BaseService, SettingsService};
 
 pub struct OpenAIService {
     base: BaseService,
@@ -191,6 +192,43 @@ impl OpenAIService {
             .collect();
 
         Ok(tags)
+    }
+}
+
+#[async_trait]
+impl AIProvider for OpenAIService {
+    async fn is_available(&self, db: &DatabaseConnection) -> bool {
+        self.settings_service
+            .get_openai_api_key(db)
+            .await
+            .unwrap_or(None)
+            .is_some()
+    }
+
+    async fn generate_post_content(
+        &self,
+        db: &DatabaseConnection,
+        title: &str,
+        additional_prompt: Option<&str>,
+    ) -> Result<String, String> {
+        self.generate_post_content(db, title, additional_prompt).await
+    }
+
+    async fn generate_excerpt(&self, db: &DatabaseConnection, content: &str) -> Result<String, String> {
+        self.generate_excerpt(db, content).await
+    }
+
+    async fn generate_tags(
+        &self,
+        db: &DatabaseConnection,
+        title: &str,
+        content: &str,
+    ) -> Result<Vec<String>, String> {
+        self.generate_tags(db, title, content).await
+    }
+
+    fn provider_name(&self) -> &'static str {
+        "OpenAI"
     }
 }
 

@@ -1,4 +1,4 @@
-use models::dto::SettingsFormDTO;
+use models::dto::{SettingsFormDTO, OllamaSettingsFormDTO};
 use rocket::{
     form::Form,
     response::{Flash, Redirect},
@@ -44,10 +44,30 @@ async fn settings_view(
         .unwrap_or(None)
         .is_some();
     
+    let ollama_url = service
+        .get_ollama_url(db)
+        .await
+        .unwrap_or(Some("http://localhost:11434".to_string()))
+        .unwrap_or_default();
+    
+    let ollama_model = service
+        .get_ollama_model(db)
+        .await
+        .unwrap_or(Some("llama2".to_string()))
+        .unwrap_or_default();
+    
+    let ollama_enabled = service
+        .get_ollama_enabled(db)
+        .await
+        .unwrap_or(false);
+    
     Ok(Template::render(
         "settings/index",
         context! {
             openai_configured,
+            ollama_url,
+            ollama_model,
+            ollama_enabled,
         }
     ))
 }
@@ -98,8 +118,88 @@ async fn delete_openai_settings(
     }
 }
 
+#[post("/ollama", data = "<data>")]
+async fn save_ollama_settings(
+    conn: Connection<'_, Db>,
+    _admin: Admin,
+    service: &State<SettingsService>,
+    data: Form<OllamaSettingsFormDTO>,
+) -> Flash<Redirect> {
+    let db = conn.into_inner();
+    let form_data = data.into_inner();
+    
+    if form_data.ollama_url.trim().is_empty() {
+        return ControllerBase::danger_redirect("/settings/", "Ollama URL cannot be empty.");
+    }
+    
+    // Test the connection first if enabled
+    if form_data.ollama_enabled {
+        match service.test_ollama_connection(&form_data.ollama_url).await {
+            Ok(true) => {
+                // Connection is valid
+            }
+            Ok(false) => {
+                return ControllerBase::danger_redirect("/settings/", "Cannot connect to Ollama server. Please check the URL and ensure Ollama is running.");
+            }
+            Err(e) => {
+                return ControllerBase::danger_redirect("/settings/", &format!("Failed to test Ollama connection: {}", e));
+            }
+        }
+    }
+    
+    // Save all settings
+    let mut errors = Vec::new();
+    
+    if let Err(e) = service.set_ollama_url(db, &form_data.ollama_url).await {
+        errors.push(format!("URL: {}", e));
+    }
+    
+    if let Err(e) = service.set_ollama_model(db, &form_data.ollama_model).await {
+        errors.push(format!("Model: {}", e));
+    }
+    
+    if let Err(e) = service.set_ollama_enabled(db, form_data.ollama_enabled).await {
+        errors.push(format!("Enabled: {}", e));
+    }
+    
+    if errors.is_empty() {
+        ControllerBase::success_redirect("/settings/", "Ollama settings saved successfully.")
+    } else {
+        ControllerBase::danger_redirect("/settings/", &format!("Failed to save settings: {}", errors.join(", ")))
+    }
+}
+
+#[delete("/ollama")]
+async fn delete_ollama_settings(
+    conn: Connection<'_, Db>,
+    _admin: Admin,
+    service: &State<SettingsService>,
+) -> Flash<Redirect> {
+    let db = conn.into_inner();
+    
+    let mut errors = Vec::new();
+    
+    if let Err(e) = service.delete_setting(db, "ollama_url").await {
+        errors.push(format!("URL: {}", e));
+    }
+    
+    if let Err(e) = service.delete_setting(db, "ollama_model").await {
+        errors.push(format!("Model: {}", e));
+    }
+    
+    if let Err(e) = service.delete_setting(db, "ollama_enabled").await {
+        errors.push(format!("Enabled: {}", e));
+    }
+    
+    if errors.is_empty() {
+        ControllerBase::success_redirect("/settings/", "Ollama settings removed successfully.")
+    } else {
+        ControllerBase::danger_redirect("/settings/", &format!("Failed to remove settings: {}", errors.join(", ")))
+    }
+}
+
 fn routes() -> Vec<Route> {
-    routes![settings_view, save_openai_settings, delete_openai_settings]
+    routes![settings_view, save_openai_settings, delete_openai_settings, save_ollama_settings, delete_ollama_settings]
 }
 
 crate::impl_controller_routes!(Controller, "Settings Controller", routes());
