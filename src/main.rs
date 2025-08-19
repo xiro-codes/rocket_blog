@@ -64,7 +64,7 @@ fn setup_logger() -> Result<(), fern::InitError> {
         })
         .level(Features::log_level())
         .filter(|meta| !should_filter_log(meta))
-        .chain(std::io::stdout())
+        // .chain(std::io::stdout())
         .chain(fern::log_file("output.log")?)
         .apply()?;
     Ok(())

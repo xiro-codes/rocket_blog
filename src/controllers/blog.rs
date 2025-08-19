@@ -100,7 +100,7 @@ async fn list_view(
         token.as_deref(),
         &client_ip.0,
     ).await.map_err(|_| Status::InternalServerError)?;
-    
+    debug!("{:?}", list_data.reaction_summaries);
     Ok(Template::render(
         "blog/list",
         context! {

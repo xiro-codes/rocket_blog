@@ -60,7 +60,7 @@
 					{% endif %}
 					
 					<!-- Reaction counts -->
-					{% set summary = false %}
+					{% set_global summary = false %}
 					{% for reaction_summary in reaction_summaries %}
 						{% if reaction_summary.post_id == post.id %}
 							{% set_global summary = reaction_summary %}
