@@ -9,5 +9,7 @@ pub mod post {
         pub file: TempFile<'r>,
         pub tags: Option<String>,
         pub action: Option<String>, // "draft" or "publish"
+        pub ai_generate: Option<String>, // "content", "excerpt", "tags"
+        pub ai_prompt: Option<String>, // Additional prompt for AI generation
     }
 }

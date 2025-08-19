@@ -1,0 +1,1 @@
+pub use super::AdminUser as Admin;

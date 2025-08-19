@@ -15,13 +15,31 @@
 		
 		<div>
 			<label for="title" class="form-label">Title:</label>
-			<input type="text" class="form-control" name="title" id="title" value="{{post.title}}" />
+			<div class="d-flex">
+				<input type="text" class="form-control me-2" name="title" id="title" value="{{post.title}}" />
+				{% if openai_available %}
+				<button type="button" id="generate-content-btn" class="btn btn-success">✨ Generate</button>
+				{% endif %}
+			</div>
 		</div>
+		
+		{% if openai_available %}
+		<div id="ai-prompt-section" style="display: none;">
+			<label for="ai-prompt" class="form-label">AI Prompt (Optional):</label>
+			<input type="text" id="ai-prompt" class="form-control" placeholder="Additional context for AI generation..." />
+			<div class="form-text">Provide additional context to guide AI content generation</div>
+		</div>
+		{% endif %}
 		
 		<div>
 			<label for="excerpt" class="form-label">Excerpt:</label>
-			<textarea name="excerpt" id="excerpt" rows="3" class="form-control" 
-			          placeholder="Brief summary of the post (optional - will be auto-generated if left empty)">{% if post.excerpt %}{{post.excerpt}}{% endif %}</textarea>
+			<div class="d-flex">
+				<textarea name="excerpt" id="excerpt" rows="3" class="form-control me-2" 
+				          placeholder="Brief summary of the post (optional - will be auto-generated if left empty)">{% if post.excerpt %}{{post.excerpt}}{% endif %}</textarea>
+				{% if openai_available %}
+				<button type="button" id="generate-excerpt-btn" class="btn btn-outline-success">✨ Generate Excerpt</button>
+				{% endif %}
+			</div>
 			<div class="form-text">Optional short summary that will appear in post listings. If left empty, it will be auto-generated from the content.</div>
 		</div>
 		
@@ -32,8 +50,13 @@
 		
 		<div class="mb-3">
 			<label for="tags" class="form-label">Tags (comma-separated):</label>
-			<input type="text" class="form-control" name="tags" id="tags" placeholder="e.g. rust, web development, tutorial" 
-			       value="{% for tag in tags %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}">
+			<div class="d-flex">
+				<input type="text" class="form-control me-2" name="tags" id="tags" placeholder="e.g. rust, web development, tutorial" 
+				       value="{% for tag in tags %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}">
+				{% if openai_available %}
+				<button type="button" id="generate-tags-btn" class="btn btn-outline-success">✨ Generate Tags</button>
+				{% endif %}
+			</div>
 			<div class="form-text">Separate multiple tags with commas</div>
 		</div>
 		
@@ -167,6 +190,146 @@ document.addEventListener('DOMContentLoaded', function() {
 			table: ["", "\n\n| Column 1 | Column 2 | Column 3 |\n| -------- | -------- | -------- |\n| Text     | Text     | Text     |\n\n"],
 		}
 	});
+
+	// AI Generation functionality (only if OpenAI is available)
+	{% if openai_available %}
+	const titleInput = document.getElementById('title');
+	const promptInput = document.getElementById('ai-prompt');
+	const promptSection = document.getElementById('ai-prompt-section');
+	const generateContentBtn = document.getElementById('generate-content-btn');
+	const generateExcerptBtn = document.getElementById('generate-excerpt-btn');
+	const generateTagsBtn = document.getElementById('generate-tags-btn');
+	const excerptTextarea = document.getElementById('excerpt');
+	const tagsInput = document.getElementById('tags');
+
+	// Show/hide AI prompt section when title is entered
+	titleInput.addEventListener('input', function() {
+		if (this.value.trim()) {
+			promptSection.style.display = 'block';
+		} else {
+			promptSection.style.display = 'none';
+		}
+	});
+
+	// Generate content with AI
+	generateContentBtn.addEventListener('click', async function() {
+		const title = titleInput.value.trim();
+		if (!title) {
+			alert('Please enter a title first');
+			return;
+		}
+
+		const prompt = promptInput.value.trim();
+		this.disabled = true;
+		this.textContent = '🤖 Generating...';
+
+		try {
+			const response = await fetch('/blog/generate-content', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'content',
+					title: title,
+					prompt: prompt || null
+				})
+			});
+
+			const data = await response.json();
+			
+			if (data.success) {
+				easyMDE.value(data.content);
+			} else {
+				alert('Error generating content: ' + (data.error || 'Unknown error'));
+			}
+		} catch (error) {
+			alert('Error generating content: ' + error.message);
+		} finally {
+			this.disabled = false;
+			this.textContent = '✨ Generate';
+		}
+	});
+
+	// Generate excerpt with AI
+	generateExcerptBtn.addEventListener('click', async function() {
+		const content = easyMDE.value();
+		if (!content.trim()) {
+			alert('Please write some content first');
+			return;
+		}
+
+		this.disabled = true;
+		this.textContent = '🤖 Generating...';
+
+		try {
+			const response = await fetch('/blog/generate-content', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'excerpt',
+					content: content
+				})
+			});
+
+			const data = await response.json();
+			
+			if (data.success) {
+				excerptTextarea.value = data.excerpt;
+			} else {
+				alert('Error generating excerpt: ' + (data.error || 'Unknown error'));
+			}
+		} catch (error) {
+			alert('Error generating excerpt: ' + error.message);
+		} finally {
+			this.disabled = false;
+			this.textContent = '✨ Generate Excerpt';
+		}
+	});
+
+	// Generate tags with AI
+	generateTagsBtn.addEventListener('click', async function() {
+		const title = titleInput.value.trim();
+		const content = easyMDE.value();
+		
+		if (!title && !content.trim()) {
+			alert('Please enter a title or write some content first');
+			return;
+		}
+
+		this.disabled = true;
+		this.textContent = '🤖 Generating...';
+
+		try {
+			const response = await fetch('/blog/generate-content', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'tags',
+					title: title,
+					content: content
+				})
+			});
+
+			const data = await response.json();
+			
+			if (data.success) {
+				tagsInput.value = data.tags;
+			} else {
+				alert('Error generating tags: ' + (data.error || 'Unknown error'));
+			}
+		} catch (error) {
+			alert('Error generating tags: ' + error.message);
+		} finally {
+			this.disabled = false;
+			this.textContent = '✨ Generate Tags';
+		}
+	});
+	{% endif %}
 });
 </script>
 {% endif %}

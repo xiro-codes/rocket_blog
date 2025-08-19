@@ -21,6 +21,8 @@ impl AppConfig {
             .and_then(|v| v.as_str().map(|s| s.to_string()))
             .unwrap_or_else(|| Self::default().data_path);
 
-        Self { data_path }
+        Self { 
+            data_path,
+        }
     }
 }
