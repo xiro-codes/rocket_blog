@@ -88,6 +88,98 @@
 		</div>
 	</div>
 	
+	<!-- Ollama Configuration Section -->
+	<div class="row justify-content-center">
+		<div class="col-md-8">
+			<div class="card terminal-card mb-4">
+				<div class="card-header">
+					<h3 class="mb-0">🦙 Ollama Integration</h3>
+				</div>
+				<div class="card-body">
+					<p class="card-text">
+						Configure Ollama for self-hosted AI-powered blog post generation features.
+						{% if ollama_enabled %}
+						<span class="badge bg-success ms-2">✓ Enabled</span>
+						{% else %}
+						<span class="badge bg-warning ms-2">⚠ Disabled</span>
+						{% endif %}
+					</p>
+					
+					<div class="alert alert-info">
+						<strong>ℹ️ About Ollama:</strong> Ollama is a self-hosted AI solution that runs locally on your machine. 
+						No API keys required, and your data stays private.
+					</div>
+					
+					<form action="/settings/ollama" method="post">
+						<div class="row">
+							<div class="col-md-6">
+								<div class="mb-3">
+									<label for="ollama_url" class="form-label">Ollama URL:</label>
+									<input type="url" name="ollama_url" id="ollama_url" class="form-control" 
+										   value="{{ ollama_url | default(value='http://localhost:11434') }}" 
+										   placeholder="http://localhost:11434" required />
+									<div class="form-text">URL where your Ollama server is running</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="mb-3">
+									<label for="ollama_model" class="form-label">Model:</label>
+									<input type="text" name="ollama_model" id="ollama_model" class="form-control" 
+										   value="{{ ollama_model | default(value='llama2') }}" 
+										   placeholder="llama2" required />
+									<div class="form-text">Model name to use (e.g., llama2, mistral, codellama)</div>
+								</div>
+							</div>
+						</div>
+						
+						<div class="mb-3">
+							<div class="form-check">
+								<input type="checkbox" name="ollama_enabled" id="ollama_enabled" class="form-check-input" 
+									   value="true" {% if ollama_enabled %}checked{% endif %} />
+								<label for="ollama_enabled" class="form-check-label">Enable Ollama Integration</label>
+								<div class="form-text">When enabled, Ollama will be used for AI features</div>
+							</div>
+						</div>
+						
+						<div class="row">
+							<div class="col-md-6">
+								<button type="submit" class="btn btn-success">[SAVE OLLAMA SETTINGS]</button>
+							</div>
+						</div>
+					</form>
+					
+					<div class="row">
+						<div class="col-md-6 offset-md-6">
+							<form action="/settings/ollama" method="post" onsubmit="return confirm('Are you sure you want to remove all Ollama settings?');">
+								<input type="hidden" name="_method" value="delete" />
+								<button type="submit" class="btn btn-danger">[REMOVE OLLAMA SETTINGS]</button>
+							</form>
+						</div>
+					</div>
+					
+					<div class="mt-4">
+						<h5>Features enabled with Ollama:</h5>
+						<ul class="list-unstyled">
+							<li>🏠 Self-hosted AI processing (no external API calls)</li>
+							<li>🔒 Complete data privacy (everything runs locally)</li>
+							<li>✨ Auto-generate blog post content from titles</li>
+							<li>✨ Generate engaging excerpts from existing content</li>
+							<li>✨ Suggest relevant tags based on content</li>
+						</ul>
+						
+						<h6>Setup Requirements:</h6>
+						<small class="text-muted">
+							1. Install Ollama from <a href="https://ollama.ai/" target="_blank">ollama.ai</a><br>
+							2. Download a model: <code>ollama pull llama2</code><br>
+							3. Start Ollama: <code>ollama serve</code><br>
+							4. Configure settings above and enable integration
+						</small>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
 	<!-- Navigation -->
 	<div class="text-center mt-4">
 		<a href="/blog" class="btn btn-secondary">[← BACK TO BLOG]</a>
@@ -105,9 +197,9 @@
 {% block script %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-	// Handle DELETE method for removing API key
-	const deleteForms = document.querySelectorAll('form[action="/settings/openai"] input[name="_method"][value="delete"]');
-	deleteForms.forEach(function(input) {
+	// Handle DELETE method for removing OpenAI API key
+	const openaiDeleteForms = document.querySelectorAll('form[action="/settings/openai"] input[name="_method"][value="delete"]');
+	openaiDeleteForms.forEach(function(input) {
 		const form = input.closest('form');
 		form.addEventListener('submit', function(e) {
 			e.preventDefault();
@@ -123,6 +215,29 @@ document.addEventListener('DOMContentLoaded', function() {
 					window.location.reload();
 				}).catch(function(error) {
 					alert('Error removing API key: ' + error.message);
+				});
+			}
+		});
+	});
+	
+	// Handle DELETE method for removing Ollama settings
+	const ollamaDeleteForms = document.querySelectorAll('form[action="/settings/ollama"] input[name="_method"][value="delete"]');
+	ollamaDeleteForms.forEach(function(input) {
+		const form = input.closest('form');
+		form.addEventListener('submit', function(e) {
+			e.preventDefault();
+			
+			if (confirm('Are you sure you want to remove all Ollama settings? This will disable Ollama integration.')) {
+				// Create a proper DELETE request
+				fetch('/settings/ollama', {
+					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					}
+				}).then(function(response) {
+					window.location.reload();
+				}).catch(function(error) {
+					alert('Error removing Ollama settings: ' + error.message);
 				});
 			}
 		});
