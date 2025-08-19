@@ -3,7 +3,7 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, TagService, CoordinatorService},
+    services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService},
     types::{HttpRange, StreamedFile},
 };
 use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag};
@@ -351,21 +351,21 @@ async fn video(
 #[get("/create")]
 async fn create_view(
     conn: Connection<'_, Db>,
-    openai_service: &State<OpenAIService>,
+    ai_service: &State<AIProviderService>,
     flash: Option<FlashMessage<'_>>,
     jar: &CookieJar<'_>,
 ) -> Result<Template, Status> {
     ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     
-    // Check if OpenAI is available
-    let openai_available = openai_service.is_available(db).await;
+    // Check if any AI service is available
+    let ai_available = ai_service.is_any_available(db).await;
     
     Ok(Template::render(
         "blog/create",
         context! {
             form_url: "create",
-            openai_available,
+            ai_available,
             flash: ControllerBase::extract_flash(flash)
         },
     ))
@@ -427,7 +427,7 @@ async fn edit_view(
     jar: &CookieJar<'_>,
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
-    openai_service: &State<OpenAIService>,
+    ai_service: &State<AIProviderService>,
     tag_service: &State<TagService>,
     id: i32,
 ) -> Result<Template, Status> {
@@ -444,15 +444,15 @@ async fn edit_view(
         Err(_) => return Err(Status::InternalServerError),
     };
     
-    // Check if OpenAI is available
-    let openai_available = openai_service.is_available(db).await;
+    // Check if any AI service is available
+    let ai_available = ai_service.is_any_available(db).await;
     
     Ok(Template::render(
         "blog/edit",
         context! {
             post,
             tags,
-            openai_available,
+            ai_available,
             form_url: ""
         },
     ))
