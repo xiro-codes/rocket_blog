@@ -50,6 +50,15 @@ impl Fairing for Seeding {
     }
     async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
         let conn = &Db::fetch(&rocket).unwrap().conn;
+        
+        // Check if data already exists - only seed if database is empty
+        let account_count = Account::find().count(conn).await.unwrap_or(0);
+        if account_count > 0 {
+            println!("Database already contains data, skipping seeding.");
+            return Ok(rocket);
+        }
+        
+        println!("Database is empty, creating seed data...");
         let pw = bcrypt::hash("pass").unwrap();
         let ac = account::ActiveModel {
             id: Set(uuid::Uuid::new_v4()),
@@ -169,29 +178,9 @@ impl Fairing for Seeding {
         PostTag::insert_many(post_tags).exec(conn).await.unwrap();
         Ok(rocket)
     }
-    async fn on_shutdown(&self, rocket: &Rocket<Orbit>) {
-        let conn = &Db::fetch(&rocket).unwrap().conn;
-
-        // Clean up video files before deleting database records
-        if let Ok(posts_with_videos) = Post::find()
-            .filter(post::Column::Path.is_not_null())
-            .all(conn)
-            .await
-        {
-            for post in posts_with_videos {
-                if let Some(video_path) = post.path {
-                    if video_path == SAMPLE_VIDEO_PATH {
-                        continue;
-                    }
-                    let _ = std::fs::remove_file(&video_path);
-                }
-            }
-        }
-
-        let _ = PostTag::delete_many().exec(conn).await;
-        let _ = Tag::delete_many().exec(conn).await;
-        let _ = Comment::delete_many().exec(conn).await;
-        let _ = Post::delete_many().exec(conn).await;
-        let _ = Account::delete_many().exec(conn).await;
+    async fn on_shutdown(&self, _rocket: &Rocket<Orbit>) {
+        // Data persistence: Do not delete data on shutdown to preserve 
+        // database content across container restarts
+        println!("Application shutting down - preserving database data.");
     }
 }
