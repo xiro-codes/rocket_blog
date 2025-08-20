@@ -89,17 +89,34 @@ async fn list_view(
     flash: Option<FlashMessage<'_>>,
     client_ip: ClientIp,
 ) -> Result<Template, Status> {
+    let page_num = page.unwrap_or(1);
+    let size = page_size.unwrap_or(10);
+    log::info!("Blog list view requested - Page: {}, Size: {}, Client IP: {}", page_num, size, client_ip.0);
+    
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
+    if token.is_some() {
+        log::debug!("Authenticated user viewing blog list");
+    } else {
+        log::debug!("Anonymous user viewing blog list");
+    }
+    
     let db = conn.into_inner();
     
     // Use coordinator service to get all data for the list view
+    log::debug!("Fetching blog list data via coordinator service");
     let list_data = coordinator.get_blog_list_data(
         db,
         page,
         page_size,
         token.as_deref(),
         &client_ip.0,
-    ).await.map_err(|_| Status::InternalServerError)?;
+    ).await.map_err(|e| {
+        log::error!("Failed to fetch blog list data: {}", e);
+        Status::InternalServerError
+    })?;
+    
+    log::debug!("Blog list data fetched successfully - {} posts, {} pages", list_data.posts.len(), list_data.num_pages);
+    
     Ok(Template::render(
         "blog/list",
         context! {

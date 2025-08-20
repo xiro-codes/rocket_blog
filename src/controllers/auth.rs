@@ -33,13 +33,16 @@ async fn login_view(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
 ) -> Result<Template, Status> {
+    log::debug!("Serving login page");
     let db = conn.into_inner();
     
     // Check if any accounts exist, return 404 if none
     if !service.has_any_accounts(db).await {
+        log::info!("No accounts exist in system - login page not available");
         return Err(Status::NotFound);
     }
     
+    log::debug!("Login page served successfully");
     Ok(Template::render(
         "auth/login",
         context! {}
@@ -53,18 +56,25 @@ async fn login(
     jar: &CookieJar<'_>,
     data: Form<AccountFormDTO>,
 ) -> Flash<Redirect> {
+    let form_data = data.into_inner();
+    log::info!("Login attempt from controller for username: {}", form_data.username);
+    
     let db = conn.into_inner();
-    if let Ok(token) = service.login(db, data.into_inner()).await {
+    if let Ok(token) = service.login(db, form_data).await {
         jar.add_private(Cookie::new("token", token.to_string()));
+        log::info!("Login successful - redirecting to blog");
         ControllerBase::success_redirect("/blog/", "Login successful.")
     } else {
+        log::warn!("Login failed - redirecting back to login form");
         ControllerBase::danger_redirect("/auth/", "Login failed.")
     }
 }
 
 #[get("/logout")]
 async fn logout(jar: &CookieJar<'_>) -> Flash<Redirect> {
+    log::info!("User logout requested");
     jar.remove_private(Cookie::from("token"));
+    log::info!("User logged out successfully");
     ControllerBase::success_redirect("/blog/", "Logout successful.")
 }
 
@@ -73,13 +83,16 @@ async fn create_admin_view(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
 ) -> Result<Template, Status> {
+    log::debug!("Serving create admin page");
     let db = conn.into_inner();
     
     // Check if any accounts exist, redirect if they do
     if service.has_any_accounts(db).await {
+        log::info!("Admin creation blocked - accounts already exist");
         return Err(Status::NotFound);
     }
     
+    log::debug!("Create admin page served successfully");
     Ok(Template::render(
         "auth/create_admin",
         context! {}
@@ -93,13 +106,18 @@ async fn create_admin(
     _jar: &CookieJar<'_>,
     data: Form<AdminCreateFormDTO>,
 ) -> Flash<Redirect> {
+    let form_data = data.into_inner();
+    log::info!("Admin account creation attempt for username: {}", form_data.username);
+    
     let db = conn.into_inner();
     
-    match service.create_admin_account(db, data.into_inner()).await {
-        Ok(_) => {
+    match service.create_admin_account(db, form_data).await {
+        Ok(account) => {
+            log::info!("Admin account creation successful for: {} ({})", account.username, account.id);
             ControllerBase::success_redirect("/blog", "Admin account created successfully! You can now log in.")
         }
-        Err(_) => {
+        Err(e) => {
+            log::error!("Admin account creation failed: {}", e);
             ControllerBase::danger_redirect("/auth/create-admin", "Failed to create admin account. It may already exist.")
         }
     }

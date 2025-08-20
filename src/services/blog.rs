@@ -63,29 +63,48 @@ impl Service {
         id: Uuid,
         data: &mut FormDTO<'_>,
     ) -> Result<post::Model, DbErr> {
-        debug!("Creating new blog post: title={}, action={:?}", 
-               data.title, data.action);
+        log::info!("Creating new blog post: title='{}', author_id={}, action={:?}", 
+                   data.title, id, data.action);
+        
+        log::debug!("Converting markdown to HTML");
         let text = markdown::to_html(data.text.as_str());
         let excerpt = Self::generate_excerpt(&data.text, data.excerpt.clone());
+        let post_id = BaseService::generate_id();
+        
+        log::debug!("Generated post ID: {}", post_id);
+        
         let fid = BaseService::generate_id().to_string();
         let path = if let Some(name) = data.file.name() {
             let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
+            log::debug!("Uploading file to: {}", path);
             data.file
                 .copy_to(path.clone())
                 .await
-                .map_err(|e| DbErr::Custom(e.to_string()))?;
+                .map_err(|e| {
+                    log::error!("File upload failed: {}", e);
+                    DbErr::Custom(e.to_string())
+                })?;
+            log::debug!("File uploaded successfully");
             Some(path)
         } else {
+            log::debug!("No file to upload");
             None
         };
 
         let is_draft = match data.action.as_deref() {
-            Some("publish") => Some(false),
-            _ => Some(true), // default to draft
+            Some("publish") => {
+                log::debug!("Publishing post immediately");
+                Some(false)
+            },
+            _ => {
+                log::debug!("Saving as draft");
+                Some(true)
+            }
         };
 
-        post::ActiveModel {
-            id: Set(BaseService::generate_id()),
+        log::debug!("Inserting post into database");
+        let result = post::ActiveModel {
+            id: Set(post_id),
             title: Set(data.title.to_owned()),
             text: Set(text),
             excerpt: Set(excerpt),
@@ -97,6 +116,13 @@ impl Service {
         }
         .insert(db)
         .await
+        .map_err(|e| {
+            log::error!("Failed to insert post: {}", e);
+            e
+        })?;
+        
+        log::info!("Blog post created successfully: {} ({})", result.title, result.id);
+        Ok(result)
     }
 
     pub async fn update_by_id(
@@ -248,12 +274,18 @@ impl Service {
     ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
         let page = page.unwrap_or(1);
         let page_size = page_size.unwrap_or(DEFAULT_PAGE_SIZE);
+        
+        log::debug!("Paginating blog posts: page={}, page_size={}, include_drafts={}", page, page_size, include_drafts);
+        
         if page == 0 {
+            log::error!("Invalid page number: 0");
             return Err(DbErr::Custom("Page number cannot be zero".to_owned()));
         }
         if page_size == 0 {
+            log::error!("Invalid page size: 0");
             return Err(DbErr::Custom("Page size cannot be zero".to_owned()));
         }
+        
         let mut query = Post::find()
             .select_only()
             .column(post::Column::Id)
@@ -262,6 +294,7 @@ impl Service {
             .column(post::Column::Draft);
         
         if !include_drafts {
+            log::debug!("Filtering out draft posts");
             query = query.filter(post::Column::Draft.eq(false));
         }
         
@@ -271,11 +304,25 @@ impl Service {
             .order_by_desc(post::Column::DatePublished)
             .into_partial_model()
             .paginate(db, page_size);
-        let num_pages = paginator.num_pages().await?;
+            
+        let num_pages = paginator.num_pages().await.map_err(|e| {
+            log::error!("Failed to get page count: {}", e);
+            e
+        })?;
+        
+        log::debug!("Fetching page {} of {} pages", page, num_pages);
+        
         paginator
             .fetch_page(page - 1)
             .await
-            .map(|p| (p, page, page_size, num_pages))
+            .map_err(|e| {
+                log::error!("Failed to fetch page {}: {}", page, e);
+                e
+            })
+            .map(|p| {
+                log::debug!("Successfully fetched {} posts for page {}", p.len(), page);
+                (p, page, page_size, num_pages)
+            })
     }
     
     pub async fn paginate_posts_by_tag(

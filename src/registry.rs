@@ -9,10 +9,15 @@ pub struct ServiceRegistry;
 impl ServiceRegistry {
     /// Register all application services with Rocket
     pub fn attach_all_services(rocket: Rocket<Build>) -> Rocket<Build> {
+        log::info!("Registering application services...");
+        
         // Create AI provider service and add providers
+        log::debug!("Creating AI provider service with OpenAI and Ollama providers");
         let mut ai_service = AIProviderService::new();
         ai_service.add_provider(Box::new(OpenAIService::new()));
         ai_service.add_provider(Box::new(OllamaService::new()));
+        
+        log::debug!("Attaching services: Auth, Blog, Comment, OpenAI, Ollama, AIProvider, Reaction, Settings, Tag, Coordinator");
         
         rocket
             .manage(AuthService::new())
@@ -41,6 +46,9 @@ pub struct ControllerRegistry;
 impl ControllerRegistry {
     /// Attach all application controllers to Rocket
     pub fn attach_all_controllers(rocket: Rocket<Build>) -> Rocket<Build> {
+        log::info!("Registering application controllers...");
+        log::debug!("Attaching controllers: Index (/), Auth (/auth), Blog (/blog), Comment (/comment), Feed (/feed), Settings (/settings)");
+        
         rocket
             .attach(controllers::IndexController::new("/".to_owned()))
             .attach(controllers::AuthController::new("/auth".to_owned()))
