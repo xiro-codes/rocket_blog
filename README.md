@@ -10,24 +10,41 @@ A modern, fast, and feature-rich blog application built with **Rust** and the **
 
 ### Current Features
 - 📝 **Blog Management** - Create, edit, delete, and publish blog posts with markdown support
-- ✨ **WYSIWYG Markdown Editor** - Visual markdown editing with EasyMDE, live preview, and terminal theme
-- 📄 **Post Excerpts** - Automatic or custom post summaries for better content discovery
+- ✨ **WYSIWYG Markdown Editor** - Visual markdown editing with EasyMDE integration
+  - Real-time preview and live editing capabilities
+  - Syntax highlighting and formatting toolbar
+  - Side-by-side and fullscreen editing modes
+  - Custom terminal theme styling matching blog aesthetic
+- 📄 **Post Excerpts/Summary System** - Enhanced content discovery and navigation
+  - Optional custom excerpts or automatic generation from post content
+  - Modern card-based list view with post previews
+  - Auto-generated excerpts with intelligent content extraction (200 char limit)
+  - "Read More" buttons for improved user experience
 - 🔐 **Authentication System** - Secure login/logout with admin privileges
-- 💬 **Comment System** - Enable readers to comment on blog posts
+- 💬 **Comment System** - Enable readers to comment on blog posts with moderation
 - 🎬 **Media Support** - Video streaming with range requests for optimal performance
 - 📄 **Pagination** - Efficient navigation through blog posts
 - 📑 **Draft System** - Save posts as drafts before publishing
-- 🏷️ **Tag System** - Organize posts with colorful, filterable tags
+- 🏷️ **Tag System** - Organize posts with colorful, filterable tags (backend complete)
 - 📱 **Responsive Design** - Bootstrap-based UI that works on all devices
-- 📧 **RSS Feed** - Subscribe to blog updates via RSS at `/feed/rss` with post excerpts
+- 📧 **RSS Feed Generation** - Complete RSS feed implementation
+  - RSS feed available at `/feed/rss` endpoint
+  - Includes post excerpts for better feed content
+  - XML-compliant RSS 2.0 format with proper metadata
 
 ### Planned Features ([See Roadmap](docs/FEATURE_SUGGESTIONS.md))
-- 🔍 **Search Functionality** - Full-text search across posts
-- 📊 **Analytics Dashboard** - Track views and engagement
-- 👤 **User Profiles** - Multi-author support with user profiles
-- ❤️ **Like/Reaction System** - Reader engagement features
-- 🖼️ **Image Upload** - Built-in image management
+- 🔍 **Search Functionality** - Full-text search across posts with advanced filtering
+- 🏷️ **Tag UI Integration** - Complete tag filtering and management interface
+- 📊 **Analytics Dashboard** - Track views, engagement, and content performance
+- 👤 **User Profiles** - Multi-author support with user profiles and bio
+- ❤️ **Like/Reaction System** - Reader engagement features with emoji reactions
+- 🖼️ **Image Upload** - Built-in image management with optimization
 - 📡 **REST API** - JSON endpoints for all blog operations
+- 🔔 **Real-time Notifications** - Live updates for comments and interactions
+- 🌐 **Social Media Integration** - Share buttons and embedded content
+- 📧 **Email Newsletter** - Subscriber management and automated campaigns
+- 🌍 **Multi-language Support** - Internationalization (i18n) capabilities
+- 📈 **SEO Optimization Tools** - Advanced SEO features and meta management
 
 ## 🚀 Quick Start
 
@@ -85,11 +102,12 @@ cargo run
 ## 📖 Usage
 
 ### Browsing Blog Posts
-1. **Main Blog Page** - Visit `/blog` to see all posts with excerpts and preview cards
+1. **Main Blog Page** - Visit `/blog` to see all posts with enhanced card-based layout
 2. **Post Discovery** - Browse posts with auto-generated or custom excerpts for quick content overview
-3. **Tag Navigation** - Click on tags to filter posts by topic
-4. **RSS Subscription** - Subscribe to `/feed/rss` for updates with excerpt content
+3. **Tag Navigation** - Click on colorful tags to filter posts by topic (backend ready)
+4. **RSS Subscription** - Subscribe to `/feed/rss` for updates with excerpt content and metadata
 5. **Responsive Design** - Seamless experience across desktop, tablet, and mobile devices
+6. **Modern UI** - Enhanced card layouts with improved readability and navigation
 
 ### Writing Blog Posts
 1. **Navigate** to `/blog` to see all posts
@@ -295,7 +313,8 @@ We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.
 - [**Development Scripts**](scripts/README.md) - Automation and tooling
 
 ### Project Documentation
-- [**Changelog**](docs/CHANGELOG.md) - Project history and release notes
+- [**Changelog**](docs/CHANGELOG.md) - Project history and release notes with detailed feature implementations
+- [**Feature Roadmap**](docs/FEATURE_SUGGESTIONS.md) - Updated roadmap with completed and planned features
 - [**Cleanup Summary**](docs/CLEANUP_SUMMARY.md) - Code cleanup and refactoring notes
 
 ## 🐛 Issues and Support
