@@ -1,0 +1,2 @@
+[2025-08-20T12:00:05Z DEBUG app::controllers::blog] Blog post detail view requested: id=49, client_ip=127.0.0.1
+[2025-08-20T12:00:05Z DEBUG app::controllers::blog] Post found: id=774b7867-0f9e-47bc-95dd-20fa7d1d0357, title=Voluptatis tradunt se libidinibus constringendos., is_admin=true
