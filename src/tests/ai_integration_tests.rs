@@ -2,9 +2,10 @@
 mod ai_integration_tests {
     use crate::services::{AIProviderService, OpenAIService, OllamaService, AIProvider, SettingsService};
     use rocket::serde::json::{json, Value};
-    use serde::{Deserialize, Serialize};
+    use rocket::serde::{Deserialize, Serialize};
 
     #[derive(Serialize)]
+    #[serde(crate = "rocket::serde")]
     struct TestOllamaRequest {
         model: String,
         prompt: String,
@@ -13,6 +14,7 @@ mod ai_integration_tests {
     }
 
     #[derive(Serialize)]
+    #[serde(crate = "rocket::serde")]
     struct TestOllamaOptions {
         num_predict: i32,
         temperature: f32,
@@ -66,8 +68,6 @@ mod ai_integration_tests {
 
     #[test]
     fn test_ollama_request_structure() {
-        use serde_json;
-        
         // Test that we can serialize the Ollama request structure
         let request = TestOllamaRequest {
             model: "llama2".to_string(),
@@ -79,8 +79,8 @@ mod ai_integration_tests {
             },
         };
         
-        // Should serialize without error
-        let _json = serde_json::to_string(&request).unwrap();
+        // Should serialize without error using rocket::serde::json
+        let _json = rocket::serde::json::to_string(&request).unwrap();
     }
 
     #[test] 

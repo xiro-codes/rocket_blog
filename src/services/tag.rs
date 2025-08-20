@@ -62,7 +62,6 @@ impl TagService {
         post_id: Uuid,
         tag_id: Uuid,
     ) -> Result<post_tag::Model, DbErr> {
-        debug!("Called");
         post_tag::ActiveModel {
             post_id: Set(post_id),
             tag_id: Set(tag_id),
