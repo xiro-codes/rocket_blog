@@ -42,6 +42,17 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     Ok(rocket)
 }
 
+async fn start_background_jobs(rocket: Rocket<Build>) -> fairing::Result {
+    log::info!("Starting background job processor...");
+    let conn = Db::fetch(&rocket).unwrap().conn.clone();
+    
+    use crate::services::JobProcessor;
+    JobProcessor::start_processor_task(conn);
+    
+    log::info!("Background job processor started");
+    Ok(rocket)
+}
+
 #[catch(default)]
 pub fn catch_default() -> Redirect {
     log::warn!("Unhandled route accessed - redirecting to home page");
@@ -105,6 +116,7 @@ async fn rocket() -> _ {
         .attach(Db::init())
         .attach(Template::fairing())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
+        .attach(AdHoc::try_on_ignite("Background Jobs", start_background_jobs))
         .attach(ServiceRegistry::fairing())
         .manage(app_config);
     
