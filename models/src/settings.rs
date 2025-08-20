@@ -13,8 +13,8 @@ pub struct Model {
     pub key: String,
     pub value: Option<String>,
     pub encrypted: bool,
-    pub created_at: DateTimeUtc,
-    pub updated_at: DateTimeUtc,
+    pub created_at: DateTime,
+    pub updated_at: DateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

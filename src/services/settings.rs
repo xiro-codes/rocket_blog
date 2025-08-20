@@ -1,6 +1,6 @@
 use aes_gcm::{Aes256Gcm, Key, Nonce, aead::{Aead, AeadCore, KeyInit, OsRng}};
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
-use chrono::Utc;
+use chrono::Local;
 use models::prelude::*;
 use models::settings;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
@@ -101,7 +101,7 @@ impl SettingsService {
         value: &str,
         encrypted: bool,
     ) -> Result<(), String> {
-        let now = Utc::now();
+        let now = Local::now().naive_local();
         
         let stored_value = if encrypted {
             self.encrypt(value)?
