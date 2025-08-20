@@ -3,6 +3,7 @@
 pub mod prelude;
 
 pub mod account;
+pub mod background_job;
 pub mod comment;
 pub mod event;
 pub mod post;

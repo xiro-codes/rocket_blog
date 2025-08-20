@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService};
+    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, BackgroundJobService, AIJobPayload};
     use crate::tests::mocks::test_data;
     use uuid::Uuid;
 
@@ -174,6 +174,67 @@ mod tests {
             
             // Should have added providers without panicking
             assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AIProviderService>());
+        }
+    }
+
+    mod background_job_service_tests {
+        use super::*;
+        use models::background_job::{JobType, JobStatus};
+
+        #[test]
+        fn test_background_job_service_new() {
+            let service = BackgroundJobService::new();
+            // Should create successfully without panicking
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<BackgroundJobService>());
+        }
+
+        #[test]
+        fn test_ai_job_payload_creation() {
+            let payload = AIJobPayload {
+                title: "Test Post".to_string(),
+                prompt: Some("Generate a test post".to_string()),
+                content: None,
+                provider: Some("openai".to_string()),
+            };
+
+            assert_eq!(payload.title, "Test Post");
+            assert_eq!(payload.prompt, Some("Generate a test post".to_string()));
+            assert_eq!(payload.content, None);
+            assert_eq!(payload.provider, Some("openai".to_string()));
+        }
+
+        #[test]
+        fn test_job_type_string_conversion() {
+            assert_eq!(JobType::GenerateContent.to_string(), "generate_content");
+            assert_eq!(JobType::GenerateExcerpt.to_string(), "generate_excerpt");
+            assert_eq!(JobType::GenerateTags.to_string(), "generate_tags");
+
+            assert_eq!("generate_content".parse::<JobType>().unwrap(), JobType::GenerateContent);
+            assert_eq!("generate_excerpt".parse::<JobType>().unwrap(), JobType::GenerateExcerpt);
+            assert_eq!("generate_tags".parse::<JobType>().unwrap(), JobType::GenerateTags);
+        }
+
+        #[test]
+        fn test_job_status_string_conversion() {
+            assert_eq!(JobStatus::Pending.to_string(), "pending");
+            assert_eq!(JobStatus::Running.to_string(), "running");
+            assert_eq!(JobStatus::Completed.to_string(), "completed");
+            assert_eq!(JobStatus::Failed.to_string(), "failed");
+
+            assert_eq!("pending".parse::<JobStatus>().unwrap(), JobStatus::Pending);
+            assert_eq!("running".parse::<JobStatus>().unwrap(), JobStatus::Running);
+            assert_eq!("completed".parse::<JobStatus>().unwrap(), JobStatus::Completed);
+            assert_eq!("failed".parse::<JobStatus>().unwrap(), JobStatus::Failed);
+        }
+
+        #[test]
+        fn test_invalid_job_type_parsing() {
+            assert!("invalid_type".parse::<JobType>().is_err());
+        }
+
+        #[test]
+        fn test_invalid_job_status_parsing() {
+            assert!("invalid_status".parse::<JobStatus>().is_err());
         }
     }
 }

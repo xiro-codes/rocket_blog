@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	});
 
-	// Generate content with AI
+	// Generate content with AI (async)
 	generateContentBtn.addEventListener('click', async function() {
 		const title = titleInput.value.trim();
 		if (!title) {
@@ -137,10 +137,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		const prompt = promptInput.value.trim();
 		this.disabled = true;
-		this.textContent = '🤖 Generating...';
+		this.textContent = '🚀 Starting AI Generation...';
 
 		try {
-			const response = await fetch('/blog/generate-content', {
+			// Start async generation
+			const response = await fetch('/blog/generate-content-async', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -154,20 +155,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 			const data = await response.json();
 			
-			if (data.success) {
-				easyMDE.value(data.content);
+			if (data.success && data.job_id) {
+				// Redirect to job status page to monitor progress
+				window.location.href = `/blog/job-status?job_id=${data.job_id}`;
 			} else {
-				alert('Error generating content: ' + (data.error || 'Unknown error'));
+				alert('Error starting AI generation: ' + (data.error || 'Unknown error'));
+				this.disabled = false;
+				this.textContent = '✨ Generate';
 			}
 		} catch (error) {
-			alert('Error generating content: ' + error.message);
-		} finally {
+			alert('Error starting AI generation: ' + error.message);
 			this.disabled = false;
 			this.textContent = '✨ Generate';
 		}
 	});
 
-	// Generate excerpt with AI
+	// Generate excerpt with AI (async)
 	generateExcerptBtn.addEventListener('click', async function() {
 		const content = easyMDE.value();
 		if (!content.trim()) {
@@ -176,10 +179,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 
 		this.disabled = true;
-		this.textContent = '🤖 Generating...';
+		this.textContent = '🚀 Starting AI Generation...';
 
 		try {
-			const response = await fetch('/blog/generate-content', {
+			// Start async generation
+			const response = await fetch('/blog/generate-content-async', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -192,20 +196,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 			const data = await response.json();
 			
-			if (data.success) {
-				excerptTextarea.value = data.excerpt;
+			if (data.success && data.job_id) {
+				// Redirect to job status page to monitor progress
+				window.location.href = `/blog/job-status?job_id=${data.job_id}`;
 			} else {
-				alert('Error generating excerpt: ' + (data.error || 'Unknown error'));
+				alert('Error starting excerpt generation: ' + (data.error || 'Unknown error'));
+				this.disabled = false;
+				this.textContent = '✨ Generate Excerpt';
 			}
 		} catch (error) {
-			alert('Error generating excerpt: ' + error.message);
-		} finally {
+			alert('Error starting excerpt generation: ' + error.message);
 			this.disabled = false;
 			this.textContent = '✨ Generate Excerpt';
 		}
 	});
 
-	// Generate tags with AI
+	// Generate tags with AI (async)
 	generateTagsBtn.addEventListener('click', async function() {
 		const title = titleInput.value.trim();
 		const content = easyMDE.value();
@@ -216,10 +222,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 
 		this.disabled = true;
-		this.textContent = '🤖 Generating...';
+		this.textContent = '🚀 Starting AI Generation...';
 
 		try {
-			const response = await fetch('/blog/generate-content', {
+			// Start async generation
+			const response = await fetch('/blog/generate-content-async', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -233,14 +240,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 			const data = await response.json();
 			
-			if (data.success) {
-				tagsInput.value = data.tags;
+			if (data.success && data.job_id) {
+				// Redirect to job status page to monitor progress
+				window.location.href = `/blog/job-status?job_id=${data.job_id}`;
 			} else {
-				alert('Error generating tags: ' + (data.error || 'Unknown error'));
+				alert('Error starting tags generation: ' + (data.error || 'Unknown error'));
+				this.disabled = false;
+				this.textContent = '✨ Generate Tags';
 			}
 		} catch (error) {
-			alert('Error generating tags: ' + error.message);
-		} finally {
+			alert('Error starting tags generation: ' + error.message);
 			this.disabled = false;
 			this.textContent = '✨ Generate Tags';
 		}
