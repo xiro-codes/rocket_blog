@@ -73,10 +73,8 @@ impl OllamaService {
 
     /// Generate content using Ollama API
     async fn generate_content(&self, db: &DatabaseConnection, prompt: &str, max_tokens: i32, temperature: f32) -> Result<String, String> {
-        if cfg!(debug_assertions) {
-            debug!("Ollama API request: max_tokens={}, temperature={}, prompt_length={}", 
-                   max_tokens, temperature, prompt.len());
-        }
+        debug!("Ollama API request: max_tokens={}, temperature={}, prompt_length={}", 
+               max_tokens, temperature, prompt.len());
         
         let base_url = self.get_ollama_url(db).await?;
         let model = self.get_ollama_model(db).await?;
