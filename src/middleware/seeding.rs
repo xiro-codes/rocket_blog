@@ -49,16 +49,19 @@ impl Fairing for Seeding {
         }
     }
     async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
+        log::info!("Seeding middleware: checking if database seeding is needed");
         let conn = &Db::fetch(&rocket).unwrap().conn;
         
         // Check if data already exists - only seed if database is empty
         let account_count = Account::find().count(conn).await.unwrap_or(0);
         if account_count > 0 {
-            println!("Database already contains data, skipping seeding.");
+            log::info!("Database already contains {} accounts, skipping seeding", account_count);
             return Ok(rocket);
         }
         
-        println!("Database is empty, creating seed data...");
+        log::info!("Database is empty, creating seed data with {} posts...", self.count);
+        
+        log::debug!("Creating admin account");
         let pw = bcrypt::hash("pass").unwrap();
         let ac = account::ActiveModel {
             id: Set(uuid::Uuid::new_v4()),
@@ -69,9 +72,16 @@ impl Fairing for Seeding {
         }
         .insert(conn)
         .await
+        .map_err(|e| {
+            log::error!("Failed to seed admin account: {}", e);
+            e
+        })
         .expect("Failed to seed account.");
+        
+        log::debug!("Admin account created: {} ({})", ac.username, ac.id);
 
         // Create sample tags
+        log::debug!("Creating sample tags");
         let sample_tags = vec![
             ("Rust", "#CE422B"),
             ("Web Development", "#61DAFB"),
@@ -93,17 +103,29 @@ impl Fairing for Seeding {
             }
             .insert(conn)
             .await
+            .map_err(|e| {
+                log::error!("Failed to seed tag '{}': {}", tag_name, e);
+                e
+            })
             .expect("Failed to seed tag.");
             created_tags.push(tag);
         }
+        
+        log::debug!("Created {} tags", created_tags.len());
 
         // Get the sample video path if it exists
         let video_path = self.get_sample_video_path();
+        if video_path.is_some() {
+            log::debug!("Sample video found, will add to some posts");
+        } else {
+            log::debug!("No sample video found, posts will be text-only");
+        }
 
         let mut posts = Vec::new();
         let mut comments: Vec<comment::ActiveModel> = Vec::new();
         let mut post_tags: Vec<post_tag::ActiveModel> = Vec::new();
 
+        log::debug!("Creating {} sample posts with comments and tags", self.count);
         for i in 1..self.count {
             let title_rng = thread_rng();
             let text_rng = thread_rng();
@@ -173,14 +195,30 @@ impl Fairing for Seeding {
             posts.push(p);
         }
 
-        Post::insert_many(posts).exec(conn).await.unwrap();
-        Comment::insert_many(comments).exec(conn).await.unwrap();
-        PostTag::insert_many(post_tags).exec(conn).await.unwrap();
+        log::debug!("Inserting {} posts into database", posts.len());
+        Post::insert_many(posts).exec(conn).await.map_err(|e| {
+            log::error!("Failed to insert posts: {}", e);
+            e
+        }).unwrap();
+        
+        log::debug!("Inserting {} comments into database", comments.len());
+        Comment::insert_many(comments).exec(conn).await.map_err(|e| {
+            log::error!("Failed to insert comments: {}", e);
+            e
+        }).unwrap();
+        
+        log::debug!("Inserting {} post-tag relationships into database", post_tags.len());
+        PostTag::insert_many(post_tags).exec(conn).await.map_err(|e| {
+            log::error!("Failed to insert post-tag relationships: {}", e);
+            e
+        }).unwrap();
+        
+        log::info!("Database seeding completed successfully");
         Ok(rocket)
     }
     async fn on_shutdown(&self, _rocket: &Rocket<Orbit>) {
         // Data persistence: Do not delete data on shutdown to preserve 
         // database content across container restarts
-        println!("Application shutting down - preserving database data.");
+        log::info!("Application shutting down - preserving database data");
     }
 }
