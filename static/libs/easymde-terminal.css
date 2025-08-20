@@ -1,0 +1,242 @@
+/* EasyMDE Terminal Theme CSS */
+
+.EasyMDEContainer {
+  border: 2px solid #333 !important;
+  background-color: #1a1f25 !important;
+  border-radius: 0;
+}
+
+.EasyMDEContainer .editor-toolbar {
+  background-color: #0c1116 !important;
+  border-bottom: 1px solid #333 !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-radius: 0;
+  padding: 10px;
+}
+
+.EasyMDEContainer .editor-toolbar button {
+  color: #00ff41 !important;
+  background-color: transparent !important;
+  border: 1px solid #333 !important;
+  border-radius: 0 !important;
+  font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+  font-size: 12px;
+  padding: 5px 8px;
+  margin: 2px;
+  cursor: pointer;
+}
+
+.EasyMDEContainer .editor-toolbar button:hover {
+  background-color: #333 !important;
+  color: #40ff80 !important;
+  border-color: #40ff80 !important;
+}
+
+.EasyMDEContainer .editor-toolbar button.active {
+  background-color: #00ff41 !important;
+  color: #0c1116 !important;
+  border-color: #00ff41 !important;
+}
+
+.EasyMDEContainer .editor-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.EasyMDEContainer .editor-toolbar .separator {
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  background-color: #333;
+  margin: 0 5px;
+}
+
+.EasyMDEContainer .CodeMirror {
+  background-color: #1a1f25 !important;
+  color: #00ff41 !important;
+  font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+  border: none !important;
+  line-height: 1.5 !important;
+  font-size: 14px;
+  min-height: 200px;
+  padding: 10px;
+}
+
+.EasyMDEContainer .CodeMirror-cursor {
+  border-left: 2px solid #00ff41 !important;
+}
+
+.EasyMDEContainer .CodeMirror-selected {
+  background-color: #333 !important;
+}
+
+.EasyMDEContainer .CodeMirror-line {
+  color: #00ff41 !important;
+}
+
+.EasyMDEContainer .cm-header {
+  color: #40ff80 !important;
+  font-weight: bold !important;
+}
+
+.EasyMDEContainer .cm-quote {
+  color: #888 !important;
+  font-style: italic !important;
+}
+
+.EasyMDEContainer .cm-keyword {
+  color: #00ff41 !important;
+  font-weight: bold !important;
+}
+
+.EasyMDEContainer .cm-link {
+  color: #40ff80 !important;
+}
+
+.EasyMDEContainer .cm-url {
+  color: #40ff80 !important;
+}
+
+.EasyMDEContainer .cm-strong {
+  color: #00ff41 !important;
+  font-weight: bold !important;
+}
+
+.EasyMDEContainer .cm-em {
+  color: #40ff80 !important;
+  font-style: italic !important;
+}
+
+.EasyMDEContainer .cm-code {
+  color: #ffb000 !important;
+  background-color: #0c1116 !important;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.EasyMDEContainer .editor-statusbar {
+  background-color: #0c1116 !important;
+  color: #888 !important;
+  border-top: 1px solid #333 !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+  font-size: 11px;
+  padding: 5px 10px;
+}
+
+.EasyMDEContainer .editor-preview, 
+.EasyMDEContainer .editor-preview-active-side {
+  background-color: #1a1f25 !important;
+  color: #ccc !important;
+  font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+  padding: 10px;
+  border-left: 1px solid #333;
+}
+
+.EasyMDEContainer .editor-preview h1, 
+.EasyMDEContainer .editor-preview h2, 
+.EasyMDEContainer .editor-preview h3, 
+.EasyMDEContainer .editor-preview h4, 
+.EasyMDEContainer .editor-preview h5, 
+.EasyMDEContainer .editor-preview h6 {
+  color: #00ff41 !important;
+  font-weight: 700 !important;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.EasyMDEContainer .editor-preview code {
+  background-color: #0c1116 !important;
+  color: #00ff41 !important;
+  border: 1px solid #333 !important;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+}
+
+.EasyMDEContainer .editor-preview pre {
+  background-color: #0c1116 !important;
+  border: 1px solid #333 !important;
+  padding: 10px;
+  border-radius: 0;
+  color: #00ff41;
+  font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+  overflow-x: auto;
+}
+
+.EasyMDEContainer .editor-preview blockquote {
+  border-left: 4px solid #333;
+  padding-left: 10px;
+  margin-left: 0;
+  color: #888;
+  font-style: italic;
+}
+
+.EasyMDEContainer .editor-preview ul,
+.EasyMDEContainer .editor-preview ol {
+  padding-left: 20px;
+}
+
+.EasyMDEContainer .editor-preview li {
+  margin-bottom: 5px;
+}
+
+.EasyMDEContainer .editor-preview a {
+  color: #40ff80;
+  text-decoration: underline;
+}
+
+.EasyMDEContainer .editor-preview a:hover {
+  color: #00ff41;
+}
+
+/* Fallback styles for when EasyMDE is not available */
+.textarea-enhanced {
+  background-color: #1a1f25 !important;
+  color: #00ff41 !important;
+  font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
+  border: 2px solid #333 !important;
+  padding: 15px;
+  min-height: 300px;
+  resize: vertical;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.textarea-enhanced:focus {
+  border-color: #00ff41 !important;
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.3) !important;
+  outline: none;
+}
+
+/* Toolbar for fallback textarea */
+.textarea-toolbar {
+  background-color: #0c1116;
+  border: 2px solid #333;
+  border-bottom: none;
+  padding: 10px;
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.textarea-toolbar button {
+  background-color: transparent;
+  color: #00ff41;
+  border: 1px solid #333;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.textarea-toolbar button:hover {
+  background-color: #333;
+  color: #40ff80;
+  border-color: #40ff80;
+}

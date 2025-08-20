@@ -1,0 +1,176 @@
+/* Google Fonts Fallback - Terminal-friendly monospace fonts */
+
+/* 
+ * This file provides fallback CSS for Google Fonts when CDN is not accessible
+ * Uses system fonts that provide similar terminal/monospace appearance
+ */
+
+/* JetBrains Mono fallback */
+@font-face {
+  font-family: 'JetBrains Mono Fallback';
+  src: local('JetBrains Mono'), 
+       local('Menlo'), 
+       local('Monaco'), 
+       local('Consolas'), 
+       local('Liberation Mono'), 
+       local('Courier New');
+  font-weight: 100 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono Fallback';
+  src: local('JetBrains Mono Italic'), 
+       local('Menlo Italic'), 
+       local('Monaco Italic'), 
+       local('Consolas Italic'), 
+       local('Liberation Mono Italic'), 
+       local('Courier New Italic');
+  font-weight: 100 800;
+  font-style: italic;
+}
+
+/* Source Code Pro fallback */
+@font-face {
+  font-family: 'Source Code Pro Fallback';
+  src: local('Source Code Pro'), 
+       local('SF Mono'), 
+       local('Roboto Mono'), 
+       local('Fira Code'), 
+       local('Consolas'), 
+       local('Liberation Mono'), 
+       local('Courier New');
+  font-weight: 200 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Source Code Pro Fallback';
+  src: local('Source Code Pro Italic'), 
+       local('SF Mono Italic'), 
+       local('Roboto Mono Italic'), 
+       local('Fira Code Italic'), 
+       local('Consolas Italic'), 
+       local('Liberation Mono Italic'), 
+       local('Courier New Italic');
+  font-weight: 200 900;
+  font-style: italic;
+}
+
+/* 
+ * Enhanced system font stack for terminal applications
+ * Prioritizes monospace fonts that are commonly available and render well
+ */
+.font-mono, 
+.terminal-font,
+body,
+.form-control,
+.btn,
+.alert,
+.badge,
+.card,
+.EasyMDEContainer,
+.textarea-enhanced {
+  font-family: 
+    'JetBrains Mono', 
+    'JetBrains Mono Fallback',
+    'Source Code Pro', 
+    'Source Code Pro Fallback',
+    'SF Mono',
+    'Monaco', 
+    'Inconsolata', 
+    'Roboto Mono',
+    'Fira Code',
+    'Fira Mono',
+    'Droid Sans Mono',
+    'Liberation Mono',
+    'Menlo',
+    'Consolas',
+    'DejaVu Sans Mono',
+    'Bitstream Vera Sans Mono',
+    'Courier New',
+    'Courier',
+    monospace !important;
+}
+
+/* 
+ * Font weight definitions for better terminal appearance
+ * Using numeric values that work across different font families
+ */
+.font-weight-light { font-weight: 300; }
+.font-weight-normal { font-weight: 400; }
+.font-weight-medium { font-weight: 500; }
+.font-weight-semibold { font-weight: 600; }
+.font-weight-bold { font-weight: 700; }
+.font-weight-extrabold { font-weight: 800; }
+
+/* 
+ * Character spacing for better terminal readability
+ */
+.terminal-spacing {
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+}
+
+/* 
+ * Specific styling for code elements to ensure monospace rendering
+ */
+code, 
+pre, 
+.code, 
+.pre {
+  font-family: 
+    'JetBrains Mono', 
+    'Source Code Pro',
+    'SF Mono',
+    'Monaco', 
+    'Inconsolata', 
+    'Roboto Mono',
+    'Fira Code',
+    'Fira Mono',
+    'Consolas',
+    'Liberation Mono',
+    'Menlo',
+    'DejaVu Sans Mono',
+    'Bitstream Vera Sans Mono',
+    'Courier New',
+    'Courier',
+    monospace !important;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+/*
+ * Fallback for when no custom fonts are available
+ * Ensures consistent appearance across different systems
+ */
+@media (max-width: 768px) {
+  body, .form-control, .btn {
+    font-size: 14px;
+  }
+  
+  code, pre {
+    font-size: 13px;
+  }
+}
+
+/*
+ * High contrast mode support for accessibility
+ */
+@media (prefers-contrast: high) {
+  body {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+}
+
+/*
+ * Reduced motion support
+ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
