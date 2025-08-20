@@ -100,7 +100,6 @@ async fn list_view(
         token.as_deref(),
         &client_ip.0,
     ).await.map_err(|_| Status::InternalServerError)?;
-    debug!("{:?}", list_data.reaction_summaries);
     Ok(Template::render(
         "blog/list",
         context! {
@@ -131,7 +130,8 @@ async fn detail_view(
 ) -> Result<Template, Status> {
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
-    debug!("{}", id);
+
+    debug!("Blog post detail view requested: id={}, client_ip={}", id, client_ip.0);
 
     // Check if user is admin to allow draft access
     let is_admin = if let Some(token_str) = &token {
@@ -156,7 +156,7 @@ async fn detail_view(
     };
 
     if id < min_post {
-        debug!("Less Than");
+        return Err(Status::NotFound);
     }
 
     // Get post with account - handle errors gracefully
@@ -171,12 +171,14 @@ async fn detail_view(
         Err(_) => return Err(Status::InternalServerError),
     };
 
-    debug!("{:?}", tags);
-
     // Check if post is draft and user is not admin
     if post.draft.unwrap_or(false) && !is_admin {
+        debug!("Draft post {} blocked for non-admin user", post.id);
         return Err(Status::NotFound);
     }
+
+    debug!("Post found: id={}, title={}, is_admin={}", 
+           post.id, post.title, is_admin);
 
     // Get comments for the post - handle errors gracefully
     let comments = match comment_service.find_many_by_post_id(db, post.id).await {
@@ -396,12 +398,15 @@ async fn create(
                 Ok(post) => post,
                 Err(_) => return Err(Status::InternalServerError),
             };
-            debug!("{:?}", form);
+            
+            debug!("Created post with form data: title={}, ai_generate={:?}", 
+                   form.title, form.ai_generate);
+            
             if let Some(tags_str) = form.tags {
                 for tag_name in tags_str.split(",") {
-                    debug!("{:?}", tag_name);
                     let tag_name = tag_name.trim();
                     if !tag_name.is_empty() {
+                        debug!("Processing tag: {}", tag_name);
                         let tag = match tag_service.find_or_create_tag(db, tag_name).await {
                             Ok(tag) => tag,
                             Err(_) => return Err(Status::InternalServerError),

@@ -63,6 +63,8 @@ impl Service {
         id: Uuid,
         data: &mut FormDTO<'_>,
     ) -> Result<post::Model, DbErr> {
+        debug!("Creating new blog post: title={}, action={:?}", 
+               data.title, data.action);
         let text = markdown::to_html(data.text.as_str());
         let excerpt = Self::generate_excerpt(&data.text, data.excerpt.clone());
         let fid = BaseService::generate_id().to_string();

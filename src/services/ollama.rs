@@ -2,7 +2,7 @@ use crate::services::{ai_provider::AIProvider, base::BaseService, SettingsServic
 use async_trait::async_trait;
 use reqwest::Client;
 use sea_orm::DatabaseConnection;
-use serde::{Deserialize, Serialize};
+use rocket::serde::{Deserialize, Serialize};
 
 pub struct OllamaService {
     base: BaseService,
@@ -11,6 +11,7 @@ pub struct OllamaService {
 }
 
 #[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
 struct OllamaRequest {
     model: String,
     prompt: String,
@@ -19,12 +20,14 @@ struct OllamaRequest {
 }
 
 #[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
 struct OllamaOptions {
     num_predict: i32,
     temperature: f32,
 }
 
 #[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
 struct OllamaResponse {
     response: String,
     done: bool,
@@ -70,6 +73,9 @@ impl OllamaService {
 
     /// Generate content using Ollama API
     async fn generate_content(&self, db: &DatabaseConnection, prompt: &str, max_tokens: i32, temperature: f32) -> Result<String, String> {
+        debug!("Ollama API request: max_tokens={}, temperature={}, prompt_length={}", 
+               max_tokens, temperature, prompt.len());
+        
         let base_url = self.get_ollama_url(db).await?;
         let model = self.get_ollama_model(db).await?;
         let url = format!("{}/api/generate", base_url);
