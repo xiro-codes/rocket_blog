@@ -33,32 +33,61 @@ impl CoordinatorService {
         token: Option<&str>,
         client_ip: &str,
     ) -> Result<BlogListData, String> {
+        let page_num = page.unwrap_or(1);
+        let size = page_size.unwrap_or(10);
+        log::debug!("Coordinator: getting blog list data - page={}, size={}, client_ip={}", page_num, size, client_ip);
+        
         // Check if any accounts exist for the admin creation button
+        log::debug!("Coordinator: checking if accounts exist");
         let has_accounts = self.auth_service.has_any_accounts(db).await;
         
         // Check if user is admin to include drafts
         let is_admin = if let Some(token_str) = token {
+            log::debug!("Coordinator: checking admin status for token");
             self.auth_service.is_admin_token(db, token_str).await
         } else {
+            log::debug!("Coordinator: no token provided, treating as non-admin");
             false
         };
         
+        if is_admin {
+            log::debug!("Coordinator: user is admin, including draft posts");
+        } else {
+            log::debug!("Coordinator: user is not admin, excluding draft posts");
+        }
+        
         // Get paginated posts
+        log::debug!("Coordinator: fetching paginated posts");
         let (posts, page, page_size, num_pages) = self.blog_service
             .paginate_with_title_include_drafts(db, page, page_size, is_admin)
             .await
-            .map_err(|e| format!("Failed to get posts: {}", e))?;
+            .map_err(|e| {
+                let error_msg = format!("Failed to get posts: {}", e);
+                log::error!("Coordinator: {}", error_msg);
+                error_msg
+            })?;
         
         // Get all tags for the tag cloud
-        let all_tags = self.tag_service.find_all_tags(db).await.unwrap_or_default();
+        log::debug!("Coordinator: fetching all tags");
+        let all_tags = self.tag_service.find_all_tags(db).await.unwrap_or_else(|e| {
+            log::warn!("Coordinator: failed to fetch tags: {}", e);
+            Vec::new()
+        });
         
         // Get reaction summaries for all posts
+        log::debug!("Coordinator: fetching reaction summaries for {} posts", posts.len());
         let post_ids: Vec<Uuid> = posts.iter().map(|p| p.id).collect();
         let reaction_summaries = self.reaction_service
             .get_posts_reaction_summaries(db, &post_ids, client_ip)
             .await
             .map(|hashmap| hashmap.into_values().collect())
-            .unwrap_or_default();
+            .unwrap_or_else(|e| {
+                log::warn!("Coordinator: failed to fetch reaction summaries: {}", e);
+                Vec::new()
+            });
+        
+        log::info!("Coordinator: blog list data prepared - {} posts, {} tags, {} reaction summaries", 
+                  posts.len(), all_tags.len(), reaction_summaries.len());
         
         Ok(BlogListData {
             posts,

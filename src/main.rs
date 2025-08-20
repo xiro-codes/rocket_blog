@@ -27,13 +27,24 @@ use rocket_dyn_templates::Template;
 use sea_orm_rocket::Database;
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
+    log::info!("Starting database migrations...");
     let conn = &Db::fetch(&rocket).unwrap().conn;
-    let _ = migrations::Migrator::up(conn, None).await;
+    
+    match migrations::Migrator::up(conn, None).await {
+        Ok(_) => {
+            log::info!("Database migrations completed successfully");
+        }
+        Err(e) => {
+            log::error!("Database migration failed: {}", e);
+        }
+    }
+    
     Ok(rocket)
 }
 
 #[catch(default)]
 pub fn catch_default() -> Redirect {
+    log::warn!("Unhandled route accessed - redirecting to home page");
     Redirect::to("/")
 }
 
@@ -52,7 +63,7 @@ fn should_filter_log(meta: &log::Metadata) -> bool {
 
 /// Setup application logging with clean filtering
 fn setup_logger() -> Result<(), fern::InitError> {
-    fern::Dispatch::new()
+    let mut dispatch = fern::Dispatch::new()
         .format(|out, message, record| {
             out.finish(format_args!(
                 "[{} {} {}] {}",
@@ -64,9 +75,14 @@ fn setup_logger() -> Result<(), fern::InitError> {
         })
         .level(Features::log_level())
         .filter(|meta| !should_filter_log(meta))
-        // .chain(std::io::stdout())
-        .chain(fern::log_file("output.log")?)
-        .apply()?;
+        .chain(fern::log_file("output.log")?);
+    
+    // In development mode, also log to stdout for real-time feedback
+    if Features::is_development() {
+        dispatch = dispatch.chain(std::io::stdout());
+    }
+    
+    dispatch.apply()?;
     Ok(())
 }
 
@@ -77,8 +93,13 @@ async fn rocket() -> _ {
     
     // Setup logging - ignore errors if already initialized
     let _ = setup_logger();
+    log::info!("Starting Rocket Blog application...");
+    log::debug!("Development mode: {}", Features::is_development());
+    log::debug!("Seeding enabled: {}", Features::enable_seeding());
+    log::debug!("Log level: {:?}", Features::log_level());
     
     // Build the base rocket instance
+    log::info!("Building Rocket instance and attaching services...");
     let mut rocket = rocket::build()
         .register("/", catchers![catch_default])
         .attach(Db::init())
@@ -89,9 +110,11 @@ async fn rocket() -> _ {
     
     // Only attach seeding in debug builds (development mode)
     if Features::enable_seeding() {
+        log::info!("Attaching database seeding middleware");
         rocket = rocket.attach(middleware::Seeding::new(Some(0), 50));
     }
     
+    log::info!("Attaching controllers and static file server");
     // Attach all controllers
     ControllerRegistry::attach_all_controllers(rocket)
         .mount("/static", FileServer::from("./static/"))
