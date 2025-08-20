@@ -103,11 +103,12 @@ impl JobProcessor {
                     Ok(content) => {
                         // Create draft post automatically
                         match Self::create_draft_post(db, &payload.title, &content, job.account_id).await {
-                            Ok(post_id) => {
+                            Ok((post_id, seq_id)) => {
                                 json!({
                                     "content": content,
                                     "provider": provider.provider_name(),
                                     "draft_post_id": post_id,
+                                    "draft_post_seq_id": seq_id,
                                     "draft_post_title": format!("[AI DRAFT] {}", payload.title)
                                 })
                             }
@@ -170,7 +171,7 @@ impl JobProcessor {
         title: &str,
         content: &str,
         account_id: Uuid,
-    ) -> Result<Uuid, String> {
+    ) -> Result<(Uuid, i32), String> {
         let now = Utc::now().naive_utc();
         let post_id = Uuid::new_v4();
 
@@ -185,9 +186,11 @@ impl JobProcessor {
             .unwrap_or(Some(0))
             .unwrap_or(0);
 
+        let seq_id = max_seq_id + 1;
+
         let new_post = post::ActiveModel {
             id: Set(post_id),
-            seq_id: Set(max_seq_id + 1),
+            seq_id: Set(seq_id),
             title: Set(format!("[AI DRAFT] {}", title)),
             text: Set(content.to_string()),
             excerpt: NotSet,
@@ -201,6 +204,6 @@ impl JobProcessor {
             .await
             .map_err(|e| format!("Failed to create draft post: {}", e))?;
 
-        Ok(post_id)
+        Ok((post_id, seq_id))
     }
 }

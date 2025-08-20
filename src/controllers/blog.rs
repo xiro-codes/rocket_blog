@@ -849,6 +849,22 @@ async fn generate_ai_content_async(
     }
 }
 
+/// Get the job status page
+#[get("/job-status?<job_id>")]
+async fn job_status_page(
+    jar: &CookieJar<'_>,
+    job_id: Option<String>,
+) -> Result<Template, Status> {
+    ControllerBase::require_auth(jar)?;
+    
+    Ok(Template::render(
+        "blog/job_status",
+        context! {
+            job_id: job_id.unwrap_or_default()
+        },
+    ))
+}
+
 /// Check the status of a background AI generation job
 #[get("/job-status/<job_id>")]
 async fn get_job_status(
@@ -1043,6 +1059,7 @@ fn routes() -> Vec<Route> {
         get_reactions,
         generate_ai_content,
         generate_ai_content_async,
+        job_status_page,
         get_job_status
     ]
 }
