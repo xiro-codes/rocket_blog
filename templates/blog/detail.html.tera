@@ -110,6 +110,7 @@
 		{% else %}
 		<a href="{{post.seq_id - 1}}" class="btn btn-primary">[PREV POST]</a>
 		{%endif%}
+		<a href="/" class="btn btn-info">[BACK TO TERMINAL]</a>
 		{% if post.seq_id == max_post %}
 		<button class="btn btn-secondary" disabled>[NEXT POST]</button>
 		{%else%}

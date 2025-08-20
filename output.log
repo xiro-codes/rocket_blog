@@ -92,3 +92,107 @@
 [2025-08-20T12:26:09Z DEBUG app::services::auth] Token found in memory, fetching account: 815d74eb-ca52-4c66-a3f5-f6a4ea511002
 [2025-08-20T12:26:09Z DEBUG app::services::auth] Token validated for user: admin (815d74eb-ca52-4c66-a3f5-f6a4ea511002)
 [2025-08-20T12:26:09Z DEBUG app::controllers::blog] Post found: id=a3d69e1f-fe35-4701-8d2d-878956498778, title=Ex improbis factis ad minuendas., is_admin=true
+[2025-08-20T12:26:51Z INFO app::controllers::auth] User logout requested
+[2025-08-20T12:26:51Z INFO app::controllers::auth] User logged out successfully
+[2025-08-20T12:26:51Z INFO app::controllers::blog] Blog list view requested - Page: 1, Size: 10, Client IP: 127.0.0.1
+[2025-08-20T12:26:51Z DEBUG app::controllers::blog] Anonymous user viewing blog list
+[2025-08-20T12:26:51Z DEBUG app::controllers::blog] Fetching blog list data via coordinator service
+[2025-08-20T12:26:51Z DEBUG app::services::coordinator] Coordinator: getting blog list data - page=1, size=10, client_ip=127.0.0.1
+[2025-08-20T12:26:51Z DEBUG app::services::coordinator] Coordinator: checking if accounts exist
+[2025-08-20T12:26:51Z DEBUG app::services::auth] Checking if any accounts exist in database
+[2025-08-20T12:26:51Z DEBUG app::services::auth] Found existing account(s) in database
+[2025-08-20T12:26:51Z DEBUG app::services::coordinator] Coordinator: no token provided, treating as non-admin
+[2025-08-20T12:26:51Z DEBUG app::services::coordinator] Coordinator: user is not admin, excluding draft posts
+[2025-08-20T12:26:51Z DEBUG app::services::coordinator] Coordinator: fetching paginated posts
+[2025-08-20T12:26:51Z DEBUG app::services::blog] Paginating blog posts: page=1, page_size=39, include_drafts=false
+[2025-08-20T12:26:51Z DEBUG app::services::blog] Filtering out draft posts
+[2025-08-20T12:26:51Z DEBUG app::services::blog] Fetching page 1 of 2 pages
+[2025-08-20T12:26:51Z DEBUG app::services::blog] Successfully fetched 39 posts for page 1
+[2025-08-20T12:26:51Z DEBUG app::services::coordinator] Coordinator: fetching all tags
+[2025-08-20T12:26:51Z DEBUG app::services::coordinator] Coordinator: fetching reaction summaries for 39 posts
+[2025-08-20T12:26:51Z INFO app::services::coordinator] Coordinator: blog list data prepared - 39 posts, 7 tags, 39 reaction summaries
+[2025-08-20T12:26:51Z DEBUG app::controllers::blog] Blog list data fetched successfully - 39 posts, 2 pages
+[2025-08-20T12:27:01Z DEBUG app::controllers::blog] Blog post detail view requested: id=49, client_ip=127.0.0.1
+[2025-08-20T12:27:01Z DEBUG app::controllers::blog] Post found: id=a3d69e1f-fe35-4701-8d2d-878956498778, title=Ex improbis factis ad minuendas., is_admin=false
+[2025-08-20T12:28:06Z DEBUG app::controllers::auth] Serving login page
+[2025-08-20T12:28:06Z DEBUG app::services::auth] Checking if any accounts exist in database
+[2025-08-20T12:28:06Z DEBUG app::services::auth] Found existing account(s) in database
+[2025-08-20T12:28:06Z DEBUG app::controllers::auth] Login page served successfully
+[2025-08-20T12:28:12Z INFO app::controllers::auth] Login attempt from controller for username: admin
+[2025-08-20T12:28:12Z DEBUG app::services::auth] Authentication attempt for username: admin
+[2025-08-20T12:28:12Z DEBUG app::services::auth] User found in database: admin
+[2025-08-20T12:28:12Z INFO app::services::auth] User successfully authenticated: admin (ID: 815d74eb-ca52-4c66-a3f5-f6a4ea511002)
+[2025-08-20T12:28:12Z DEBUG app::services::auth] Generated token: 39afcd77-c3cd-45a8-941c-d947c4543f2d
+[2025-08-20T12:28:12Z INFO app::controllers::auth] Login successful - redirecting to blog
+[2025-08-20T12:28:12Z INFO app::controllers::blog] Blog list view requested - Page: 1, Size: 10, Client IP: 127.0.0.1
+[2025-08-20T12:28:12Z DEBUG app::controllers::blog] Authenticated user viewing blog list
+[2025-08-20T12:28:12Z DEBUG app::controllers::blog] Fetching blog list data via coordinator service
+[2025-08-20T12:28:12Z DEBUG app::services::coordinator] Coordinator: getting blog list data - page=1, size=10, client_ip=127.0.0.1
+[2025-08-20T12:28:12Z DEBUG app::services::coordinator] Coordinator: checking if accounts exist
+[2025-08-20T12:28:12Z DEBUG app::services::auth] Checking if any accounts exist in database
+[2025-08-20T12:28:12Z DEBUG app::services::auth] Found existing account(s) in database
+[2025-08-20T12:28:12Z DEBUG app::services::coordinator] Coordinator: checking admin status for token
+[2025-08-20T12:28:12Z DEBUG app::services::auth] Checking token validity: 39afcd77-c3cd-45a8-941c-d947c4543f2d
+[2025-08-20T12:28:12Z DEBUG app::services::auth] Token not found in memory: 39afcd77-c3cd-45a8-941c-d947c4543f2d
+[2025-08-20T12:28:12Z DEBUG app::services::coordinator] Coordinator: user is not admin, excluding draft posts
+[2025-08-20T12:28:12Z DEBUG app::services::coordinator] Coordinator: fetching paginated posts
+[2025-08-20T12:28:12Z DEBUG app::services::blog] Paginating blog posts: page=1, page_size=39, include_drafts=false
+[2025-08-20T12:28:12Z DEBUG app::services::blog] Filtering out draft posts
+[2025-08-20T12:28:12Z DEBUG app::services::blog] Fetching page 1 of 2 pages
+[2025-08-20T12:28:12Z DEBUG app::services::blog] Successfully fetched 39 posts for page 1
+[2025-08-20T12:28:12Z DEBUG app::services::coordinator] Coordinator: fetching all tags
+[2025-08-20T12:28:12Z DEBUG app::services::coordinator] Coordinator: fetching reaction summaries for 39 posts
+[2025-08-20T12:28:12Z INFO app::services::coordinator] Coordinator: blog list data prepared - 39 posts, 7 tags, 39 reaction summaries
+[2025-08-20T12:28:12Z DEBUG app::controllers::blog] Blog list data fetched successfully - 39 posts, 2 pages
+[2025-08-20T12:28:23Z DEBUG app::controllers::blog] Blog post detail view requested: id=49, client_ip=127.0.0.1
+[2025-08-20T12:28:23Z DEBUG app::services::auth] Checking token validity: 39afcd77-c3cd-45a8-941c-d947c4543f2d
+[2025-08-20T12:28:23Z DEBUG app::services::auth] Token found in memory, fetching account: 815d74eb-ca52-4c66-a3f5-f6a4ea511002
+[2025-08-20T12:28:23Z DEBUG app::services::auth] Token validated for user: admin (815d74eb-ca52-4c66-a3f5-f6a4ea511002)
+[2025-08-20T12:28:23Z DEBUG app::controllers::blog] Post found: id=a3d69e1f-fe35-4701-8d2d-878956498778, title=Ex improbis factis ad minuendas., is_admin=true
+[2025-08-20T12:28:37Z INFO app::controllers::index] Home page accessed - redirecting to blog
+[2025-08-20T12:28:37Z INFO app::controllers::blog] Blog list view requested - Page: 1, Size: 10, Client IP: 127.0.0.1
+[2025-08-20T12:28:37Z DEBUG app::controllers::blog] Authenticated user viewing blog list
+[2025-08-20T12:28:37Z DEBUG app::controllers::blog] Fetching blog list data via coordinator service
+[2025-08-20T12:28:37Z DEBUG app::services::coordinator] Coordinator: getting blog list data - page=1, size=10, client_ip=127.0.0.1
+[2025-08-20T12:28:37Z DEBUG app::services::coordinator] Coordinator: checking if accounts exist
+[2025-08-20T12:28:37Z DEBUG app::services::auth] Checking if any accounts exist in database
+[2025-08-20T12:28:37Z DEBUG app::services::auth] Found existing account(s) in database
+[2025-08-20T12:28:37Z DEBUG app::services::coordinator] Coordinator: checking admin status for token
+[2025-08-20T12:28:37Z DEBUG app::services::auth] Checking token validity: 39afcd77-c3cd-45a8-941c-d947c4543f2d
+[2025-08-20T12:28:37Z DEBUG app::services::auth] Token not found in memory: 39afcd77-c3cd-45a8-941c-d947c4543f2d
+[2025-08-20T12:28:37Z DEBUG app::services::coordinator] Coordinator: user is not admin, excluding draft posts
+[2025-08-20T12:28:37Z DEBUG app::services::coordinator] Coordinator: fetching paginated posts
+[2025-08-20T12:28:37Z DEBUG app::services::blog] Paginating blog posts: page=1, page_size=39, include_drafts=false
+[2025-08-20T12:28:37Z DEBUG app::services::blog] Filtering out draft posts
+[2025-08-20T12:28:37Z DEBUG app::services::blog] Fetching page 1 of 2 pages
+[2025-08-20T12:28:37Z DEBUG app::services::blog] Successfully fetched 39 posts for page 1
+[2025-08-20T12:28:37Z DEBUG app::services::coordinator] Coordinator: fetching all tags
+[2025-08-20T12:28:37Z DEBUG app::services::coordinator] Coordinator: fetching reaction summaries for 39 posts
+[2025-08-20T12:28:37Z INFO app::services::coordinator] Coordinator: blog list data prepared - 39 posts, 7 tags, 39 reaction summaries
+[2025-08-20T12:28:37Z DEBUG app::controllers::blog] Blog list data fetched successfully - 39 posts, 2 pages
+[2025-08-20T12:28:50Z INFO app::controllers::index] Home page accessed - redirecting to blog
+[2025-08-20T12:28:50Z INFO app::controllers::blog] Blog list view requested - Page: 1, Size: 10, Client IP: 127.0.0.1
+[2025-08-20T12:28:50Z DEBUG app::controllers::blog] Authenticated user viewing blog list
+[2025-08-20T12:28:50Z DEBUG app::controllers::blog] Fetching blog list data via coordinator service
+[2025-08-20T12:28:50Z DEBUG app::services::coordinator] Coordinator: getting blog list data - page=1, size=10, client_ip=127.0.0.1
+[2025-08-20T12:28:50Z DEBUG app::services::coordinator] Coordinator: checking if accounts exist
+[2025-08-20T12:28:50Z DEBUG app::services::auth] Checking if any accounts exist in database
+[2025-08-20T12:28:50Z DEBUG app::services::auth] Found existing account(s) in database
+[2025-08-20T12:28:50Z DEBUG app::services::coordinator] Coordinator: checking admin status for token
+[2025-08-20T12:28:50Z DEBUG app::services::auth] Checking token validity: 39afcd77-c3cd-45a8-941c-d947c4543f2d
+[2025-08-20T12:28:50Z DEBUG app::services::auth] Token not found in memory: 39afcd77-c3cd-45a8-941c-d947c4543f2d
+[2025-08-20T12:28:50Z DEBUG app::services::coordinator] Coordinator: user is not admin, excluding draft posts
+[2025-08-20T12:28:50Z DEBUG app::services::coordinator] Coordinator: fetching paginated posts
+[2025-08-20T12:28:50Z DEBUG app::services::blog] Paginating blog posts: page=1, page_size=39, include_drafts=false
+[2025-08-20T12:28:50Z DEBUG app::services::blog] Filtering out draft posts
+[2025-08-20T12:28:50Z DEBUG app::services::blog] Fetching page 1 of 2 pages
+[2025-08-20T12:28:50Z DEBUG app::services::blog] Successfully fetched 39 posts for page 1
+[2025-08-20T12:28:50Z DEBUG app::services::coordinator] Coordinator: fetching all tags
+[2025-08-20T12:28:50Z DEBUG app::services::coordinator] Coordinator: fetching reaction summaries for 39 posts
+[2025-08-20T12:28:50Z INFO app::services::coordinator] Coordinator: blog list data prepared - 39 posts, 7 tags, 39 reaction summaries
+[2025-08-20T12:28:50Z DEBUG app::controllers::blog] Blog list data fetched successfully - 39 posts, 2 pages
+[2025-08-20T12:29:03Z DEBUG app::controllers::blog] Blog post detail view requested: id=48, client_ip=127.0.0.1
+[2025-08-20T12:29:03Z DEBUG app::services::auth] Checking token validity: 39afcd77-c3cd-45a8-941c-d947c4543f2d
+[2025-08-20T12:29:03Z DEBUG app::services::auth] Token found in memory, fetching account: 815d74eb-ca52-4c66-a3f5-f6a4ea511002
+[2025-08-20T12:29:03Z DEBUG app::services::auth] Token validated for user: admin (815d74eb-ca52-4c66-a3f5-f6a4ea511002)
+[2025-08-20T12:29:03Z DEBUG app::controllers::blog] Post found: id=17b2a16e-df42-42e2-9aba-14efb4900a55, title=Et non necessariam et quae., is_admin=true
