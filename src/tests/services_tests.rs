@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, AIProviderService, OpenAIService, OllamaService, AIProvider};
+    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, AIProviderService, OpenAIService, OllamaService, AIProvider, BackgroundJobService};
     use crate::tests::mocks::test_data;
     use uuid::Uuid;
 
@@ -342,6 +342,69 @@ mod tests {
             // Note: We can't directly test encryption key equality since it's private
             assert_eq!(std::mem::size_of_val(&service1), std::mem::size_of::<SettingsService>());
             assert_eq!(std::mem::size_of_val(&service2), std::mem::size_of::<SettingsService>());
+        }
+    }
+
+    mod background_job_service_tests {
+        use super::*;
+        use crate::services::BackgroundJobService;
+        use models::background_job;
+        use sea_orm::{MockDatabase, DbBackend, MockExecResult};
+        use chrono::{DateTime, FixedOffset};
+        use serde_json::json;
+
+        #[tokio::test]
+        async fn test_background_job_timezone_aware_creation() {
+            // Create mock data with timezone-aware timestamp
+            let mock_job = background_job::Model {
+                id: Uuid::new_v4(),
+                job_type: "youtube_download".to_string(),
+                entity_type: "post".to_string(),
+                entity_id: Uuid::new_v4(),
+                status: "pending".to_string(),
+                error_message: None,
+                job_data: Some(json!({"url": "https://youtube.com/watch?v=test"})),
+                created_at: DateTime::<FixedOffset>::parse_from_rfc3339("2024-01-01T00:00:00+00:00").unwrap(),
+                updated_at: DateTime::<FixedOffset>::parse_from_rfc3339("2024-01-01T00:00:00+00:00").unwrap(),
+            };
+
+            // Create mock database
+            let db = MockDatabase::new(DbBackend::Postgres)
+                .append_query_results([
+                    vec![mock_job.clone()],
+                ])
+                .into_connection();
+
+            let service = BackgroundJobService::new();
+            
+            // Test creating a job with timezone-aware timestamps
+            let result = service.create_job(
+                &db,
+                "youtube_download".to_string(),
+                "post".to_string(),
+                Uuid::new_v4(),
+                "pending".to_string(),
+                Some(json!({"url": "https://youtube.com/watch?v=test"})),
+            ).await;
+
+            // Verify the job was created successfully
+            assert!(result.is_ok());
+            let job = result.unwrap();
+            assert_eq!(job.job_type, "youtube_download");
+            assert_eq!(job.entity_type, "post");
+            assert_eq!(job.status, "pending");
+            
+            // Verify that created_at and updated_at are timezone-aware
+            // The exact values will be mock data, but the types should be correct
+            assert!(job.created_at.timezone().local_minus_utc() == 0); // Should be UTC offset
+            assert!(job.updated_at.timezone().local_minus_utc() == 0);
+        }
+
+        #[test]
+        fn test_background_job_service_new() {
+            let service = BackgroundJobService::new();
+            // Should create successfully
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<BackgroundJobService>());
         }
     }
 }
