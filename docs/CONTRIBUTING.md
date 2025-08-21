@@ -26,7 +26,7 @@ Thank you for your interest in contributing to Rocket Blog! This guide will help
    just docker-dev-live       # Development with live template/static reloading
    
    # Option 2: Docker Database Only
-   docker-compose up postgres -d
+   docker-compose -f scripts/docker/docker-compose.yml up postgres -d
    
    # Option 3: Local PostgreSQL
    createdb tdavis_dev

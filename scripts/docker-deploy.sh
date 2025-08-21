@@ -35,7 +35,7 @@ function show_help() {
 
 function start_dev() {
     echo "Starting development environment..."
-    docker compose -f docker-compose.dev.yml up -d --build
+    docker compose -f scripts/docker/docker-compose.dev.yml up -d --build
     echo ""
     echo "Development environment started!"
     echo "  • App: http://localhost:8000"
@@ -48,7 +48,7 @@ function start_dev() {
 
 function start_dev_live() {
     echo "Starting development environment with live template reloading..."
-    docker compose -f docker-compose.dev.live.yml up -d --build
+    docker compose -f scripts/docker/docker-compose.dev.live.yml up -d --build
     echo ""
     echo "Live development environment started!"
     echo "  • App: http://localhost:8000 (templates/static files auto-reload)"
@@ -67,7 +67,7 @@ function start_prod() {
     fi
     
     echo "Starting production environment..."
-    docker compose up -d --build
+    docker compose -f scripts/docker/docker-compose.yml up -d --build
     echo ""
     echo "Production environment started!"
     echo "  • App: https://blog.tdavis.dev"
@@ -81,31 +81,31 @@ function setup_ssl() {
 
 function renew_ssl() {
     echo "Renewing SSL certificates..."
-    docker compose exec nginx certbot renew --force-renewal
-    docker compose exec nginx nginx -s reload
+    docker compose -f scripts/docker/docker-compose.yml exec nginx certbot renew --force-renewal
+    docker compose -f scripts/docker/docker-compose.yml exec nginx nginx -s reload
     echo "SSL certificates renewed and nginx reloaded."
 }
 
 function show_status() {
     echo "Service Status:"
-    docker compose ps
+    docker compose -f scripts/docker/docker-compose.yml ps
 }
 
 function show_logs() {
     if [ -n "$1" ]; then
         echo "Showing logs for service: $1"
-        docker compose logs -f "$1"
+        docker compose -f scripts/docker/docker-compose.yml logs -f "$1"
     else
         echo "Showing logs for all services:"
-        docker compose logs -f
+        docker compose -f scripts/docker/docker-compose.yml logs -f
     fi
 }
 
 function stop_services() {
     echo "Stopping all services..."
-    docker compose down
-    docker compose -f docker-compose.dev.yml down 2>/dev/null || true
-    docker compose -f docker-compose.dev.live.yml down 2>/dev/null || true
+    docker compose -f scripts/docker/docker-compose.yml down
+    docker compose -f scripts/docker/docker-compose.dev.yml down 2>/dev/null || true
+    docker compose -f scripts/docker/docker-compose.dev.live.yml down 2>/dev/null || true
     echo "All services stopped."
 }
 
@@ -115,9 +115,9 @@ function clean_all() {
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "Cleaning up..."
-        docker compose down -v --remove-orphans
-        docker compose -f docker-compose.dev.yml down -v --remove-orphans 2>/dev/null || true
-        docker compose -f docker-compose.dev.live.yml down -v --remove-orphans 2>/dev/null || true
+        docker compose -f scripts/docker/docker-compose.yml down -v --remove-orphans
+        docker compose -f scripts/docker/docker-compose.dev.yml down -v --remove-orphans 2>/dev/null || true
+        docker compose -f scripts/docker/docker-compose.dev.live.yml down -v --remove-orphans 2>/dev/null || true
         echo "Cleanup complete."
     else
         echo "Cleanup cancelled."

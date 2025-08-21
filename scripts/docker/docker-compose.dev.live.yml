@@ -1,8 +1,13 @@
+# Docker Compose for Live Development with Source Code Mounting
+# This version mounts source code for live development workflows
+
 services:
   # The database service
   postgres:
     image: postgres:13 # Using a specific version is recommended
     restart: always
+    ports:
+      - "5432:5432"  # Expose for development access
     environment:
       # Sets the default user, password, and database as specified
       POSTGRES_USER: master
@@ -19,69 +24,35 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    # Only expose port for external access if needed
-    ports:
-      - "5432:5432"
 
-  # The Rust web application
+  # The Rust web application (live development with volume mounts)
   app:
     build: 
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: scripts/docker/Dockerfile.fallback
     restart: always
-    # No direct port exposure - nginx will proxy to this
+    ports:
+      # Expose app port for development
+      - "8000:8000"
     environment:
       # Override database URL to use docker service name
       ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
+      # Development environment settings
+      RUST_LOG: debug
+      ROCKET_ENV: development
     volumes:
       # Persist uploaded files
       - app_data:/app/data
+      # Mount templates and static files for live editing
+      - ./templates:/app/templates:ro
+      - ./static:/app/static:ro
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       app-network:
         ipv4_address: 172.20.0.30
-
-  # Nginx reverse proxy with SSL termination
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      # SSL certificates and webroot for certbot
-      - letsencrypt_data:/etc/letsencrypt
-      - certbot_webroot:/var/www/certbot
-      - nginx_logs:/var/log/nginx
-    depends_on:
-      - app
-    networks:
-      app-network:
-        ipv4_address: 172.20.0.40
-
-  # Certbot for SSL certificate management
-  certbot:
-    image: certbot/certbot
-    restart: "no"
-    volumes:
-      - letsencrypt_data:/etc/letsencrypt
-      - certbot_webroot:/var/www/certbot
-    command: >
-      sh -c "
-        while :; do
-          certbot renew --webroot --webroot-path=/var/www/certbot --quiet
-          sleep 12h
-        done
-      "
-    depends_on:
-      - nginx
-    networks:
-      app-network:
-        ipv4_address: 172.20.0.50
+  
   # The pgAdmin GUI service
   pgadmin:
     image: dpage/pgadmin4
@@ -112,7 +83,3 @@ networks:
 volumes:
   postgres_data:
   app_data:
-  letsencrypt_data:
-  certbot_webroot:
-  nginx_logs:
-

@@ -7,11 +7,11 @@ echo "Setting up initial SSL certificates for blog.tdavis.dev..."
 
 # Check if nginx is already running and stop it temporarily
 echo "Stopping any running nginx containers..."
-docker compose stop nginx 2>/dev/null || true
+docker compose -f scripts/docker/docker-compose.yml stop nginx 2>/dev/null || true
 
 # Start nginx in HTTP-only mode for certificate generation
 echo "Starting nginx in HTTP-only mode..."
-docker compose up -d nginx
+docker compose -f scripts/docker/docker-compose.yml up -d nginx
 
 # Wait for nginx to start
 echo "Waiting for nginx to start..."
@@ -19,7 +19,7 @@ sleep 10
 
 # Generate certificates using standalone certbot
 echo "Generating SSL certificates..."
-docker compose run --rm certbot \
+docker compose -f scripts/docker/docker-compose.yml run --rm certbot \
     certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
@@ -35,10 +35,10 @@ if [ $? -eq 0 ]; then
     
     # Restart nginx with the full SSL configuration
     echo "Restarting nginx with SSL configuration..."
-    docker compose stop nginx
+    docker compose -f scripts/docker/docker-compose.yml stop nginx
     
     # Copy the full SSL configuration back
-    docker compose up -d nginx
+    docker compose -f scripts/docker/docker-compose.yml up -d nginx
     
     echo ""
     echo "SSL setup complete!"
