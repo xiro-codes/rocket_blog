@@ -41,6 +41,7 @@ pub struct AdminCreateFormDTO {
 #[serde(crate = "rocket::serde")]
 pub struct CommentFormDTO {
     pub text: String,
+    pub username: Option<String>, // For anonymous users
 }
 
 /// Result struct for post title queries

@@ -138,6 +138,48 @@ impl Service {
         Ok(account)
     }
 
+    /// Create a regular (non-admin) user account
+    pub async fn create_user_account(&self, db: &DbConn, data: AccountFormDTO) -> Result<account::Model, DbErr> {
+        log::info!("Attempting to create user account for username: {}", data.username);
+        
+        // Check if username already exists
+        let existing_user = Account::find()
+            .filter(account::Column::Username.eq(&data.username))
+            .one(db)
+            .await?;
+            
+        if existing_user.is_some() {
+            log::warn!("User account creation blocked - username already exists: {}", data.username);
+            return Err(DbErr::Custom("Username already exists".to_owned()));
+        }
+
+        log::debug!("Hashing password for new user account");
+        let pw = bcrypt::hash(&data.password).map_err(|e| {
+            log::error!("Password hashing failed: {}", e);
+            DbErr::Custom("Password hashing failed".to_owned())
+        })?;
+        
+        let account_id = BaseService::generate_id();
+        log::debug!("Creating user account with ID: {}", account_id);
+        
+        let account = account::ActiveModel {
+            id: Set(account_id),
+            username: Set(data.username.clone()),
+            password: Set(pw),
+            email: Set("".to_string()), // Regular users don't need email
+            admin: Set(false),
+        }
+        .insert(db)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to insert user account: {}", e);
+            e
+        })?;
+
+        log::info!("User account created successfully: {} ({})", data.username, account.id);
+        Ok(account)
+    }
+
     /// Check if a token belongs to an admin user
     pub async fn is_admin_token(&self, db: &DbConn, token_str: &str) -> bool {
         if let Ok(token_uuid) = Uuid::parse_str(token_str) {
