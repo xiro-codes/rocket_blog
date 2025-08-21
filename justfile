@@ -98,6 +98,18 @@ docker-clean:
 docker-help:
 	sh ./scripts/docker-deploy.sh help
 
+# Run tests in Docker container
+docker-test:
+	@echo "🧪 Building and running tests in Docker container..."
+	docker build -f Dockerfile.test -t rocket-blog-test .
+	docker run --rm rocket-blog-test
+
+# Run tests in Docker container with verbose output
+docker-test-verbose:
+	@echo "🧪 Building and running tests in Docker container (verbose)..."
+	docker build -f Dockerfile.test -t rocket-blog-test .
+	docker run --rm rocket-blog-test cargo test -- --nocapture
+
 # View application logs from the app_data volume
 logs:
 	@echo "📋 Reading output.log from app_data volume..."
@@ -181,6 +193,8 @@ help:
 	@echo "  docker-dev           Start development environment"
 	@echo "  docker-dev-live      Start development with live reload"
 	@echo "  docker-prod          Start production environment"
+	@echo "  docker-test          Run tests in Docker container"
+	@echo "  docker-test-verbose  Run tests in Docker container (verbose)"
 	@echo "  docker-stop          Stop all containers"
 	@echo "  docker-clean         Stop and remove all data"
 	@echo "  docker-status        Show container status"
