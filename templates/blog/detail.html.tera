@@ -6,11 +6,7 @@
 		<div class="d-flex justify-content-between align-items-start">
 			<div class="flex-grow-1">
 				<span class="terminal-prompt">
-					{% if thread.comment.username %}
-						<small class="text-muted">{{ thread.comment.username }}:</small>
-					{% else %}
-						<small class="text-muted">User:</small>
-					{% endif %}
+					<small class="text-muted">{{ thread.display_username }}:</small>
 				</span>
 				<div class="comment-text">{{ thread.comment.text }}</div>
 			</div>
