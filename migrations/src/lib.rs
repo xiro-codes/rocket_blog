@@ -6,7 +6,6 @@ mod m20241202_000001_add_excerpt;
 mod m20241203_000001_add_fulltext_search;
 mod m20241204_000001_add_post_reactions;
 mod m20241205_000001_add_settings;
-mod m20241206_000001_add_background_jobs;
 
 pub struct Migrator;
 
@@ -20,7 +19,6 @@ impl MigratorTrait for Migrator {
             Box::new(m20241203_000001_add_fulltext_search::Migration),
             Box::new(m20241204_000001_add_post_reactions::Migration),
             Box::new(m20241205_000001_add_settings::Migration),
-            Box::new(m20241206_000001_add_background_jobs::Migration),
         ]
     }
 }
