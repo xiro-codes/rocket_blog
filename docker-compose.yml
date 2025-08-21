@@ -12,7 +12,8 @@ services:
       # Persists the database data to a named volume on the host
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - app-network
+      app-network:
+        ipv4_address: 172.20.0.10
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U master -d tdavis_dev"]
       interval: 5s
@@ -39,7 +40,8 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - app-network
+      app-network:
+        ipv4_address: 172.20.0.30
 
   # Nginx reverse proxy with SSL termination
   nginx:
@@ -58,7 +60,8 @@ services:
     depends_on:
       - app
     networks:
-      - app-network
+      app-network:
+        ipv4_address: 172.20.0.40
 
   # Certbot for SSL certificate management
   certbot:
@@ -76,6 +79,9 @@ services:
       "
     depends_on:
       - nginx
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.50
   # The pgAdmin GUI service
   pgadmin:
     image: dpage/pgadmin4
@@ -91,12 +97,16 @@ services:
       # Ensures the postgres service starts before pgAdmin
       - postgres
     networks:
-      - app-network
+      app-network:
+        ipv4_address: 172.20.0.20
 
 # Define networks for stable inter-container communication
 networks:
   app-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 
 # Define the named volumes for data persistence
 volumes:
