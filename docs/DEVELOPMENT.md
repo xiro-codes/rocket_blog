@@ -185,6 +185,16 @@ The development environment preserves database data across container restarts:
 
 **Note**: Data persists in Docker volumes even when containers are stopped and restarted. Only the `clean` command removes volumes and data.
 
+### Network Configuration
+
+The development environment uses static IP addresses for stable connections:
+
+- **PostgreSQL**: Always available at `172.20.0.10`
+- **pgAdmin**: Always available at `172.20.0.20`
+- **App**: Always available at `172.20.0.30`
+
+If pgAdmin loses connection to PostgreSQL, verify the database server configuration uses IP `172.20.0.10` instead of the hostname `postgres`.
+
 ## Comparison with Production
 
 | Feature | Development | Production |
