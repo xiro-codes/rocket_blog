@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService};
+    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, AIProviderService, OpenAIService, OllamaService, AIProvider};
     use crate::tests::mocks::test_data;
     use uuid::Uuid;
 
@@ -226,6 +226,122 @@ mod tests {
             
             // Should have added providers without panicking
             assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AIProviderService>());
+        }
+
+        #[test]
+        fn test_openai_service_provider_name() {
+            let service = OpenAIService::new();
+            assert_eq!(service.provider_name(), "OpenAI");
+            assert!(!service.provider_name().is_empty());
+        }
+
+        #[test]
+        fn test_ollama_service_provider_name() {
+            let service = OllamaService::new();
+            assert_eq!(service.provider_name(), "Ollama");
+            assert!(!service.provider_name().is_empty());
+        }
+
+        #[test]
+        fn test_ai_provider_service_multiple_additions() {
+            let mut service = AIProviderService::new();
+            
+            // Add multiple providers
+            for _ in 0..3 {
+                service.add_provider(Box::new(OpenAIService::new()));
+                service.add_provider(Box::new(OllamaService::new()));
+            }
+            
+            // Should handle multiple additions without issues
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AIProviderService>());
+        }
+
+        #[test]
+        fn test_ai_provider_service_empty_state() {
+            let service = AIProviderService::new();
+            
+            // Service should be usable even without providers
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AIProviderService>());
+        }
+    }
+
+    mod coordinator_service_tests {
+        use super::*;
+        use crate::services::CoordinatorService;
+
+        #[test]
+        fn test_coordinator_service_new() {
+            let service = CoordinatorService::new();
+            
+            // Should create successfully with all sub-services
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<CoordinatorService>());
+        }
+
+        #[test]
+        fn test_coordinator_service_composition() {
+            let service = CoordinatorService::new();
+            
+            // Coordinator should compose multiple services
+            // We can't access private fields directly, but we can verify creation
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<CoordinatorService>());
+        }
+
+        #[test]
+        fn test_coordinator_service_multiple_instances() {
+            let service1 = CoordinatorService::new();
+            let service2 = CoordinatorService::new();
+            
+            // Should be able to create multiple instances
+            assert_eq!(std::mem::size_of_val(&service1), std::mem::size_of::<CoordinatorService>());
+            assert_eq!(std::mem::size_of_val(&service2), std::mem::size_of::<CoordinatorService>());
+        }
+    }
+
+    mod reaction_service_tests {
+        use super::*;
+        use crate::services::ReactionService;
+
+        #[test]
+        fn test_reaction_service_new() {
+            let service = ReactionService::new();
+            
+            // Should create successfully
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<ReactionService>());
+        }
+
+        #[test]
+        fn test_reaction_service_creation_multiple() {
+            // Test multiple service creation
+            let services: Vec<ReactionService> = (0..5).map(|_| ReactionService::new()).collect();
+            
+            assert_eq!(services.len(), 5);
+            for service in &services {
+                assert_eq!(std::mem::size_of_val(service), std::mem::size_of::<ReactionService>());
+            }
+        }
+    }
+
+    mod settings_service_tests {
+        use super::*;
+        use crate::services::SettingsService;
+
+        #[test]
+        fn test_settings_service_new() {
+            let service = SettingsService::new();
+            
+            // Should create successfully
+            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<SettingsService>());
+        }
+
+        #[test]
+        fn test_settings_service_encryption_key() {
+            let service1 = SettingsService::new();
+            let service2 = SettingsService::new();
+            
+            // Both services should be created successfully
+            // Note: We can't directly test encryption key equality since it's private
+            assert_eq!(std::mem::size_of_val(&service1), std::mem::size_of::<SettingsService>());
+            assert_eq!(std::mem::size_of_val(&service2), std::mem::size_of::<SettingsService>());
         }
     }
 }

@@ -19,6 +19,7 @@ pub mod responders_tests;
 pub mod dto_tests;
 pub mod types_tests;
 pub mod registry_tests;
+pub mod edge_case_tests;
 
 // Test fairings and rocket testing utilities
 pub mod fairings;
