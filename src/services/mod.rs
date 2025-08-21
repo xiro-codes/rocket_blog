@@ -6,6 +6,8 @@ pub use coordinator::{CoordinatorService, BlogListData, BlogDetailData, BlogSear
 
 mod auth;
 pub use auth::Service as AuthService;
+mod background_job;
+pub use background_job::BackgroundJobService;
 mod blog;
 pub use blog::Service as BlogService;
 mod comment;

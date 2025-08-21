@@ -4,7 +4,9 @@ use uuid::Uuid;
 use crate::config::AppConfig;
 use rocket::State;
 use sea_orm::*;
-use models::{post, prelude::Post};
+use models::{background_job, prelude::BackgroundJob};
+use crate::services::BackgroundJobService;
+use serde_json;
 
 pub struct YoutubeDownloadService;
 
@@ -19,17 +21,17 @@ pub enum DownloadStatus {
 impl ToString for DownloadStatus {
     fn to_string(&self) -> String {
         match self {
-            DownloadStatus::Pending => "pending".to_string(),
-            DownloadStatus::Downloading => "downloading".to_string(),
-            DownloadStatus::Completed => "completed".to_string(),
-            DownloadStatus::Failed => "failed".to_string(),
+            DownloadStatus::Pending => background_job::STATUS_PENDING.to_string(),
+            DownloadStatus::Downloading => background_job::STATUS_DOWNLOADING.to_string(),
+            DownloadStatus::Completed => background_job::STATUS_COMPLETED.to_string(),
+            DownloadStatus::Failed => background_job::STATUS_FAILED.to_string(),
         }
     }
 }
 
-#[derive(Debug)]
-pub struct DownloadJob {
-    pub post_id: Uuid,
+#[derive(Debug, rocket::serde::Serialize, rocket::serde::Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct YoutubeJobData {
     pub youtube_url: String,
     pub data_path: String,
 }
@@ -72,63 +74,72 @@ impl YoutubeDownloadService {
     ) -> Result<(), DbErr> {
         log::info!("Starting YouTube download for post {}: {}", post_id, youtube_url);
 
-        // Update post status to downloading
-        self.update_download_status(db, post_id, DownloadStatus::Downloading, None).await?;
-
-        // Create download job
-        let job = DownloadJob {
-            post_id,
+        let job_service = BackgroundJobService::new();
+        
+        // Create job data
+        let job_data = YoutubeJobData {
             youtube_url: youtube_url.clone(),
             data_path: app_config.data_path.clone(),
         };
 
+        // Create background job
+        let job = job_service.create_job(
+            db,
+            background_job::JOB_TYPE_YOUTUBE_DOWNLOAD.to_string(),
+            background_job::ENTITY_TYPE_POST.to_string(),
+            post_id,
+            DownloadStatus::Pending.to_string(),
+            Some(serde_json::to_value(&job_data).map_err(|e| DbErr::Custom(e.to_string()))?),
+        ).await?;
+
+        log::info!("Created background job {} for YouTube download", job.id);
+
+        // Update job status to downloading and start processing
+        job_service.update_job_status(
+            db,
+            job.id,
+            DownloadStatus::Downloading.to_string(),
+            None,
+        ).await?;
+
         // Start immediate download (synchronous for now, in a real implementation you'd use a job queue)
-        match Self::download_video_sync(&job).await {
+        match Self::download_video_sync(&job_data, post_id).await {
             Ok(file_path) => {
                 log::info!("YouTube download completed for post {}: {}", post_id, file_path);
-                // Update post with completed status and file path
-                self.update_download_completed(db, post_id, file_path).await?;
+                // Update job with completed status
+                job_service.update_job_status(
+                    db,
+                    job.id,
+                    DownloadStatus::Completed.to_string(),
+                    None,
+                ).await?;
+                
+                // Update post with file path
+                self.update_post_with_file_path(db, post_id, file_path).await?;
             },
             Err(e) => {
                 log::error!("YouTube download failed for post {}: {}", post_id, e);
-                self.update_download_status(db, post_id, DownloadStatus::Failed, Some(e)).await?;
+                job_service.update_job_status(
+                    db,
+                    job.id,
+                    DownloadStatus::Failed.to_string(),
+                    Some(e),
+                ).await?;
             }
         }
 
         Ok(())
     }
 
-    /// Update the download status in the database
-    pub async fn update_download_status(
-        &self,
-        db: &DbConn,
-        post_id: Uuid,
-        status: DownloadStatus,
-        error_message: Option<String>,
-    ) -> Result<(), DbErr> {
-        let mut post: post::ActiveModel = Post::find()
-            .filter(post::Column::Id.eq(post_id))
-            .one(db)
-            .await?
-            .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", post_id)))?
-            .into();
-
-        post.download_status = Set(Some(status.to_string()));
-        if let Some(error) = error_message {
-            post.download_error = Set(Some(error));
-        }
-
-        post.update(db).await?;
-        Ok(())
-    }
-
-    /// Update post with completed download and file path
-    pub async fn update_download_completed(
+    /// Update post with the downloaded file path
+    async fn update_post_with_file_path(
         &self,
         db: &DbConn,
         post_id: Uuid,
         file_path: String,
     ) -> Result<(), DbErr> {
+        use models::{post, prelude::Post};
+        
         let mut post: post::ActiveModel = Post::find()
             .filter(post::Column::Id.eq(post_id))
             .one(db)
@@ -136,21 +147,18 @@ impl YoutubeDownloadService {
             .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", post_id)))?
             .into();
 
-        post.download_status = Set(Some(DownloadStatus::Completed.to_string()));
-        post.download_error = Set(None);
         post.path = Set(Some(file_path));
-
         post.update(db).await?;
         Ok(())
     }
 
     /// Download video using yt-dlp synchronously
-    async fn download_video_sync(job: &DownloadJob) -> Result<String, String> {
+    async fn download_video_sync(job_data: &YoutubeJobData, post_id: Uuid) -> Result<String, String> {
         // Generate output filename
-        let video_id = Self::extract_video_id(&job.youtube_url)
+        let video_id = Self::extract_video_id(&job_data.youtube_url)
             .ok_or("Failed to extract video ID from URL")?;
-        let output_filename = format!("{}_{}.%(ext)s", job.post_id, video_id);
-        let output_path = format!("{}/{}", job.data_path, output_filename);
+        let output_filename = format!("{}_{}.%(ext)s", post_id, video_id);
+        let output_path = format!("{}/{}", job_data.data_path, output_filename);
 
         log::debug!("Downloading video to: {}", output_path);
 
@@ -177,7 +185,7 @@ impl YoutubeDownloadService {
             .arg("--no-playlist") // Download only the specific video, not the entire playlist
             .arg("--extract-flat")
             .arg("false")
-            .arg(&job.youtube_url)
+            .arg(&job_data.youtube_url)
             .output()
             .map_err(|e| format!("Failed to execute yt-dlp: {}", e))?;
 
@@ -209,13 +217,15 @@ impl YoutubeDownloadService {
         db: &DbConn,
         post_id: Uuid,
     ) -> Result<Option<(String, Option<String>)>, DbErr> {
-        let post = Post::find()
-            .filter(post::Column::Id.eq(post_id))
-            .one(db)
-            .await?;
-
-        match post {
-            Some(p) => Ok(p.download_status.map(|status| (status, p.download_error))),
+        let job_service = BackgroundJobService::new();
+        
+        match job_service.get_job_by_entity(
+            db,
+            background_job::ENTITY_TYPE_POST.to_string(),
+            post_id,
+            background_job::JOB_TYPE_YOUTUBE_DOWNLOAD.to_string(),
+        ).await? {
+            Some(job) => Ok(Some((job.status, job.error_message))),
             None => Ok(None),
         }
     }
