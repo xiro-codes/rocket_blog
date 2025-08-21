@@ -12,6 +12,14 @@ pub mod ai_integration_tests;
 pub mod seaorm_mock_tests;
 pub mod rocket_mock_tests;
 
+// Test modules for additional components
+pub mod features_tests;
+pub mod guards_tests;
+pub mod responders_tests;
+pub mod dto_tests;
+pub mod types_tests;
+pub mod registry_tests;
+
 // Test fairings and rocket testing utilities
 pub mod fairings;
 
