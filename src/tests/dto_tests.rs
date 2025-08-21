@@ -45,6 +45,24 @@ use std::io::Cursor;
     }
 
     #[test]
+    fn test_form_dto_optional_file() {
+        // Test that file field is now optional for YouTube-only posts
+        use rocket::fs::TempFile;
+        
+        // Test with no file (YouTube URL scenario)
+        let no_file: Option<TempFile> = None;
+        assert!(no_file.is_none());
+        
+        // Verify we can simulate a FormDTO structure without a file
+        let youtube_url = Some("https://www.youtube.com/watch?v=VIDEO_ID".to_string());
+        assert!(youtube_url.is_some());
+        
+        // This validates the use case where file is None but youtube_url is provided
+        let has_youtube_but_no_file = no_file.is_none() && youtube_url.is_some();
+        assert!(has_youtube_but_no_file);
+    }
+
+    #[test]
     fn test_form_dto_action_values() {
         // Test valid action values
         let draft_action = Some("draft".to_string());

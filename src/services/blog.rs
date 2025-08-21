@@ -76,18 +76,23 @@ impl Service {
         
         // Handle file upload
         let fid = BaseService::generate_id().to_string();
-        let path = if let Some(name) = data.file.name() {
-            let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
-            log::debug!("Uploading file to: {}", path);
-            data.file
-                .copy_to(path.clone())
-                .await
-                .map_err(|e| {
-                    log::error!("File upload failed: {}", e);
-                    DbErr::Custom(e.to_string())
-                })?;
-            log::debug!("File uploaded successfully");
-            Some(path)
+        let path = if let Some(ref mut file) = data.file {
+            if let Some(name) = file.name() {
+                let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
+                log::debug!("Uploading file to: {}", path);
+                file
+                    .copy_to(path.clone())
+                    .await
+                    .map_err(|e| {
+                        log::error!("File upload failed: {}", e);
+                        DbErr::Custom(e.to_string())
+                    })?;
+                log::debug!("File uploaded successfully");
+                Some(path)
+            } else {
+                log::debug!("File object present but no filename");
+                None
+            }
         } else {
             log::debug!("No file to upload");
             None
