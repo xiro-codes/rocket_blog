@@ -42,6 +42,7 @@ pub struct AdminCreateFormDTO {
 pub struct CommentFormDTO {
     pub text: String,
     pub username: Option<String>, // For anonymous users
+    pub parent_id: Option<Uuid>, // For threaded replies
 }
 
 /// Result struct for post title queries
