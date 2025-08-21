@@ -51,7 +51,7 @@ docker-compose -f docker-compose.dev.live.yml up --build
 ### Docker Configuration Files
 
 - **`scripts/docker/docker-compose.dev.yml`** - Standard development environment
-  - Uses `scripts/docker/Dockerfile.fallback` for faster debug builds
+  - Uses `scripts/docker/Dockerfile.dev` for faster debug builds
   - Good for testing built application
   
 - **`scripts/docker/docker-compose.dev.live.yml`** - Live development environment  

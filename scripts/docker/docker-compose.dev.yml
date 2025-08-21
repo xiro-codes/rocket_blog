@@ -26,7 +26,7 @@ services:
   app:
     build: 
       context: ../..
-      dockerfile: scripts/docker/Dockerfile.fallback
+      dockerfile: scripts/docker/Dockerfile.dev
     restart: always
     ports:
       # Expose app port for development

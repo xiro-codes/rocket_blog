@@ -244,7 +244,7 @@ docker-compose -f scripts/docker/docker-compose.dev.live.yml up --build # Live t
 **Troubleshooting Docker Builds:** If you encounter SSL certificate issues during Docker build, try:
 ```bash
 # Use the fallback Dockerfile
-docker build -f scripts/docker/Dockerfile.fallback -t rocket-blog .
+docker build -f scripts/docker/Dockerfile.dev -t rocket-blog .
 
 # Or build with host network
 docker build --network=host -t rocket-blog .
