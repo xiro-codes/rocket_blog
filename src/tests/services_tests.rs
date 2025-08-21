@@ -162,6 +162,7 @@ mod tests {
             let form_data = CommentFormDTO {
                 text: "This is a test comment".to_string(),
                 username: Some("anonymous_user".to_string()),
+                parent_id: None,
             };
             
             assert_eq!(form_data.text, "This is a test comment");
@@ -173,6 +174,7 @@ mod tests {
             let form_data = CommentFormDTO {
                 text: "This is a test comment".to_string(),
                 username: None,
+                parent_id: None,
             };
             
             assert_eq!(form_data.text, "This is a test comment");

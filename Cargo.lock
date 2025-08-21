@@ -175,6 +175,7 @@ dependencies = [
  "sea-orm",
  "sea-orm-rocket",
  "slug",
+ "tokio",
  "uuid",
 ]
 

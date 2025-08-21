@@ -36,7 +36,7 @@ features = ["tera"]
 
 [dependencies.sea-orm]
 version = "1.1.1"
-features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros"]
+features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros", "mock"]
 
 [dependencies.chrono]
 version = "0.4.31"
@@ -48,6 +48,7 @@ features = ["v4", "serde"]
 
 [dev-dependencies]
 # Using only basic test features that don't require external downloads
+tokio = { version = "1.0", features = ["test-util"] }
 
 [workspace]
 members = ["migrations", "models"]
