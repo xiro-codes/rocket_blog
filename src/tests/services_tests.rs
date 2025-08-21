@@ -48,12 +48,37 @@ mod tests {
 
     mod auth_service_tests {
         use super::*;
+        use models::dto::{AccountFormDTO, AdminCreateFormDTO};
 
         #[test]
         fn test_auth_service_new() {
             let service = AuthService::new();
             // Should create successfully without panicking
             assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AuthService>());
+        }
+
+        #[test]
+        fn test_admin_create_form_dto() {
+            let form_data = AdminCreateFormDTO {
+                username: "admin".to_string(),
+                password: "password123".to_string(),
+                email: "admin@example.com".to_string(),
+            };
+            
+            assert_eq!(form_data.username, "admin");
+            assert_eq!(form_data.password, "password123");
+            assert_eq!(form_data.email, "admin@example.com");
+        }
+
+        #[test]
+        fn test_account_form_dto() {
+            let form_data = AccountFormDTO {
+                username: "user".to_string(),
+                password: "password123".to_string(),
+            };
+            
+            assert_eq!(form_data.username, "user");
+            assert_eq!(form_data.password, "password123");
         }
     }
 
@@ -123,12 +148,35 @@ mod tests {
 
     mod comment_service_tests {
         use super::*;
+        use models::dto::CommentFormDTO;
 
         #[test]
         fn test_comment_service_new() {
             let service = CommentService::new();
             // Should create successfully without panicking
             assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<CommentService>());
+        }
+
+        #[test]
+        fn test_comment_form_dto() {
+            let form_data = CommentFormDTO {
+                text: "This is a test comment".to_string(),
+                username: Some("anonymous_user".to_string()),
+            };
+            
+            assert_eq!(form_data.text, "This is a test comment");
+            assert_eq!(form_data.username, Some("anonymous_user".to_string()));
+        }
+
+        #[test]
+        fn test_comment_form_dto_without_username() {
+            let form_data = CommentFormDTO {
+                text: "This is a test comment".to_string(),
+                username: None,
+            };
+            
+            assert_eq!(form_data.text, "This is a test comment");
+            assert_eq!(form_data.username, None);
         }
     }
 
