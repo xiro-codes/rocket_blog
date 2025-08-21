@@ -62,7 +62,7 @@ cd rocket_blog
 ### 2. Database Setup
 ```bash
 # Start PostgreSQL with Docker (recommended)
-docker-compose up postgres -d
+docker-compose -f scripts/docker/docker-compose.yml up postgres -d
 
 # OR set up PostgreSQL manually and create database:
 # createdb tdavis_dev
@@ -164,7 +164,7 @@ cargo build --release
 
 ### Development Setup
 1. **Install Dependencies**: Rust, PostgreSQL, Just
-2. **Database**: Run `docker-compose up postgres -d`
+2. **Database**: Run `docker-compose -f scripts/docker/docker-compose.yml up postgres -d`
 3. **Migrations**: Run `just migrate`
 4. **Development**: Run `cargo run` for auto-reload
 5. **Testing**: Run `cargo test`
@@ -215,8 +215,8 @@ For a complete Docker setup with build instructions, see [Docker Guide](docs/DOC
 ./scripts/docker-deploy.sh dev-live
 
 # Or use docker-compose directly:
-docker-compose -f docker-compose.dev.yml up --build      # Standard
-docker-compose -f docker-compose.dev.live.yml up --build # Live template reload
+docker-compose -f scripts/docker/docker-compose.dev.yml up --build      # Standard
+docker-compose -f scripts/docker/docker-compose.dev.live.yml up --build # Live template reload
 ```
 
 **Production:**
@@ -244,7 +244,7 @@ docker-compose -f docker-compose.dev.live.yml up --build # Live template reload
 **Troubleshooting Docker Builds:** If you encounter SSL certificate issues during Docker build, try:
 ```bash
 # Use the fallback Dockerfile
-docker build -f Dockerfile.fallback -t rocket-blog .
+docker build -f scripts/docker/Dockerfile.dev -t rocket-blog .
 
 # Or build with host network
 docker build --network=host -t rocket-blog .

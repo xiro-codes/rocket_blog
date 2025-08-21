@@ -101,13 +101,13 @@ docker-help:
 # Run tests in Docker container
 docker-test:
 	@echo "🧪 Building and running tests in Docker container..."
-	docker build -f Dockerfile.test -t rocket-blog-test .
+	docker build -f scripts/docker/Dockerfile.test -t rocket-blog-test .
 	docker run --rm rocket-blog-test
 
 # Run tests in Docker container with verbose output
 docker-test-verbose:
 	@echo "🧪 Building and running tests in Docker container (verbose)..."
-	docker build -f Dockerfile.test -t rocket-blog-test .
+	docker build -f scripts/docker/Dockerfile.test -t rocket-blog-test .
 	docker run --rm rocket-blog-test cargo test -- --nocapture
 
 # View application logs from the app_data volume

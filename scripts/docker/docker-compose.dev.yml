@@ -25,8 +25,8 @@ services:
   # The Rust web application (development build)
   app:
     build: 
-      context: .
-      dockerfile: Dockerfile.fallback
+      context: ../..
+      dockerfile: scripts/docker/Dockerfile.dev
     restart: always
     ports:
       # Expose app port for development

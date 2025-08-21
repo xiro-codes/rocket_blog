@@ -50,16 +50,16 @@ docker-compose -f docker-compose.dev.live.yml up --build
 
 ### Docker Configuration Files
 
-- **`docker-compose.dev.yml`** - Standard development environment
-  - Uses `Dockerfile.dev` for faster debug builds
+- **`scripts/docker/docker-compose.dev.yml`** - Standard development environment
+  - Uses `scripts/docker/Dockerfile.dev` for faster debug builds
   - Good for testing built application
   
-- **`docker-compose.dev.live.yml`** - Live development environment  
+- **`scripts/docker/docker-compose.dev.live.yml`** - Live development environment  
   - Mounts templates and static files for live editing
   - Immediate updates for frontend changes (no rebuild needed)
   - Best for template and design development
 
-- **`Dockerfile`** - Production-ready Dockerfile used for all builds
+- **`scripts/docker/Dockerfile`** - Production-ready Dockerfile used for all builds
   - Multi-stage build for optimized production images
   - Works consistently across all platforms including NixOS
   - Used by both development and production docker-compose setups

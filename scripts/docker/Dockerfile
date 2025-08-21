@@ -47,7 +47,7 @@ WORKDIR /app
 # Copy static assets and templates
 COPY templates ./templates/
 COPY static ./static/
-COPY .Rocket.docker.toml ./Rocket.toml
+COPY scripts/docker/.Rocket.docker.toml ./Rocket.toml
 
 # Copy the built binary from builder stage
 # Note: The binary is named "app" in Cargo.toml but we rename it to rocket-template for consistency

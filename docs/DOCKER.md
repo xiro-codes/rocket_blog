@@ -18,7 +18,7 @@ This guide provides instructions for building and running the Rocket Blog applic
 ```bash
 # For local development with direct app access
 just docker-dev
-# OR: docker-compose -f docker-compose.dev.yml up --build
+# OR: docker-compose -f scripts/docker/docker-compose.dev.yml up --build
 # Access: http://localhost:8000
 # pgAdmin: http://localhost:5050
 ```
@@ -33,7 +33,7 @@ just docker-setup-ssl
 
 # Start the full production stack
 just docker-prod
-# OR: docker-compose up --build -d
+# OR: docker-compose -f scripts/docker/docker-compose.yml up --build -d
 # Access: https://blog.tdavis.dev
 ```
 
@@ -70,12 +70,12 @@ just docker-prod
 
 # Check service status
 just docker-status
-# OR: docker-compose ps
+# OR: docker-compose -f scripts/docker/docker-compose.yml ps
 
 # View logs
 just docker-logs nginx
 just docker-logs app
-# OR: docker-compose logs nginx && docker-compose logs app
+# OR: docker-compose -f scripts/docker/docker-compose.yml logs nginx && docker-compose -f scripts/docker/docker-compose.yml logs app
 ```
 
 ### Services in Production
@@ -100,7 +100,7 @@ For local development without SSL complexity, there are two optimized options:
 # Use development compose file with debug builds
 just docker-dev
 # OR: ./scripts/docker-deploy.sh dev
-# OR: docker-compose -f docker-compose.dev.yml up --build
+# OR: docker-compose -f scripts/docker/docker-compose.dev.yml up --build
 
 # Access points:
 # - App: http://localhost:8000
@@ -114,7 +114,7 @@ just docker-dev
 # Use live development with automatic rebuilds
 just docker-dev-live
 # OR: ./scripts/docker-deploy.sh dev-live
-# OR: docker-compose -f docker-compose.dev.live.yml up --build
+# OR: docker-compose -f scripts/docker/docker-compose.dev.live.yml up --build
 
 # Access points:
 # - App: http://localhost:8000 (auto-reloads on code changes)
@@ -137,16 +137,16 @@ For detailed development workflow documentation, see [Development Guide](DEVELOP
 
 ```bash
 # Force certificate renewal
-docker-compose exec nginx certbot renew --force-renewal
+docker-compose -f scripts/docker/docker-compose.yml exec nginx certbot renew --force-renewal
 
 # Check certificate status
-docker-compose exec nginx certbot certificates
+docker-compose -f scripts/docker/docker-compose.yml exec nginx certbot certificates
 
 # Test nginx configuration
-docker-compose exec nginx nginx -t
+docker-compose -f scripts/docker/docker-compose.yml exec nginx nginx -t
 
 # Reload nginx after config changes
-docker-compose exec nginx nginx -s reload
+docker-compose -f scripts/docker/docker-compose.yml exec nginx nginx -s reload
 ```
 
 ### Certificate Troubleshooting
@@ -165,7 +165,7 @@ curl -I http://blog.tdavis.dev/.well-known/acme-challenge/test
 
 3. **Check nginx logs:**
 ```bash
-docker-compose logs nginx
+docker-compose -f scripts/docker/docker-compose.yml logs nginx
 ```
 
 4. **Re-run setup:**
@@ -198,7 +198,7 @@ docker run --rm \
   -d blog.tdavis.dev
 ```
 
-### Option 2: Using the Existing .Dockerfile (Runtime-only)
+### Option 2: Using the Existing scripts/docker/.Dockerfile (Runtime-only)
 
 If you can build locally but want to run in Docker:
 
@@ -207,7 +207,7 @@ If you can build locally but want to run in Docker:
 cargo build --release
 
 # Build using the runtime-only Dockerfile
-docker build -f .Dockerfile -t rocket-blog-runtime .
+docker build -f scripts/docker/.Dockerfile -t rocket-blog-runtime .
 
 # Run the container
 docker run -p 8000:8000 rocket-blog-runtime
@@ -296,7 +296,7 @@ If SSL issues persist, you can build on a different machine and copy the binary:
 
 2. Use the runtime-only Dockerfile:
    ```bash
-   docker build -f .Dockerfile -t rocket-blog .
+   docker build -f scripts/docker/.Dockerfile -t rocket-blog .
    ```
 
 ### NixOS Specific Instructions

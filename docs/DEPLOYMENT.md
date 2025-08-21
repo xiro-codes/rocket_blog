@@ -33,18 +33,18 @@ The easiest way to deploy Rocket Blog is using Docker and Docker Compose.
    ```bash
    # Build and start all services
    just docker-prod
-   # OR: docker-compose up -d --build
+   # OR: docker-compose -f scripts/docker/docker-compose.yml up -d --build
    
    # Check service status
    just docker-status
-   # OR: docker-compose ps
+   # OR: docker-compose -f scripts/docker/docker-compose.yml ps
    ```
 
 4. **Initialize Database**
    ```bash
    # Run migrations
    just migrate
-   # OR: docker-compose exec app cargo run -p migrations
+   # OR: docker-compose -f scripts/docker/docker-compose.yml exec app cargo run -p migrations
    ```
 
 5. **Access Your Blog**
