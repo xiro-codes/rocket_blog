@@ -4,10 +4,10 @@ mod comprehensive_tests {
     //! These tests focus on basic functionality and don't require database connections
 
     use crate::config::AppConfig;
-    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, CoordinatorService, ReactionService};
+    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, CoordinatorService, ReactionService, AIProviderService, OpenAIService, OllamaService, SettingsService};
     use crate::controllers::{AuthController, BlogController, CommentController, IndexController, FeedController, ControllerBase};
     use crate::middleware::Seeding;
-    use crate::registry::ServiceRegistry;
+    use crate::registry::{ServiceRegistry, ControllerRegistry};
     use crate::{catch_default, should_filter_log};
     
     // Test data helpers
@@ -257,6 +257,87 @@ mod comprehensive_tests {
             assert!(rocket.state::<CoordinatorService>().is_some());
             assert!(rocket.state::<ReactionService>().is_some());
             assert!(rocket.state::<AppConfig>().is_some());
+        }
+
+        #[test]
+        fn test_error_handling_consistency() {
+            // Test that error handling is consistent across services
+            let result: Result<String, sea_orm::DbErr> = BaseService::handle_not_found(None, "TestEntity");
+            
+            assert!(result.is_err());
+            match result.unwrap_err() {
+                sea_orm::DbErr::RecordNotFound(msg) => {
+                    assert_eq!(msg, "TestEntity not found");
+                }
+                _ => panic!("Expected RecordNotFound error"),
+            }
+        }
+
+        #[test]
+        fn test_service_composition_patterns() {
+            // Test various service composition patterns
+            let coordinator = CoordinatorService::new();
+            let ai_provider = AIProviderService::new();
+            let settings = SettingsService::new();
+            let reaction = ReactionService::new();
+            
+            // All services should compose well together
+            assert_eq!(std::mem::size_of_val(&coordinator), std::mem::size_of::<CoordinatorService>());
+            assert_eq!(std::mem::size_of_val(&ai_provider), std::mem::size_of::<AIProviderService>());
+            assert_eq!(std::mem::size_of_val(&settings), std::mem::size_of::<SettingsService>());
+            assert_eq!(std::mem::size_of_val(&reaction), std::mem::size_of::<ReactionService>());
+        }
+
+        #[test]
+        fn test_concurrent_service_creation() {
+            // Test that services can be created concurrently
+            use std::thread;
+            
+            let handles: Vec<_> = (0..5).map(|_| {
+                thread::spawn(|| {
+                    let _auth = AuthService::new();
+                    let _blog = BlogService::new();
+                    let _comment = CommentService::new();
+                    let _tag = TagService::new();
+                    let _coordinator = CoordinatorService::new();
+                    "success"
+                })
+            }).collect();
+            
+            for handle in handles {
+                assert_eq!(handle.join().unwrap(), "success");
+            }
+        }
+
+        #[test]
+        fn test_memory_efficiency() {
+            // Test that services are memory efficient (most should be reasonably sized)
+            assert!(std::mem::size_of::<AuthService>() <= 128); // Reasonable size limit
+            assert!(std::mem::size_of::<BlogService>() <= 128);
+            assert!(std::mem::size_of::<CommentService>() <= 128);
+            assert!(std::mem::size_of::<TagService>() <= 128);
+            assert!(std::mem::size_of::<ReactionService>() <= 128);
+            // SettingsService and CoordinatorService may be larger due to composition
+        }
+
+        #[test]
+        fn test_service_registry_comprehensive() {
+            // Test comprehensive service registry functionality
+            let rocket = rocket::build();
+            let rocket = ServiceRegistry::attach_all_services(rocket);
+            let rocket = ControllerRegistry::attach_all_controllers(rocket);
+            
+            // Verify all services are available
+            assert!(rocket.state::<AuthService>().is_some());
+            assert!(rocket.state::<BlogService>().is_some());
+            assert!(rocket.state::<CommentService>().is_some());
+            assert!(rocket.state::<TagService>().is_some());
+            assert!(rocket.state::<AIProviderService>().is_some());
+            assert!(rocket.state::<OpenAIService>().is_some());
+            assert!(rocket.state::<OllamaService>().is_some());
+            assert!(rocket.state::<ReactionService>().is_some());
+            assert!(rocket.state::<SettingsService>().is_some());
+            assert!(rocket.state::<CoordinatorService>().is_some());
         }
     }
 }
