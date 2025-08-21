@@ -10,6 +10,10 @@ pub mod comprehensive_tests;
 pub mod redirect_tests;
 pub mod ai_integration_tests;
 pub mod seaorm_mock_tests;
+pub mod rocket_mock_tests;
+
+// Test fairings and rocket testing utilities
+pub mod fairings;
 
 // Test utilities and mocks
 pub mod utils;
