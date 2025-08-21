@@ -130,7 +130,7 @@ coverage:
 		echo "Installing cargo-tarpaulin..."; \
 		cargo install cargo-tarpaulin; \
 	fi
-	cargo tarpaulin --verbose --timeout 60 --lib
+	cargo tarpaulin --verbose --timeout 60
 
 # Install and run Tarpaulin locally with full workspace coverage
 coverage-full:
