@@ -1,16 +1,25 @@
 use chrono::Local;
-use models::{comment, dto::CommentFormDTO, prelude::Comment};
+use models::{comment, dto::CommentFormDTO, prelude::{Comment, Account}};
 use sea_orm::*;
 use uuid::Uuid;
 use rocket::serde::{Deserialize, Serialize};
 
 use crate::services::base::BaseService;
 
+/// Enhanced comment structure with resolved username
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct CommentWithUser {
+    pub comment: comment::Model,
+    pub display_username: String,
+}
+
 /// Hierarchical comment structure for threaded display
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct CommentThread {
     pub comment: comment::Model,
+    pub display_username: String,
     pub replies: Vec<CommentThread>,
 }
 
@@ -77,31 +86,54 @@ impl Service {
         db: &DbConn,
         post_id: Uuid,
     ) -> Result<Vec<CommentThread>, DbErr> {
-        // Get all comments for the post
-        let all_comments = Comment::find()
+        // Get all comments for the post with their related account data
+        let comments_with_accounts = Comment::find()
             .filter(comment::Column::PostId.eq(post_id))
+            .find_also_related(Account)
             .order_by_asc(comment::Column::DatePublished) // Order by date for consistent threading
             .all(db)
             .await?;
 
+        // Convert to CommentWithUser structures
+        let comments_with_users: Vec<CommentWithUser> = comments_with_accounts
+            .into_iter()
+            .map(|(comment, account)| {
+                let display_username = if let Some(account) = account {
+                    // Use the account's username for authenticated users
+                    account.username
+                } else if let Some(username) = &comment.username {
+                    // Use the stored username for anonymous users
+                    username.clone()
+                } else {
+                    // Fallback for edge cases
+                    "Anonymous".to_string()
+                };
+
+                CommentWithUser {
+                    comment,
+                    display_username,
+                }
+            })
+            .collect();
+
         // Build the hierarchical structure
-        let threads = self.build_comment_threads(all_comments);
+        let threads = self.build_comment_threads(comments_with_users);
         Ok(threads)
     }
 
     /// Helper method to build hierarchical comment structure
-    fn build_comment_threads(&self, comments: Vec<comment::Model>) -> Vec<CommentThread> {
+    fn build_comment_threads(&self, comments: Vec<CommentWithUser>) -> Vec<CommentThread> {
         use std::collections::HashMap;
         
-        let mut comment_map: HashMap<Uuid, comment::Model> = HashMap::new();
+        let mut comment_map: HashMap<Uuid, CommentWithUser> = HashMap::new();
         let mut children_map: HashMap<Option<Uuid>, Vec<Uuid>> = HashMap::new();
         
         // Index comments and group by parent_id
-        for comment in comments {
-            let id = comment.id;
-            let parent_id = comment.parent_id;
+        for comment_with_user in comments {
+            let id = comment_with_user.comment.id;
+            let parent_id = comment_with_user.comment.parent_id;
             
-            comment_map.insert(id, comment);
+            comment_map.insert(id, comment_with_user);
             children_map.entry(parent_id).or_insert_with(Vec::new).push(id);
         }
         
@@ -109,8 +141,8 @@ impl Service {
         let mut threads = Vec::new();
         if let Some(top_level_ids) = children_map.get(&None) {
             for &comment_id in top_level_ids {
-                if let Some(comment) = comment_map.get(&comment_id) {
-                    let thread = self.build_thread_recursive(comment.clone(), &comment_map, &children_map);
+                if let Some(comment_with_user) = comment_map.get(&comment_id) {
+                    let thread = self.build_thread_recursive(comment_with_user.clone(), &comment_map, &children_map);
                     threads.push(thread);
                 }
             }
@@ -122,17 +154,17 @@ impl Service {
     /// Recursively build a comment thread
     fn build_thread_recursive(
         &self,
-        comment: comment::Model,
-        comment_map: &std::collections::HashMap<Uuid, comment::Model>,
+        comment_with_user: CommentWithUser,
+        comment_map: &std::collections::HashMap<Uuid, CommentWithUser>,
         children_map: &std::collections::HashMap<Option<Uuid>, Vec<Uuid>>,
     ) -> CommentThread {
         let mut replies = Vec::new();
         
-        if let Some(child_ids) = children_map.get(&Some(comment.id)) {
+        if let Some(child_ids) = children_map.get(&Some(comment_with_user.comment.id)) {
             for &child_id in child_ids {
-                if let Some(child_comment) = comment_map.get(&child_id) {
+                if let Some(child_comment_with_user) = comment_map.get(&child_id) {
                     let child_thread = self.build_thread_recursive(
-                        child_comment.clone(),
+                        child_comment_with_user.clone(),
                         comment_map,
                         children_map,
                     );
@@ -141,6 +173,10 @@ impl Service {
             }
         }
         
-        CommentThread { comment, replies }
+        CommentThread {
+            comment: comment_with_user.comment,
+            display_username: comment_with_user.display_username,
+            replies,
+        }
     }
 }
