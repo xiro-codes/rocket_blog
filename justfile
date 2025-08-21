@@ -130,7 +130,7 @@ coverage:
 		echo "Installing cargo-tarpaulin..."; \
 		cargo install cargo-tarpaulin; \
 	fi
-	cargo tarpaulin --verbose --timeout 60 --lib
+	cargo tarpaulin --verbose --timeout 60 --package app
 
 # Install and run Tarpaulin locally with full workspace coverage
 coverage-full:
@@ -139,7 +139,7 @@ coverage-full:
 		echo "Installing cargo-tarpaulin..."; \
 		cargo install cargo-tarpaulin; \
 	fi
-	cargo tarpaulin --verbose --all-features --workspace --timeout 120
+	cargo tarpaulin --verbose --all-features --timeout 120 --package app
 
 # View application logs from the app_data volume
 logs:
