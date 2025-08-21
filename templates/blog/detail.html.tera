@@ -81,12 +81,18 @@
 <hr class="terminal-divider">
 
 <div class="d-flex justify-content-center align-items-center">
-	<form action="/comment/create/{{post.id}}" method="post" class="d-flex flex-row mb-2 terminal-comment-form">
+	<form action="/comment/create/{{post.id}}" method="post" class="d-flex flex-column mb-2 terminal-comment-form">
+		{% if not token %}
+		<div class="form-floating mb-2">
+			<input type="text" id="username" name="username" class="form-control" placeholder="Your name (optional)..." />
+			<label for="username" class="form-label">Your Name (optional):</label>
+		</div>
+		{% endif %}
 		<div class="form-floating">
 			<input type="text" required id="text" name="text" class="form-control" placeholder="Enter comment..." />
 			<label for="text" class="form-label">Post Comment:</label>
 		</div>
-		<button class="btn btn-primary" type="submit">[SUBMIT]</button>
+		<button class="btn btn-primary mt-2" type="submit">[SUBMIT]</button>
 	</form>
 </div>
 
@@ -95,7 +101,19 @@
 	<ul class="list-group">
 		{% for comment in comments %}
 		<li class="list-group-item mx-5">
-			<span class="terminal-prompt"></span>{{comment.text}}
+			<div class="d-flex justify-content-between align-items-start">
+				<div class="flex-grow-1">
+					<span class="terminal-prompt">
+						{% if comment.username %}
+							<small class="text-muted">{{comment.username}}:</small>
+						{% else %}
+							<small class="text-muted">User:</small>
+						{% endif %}
+					</span>
+					<span>{{comment.text}}</span>
+				</div>
+				<small class="text-muted">{{comment.date_published}}</small>
+			</div>
 		</li>
 		{%endfor%}
 	</ul>

@@ -4,7 +4,9 @@ use rocket::{
     form::Form,
     http::Status,
     response::{Flash, Redirect},
+    request::{FromRequest, Outcome},
     Build, Rocket, Route, State,
+    http::CookieJar,
 };
 use sea_orm_rocket::Connection;
 use uuid::Uuid;
@@ -12,7 +14,7 @@ use uuid::Uuid;
 use crate::{
     controllers::base::ControllerBase,
     pool::Db,
-    services::{BlogService, CommentService},
+    services::{AuthService, BlogService, CommentService},
 };
 
 pub struct Controller {
@@ -31,12 +33,27 @@ impl Controller {
 async fn create(
     conn: Connection<'_, Db>,
     service: &State<CommentService>,
+    auth_service: &State<AuthService>,
     blog_service: &State<BlogService>,
+    jar: &CookieJar<'_>,
     post_id: Uuid,
     form_data: Form<CommentFormDTO>,
 ) -> Result<Flash<Redirect>, Status> {
     let db = conn.into_inner();
-    let _ = service.create(db, post_id, form_data.into_inner()).await;
+    
+    // Check if user is authenticated
+    let user_id = if let Some(token_cookie) = jar.get_private("token") {
+        let token_str = token_cookie.value();
+        if let Ok(token) = token_str.parse::<Uuid>() {
+            auth_service.check_token(db, token).await.map(|account| account.id)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    
+    let _ = service.create(db, post_id, form_data.into_inner(), user_id).await;
     match blog_service.find_by_id(db, post_id).await {
         Ok(Some(post)) => Ok(ControllerBase::success_redirect(
             format!("/blog/{}", post.seq_id),

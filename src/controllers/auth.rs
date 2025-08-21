@@ -123,8 +123,41 @@ async fn create_admin(
     }
 }
 
+#[get("/register")]
+async fn register_view() -> Template {
+    log::debug!("Serving user registration page");
+    Template::render(
+        "auth/register",
+        context! {}
+    )
+}
+
+#[post("/register", data = "<data>")]
+async fn register(
+    conn: Connection<'_, Db>,
+    service: &State<AuthService>,
+    _jar: &CookieJar<'_>,
+    data: Form<AccountFormDTO>,
+) -> Flash<Redirect> {
+    let form_data = data.into_inner();
+    log::info!("User account registration attempt for username: {}", form_data.username);
+    
+    let db = conn.into_inner();
+    
+    match service.create_user_account(db, form_data).await {
+        Ok(account) => {
+            log::info!("User account registration successful for: {} ({})", account.username, account.id);
+            ControllerBase::success_redirect("/auth", "Account created successfully! You can now log in.")
+        }
+        Err(e) => {
+            log::error!("User account registration failed: {}", e);
+            ControllerBase::danger_redirect("/auth/register", "Failed to create account. Username may already exist.")
+        }
+    }
+}
+
 fn routes() -> Vec<Route> {
-    routes![login_view, login, logout, create_admin_view, create_admin]
+    routes![login_view, login, logout, create_admin_view, create_admin, register_view, register]
 }
 
 crate::impl_controller_routes!(Controller, "Auth Controller", routes());

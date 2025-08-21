@@ -12,10 +12,20 @@ pub struct Model {
     pub post_id: Uuid,
     pub text: String,
     pub date_published: DateTime,
+    pub user_id: Option<Uuid>,
+    pub username: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(
+        belongs_to = "super::account::Entity",
+        from = "Column::UserId", 
+        to = "super::account::Column::Id",
+        on_update = "Cascade",
+        on_delete = "SetNull"
+    )]
+    Account,
     #[sea_orm(
         belongs_to = "super::post::Entity",
         from = "Column::PostId",
@@ -24,6 +34,12 @@ pub enum Relation {
         on_delete = "Cascade"
     )]
     Post,
+}
+
+impl Related<super::account::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Account.def()
+    }
 }
 
 impl Related<super::post::Entity> for Entity {

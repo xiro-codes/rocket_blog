@@ -21,12 +21,23 @@ impl Service {
         db: &DbConn,
         post_id: Uuid,
         data: CommentFormDTO,
+        user_id: Option<Uuid>, // None for anonymous users
     ) -> Result<(), DbErr> {
+        let username = if user_id.is_some() {
+            // For authenticated users, don't store username (will use account relation)
+            None
+        } else {
+            // For anonymous users, use provided username or default to "Anonymous"
+            Some(data.username.unwrap_or_else(|| "Anonymous".to_string()))
+        };
+
         let _comment = comment::ActiveModel {
             id: Set(BaseService::generate_id()),
             text: Set(data.text),
             date_published: Set(Local::now().naive_local()),
             post_id: Set(post_id),
+            user_id: Set(user_id),
+            username: Set(username),
         }
         .insert(db)
         .await?;
