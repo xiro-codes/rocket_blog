@@ -110,6 +110,37 @@ docker-test-verbose:
 	docker build -f scripts/docker/Dockerfile.test -t rocket-blog-test .
 	docker run --rm rocket-blog-test cargo test -- --nocapture
 
+# Run code coverage with Tarpaulin in Docker container
+docker-coverage:
+	@echo "📊 Building and running code coverage with Tarpaulin in Docker container..."
+	docker build -f scripts/docker/Dockerfile.coverage -t rocket-blog-coverage .
+	docker run --rm rocket-blog-coverage
+
+# Run code coverage with Tarpaulin in Docker container with output to file
+docker-coverage-output:
+	@echo "📊 Building and running code coverage with Tarpaulin in Docker container (saving output)..."
+	docker build -f scripts/docker/Dockerfile.coverage -t rocket-blog-coverage .
+	docker run --rm rocket-blog-coverage > coverage-report.txt
+	@echo "✅ Coverage report saved to coverage-report.txt"
+
+# Install and run Tarpaulin locally (requires cargo-tarpaulin to be installed)
+coverage:
+	@echo "📊 Running code coverage with Tarpaulin locally..."
+	@if ! command -v cargo-tarpaulin >/dev/null 2>&1; then \
+		echo "Installing cargo-tarpaulin..."; \
+		cargo install cargo-tarpaulin; \
+	fi
+	cargo tarpaulin --verbose --timeout 60 --lib
+
+# Install and run Tarpaulin locally with full workspace coverage
+coverage-full:
+	@echo "📊 Running full code coverage with Tarpaulin locally..."
+	@if ! command -v cargo-tarpaulin >/dev/null 2>&1; then \
+		echo "Installing cargo-tarpaulin..."; \
+		cargo install cargo-tarpaulin; \
+	fi
+	cargo tarpaulin --verbose --all-features --workspace --timeout 120
+
 # View application logs from the app_data volume
 logs:
 	@echo "📋 Reading output.log from app_data volume..."
@@ -183,6 +214,8 @@ help:
 	@echo "  test                 Run all tests"
 	@echo "  test-name NAME       Run specific test by name"
 	@echo "  test-verbose         Run tests with output"
+	@echo "  coverage             Run code coverage with Tarpaulin locally"
+	@echo "  coverage-full        Run full workspace coverage with Tarpaulin"
 	@echo "  check                Check code without building"
 	@echo "  fmt                  Format code"
 	@echo "  fmt-check            Check code formatting"
@@ -195,6 +228,8 @@ help:
 	@echo "  docker-prod          Start production environment"
 	@echo "  docker-test          Run tests in Docker container"
 	@echo "  docker-test-verbose  Run tests in Docker container (verbose)"
+	@echo "  docker-coverage      Run code coverage with Tarpaulin in Docker"
+	@echo "  docker-coverage-output Run coverage with output saved to file"
 	@echo "  docker-stop          Stop all containers"
 	@echo "  docker-clean         Stop and remove all data"
 	@echo "  docker-status        Show container status"
