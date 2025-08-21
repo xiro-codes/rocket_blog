@@ -364,6 +364,32 @@ The Docker containers support these environment variables:
 - `ROCKET_ADDRESS`: Bind address (default: `0.0.0.0`)
 - `ROCKET_PORT`: Port to listen on (default: `8000`)
 
+## Container Networking
+
+All Docker Compose configurations use a custom bridge network with static IP addresses to ensure stable connections between services:
+
+### Network Configuration
+- **Network**: `app-network` with subnet `172.20.0.0/16`
+- **IP Assignments**:
+  - PostgreSQL: `172.20.0.10`
+  - pgAdmin: `172.20.0.20`
+  - App: `172.20.0.30`
+  - nginx: `172.20.0.40` (production only)
+  - certbot: `172.20.0.50` (production only)
+
+### Benefits
+- **Stable pgAdmin connections**: PostgreSQL always has the same IP address (`172.20.0.10`)
+- **Reliable service discovery**: No IP changes between container restarts
+- **Consistent configuration**: Same network setup across development and production
+
+### pgAdmin Configuration
+When setting up database connections in pgAdmin, use:
+- **Host**: `172.20.0.10` (PostgreSQL static IP)
+- **Port**: `5432`
+- **Database**: `tdavis_dev`
+- **Username**: `master`
+- **Password**: `password`
+
 ## Docker Compose Configuration
 
 The included `docker-compose.yml` provides a complete setup with PostgreSQL:
