@@ -22,3 +22,5 @@ mod settings;
 pub use settings::SettingsService;
 mod tag;
 pub use tag::TagService;
+mod youtube;
+pub use youtube::YoutubeDownloadService;

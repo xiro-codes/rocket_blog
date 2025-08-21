@@ -8,6 +8,7 @@ mod m20241204_000001_add_post_reactions;
 mod m20241205_000001_add_settings;
 mod m20241206_000001_add_comment_user_association;
 mod m20241207_000001_add_comment_replies;
+mod m20241210_000001_add_youtube_downloads;
 
 pub struct Migrator;
 
@@ -23,6 +24,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20241205_000001_add_settings::Migration),
             Box::new(m20241206_000001_add_comment_user_association::Migration),
             Box::new(m20241207_000001_add_comment_replies::Migration),
+            Box::new(m20241210_000001_add_youtube_downloads::Migration),
         ]
     }
 }

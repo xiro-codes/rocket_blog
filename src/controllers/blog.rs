@@ -3,7 +3,7 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService},
+    services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService, YoutubeDownloadService},
     types::{HttpRange, StreamedFile},
 };
 use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag};
@@ -484,6 +484,7 @@ async fn edit(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
     tag_service: &State<TagService>,
+    app_config: &State<AppConfig>,
     id: i32,
     form_data: Form<FormDTO<'_>>,
     jar: &CookieJar<'_>,
@@ -502,7 +503,7 @@ async fn edit(
     
     // Update the post
     match service
-        .update_by_seq_id(db, id, form)
+        .update_by_seq_id(db, app_config, id, form)
         .await
     {
         Ok(_) => {

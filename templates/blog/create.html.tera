@@ -53,6 +53,17 @@
 		</div>
 		
 		<div class="mb-3">
+			<label class="form-label">OR</label>
+		</div>
+		
+		<div>
+			<label for="youtube_url" class="form-label">YouTube URL:</label>
+			<input type="url" name="youtube_url" id="youtube_url" class="form-control" 
+			       placeholder="https://www.youtube.com/watch?v=..." />
+			<div class="form-text">Provide a YouTube URL to download the video. The download will happen in the background.</div>
+		</div>
+		
+		<div class="mb-3">
 			<label for="tags" class="form-label">Tags (comma-separated):</label>
 			<div class="d-flex">
 				<input type="text" class="form-control me-2" name="tags" id="tags" placeholder="e.g. rust, web development, tutorial">
@@ -107,8 +118,48 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	});
 
+	// Handle file upload vs YouTube URL mutual exclusion
+	const fileInput = document.getElementById('file');
+	const youtubeInput = document.getElementById('youtube_url');
+
+	fileInput.addEventListener('change', function() {
+		if (this.files && this.files.length > 0) {
+			youtubeInput.disabled = true;
+			youtubeInput.value = '';
+			youtubeInput.placeholder = 'File upload selected - clear file to enable YouTube URL';
+		} else {
+			youtubeInput.disabled = false;
+			youtubeInput.placeholder = 'https://www.youtube.com/watch?v=...';
+		}
+	});
+
+	youtubeInput.addEventListener('input', function() {
+		if (this.value.trim()) {
+			fileInput.disabled = true;
+		} else {
+			fileInput.disabled = false;
+		}
+	});
+
 	// AI Generation functionality (only if any AI service is available)
 	{% if ai_available %}
+	const titleInput = document.getElementById('title');
+	const promptInput = document.getElementById('ai-prompt');
+	const promptSection = document.getElementById('ai-prompt-section');
+	const generateContentBtn = document.getElementById('generate-content-btn');
+	const generateExcerptBtn = document.getElementById('generate-excerpt-btn');
+	const generateTagsBtn = document.getElementById('generate-tags-btn');
+	const excerptTextarea = document.getElementById('excerpt');
+	const tagsInput = document.getElementById('tags');
+
+	// Show/hide AI prompt section when title is entered
+	titleInput.addEventListener('input', function() {
+		if (this.value.trim()) {
+			promptSection.style.display = 'block';
+		} else {
+			promptSection.style.display = 'none';
+		}
+	});
 	const titleInput = document.getElementById('title');
 	const promptInput = document.getElementById('ai-prompt');
 	const promptSection = document.getElementById('ai-prompt-section');

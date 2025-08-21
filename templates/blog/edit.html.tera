@@ -48,6 +48,28 @@
 			<textarea name="text" class="form-control" id="text" rows="8">{{post.text}}</textarea>
 		</div>
 		
+		<div>
+			<label for="youtube_url" class="form-label">YouTube URL:</label>
+			<input type="url" name="youtube_url" id="youtube_url" class="form-control" 
+			       placeholder="https://www.youtube.com/watch?v=..." 
+			       value="{{post.youtube_url | default(value='')}}"/>
+			<div class="form-text">
+				{% if post.youtube_url %}
+					{% if post.download_status == "completed" %}
+						<span class="text-success">✅ YouTube video downloaded successfully</span>
+					{% elif post.download_status == "downloading" %}
+						<span class="text-info">⬇️ YouTube video is downloading...</span>
+					{% elif post.download_status == "pending" %}
+						<span class="text-warning">⏳ YouTube download is pending...</span>
+					{% elif post.download_status == "failed" %}
+						<span class="text-danger">❌ YouTube download failed{% if post.download_error %}: {{post.download_error}}{% endif %}</span>
+					{% endif %}
+				{% else %}
+					Provide a YouTube URL to download the video. The download will happen in the background.
+				{% endif %}
+			</div>
+		</div>
+		
 		<div class="mb-3">
 			<label for="tags" class="form-label">Tags (comma-separated):</label>
 			<div class="d-flex">

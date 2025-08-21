@@ -7,6 +7,7 @@ pub mod post {
         pub text: String,
         pub excerpt: Option<String>,
         pub file: TempFile<'r>,
+        pub youtube_url: Option<String>, // YouTube URL for downloading
         pub tags: Option<String>,
         pub action: Option<String>, // "draft" or "publish"
         pub ai_generate: Option<String>, // "content", "excerpt", "tags"
