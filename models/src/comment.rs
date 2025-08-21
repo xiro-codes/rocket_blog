@@ -14,6 +14,7 @@ pub struct Model {
     pub date_published: DateTime,
     pub user_id: Option<Uuid>,
     pub username: Option<String>,
+    pub parent_id: Option<Uuid>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -197,8 +197,8 @@ async fn detail_view(
     debug!("Post found: id={}, title={}, is_admin={}", 
            post.id, post.title, is_admin);
 
-    // Get comments for the post - handle errors gracefully
-    let comments = match comment_service.find_many_by_post_id(db, post.id).await {
+    // Get comments for the post in threaded format - handle errors gracefully
+    let comments = match comment_service.find_threaded_by_post_id(db, post.id).await {
         Ok(comments) => comments,
         Err(_) => return Err(Status::InternalServerError),
     };

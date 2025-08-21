@@ -133,12 +133,33 @@ Tags are labels that help organize and categorize your blog posts. They make it 
 
 - **Reader Comments**: Any visitor can leave comments on published posts
 - **No Registration Required**: Comments don't require user accounts
+- **Reddit-Style Threading**: Comments support hierarchical replies for organized conversations
 - **Moderation**: Admin users can moderate comments
+
+### Comment Features
+
+1. **Top-Level Comments**
+   - Comments appear at the bottom of each blog post
+   - Use the main comment form to post a new comment
+
+2. **Threaded Replies** ✨ *New Feature*
+   - Click "Reply" on any comment to respond directly to it
+   - Replies are visually indented to show the conversation hierarchy
+   - Support for unlimited nesting levels (like Reddit)
+   - Easy-to-follow conversation threads
+
+3. **Interactive Reply Forms**
+   - Reply forms appear inline when clicking "Reply"
+   - Only one reply form is shown at a time
+   - Cancel button to close reply forms
+   - Focus automatically moves to the reply text area
 
 ### Managing Comments
 
 1. **Viewing Comments**
-   - Comments appear at the bottom of each blog post
+   - Comments display in chronological order with newest first
+   - Threaded replies maintain conversation context
+   - Visual indentation shows reply levels (20px per level)
    - Admin users see additional management options
 
 2. **Comment Moderation** (Admin Feature)
@@ -150,6 +171,7 @@ Tags are labels that help organize and categorize your blog posts. They make it 
 
 - **Encourage Engagement**: Ask questions at the end of posts
 - **Respond Promptly**: Reply to comments to build community
+- **Use Threading**: Reply directly to specific comments for context
 - **Moderate Fairly**: Remove spam but preserve constructive criticism
 - **Set Guidelines**: Consider adding comment guidelines to your blog
 
