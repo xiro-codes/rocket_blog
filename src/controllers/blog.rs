@@ -3,10 +3,10 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService},
+    services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService},
     types::{HttpRange, StreamedFile},
 };
-use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag};
+use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag, background_job};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -484,6 +484,7 @@ async fn edit(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
     tag_service: &State<TagService>,
+    app_config: &State<AppConfig>,
     id: i32,
     form_data: Form<FormDTO<'_>>,
     jar: &CookieJar<'_>,
@@ -502,7 +503,7 @@ async fn edit(
     
     // Update the post
     match service
-        .update_by_seq_id(db, id, form)
+        .update_by_seq_id(db, app_config, id, form)
         .await
     {
         Ok(_) => {
@@ -881,6 +882,68 @@ async fn generate_ai_content(
     }
 }
 
+#[get("/<id>/background-job-status")]
+async fn get_background_job_status(
+    conn: Connection<'_, Db>,
+    service: &State<BlogService>,
+    background_job_service: &State<BackgroundJobService>,
+    id: i32,
+    jar: &CookieJar<'_>,
+) -> Result<Json<Value>, Status> {
+    // Require authentication to view job status
+    ControllerBase::require_auth(jar)?;
+    
+    let db = conn.into_inner();
+    
+    // First get the post to get its ID
+    let post = match service.find_by_seq_id(db, id).await {
+        Ok(post) => post,
+        Err(_) => return Err(Status::NotFound),
+    };
+    
+    // Get the latest YouTube download job for this post
+    match background_job_service.get_job_by_entity(
+        db, 
+        background_job::ENTITY_TYPE_POST.to_string(),
+        post.id,
+        background_job::JOB_TYPE_YOUTUBE_DOWNLOAD.to_string()
+    ).await {
+        Ok(Some(job)) => {
+            // Extract YouTube URL from job_data if available
+            let youtube_url = job.job_data
+                .as_ref()
+                .and_then(|data| data.get("url"))
+                .and_then(|url| url.as_str())
+                .unwrap_or("");
+            
+            Ok(Json(json!({
+                "success": true,
+                "job": {
+                    "id": job.id,
+                    "status": job.status,
+                    "error_message": job.error_message,
+                    "youtube_url": youtube_url,
+                    "created_at": job.created_at,
+                    "updated_at": job.updated_at
+                }
+            })))
+        },
+        Ok(None) => {
+            // No background job found
+            Ok(Json(json!({
+                "success": true,
+                "job": null
+            })))
+        },
+        Err(_) => {
+            Ok(Json(json!({
+                "success": false,
+                "error": "Failed to fetch background job status"
+            })))
+        }
+    }
+}
+
 fn routes() -> Vec<Route> {
     routes![
         list_view,
@@ -898,7 +961,8 @@ fn routes() -> Vec<Route> {
         add_reaction,
         remove_reaction,
         get_reactions,
-        generate_ai_content
+        generate_ai_content,
+        get_background_job_status
     ]
 }
 

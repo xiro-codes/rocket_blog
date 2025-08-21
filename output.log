@@ -209,3 +209,16 @@
 [2025-08-21T17:21:39Z INFO app] Starting database migrations...
 [2025-08-21T17:21:39Z ERROR sea_orm_rocket::database] Attempted to fetch unattached database `[1mapp::pool::Db[0m`.
 [2025-08-21T17:21:39Z INFO sea_orm_rocket::database::_] `[1mapp::pool::Db::init()[0m` fairing must be attached prior to using this database.
+[2025-08-21T21:00:05Z INFO app] Starting Rocket Blog application...
+[2025-08-21T21:00:05Z DEBUG app] Development mode: true
+[2025-08-21T21:00:05Z DEBUG app] Seeding enabled: true
+[2025-08-21T21:00:05Z DEBUG app] Log level: Debug
+[2025-08-21T21:00:05Z INFO app] Building Rocket instance and attaching services...
+[2025-08-21T21:00:05Z INFO app] Attaching database seeding middleware
+[2025-08-21T21:00:05Z INFO app] Attaching controllers and static file server
+[2025-08-21T21:00:05Z INFO app::registry] Registering application controllers...
+[2025-08-21T21:00:05Z DEBUG app::registry] Attaching controllers: Index (/), Auth (/auth), Blog (/blog), Comment (/comment), Feed (/feed), Settings (/settings)
+[2025-08-21T21:00:10Z ERROR sea_orm_rocket::database] failed to initialize database: Connection Error: pool timed out while waiting for an open connection
+[2025-08-21T21:00:10Z INFO app] Starting database migrations...
+[2025-08-21T21:00:10Z ERROR sea_orm_rocket::database] Attempted to fetch unattached database `[1mapp::pool::Db[0m`.
+[2025-08-21T21:00:10Z INFO sea_orm_rocket::database::_] `[1mapp::pool::Db::init()[0m` fairing must be attached prior to using this database.

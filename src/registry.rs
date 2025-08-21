@@ -1,4 +1,4 @@
-use crate::services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService};
+use crate::services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService};
 use crate::controllers;
 use crate::config::AppConfig;
 use rocket::{fairing::AdHoc, Build, Rocket, State};
@@ -17,7 +17,7 @@ impl ServiceRegistry {
         ai_service.add_provider(Box::new(OpenAIService::new()));
         ai_service.add_provider(Box::new(OllamaService::new()));
         
-        log::debug!("Attaching services: Auth, Blog, Comment, OpenAI, Ollama, AIProvider, Reaction, Settings, Tag, Coordinator");
+        log::debug!("Attaching services: Auth, Blog, Comment, OpenAI, Ollama, AIProvider, Reaction, Settings, Tag, Coordinator, YouTube, BackgroundJob");
         
         rocket
             .manage(AuthService::new())
@@ -30,6 +30,8 @@ impl ServiceRegistry {
             .manage(SettingsService::new())
             .manage(TagService::new())
             .manage(CoordinatorService::new())
+            .manage(YoutubeDownloadService::new())
+            .manage(BackgroundJobService::new())
     }
     
     /// Create a fairing that initializes services

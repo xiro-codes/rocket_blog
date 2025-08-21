@@ -231,23 +231,39 @@ The blog uses a modern dark theme by default:
 
 ### Video Streaming
 
-Your blog supports video file uploads and streaming:
+Your blog supports both video file uploads and YouTube video downloads:
 
 1. **Uploading Videos**
    - Videos can be included in blog posts
    - Supports large files up to 1GB
    - Automatic streaming optimization
 
-2. **Viewing Videos**
+2. **YouTube Video Downloads**
+   - NEW: Provide a YouTube URL instead of uploading a file
+   - Videos are downloaded automatically in the background using yt-dlp
+   - Download status is displayed during the process:
+     - ⏳ **Pending**: Download queued
+     - ⬇️ **Downloading**: Video is being downloaded
+     - ✅ **Completed**: Download successful, video ready for streaming
+     - ❌ **Failed**: Download failed with error message
+   - Supports various YouTube URL formats:
+     - `https://www.youtube.com/watch?v=VIDEO_ID`
+     - `https://youtu.be/VIDEO_ID`
+     - `https://www.youtube.com/embed/VIDEO_ID`
+     - `https://www.youtube.com/v/VIDEO_ID`
+
+3. **Viewing Videos**
    - Videos stream efficiently with range request support
    - Viewers can seek to any position without full download
    - Works across all modern browsers
+   - Both uploaded and downloaded videos use the same streaming system
 
 ### File Uploads
 
 - **Size Limit**: Files up to 1GB are supported
 - **Security**: Uploaded files are safely stored
 - **Access Control**: File access respects post privacy settings
+- **YouTube Integration**: You can either upload a file OR provide a YouTube URL (not both)
 
 ## 📊 Blog Analytics (Coming Soon)
 

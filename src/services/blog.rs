@@ -13,6 +13,7 @@ use sea_orm::{ColumnTrait, JoinType, *};
 use uuid::Uuid;
 
 use crate::services::base::BaseService;
+use crate::services::youtube::{YoutubeDownloadService, DownloadStatus};
 
 pub struct Service {
     base: BaseService,
@@ -73,6 +74,7 @@ impl Service {
         
         log::debug!("Generated post ID: {}", post_id);
         
+        // Handle file upload
         let fid = BaseService::generate_id().to_string();
         let path = if let Some(name) = data.file.name() {
             let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
@@ -88,6 +90,21 @@ impl Service {
             Some(path)
         } else {
             log::debug!("No file to upload");
+            None
+        };
+
+        // Handle YouTube URL if provided
+        let youtube_url = if let Some(ref url) = data.youtube_url {
+            if !url.trim().is_empty() && YoutubeDownloadService::is_valid_youtube_url(url) {
+                log::info!("YouTube URL provided: {}", url);
+                Some(url.clone())
+            } else if !url.trim().is_empty() {
+                log::warn!("Invalid YouTube URL provided: {}", url);
+                return Err(DbErr::Custom("Invalid YouTube URL format".to_string()));
+            } else {
+                None
+            }
+        } else {
             None
         };
 
@@ -120,6 +137,16 @@ impl Service {
             log::error!("Failed to insert post: {}", e);
             e
         })?;
+
+        // Start YouTube download if URL was provided
+        if let Some(ref url) = youtube_url {
+            log::info!("Starting YouTube download for post {} with URL: {}", result.id, url);
+            let youtube_service = YoutubeDownloadService::new();
+            if let Err(e) = youtube_service.start_download(db, app_config, result.id, url.clone()).await {
+                log::error!("Failed to start YouTube download: {}", e);
+                // Note: Error handling is now managed by the background job system
+            }
+        }
         
         log::info!("Blog post created successfully: {} ({})", result.title, result.id);
         Ok(result)
@@ -146,6 +173,7 @@ impl Service {
     pub async fn update_by_seq_id(
         &self,
         db: &DbConn,
+        app_config: &State<AppConfig>,
         id: i32,
         data: FormDTO<'_>,
     ) -> Result<post::Model, DbErr> {
@@ -164,6 +192,31 @@ impl Service {
                 "publish" => p.draft = Set(Some(false)),
                 "draft" => p.draft = Set(Some(true)),
                 _ => {} // Keep existing draft status
+            }
+        }
+        
+        // Handle YouTube URL update
+        if let Some(ref url) = data.youtube_url {
+            if !url.trim().is_empty() && YoutubeDownloadService::is_valid_youtube_url(url) {
+                log::info!("YouTube URL updated for post {}: {}", id, url);
+                
+                // Update the post first
+                p.title = Set(data.title.to_owned());
+                p.text = Set(text);
+                p.excerpt = Set(excerpt);
+                let updated_post = p.update(db).await?;
+                
+                // Start YouTube download (this will create a new background job)
+                let youtube_service = YoutubeDownloadService::new();
+                if let Err(e) = youtube_service.start_download(db, app_config, updated_post.id, url.clone()).await {
+                    log::error!("Failed to start YouTube download: {}", e);
+                    // Error handling is now managed by the background job system
+                }
+                
+                return Ok(updated_post);
+            } else if !url.trim().is_empty() {
+                log::warn!("Invalid YouTube URL provided for post {}: {}", id, url);
+                return Err(DbErr::Custom("Invalid YouTube URL format".to_string()));
             }
         }
         

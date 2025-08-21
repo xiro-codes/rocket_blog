@@ -96,7 +96,10 @@ railway up
 sudo apt update && sudo apt upgrade -y
 
 # Install required packages
-sudo apt install -y build-essential pkg-config libssl-dev libpq-dev nginx postgresql postgresql-contrib
+sudo apt install -y build-essential pkg-config libssl-dev libpq-dev nginx postgresql postgresql-contrib python3-pip
+
+# Install yt-dlp for YouTube video downloads (optional but recommended)
+sudo pip3 install yt-dlp
 
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh

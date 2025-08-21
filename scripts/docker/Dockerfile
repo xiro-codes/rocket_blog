@@ -31,12 +31,17 @@ RUN cargo build --release
 # Stage 2: Runtime image  
 FROM debian:bookworm-slim
 
-# Install runtime dependencies
+# Install runtime dependencies including Python and yt-dlp
 RUN apt-get update && apt-get install -y \
     libssl3 \
     libpq5 \
     ca-certificates \
+    python3 \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
+
+# Install yt-dlp using pip
+RUN pip3 install --no-cache-dir yt-dlp
 
 # Create app user
 RUN useradd -m -u 1000 app
