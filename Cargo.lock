@@ -174,7 +174,6 @@ dependencies = [
  "rocket_dyn_templates",
  "sea-orm",
  "sea-orm-rocket",
- "serde_json",
  "slug",
  "uuid",
 ]
@@ -2300,7 +2299,6 @@ dependencies = [
  "chrono",
  "rocket",
  "sea-orm",
- "serde_json",
  "uuid",
 ]
 

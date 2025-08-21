@@ -1,12 +1,6 @@
 mod base;
 pub use base::BaseService;
 
-mod background_job;
-pub use background_job::{BackgroundJobService, AIJobPayload};
-
-mod job_processor;
-pub use job_processor::JobProcessor;
-
 mod coordinator;
 pub use coordinator::{CoordinatorService, BlogListData, BlogDetailData, BlogSearchData};
 

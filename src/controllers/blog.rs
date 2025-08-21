@@ -3,7 +3,7 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService, BackgroundJobService},
+    services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService},
     types::{HttpRange, StreamedFile},
 };
 use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag};
@@ -767,165 +767,6 @@ async fn get_reactions(
     Ok(Json(json!(summary)))
 }
 
-/// Start background AI content generation and return job ID immediately
-#[post("/generate-content-async", data = "<generation_request>")]
-async fn generate_ai_content_async(
-    conn: Connection<'_, Db>,
-    auth_service: &State<AuthService>,
-    background_job_service: &State<BackgroundJobService>,
-    jar: &CookieJar<'_>,
-    generation_request: Json<Value>,
-) -> Result<Json<Value>, Status> {
-    // Check authentication
-    let token = ControllerBase::check_auth(jar)?;
-    let db = conn.into_inner();
-    
-    let account_id = if let Some(token_str) = token {
-        if let Ok(token_uuid) = uuid::Uuid::parse_str(&token_str) {
-            if let Some(account) = auth_service.check_token(db, token_uuid).await {
-                account.id
-            } else {
-                return Err(Status::Unauthorized);
-            }
-        } else {
-            return Err(Status::Unauthorized);
-        }
-    } else {
-        return Err(Status::Unauthorized);
-    };
-
-    let request = generation_request.into_inner();
-    
-    let title = request.get("title")
-        .and_then(|v| v.as_str())
-        .unwrap_or("")
-        .to_string();
-    
-    let prompt = request.get("prompt")
-        .and_then(|v| v.as_str())
-        .map(|s| s.to_string());
-    
-    let content = request.get("content")
-        .and_then(|v| v.as_str())
-        .map(|s| s.to_string());
-    
-    let provider = request.get("provider")
-        .and_then(|v| v.as_str())
-        .map(|s| s.to_string());
-    
-    let generation_type = request.get("type")
-        .and_then(|v| v.as_str())
-        .unwrap_or("content");
-
-    use crate::services::AIJobPayload;
-    use models::background_job::JobType;
-
-    let job_type = match generation_type {
-        "content" => JobType::GenerateContent,
-        "excerpt" => JobType::GenerateExcerpt,
-        "tags" => JobType::GenerateTags,
-        _ => return Ok(Json(json!({
-            "error": "Invalid generation type"
-        })))
-    };
-
-    let payload = AIJobPayload {
-        title,
-        prompt,
-        content,
-        provider,
-    };
-
-    match background_job_service.create_job(db, job_type, payload, account_id).await {
-        Ok(job) => Ok(Json(json!({
-            "success": true,
-            "job_id": job.id,
-            "status": "pending",
-            "message": "AI generation started in background. Use /job-status/{job_id} to check progress."
-        }))),
-        Err(e) => Ok(Json(json!({
-            "error": format!("Failed to create background job: {}", e)
-        })))
-    }
-}
-
-/// Get the job status page
-#[get("/job-status?<job_id>")]
-async fn job_status_page(
-    jar: &CookieJar<'_>,
-    job_id: Option<String>,
-) -> Result<Template, Status> {
-    ControllerBase::require_auth(jar)?;
-    
-    Ok(Template::render(
-        "blog/job_status",
-        context! {
-            job_id: job_id.unwrap_or_default()
-        },
-    ))
-}
-
-/// Check the status of a background AI generation job
-#[get("/job-status/<job_id>")]
-async fn get_job_status(
-    conn: Connection<'_, Db>,
-    auth_service: &State<AuthService>,
-    background_job_service: &State<BackgroundJobService>,
-    jar: &CookieJar<'_>,
-    job_id: String,
-) -> Result<Json<Value>, Status> {
-    // Check authentication
-    let token = ControllerBase::check_auth(jar)?;
-    let db = conn.into_inner();
-    
-    if let Some(token_str) = token {
-        if let Ok(token_uuid) = uuid::Uuid::parse_str(&token_str) {
-            if auth_service.check_token(db, token_uuid).await.is_none() {
-                return Err(Status::Unauthorized);
-            }
-        } else {
-            return Err(Status::Unauthorized);
-        }
-    } else {
-        return Err(Status::Unauthorized);
-    }
-
-    let job_uuid = match uuid::Uuid::parse_str(&job_id) {
-        Ok(id) => id,
-        Err(_) => return Ok(Json(json!({
-            "error": "Invalid job ID format"
-        })))
-    };
-
-    match background_job_service.get_job_by_id(db, job_uuid).await {
-        Ok(Some(job)) => {
-            let mut response = json!({
-                "job_id": job.id,
-                "status": job.status,
-                "created_at": job.created_at,
-                "updated_at": job.updated_at,
-                "completed_at": job.completed_at
-            });
-
-            if let Some(result) = job.result {
-                response["result"] = result;
-            }
-
-            if let Some(error) = job.error {
-                response["error"] = json!(error);
-            }
-
-            Ok(Json(response))
-        },
-        Ok(None) => Ok(Json(json!({
-            "error": "Job not found"
-        }))),
-        Err(e) => Ok(Json(json!({
-            "error": format!("Database error: {}", e)
-        })))
-    }
-}
-
 /// Generate AI content for a blog post
 #[post("/generate-content", data = "<generation_request>")]
 async fn generate_ai_content(
@@ -1057,10 +898,7 @@ fn routes() -> Vec<Route> {
         add_reaction,
         remove_reaction,
         get_reactions,
-        generate_ai_content,
-        generate_ai_content_async,
-        job_status_page,
-        get_job_status
+        generate_ai_content
     ]
 }
 
