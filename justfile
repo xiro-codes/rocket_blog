@@ -202,11 +202,10 @@ logs:
 # View application logs from the Docker container
 logs-docker:
 	@echo "📋 Reading output.log from Docker container..."
-	@container_id=$$(docker ps -q -f name=app); \
+	@container_id=$$(docker ps -q --filter "name=app"); \
 	if [ -n "$$container_id" ]; then \
 		echo "Found container: $$container_id"; \
 		docker exec $$container_id tail -50 /app/output.log 2>/dev/null || \
-		docker exec $$container_id ls -la /app/ 2>/dev/null || \
 		echo "❌ Could not access logs from container"; \
 	else \
 		echo "❌ No running app container found. Start with 'just docker-dev' first."; \
@@ -224,7 +223,7 @@ logs-follow:
 # View application logs from Docker container with live tail
 logs-docker-follow:
 	@echo "📋 Following output.log from Docker container (press Ctrl+C to stop)..."
-	@container_id=$$(docker ps -q -f name=app); \
+	@container_id=$$(docker ps -q --filter "name=app"); \
 	if [ -n "$$container_id" ]; then \
 		docker exec $$container_id tail -f /app/output.log 2>/dev/null || \
 		echo "❌ Could not access logs from container"; \
@@ -235,8 +234,12 @@ logs-docker-follow:
 # Show log file locations and status
 logs-info:
 	@echo "📍 Log file locations:"
-	@echo "Local:      ./output.log $(if [ -f "./output.log" ]; then echo "(exists, $$(wc -l < ./output.log) lines)"; else echo "(not found)"; fi)"
-	@container_id=$$(docker ps -q -f name=app); \
+	@if [ -f "./output.log" ]; then \
+		echo "Local:      ./output.log (exists, $$(wc -l < ./output.log) lines)"; \
+	else \
+		echo "Local:      ./output.log (not found)"; \
+	fi
+	@container_id=$$(docker ps -q --filter "name=app"); \
 	if [ -n "$$container_id" ]; then \
 		echo "Container:  /app/output.log in container $$container_id"; \
 		docker exec $$container_id ls -la /app/output.log 2>/dev/null || echo "           (not accessible)"; \

@@ -2,6 +2,9 @@
 .direnv
 result
 
+# Application logs
+output.log
+
 # Sea-ORM automation temporary files
 models/custom_code_backup.json
 models/src.backup/
