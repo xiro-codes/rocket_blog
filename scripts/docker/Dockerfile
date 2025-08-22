@@ -40,8 +40,8 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install yt-dlp using pip
-RUN pip3 install --no-cache-dir yt-dlp
+# Install yt-dlp using pip (break system packages restriction in container environment)
+RUN pip3 install --no-cache-dir --break-system-packages yt-dlp
 
 # Create app user
 RUN useradd -m -u 1000 app
