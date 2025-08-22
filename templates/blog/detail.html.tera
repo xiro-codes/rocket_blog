@@ -1,5 +1,34 @@
 {% extends "base" %}
 
+{% block content %}
+<!-- Schema.org structured data for blog post -->
+{% if post %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ post.title | escape }}",
+  "description": "{% if post.excerpt %}{{ post.excerpt | escape }}{% else %}{{ post.text | truncate(length=160) | escape }}{% endif %}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ username }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Rocket Blog"
+  },
+  "datePublished": "{{ post.date_published | date(format='%Y-%m-%dT%H:%M:%S%z') }}",
+  "dateModified": "{{ post.date_published | date(format='%Y-%m-%dT%H:%M:%S%z') }}",
+  "url": "/blog/{{ post.seq_id }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/blog/{{ post.seq_id }}"
+  }{% if tags %},
+  "keywords": [{% for tag in tags %}"{{ tag.name | escape }}"{% if not loop.last %},{% endif %}{% endfor %}]{% endif %}
+}
+</script>
+{% endif %}
+
 {% macro render_comment_thread(thread, post_id, level) %}
 <div class="comment-thread" style="margin-left: {{ level * 20 }}px;">
 	<div class="comment-item border rounded p-3 mb-2" data-comment-id="{{ thread.comment.id }}">

@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: /sitemap.xml
+
+# Allow crawling of main content areas
+Allow: /blog/
+Allow: /feed/
+
+# Disallow admin areas and private content
+Disallow: /auth/
+Disallow: /admin/
+Disallow: */edit
+Disallow: */delete
+Disallow: */draft
+
+# Crawl-delay (optional, helps with server load)
+Crawl-delay: 1
