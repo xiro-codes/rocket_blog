@@ -54,6 +54,9 @@ http {
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
             
+            # File upload support
+            client_max_body_size 1G;
+            
             # Handle backend errors gracefully
             proxy_connect_timeout 5s;
             proxy_send_timeout 60s;
