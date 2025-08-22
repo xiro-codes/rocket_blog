@@ -4,7 +4,6 @@ mod edge_case_tests {
     use crate::config::AppConfig;
     use crate::middleware::Seeding;
     use crate::controllers::{AuthController, BlogController, CommentController, IndexController, FeedController};
-    use crate::registry::{ServiceRegistry, ControllerRegistry};
     use crate::guards::{AuthenticatedUser, OptionalUser, AdminUser};
     use crate::responders::ApiResponse;
     use crate::features::Features;

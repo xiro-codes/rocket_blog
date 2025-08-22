@@ -9,7 +9,6 @@ use uuid::Uuid;
 use crate::services::base::BaseService;
 
 pub struct SettingsService {
-    base: BaseService,
     encryption_key: [u8; 32],
 }
 
@@ -23,7 +22,6 @@ impl SettingsService {
         ];
         
         Self {
-            base: BaseService::new(),
             encryption_key,
         }
     }

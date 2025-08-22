@@ -5,7 +5,6 @@ use sea_orm::DatabaseConnection;
 use rocket::serde::{Deserialize, Serialize};
 
 pub struct OllamaService {
-    base: BaseService,
     settings_service: SettingsService,
     http_client: Client,
 }
@@ -36,7 +35,6 @@ struct OllamaResponse {
 impl OllamaService {
     pub fn new() -> Self {
         Self {
-            base: BaseService::new(),
             settings_service: SettingsService::new(),
             http_client: Client::new(),
         }

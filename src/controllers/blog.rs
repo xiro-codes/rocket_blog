@@ -3,7 +3,7 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService},
+    services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService, BackgroundJobService},
     types::{HttpRange, StreamedFile},
 };
 use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag, background_job};

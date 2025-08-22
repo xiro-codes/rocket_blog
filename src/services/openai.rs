@@ -7,14 +7,12 @@ use sea_orm::DatabaseConnection;
 use crate::services::{ai_provider::AIProvider, base::BaseService, SettingsService};
 
 pub struct OpenAIService {
-    base: BaseService,
     settings_service: SettingsService,
 }
 
 impl OpenAIService {
     pub fn new() -> Self {
         Self {
-            base: BaseService::new(),
             settings_service: SettingsService::new(),
         }
     }

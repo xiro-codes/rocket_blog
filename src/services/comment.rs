@@ -23,15 +23,11 @@ pub struct CommentThread {
     pub replies: Vec<CommentThread>,
 }
 
-pub struct Service {
-    base: BaseService,
-}
+pub struct Service;
 
 impl Service {
     pub fn new() -> Self {
-        Self {
-            base: BaseService::new(),
-        }
+        Self
     }
 
     pub async fn create(

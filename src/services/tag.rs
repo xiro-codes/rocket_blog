@@ -6,15 +6,11 @@ use uuid::Uuid;
 
 use crate::services::base::BaseService;
 
-pub struct TagService {
-    base: BaseService,
-}
+pub struct TagService;
 
 impl TagService {
     pub fn new() -> Self {
-        Self {
-            base: BaseService::new(),
-        }
+        Self
     }
 
     pub async fn create_tag(

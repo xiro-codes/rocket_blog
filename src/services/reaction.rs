@@ -9,9 +9,7 @@ use sea_orm::{ColumnTrait, DbConn, EntityTrait, QueryFilter, Set, ActiveModelTra
 use std::collections::HashMap;
 use uuid::Uuid;
 
-pub struct Service {
-    base: BaseService,
-}
+pub struct Service;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -31,9 +29,7 @@ pub struct PostReactionSummary {
 
 impl Service {
     pub fn new() -> Self {
-        Self {
-            base: BaseService::new(),
-        }
+        Self
     }
 
     /// Add or update a reaction to a post

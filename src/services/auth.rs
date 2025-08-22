@@ -9,7 +9,6 @@ use uuid::Uuid;
 use crate::services::base::BaseService;
 
 pub struct Service {
-    base: BaseService,
     token_map: Mutex<HashMap<Token, AccountId>>,
 }
 type Token = Uuid;
@@ -18,7 +17,6 @@ type AccountId = Uuid;
 impl Service {
     pub fn new() -> Self {
         Self {
-            base: BaseService::new(),
             token_map: Mutex::new(HashMap::new()),
         }
     }

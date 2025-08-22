@@ -3,7 +3,6 @@ use rocket::request::{FromRequest, Outcome, Request};
 use rocket::State;
 use uuid::Uuid;
 use crate::services::AuthService;
-use sea_orm_rocket;
 
 pub mod admin;
 

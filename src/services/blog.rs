@@ -15,17 +15,13 @@ use uuid::Uuid;
 use crate::services::base::BaseService;
 use crate::services::youtube::{YoutubeDownloadService, DownloadStatus};
 
-pub struct Service {
-    base: BaseService,
-}
+pub struct Service;
 
 const DEFAULT_PAGE_SIZE: u64 = 39;
 
 impl Service {
     pub fn new() -> Self {
-        Self {
-            base: BaseService::new(),
-        }
+        Self
     }
 
     /// Generate an excerpt from the text content if no excerpt is provided

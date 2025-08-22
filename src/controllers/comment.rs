@@ -4,7 +4,6 @@ use rocket::{
     form::Form,
     http::Status,
     response::{Flash, Redirect},
-    request::{FromRequest, Outcome},
     Build, Rocket, Route, State,
     http::CookieJar,
 };
