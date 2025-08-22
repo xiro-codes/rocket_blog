@@ -1,0 +1,49 @@
+{% macro render_comment_thread(thread, post_id, level) %}
+<div class="comment-thread" style="margin-left: {{ level * 20 }}px;">
+	<div class="comment-item border rounded p-3 mb-2" data-comment-id="{{ thread.comment.id }}">
+		<div class="d-flex justify-content-between align-items-start">
+			<div class="flex-grow-1">
+				<span class="terminal-prompt">
+					<small class="text-muted">{{ thread.display_username }}:</small>
+				</span>
+				<div class="comment-text">{{ thread.comment.text }}</div>
+			</div>
+			<div class="comment-actions">
+				<small class="text-muted">{{ thread.comment.date_published }}</small>
+				<div class="mt-1">
+					<button class="btn btn-sm btn-outline-primary reply-btn" 
+					        data-comment-id="{{ thread.comment.id }}" 
+					        data-post-id="{{ post_id }}">
+						Reply
+					</button>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Reply form (initially hidden) -->
+		<div class="reply-form mt-3" id="reply-form-{{ thread.comment.id }}" style="display: none;">
+			<form action="/comment/reply/{{ post_id }}/{{ thread.comment.id }}" method="post" class="d-flex flex-column">
+				{% if not token %}
+				<div class="form-floating mb-2">
+					<input type="text" id="username-{{ thread.comment.id }}" name="username" class="form-control" placeholder="Your name (optional)..." />
+					<label for="username-{{ thread.comment.id }}" class="form-label">Your Name (optional):</label>
+				</div>
+				{% endif %}
+				<div class="form-floating mb-2">
+					<textarea id="text-{{ thread.comment.id }}" name="text" class="form-control" placeholder="Enter your reply..." required rows="3"></textarea>
+					<label for="text-{{ thread.comment.id }}" class="form-label">Your Reply:</label>
+				</div>
+				<div class="d-flex gap-2">
+					<button class="btn btn-primary btn-sm" type="submit">Post Reply</button>
+					<button class="btn btn-secondary btn-sm cancel-reply" type="button">Cancel</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Render child comments recursively -->
+	{% for reply in thread.replies %}
+		{{ self::render_comment_thread(thread=reply, post_id=post_id, level=level + 1) }}
+	{% endfor %}
+</div>
+{% endmacro %}
