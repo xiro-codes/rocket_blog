@@ -49,7 +49,7 @@ impl ControllerRegistry {
     /// Attach all application controllers to Rocket
     pub fn attach_all_controllers(rocket: Rocket<Build>) -> Rocket<Build> {
         log::info!("Registering application controllers...");
-        log::debug!("Attaching controllers: Index (/), Auth (/auth), Blog (/blog), Comment (/comment), Feed (/feed), Settings (/settings)");
+        log::debug!("Attaching controllers: Index (/), Auth (/auth), Blog (/blog), Comment (/comment), Feed (/feed), Settings (/settings), SEO (/)");
         
         rocket
             .attach(controllers::IndexController::new("/".to_owned()))
@@ -58,6 +58,7 @@ impl ControllerRegistry {
             .attach(controllers::CommentController::new("/comment".to_owned()))
             .attach(controllers::FeedController::new("/feed".to_owned()))
             .attach(controllers::SettingsController::new("/settings".to_owned()))
+            .attach(controllers::SeoController::new("/".to_owned()))
     }
     
     /// Create a fairing that initializes controllers

@@ -13,3 +13,5 @@ mod feed;
 pub use feed::Controller as FeedController;
 mod settings;
 pub use settings::Controller as SettingsController;
+mod seo;
+pub use seo::Controller as SeoController;

@@ -145,7 +145,20 @@ async fn list_view(
             all_tags: list_data.all_tags,
             reaction_summaries: list_data.reaction_summaries,
             has_accounts: list_data.has_accounts,
-            flash: ControllerBase::extract_flash(flash)
+            flash: ControllerBase::extract_flash(flash),
+            // SEO data
+            page_title: if page_num > 1 { 
+                format!("Blog Posts - Page {} - Rocket Blog", page_num) 
+            } else { 
+                "Blog Posts - Rocket Blog".to_string() 
+            },
+            page_description: "Discover insightful articles, technical content, and programming insights on Rocket Blog. Built with Rust and Rocket framework.",
+            canonical_url: if page_num > 1 { 
+                format!("/blog?page={}", page_num) 
+            } else { 
+                "/blog".to_string() 
+            },
+            page_keywords: "blog, rust, rocket, programming, technology, articles",
         },
     ))
 }
@@ -246,6 +259,21 @@ async fn detail_view(
         })
         .collect();
 
+    // Generate SEO data
+    let page_title = format!("{} - Rocket Blog", post.title);
+    let page_description = post.excerpt
+        .as_ref()
+        .unwrap_or(&post.text)
+        .chars()
+        .take(160)
+        .collect::<String>();
+    let canonical_url = format!("/blog/{}", post.seq_id);
+    let page_keywords = if !tags.is_empty() {
+        tags.iter().map(|t| t.name.as_str()).collect::<Vec<_>>().join(", ")
+    } else {
+        "blog, article".to_string()
+    };
+
     Ok(Template::render(
         "blog/detail",
         context! {
@@ -259,7 +287,12 @@ async fn detail_view(
             max_post,
             reaction_summary,
             reaction_types: reaction_types_with_data,
-            flash: ControllerBase::extract_flash(flash)
+            flash: ControllerBase::extract_flash(flash),
+            // SEO data
+            page_title,
+            page_description,
+            canonical_url,
+            page_keywords,
         },
     ))
 }
