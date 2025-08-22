@@ -175,7 +175,6 @@ impl YoutubeDownloadService {
                 return Err("yt-dlp not found. Please install yt-dlp to enable YouTube downloads".to_string());
             }
         }
-
         // Run yt-dlp to download the video
         let output = Command::new("yt-dlp")
             .arg("--format")
@@ -183,8 +182,8 @@ impl YoutubeDownloadService {
             .arg("--output")
             .arg(&output_path)
             .arg("--no-playlist") // Download only the specific video, not the entire playlist
-            .arg("--extract-flat")
-            .arg("false")
+            // .arg("--extract-flat")
+            // .arg("false")
             .arg(&job_data.youtube_url)
             .output()
             .map_err(|e| format!("Failed to execute yt-dlp: {}", e))?;
