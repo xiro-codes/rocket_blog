@@ -3,7 +3,7 @@ use chrono::Local;
 use lipsum::lipsum_words_with_rng;
 use models::{
     account, comment, post, post_tag,
-    prelude::{Account, Comment, Post, PostTag, Tag},
+    prelude::{Account, Comment, Post, PostTag},
     tag,
 };
 use pwhash::bcrypt;

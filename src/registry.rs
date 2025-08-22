@@ -1,7 +1,6 @@
 use crate::services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService};
 use crate::controllers;
-use crate::config::AppConfig;
-use rocket::{fairing::AdHoc, Build, Rocket, State};
+use rocket::{fairing::AdHoc, Build, Rocket};
 
 /// Service registry for managing application services
 pub struct ServiceRegistry;
