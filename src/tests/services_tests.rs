@@ -350,7 +350,7 @@ mod tests {
         use crate::services::BackgroundJobService;
         use models::background_job;
         use sea_orm::{MockDatabase, DbBackend, MockExecResult};
-        use chrono::{DateTime, FixedOffset};
+        use chrono::{DateTime, FixedOffset, Datelike};
         use serde_json::json;
 
         #[tokio::test]
@@ -364,8 +364,8 @@ mod tests {
                 status: "pending".to_string(),
                 error_message: None,
                 job_data: Some(json!({"url": "https://youtube.com/watch?v=test"})),
-                created_at: DateTime::<FixedOffset>::parse_from_rfc3339("2024-01-01T00:00:00+00:00").unwrap(),
-                updated_at: DateTime::<FixedOffset>::parse_from_rfc3339("2024-01-01T00:00:00+00:00").unwrap(),
+                created_at: chrono::NaiveDateTime::parse_from_str("2024-01-01 00:00:00", "%Y-%m-%d %H:%M:%S").unwrap(),
+                updated_at: chrono::NaiveDateTime::parse_from_str("2024-01-01 00:00:00", "%Y-%m-%d %H:%M:%S").unwrap(),
             };
 
             // Create mock database
@@ -394,10 +394,10 @@ mod tests {
             assert_eq!(job.entity_type, "post");
             assert_eq!(job.status, "pending");
             
-            // Verify that created_at and updated_at are timezone-aware
-            // The exact values will be mock data, but the types should be correct
-            assert!(job.created_at.timezone().local_minus_utc() == 0); // Should be UTC offset
-            assert!(job.updated_at.timezone().local_minus_utc() == 0);
+            // Verify that created_at and updated_at are NaiveDateTime
+            // Since they're NaiveDateTime (no timezone info), we can check their components
+            assert_eq!(job.created_at.year(), 2024);
+            assert_eq!(job.updated_at.year(), 2024);
         }
 
         #[test]
