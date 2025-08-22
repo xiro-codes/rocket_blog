@@ -68,6 +68,49 @@ function start_dev_live() {
     echo "View logs with: $0 logs app"
 }
 
+function install_systemd_timers() {
+    echo "Installing systemd timers for automated backups..."
+    
+    local systemd_dir="$SCRIPT_DIR/systemd"
+    local system_dir="/etc/systemd/system"
+    
+    # Check if systemd files exist
+    if [ ! -f "$systemd_dir/rocket-blog-backup.service" ] || [ ! -f "$systemd_dir/rocket-blog-backup.timer" ]; then
+        echo "⚠️  Systemd files not found in $systemd_dir"
+        return 1
+    fi
+    
+    # Copy systemd files to system directory (requires sudo)
+    if command -v sudo >/dev/null 2>&1; then
+        echo "Installing systemd service and timer files..."
+        sudo cp "$systemd_dir/rocket-blog-backup.service" "$system_dir/"
+        sudo cp "$systemd_dir/rocket-blog-backup.timer" "$system_dir/"
+        
+        # Update working directory in service file to current project directory
+        sudo sed -i "s|WorkingDirectory=/opt/rocket_blog|WorkingDirectory=$PROJECT_DIR|g" "$system_dir/rocket-blog-backup.service"
+        sudo sed -i "s|ExecStart=/opt/rocket_blog/scripts/docker-deploy.sh|ExecStart=$PROJECT_DIR/scripts/docker-deploy.sh|g" "$system_dir/rocket-blog-backup.service"
+        sudo sed -i "s|ExecStartPost=/opt/rocket_blog/scripts/docker-deploy.sh|ExecStartPost=$PROJECT_DIR/scripts/docker-deploy.sh|g" "$system_dir/rocket-blog-backup.service"
+        sudo sed -i "s|ReadWritePaths=/opt/rocket_blog/backups|ReadWritePaths=$PROJECT_DIR/backups|g" "$system_dir/rocket-blog-backup.service"
+        
+        # Reload systemd and enable timer
+        sudo systemctl daemon-reload
+        sudo systemctl enable rocket-blog-backup.timer
+        sudo systemctl start rocket-blog-backup.timer
+        
+        echo "✅ Systemd backup timer installed and started"
+        echo "Next backup will run daily at 2:00 AM"
+        echo "Check status with: sudo systemctl status rocket-blog-backup.timer"
+        echo "View logs with: sudo journalctl -u rocket-blog-backup.service"
+    else
+        echo "⚠️  sudo not available - cannot install systemd timers"
+        echo "Manual installation required as root:"
+        echo "  sudo cp $systemd_dir/*.service $systemd_dir/*.timer /etc/systemd/system/"
+        echo "  sudo systemctl daemon-reload"
+        echo "  sudo systemctl enable rocket-blog-backup.timer"
+        echo "  sudo systemctl start rocket-blog-backup.timer"
+    fi
+}
+
 function start_prod() {
     if [ ! -f "/var/lib/docker/volumes/rocket_blog_letsencrypt_data/_data/live/blog.tdavis.dev/fullchain.pem" ]; then
         echo "SSL certificates not found. Running setup first..."
@@ -80,6 +123,10 @@ function start_prod() {
     echo "Production environment started!"
     echo "  • App: https://blog.tdavis.dev"
     echo "  • pgAdmin: http://localhost:5050"
+    
+    # Install systemd timers for automated backups
+    echo ""
+    install_systemd_timers
 }
 
 function setup_ssl() {

@@ -409,7 +409,32 @@ BACKUP_DIR=/path/to/backups ./scripts/docker-backup.sh backup
 
 #### Automated Backups
 
-Add to crontab for automated Docker volume backups:
+The system supports automated backups through systemd timers (recommended) or cron jobs.
+
+##### Systemd Timers (Recommended)
+
+When deploying production (`just docker-prod`), systemd timers are automatically installed for daily backups. You can also install them manually:
+
+```bash
+# Install systemd timers for automated backups
+just docker-backup-install-timers
+
+# Check timer status
+just docker-backup-timer-status
+sudo systemctl status rocket-blog-backup.timer
+
+# View backup logs
+sudo journalctl -u rocket-blog-backup.service
+
+# Stop and disable timer
+just docker-backup-timer-stop
+```
+
+The systemd timer runs daily at 2:00 AM and automatically cleans backups older than 7 days.
+
+##### Cron Jobs (Alternative)
+
+For systems without systemd or manual control:
 
 ```bash
 # Daily backup at 2 AM

@@ -500,6 +500,38 @@ Each backup includes:
 
 Backups are stored as compressed tar.gz files in `./backups/` directory.
 
+### Automated Backups with Systemd Timers
+
+The production deployment automatically sets up systemd timers for daily backups at 2:00 AM.
+
+```bash
+# Production deployment automatically installs backup timers
+just docker-prod
+
+# Manually install systemd timers
+just docker-backup-install-timers
+
+# Check timer status
+just docker-backup-timer-status
+sudo systemctl status rocket-blog-backup.timer
+
+# View backup service logs
+sudo journalctl -u rocket-blog-backup.service
+
+# List timer schedules
+sudo systemctl list-timers rocket-blog-backup.timer
+
+# Stop and disable automatic backups
+just docker-backup-timer-stop
+```
+
+The systemd timer:
+- Runs daily at 2:00 AM with a random delay up to 5 minutes
+- Automatically backs up production volumes
+- Cleans backups older than 7 days
+- Logs all operations to the system journal
+- Includes security restrictions for safer execution
+
 ### Volume Inspection and Troubleshooting
 
 ```bash

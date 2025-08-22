@@ -75,6 +75,9 @@ docker-dev-live:
 	sh ./scripts/docker-deploy.sh dev-live
 
 docker-prod:
+	@echo "🔄 Creating backup before production deployment..."
+	sh ./scripts/docker-deploy.sh backup prod || echo "⚠️  Backup failed or no existing deployment found - continuing with deployment..."
+	@echo "🚀 Starting production deployment..."
 	sh ./scripts/docker-deploy.sh prod
 
 docker-setup-ssl:
@@ -113,6 +116,35 @@ docker-backup-list:
 # Clean old Docker volume backups (default: 7 days)
 docker-backup-clean DAYS="7":
 	sh ./scripts/docker-deploy.sh backup-clean {{DAYS}}
+
+# Install systemd timers for automated backups
+docker-backup-install-timers:
+	@echo "🕒 Installing systemd timers for automated backups..."
+	@if command -v sudo >/dev/null 2>&1; then \
+		sudo cp ./scripts/systemd/rocket-blog-backup.service /etc/systemd/system/; \
+		sudo cp ./scripts/systemd/rocket-blog-backup.timer /etc/systemd/system/; \
+		sudo sed -i "s|WorkingDirectory=/opt/rocket_blog|WorkingDirectory=$(pwd)|g" /etc/systemd/system/rocket-blog-backup.service; \
+		sudo sed -i "s|ExecStart=/opt/rocket_blog/scripts/docker-deploy.sh|ExecStart=$(pwd)/scripts/docker-deploy.sh|g" /etc/systemd/system/rocket-blog-backup.service; \
+		sudo sed -i "s|ExecStartPost=/opt/rocket_blog/scripts/docker-deploy.sh|ExecStartPost=$(pwd)/scripts/docker-deploy.sh|g" /etc/systemd/system/rocket-blog-backup.service; \
+		sudo sed -i "s|ReadWritePaths=/opt/rocket_blog/backups|ReadWritePaths=$(pwd)/backups|g" /etc/systemd/system/rocket-blog-backup.service; \
+		sudo systemctl daemon-reload; \
+		sudo systemctl enable rocket-blog-backup.timer; \
+		sudo systemctl start rocket-blog-backup.timer; \
+		echo "✅ Systemd backup timer installed and started"; \
+		echo "Check status: sudo systemctl status rocket-blog-backup.timer"; \
+	else \
+		echo "❌ sudo not available - manual installation required"; \
+	fi
+
+# Check systemd backup timer status
+docker-backup-timer-status:
+	@sudo systemctl status rocket-blog-backup.timer || echo "Timer not installed or not accessible"
+
+# Stop and disable systemd backup timer
+docker-backup-timer-stop:
+	@sudo systemctl stop rocket-blog-backup.timer || true
+	@sudo systemctl disable rocket-blog-backup.timer || true
+	@echo "✅ Systemd backup timer stopped and disabled"
 
 # Run tests in Docker container
 docker-test:
@@ -250,6 +282,15 @@ help:
 	@echo "  docker-clean         Stop and remove all data"
 	@echo "  docker-status        Show container status"
 	@echo "  docker-logs [SERVICE] Show Docker logs"
+	@echo ""
+	@echo "🔄 Docker Backups:"
+	@echo "  docker-backup ENV           Backup Docker volumes"
+	@echo "  docker-restore ENV          Restore Docker volumes from backup"
+	@echo "  docker-backup-list          List available Docker volume backups"
+	@echo "  docker-backup-clean DAYS    Clean old backups (default: 7 days)"
+	@echo "  docker-backup-install-timers Install systemd timers for automated backups"
+	@echo "  docker-backup-timer-status  Check systemd backup timer status"
+	@echo "  docker-backup-timer-stop    Stop and disable systemd backup timer"
 	@echo ""
 	@echo "📋 Application Logs:"
 	@echo "  logs                 View recent application logs (local)"
