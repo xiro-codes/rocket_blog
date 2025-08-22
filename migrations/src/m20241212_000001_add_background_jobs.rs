@@ -50,13 +50,13 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(BackgroundJob::CreatedAt)
-                            .timestamp_with_time_zone()
+                            .timestamp()
                             .not_null()
                             .default(Expr::current_timestamp()),
                     )
                     .col(
                         ColumnDef::new(BackgroundJob::UpdatedAt)
-                            .timestamp_with_time_zone()
+                            .timestamp()
                             .not_null()
                             .default(Expr::current_timestamp()),
                     )
