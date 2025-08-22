@@ -86,6 +86,7 @@ async fn list_view(
     page_size: Option<u64>,
     jar: &CookieJar<'_>,
     coordinator: &State<CoordinatorService>,
+    auth_service: &State<AuthService>,
     flash: Option<FlashMessage<'_>>,
     client_ip: ClientIp,
 ) -> Result<Template, Status> {
@@ -101,6 +102,21 @@ async fn list_view(
     }
     
     let db = conn.into_inner();
+    
+    // Check if user is admin
+    let is_admin = if let Some(token_str) = &token {
+        if let Ok(token_uuid) = Uuid::parse_str(token_str) {
+            if let Some(account) = auth_service.check_token(db, token_uuid).await {
+                account.admin
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    } else {
+        false
+    };
     
     // Use coordinator service to get all data for the list view
     log::debug!("Fetching blog list data via coordinator service");
@@ -125,6 +141,7 @@ async fn list_view(
             page_size: list_data.page_size,
             num_pages: list_data.num_pages,
             token,
+            is_admin,
             all_tags: list_data.all_tags,
             reaction_summaries: list_data.reaction_summaries,
             has_accounts: list_data.has_accounts,
@@ -237,6 +254,7 @@ async fn detail_view(
             comments,
             username: account.map(|a| a.username),
             token,
+            is_admin,
             min_post,
             max_post,
             reaction_summary,
@@ -372,9 +390,8 @@ async fn create_view(
     conn: Connection<'_, Db>,
     ai_service: &State<AIProviderService>,
     flash: Option<FlashMessage<'_>>,
-    jar: &CookieJar<'_>,
+    _admin: crate::guards::admin::Admin,
 ) -> Result<Template, Status> {
-    ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     
     // Check if any AI service is available
@@ -446,14 +463,13 @@ async fn create(
 
 #[get("/<id>/edit")]
 async fn edit_view(
-    jar: &CookieJar<'_>,
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
     ai_service: &State<AIProviderService>,
     tag_service: &State<TagService>,
     id: i32,
+    _admin: crate::guards::admin::Admin,
 ) -> Result<Template, Status> {
-    ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     let post = match service.find_by_seq_id(db, id).await {
         Ok(post) => post,
@@ -487,9 +503,8 @@ async fn edit(
     app_config: &State<AppConfig>,
     id: i32,
     form_data: Form<FormDTO<'_>>,
-    jar: &CookieJar<'_>,
+    _admin: crate::guards::admin::Admin,
 ) -> Result<Flash<Redirect>, Status> {
-    ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     
     // First get the post to get its ID
@@ -621,9 +636,8 @@ async fn delete(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
     id: i32,
-    jar: &CookieJar<'_>,
+    _admin: crate::guards::admin::Admin,
 ) -> Result<Flash<Redirect>, Status> {
-    ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     let _ = service.delete_by_seq_id(db, id).await;
     Ok(ControllerBase::success_redirect("/blog/", "Deleted Post"))
