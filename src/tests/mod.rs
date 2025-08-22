@@ -11,6 +11,7 @@ pub mod redirect_tests;
 pub mod ai_integration_tests;
 pub mod seaorm_mock_tests;
 pub mod rocket_mock_tests;
+pub mod youtube_tests;
 
 // Test modules for additional components
 pub mod features_tests;
