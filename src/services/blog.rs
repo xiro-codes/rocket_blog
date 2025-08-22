@@ -180,7 +180,7 @@ impl Service {
         db: &DbConn,
         app_config: &State<AppConfig>,
         id: i32,
-        data: FormDTO<'_>,
+        mut data: FormDTO<'_>,
     ) -> Result<post::Model, DbErr> {
         let mut p: post::ActiveModel = Post::find()
             .filter(post::Column::SeqId.eq(id))
@@ -197,6 +197,30 @@ impl Service {
                 "publish" => p.draft = Set(Some(false)),
                 "draft" => p.draft = Set(Some(true)),
                 _ => {} // Keep existing draft status
+            }
+        }
+        
+        // Handle file upload
+        if let Some(ref mut file) = data.file {
+            if let Some(name) = file.name() {
+                let fid = BaseService::generate_id().to_string();
+                let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
+                log::debug!("Uploading file to: {}", path);
+                file
+                    .copy_to(path.clone())
+                    .await
+                    .map_err(|e| {
+                        log::error!("File upload failed: {}", e);
+                        DbErr::Custom(e.to_string())
+                    })?;
+                log::debug!("File uploaded successfully");
+                
+                // Set the file path and update the post
+                p.path = Set(Some(path));
+                p.title = Set(data.title.to_owned());
+                p.text = Set(text);
+                p.excerpt = Set(excerpt);
+                return p.update(db).await;
             }
         }
         

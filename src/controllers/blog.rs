@@ -495,7 +495,7 @@ async fn edit_view(
         },
     ))
 }
-#[post("/<id>/edit", data = "<form_data>")]
+#[post("/<id>/edit", format = "multipart/form-data", data = "<form_data>")]
 async fn edit(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
