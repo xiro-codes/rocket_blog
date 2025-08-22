@@ -503,9 +503,8 @@ async fn edit(
     app_config: &State<AppConfig>,
     id: i32,
     form_data: Form<FormDTO<'_>>,
-    jar: &CookieJar<'_>,
+    _admin: crate::guards::admin::Admin,
 ) -> Result<Flash<Redirect>, Status> {
-    ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     
     // First get the post to get its ID
@@ -637,9 +636,8 @@ async fn delete(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
     id: i32,
-    jar: &CookieJar<'_>,
+    _admin: crate::guards::admin::Admin,
 ) -> Result<Flash<Redirect>, Status> {
-    ControllerBase::require_auth(jar)?;
     let db = conn.into_inner();
     let _ = service.delete_by_seq_id(db, id).await;
     Ok(ControllerBase::success_redirect("/blog/", "Deleted Post"))
