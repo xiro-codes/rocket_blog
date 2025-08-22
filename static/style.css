@@ -406,7 +406,137 @@ p {
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+
+/* Extra small devices (phones, less than 576px) */
+@media (max-width: 575.98px) {
+	.terminal-header::before {
+		font-size: 0.5em;
+		content: "┌─────────────────────────────┐\A│ 🚀 ROCKET BLOG v1.0        │\A│ Status: ONLINE             │\A└─────────────────────────────┘\A";
+	}
+	
+	.terminal-container {
+		padding: 5px;
+	}
+	
+	footer, header {
+		margin-left: 0.5em;
+		margin-right: 0.5em;
+		flex-direction: column;
+		gap: 10px;
+	}
+	
+	form {
+		padding: 15px;
+		margin: 5px;
+		max-width: 100%;
+	}
+	
+	form > div {
+		max-width: 100%;
+	}
+	
+	/* Make buttons stack vertically on very small screens */
+	.btn-group {
+		flex-direction: column;
+		width: 100%;
+	}
+	
+	.btn-group .btn {
+		margin-bottom: 5px;
+		width: 100%;
+	}
+	
+	/* Better spacing for cards */
+	.card {
+		margin-bottom: 15px;
+	}
+	
+	/* Improve readability */
+	h1, h2, h3, h4, h5, h6 {
+		font-size: 1.2rem;
+		line-height: 1.3;
+		word-break: break-word;
+	}
+	
+	/* Make tables scroll horizontally */
+	table {
+		font-size: 0.85rem;
+		overflow-x: auto;
+		display: block;
+		white-space: nowrap;
+	}
+	
+	th, td {
+		padding: 8px;
+		min-width: 100px;
+	}
+	
+	/* Better form controls for touch */
+	.form-control, .form-select {
+		font-size: 16px; /* Prevents zoom on iOS */
+		padding: 15px;
+	}
+	
+	/* Stack form input groups */
+	.d-flex.form-input-group {
+		flex-direction: column;
+	}
+	
+	.d-flex.form-input-group .form-control {
+		margin-bottom: 10px;
+		margin-right: 0;
+	}
+	
+	.d-flex.form-input-group .btn {
+		width: 100%;
+	}
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+	.terminal-header::before {
+		font-size: 0.55em;
+		content: "┌──────────────────────────────────────┐\A│  🚀 ROCKET BLOG TERMINAL v1.0      │\A│  Status: ONLINE                     │\A└──────────────────────────────────────┘\A";
+	}
+	
+	.terminal-container {
+		padding: 8px;
+	}
+	
+	footer, header {
+		margin-left: 0.75em;
+		margin-right: 0.75em;
+	}
+	
+	form {
+		padding: 18px;
+		margin: 8px;
+	}
+	
+	/* Allow some button groups to wrap */
+	.btn-group {
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+	
+	.btn-group .btn {
+		margin: 2px;
+		flex: 1;
+		min-width: 120px;
+	}
+	
+	/* Better table handling */
+	table {
+		font-size: 0.9rem;
+	}
+	
+	th, td {
+		padding: 10px;
+	}
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991.98px) {
 	.terminal-header::before {
 		font-size: 0.6em;
 		content: "┌────────────────────────────────────────────┐\A│  🚀 ROCKET BLOG TERMINAL v1.0            │\A│  Status: ONLINE                           │\A└────────────────────────────────────────────┘\A";
@@ -425,4 +555,99 @@ p {
 	.terminal-container {
 		padding: 10px;
 	}
+	
+	/* Button groups can stay horizontal */
+	.btn-group .btn {
+		margin: 0 2px;
+	}
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+	.terminal-header::before {
+		font-size: 0.85em;
+	}
+	
+	/* Default desktop styles - no overrides needed */
+}
+
+/* Additional mobile-friendly utilities */
+.table-responsive-mobile {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.table-responsive-mobile table {
+	width: 100%;
+	min-width: 600px;
+}
+
+/* Touch-friendly button sizes */
+@media (max-width: 767.98px) {
+	.btn {
+		padding: 12px 16px;
+		font-size: 14px;
+		min-height: 44px; /* Apple's recommended touch target size */
+	}
+	
+	.btn-sm {
+		padding: 10px 14px;
+		font-size: 12px;
+		min-height: 40px;
+	}
+	
+	/* Improve spacing between elements */
+	.mb-2 {
+		margin-bottom: 1rem !important;
+	}
+	
+	.mb-3 {
+		margin-bottom: 1.5rem !important;
+	}
+	
+	/* Better card layouts for mobile */
+	.col-md-4, .col-md-8 {
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+	
+	/* Improve comment layout on mobile */
+	.comment-thread {
+		margin-left: 0 !important;
+	}
+	
+	.comment-item {
+		padding: 15px !important;
+		margin-bottom: 15px;
+	}
+	
+	/* Better video responsive behavior */
+	video {
+		width: 100%;
+		height: auto;
+		max-height: 300px;
+	}
+	
+	/* Ensure content doesn't overflow */
+	.mx-5 {
+		margin-left: 15px !important;
+		margin-right: 15px !important;
+	}
+	
+	/* Better link spacing in navigation */
+	.btn-group .btn {
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
+}
+
+/* Prevent horizontal scrolling issues */
+body {
+	overflow-x: hidden;
+}
+
+.container-fluid {
+	max-width: 100vw;
+	overflow-x: hidden;
 }

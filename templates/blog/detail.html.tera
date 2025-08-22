@@ -99,12 +99,12 @@
       {% endfor %}
   </div>
   {% endif %}
-	<div class="btn-group mb-2">
+	<div class="btn-group mb-2 flex-wrap">
 		<a class="btn btn-info" href="/blog">[← BACK TO POSTS]</a>
 		<a class="btn btn-success" href="/blog/search">[SEARCH]</a>
 	</div>
 	{%if is_admin %}
-	<header class="btn-group">
+	<header class="btn-group flex-wrap">
 		{% if post.draft %}
 		<a class="btn btn-success" href="{{post.seq_id}}/publish">[PUBLISH]</a>
 		{% endif %}
@@ -121,16 +121,16 @@
 
 <hr class="terminal-divider">
 
-<div class="mx-5">
+<div class="mx-2 mx-md-5">
 	<p>{{post.text | safe}}</p>
 	<h6 class="text-muted">Published: {{post.date_published}}</h6>
 </div>
 
 <!-- Reaction Section -->
-<div class="mx-5 my-4">
+<div class="mx-2 mx-md-5 my-4">
 	<h4 class="terminal-prompt">Reactions</h4>
 	<div class="reaction-container" data-post-id="{{post.seq_id}}">
-		<div class="reaction-buttons d-flex gap-2 mb-3">
+		<div class="reaction-buttons d-flex gap-2 mb-3 flex-wrap">
 			{% for reaction_type in reaction_types %}
 			<button class="btn btn-sm reaction-btn {% if reaction_summary.user_reaction == reaction_type.type %}btn-primary{% else %}btn-outline-secondary{% endif %}" 
 			        data-reaction="{{reaction_type.type}}" 
@@ -175,7 +175,7 @@
 	</form>
 </div>
 
-<div class="mx-5">
+<div class="mx-2 mx-md-5">
 	<h3 class="terminal-prompt">Comments</h3>
 	<div id="comments-container">
 		{% for thread in comments %}
@@ -187,7 +187,7 @@
 <hr class="terminal-divider">
 
 <div class="d-flex justify-content-center m-2">
-	<footer class="btn-group align-items-center">
+	<footer class="btn-group align-items-center flex-wrap">
 		{%if token%}
 		{% if post.seq_id == min_post %}
 		<button class="btn btn-secondary" disabled>[PREV POST]</button>
