@@ -21,6 +21,10 @@ function show_help() {
     echo "  renew-ssl          Force SSL certificate renewal"
     echo "  status             Show service status"
     echo "  logs [service]     Show logs (optional service name)"
+    echo "  backup [env]       Backup Docker volumes (env: prod|dev, auto-detect if not specified)"
+    echo "  restore [env]      Restore Docker volumes from latest backup"
+    echo "  backup-list        List available backups"
+    echo "  backup-clean [days] Remove backups older than N days (default: 7)"
     echo "  stop               Stop all services"
     echo "  clean              Stop and remove all containers/volumes"
     echo "  help               Show this help message"
@@ -31,6 +35,10 @@ function show_help() {
     echo "  $0 prod             # Start production with SSL"
     echo "  $0 logs nginx       # Show nginx logs only"
     echo "  $0 setup-ssl       # Generate SSL certificates"
+    echo "  $0 backup           # Backup volumes (auto-detect environment)"
+    echo "  $0 backup prod      # Backup production volumes"
+    echo "  $0 restore dev      # Restore development volumes"
+    echo "  $0 backup-clean 30  # Remove backups older than 30 days"
 }
 
 function start_dev() {
@@ -60,6 +68,49 @@ function start_dev_live() {
     echo "View logs with: $0 logs app"
 }
 
+function install_systemd_timers() {
+    echo "Installing systemd timers for automated backups..."
+    
+    local systemd_dir="$SCRIPT_DIR/systemd"
+    local system_dir="/etc/systemd/system"
+    
+    # Check if systemd files exist
+    if [ ! -f "$systemd_dir/rocket-blog-backup.service" ] || [ ! -f "$systemd_dir/rocket-blog-backup.timer" ]; then
+        echo "⚠️  Systemd files not found in $systemd_dir"
+        return 1
+    fi
+    
+    # Copy systemd files to system directory (requires sudo)
+    if command -v sudo >/dev/null 2>&1; then
+        echo "Installing systemd service and timer files..."
+        sudo cp "$systemd_dir/rocket-blog-backup.service" "$system_dir/"
+        sudo cp "$systemd_dir/rocket-blog-backup.timer" "$system_dir/"
+        
+        # Update working directory in service file to current project directory
+        sudo sed -i "s|WorkingDirectory=/opt/rocket_blog|WorkingDirectory=$PROJECT_DIR|g" "$system_dir/rocket-blog-backup.service"
+        sudo sed -i "s|ExecStart=/opt/rocket_blog/scripts/docker-deploy.sh|ExecStart=$PROJECT_DIR/scripts/docker-deploy.sh|g" "$system_dir/rocket-blog-backup.service"
+        sudo sed -i "s|ExecStartPost=/opt/rocket_blog/scripts/docker-deploy.sh|ExecStartPost=$PROJECT_DIR/scripts/docker-deploy.sh|g" "$system_dir/rocket-blog-backup.service"
+        sudo sed -i "s|ReadWritePaths=/opt/rocket_blog/backups|ReadWritePaths=$PROJECT_DIR/backups|g" "$system_dir/rocket-blog-backup.service"
+        
+        # Reload systemd and enable timer
+        sudo systemctl daemon-reload
+        sudo systemctl enable rocket-blog-backup.timer
+        sudo systemctl start rocket-blog-backup.timer
+        
+        echo "✅ Systemd backup timer installed and started"
+        echo "Next backup will run daily at 2:00 AM"
+        echo "Check status with: sudo systemctl status rocket-blog-backup.timer"
+        echo "View logs with: sudo journalctl -u rocket-blog-backup.service"
+    else
+        echo "⚠️  sudo not available - cannot install systemd timers"
+        echo "Manual installation required as root:"
+        echo "  sudo cp $systemd_dir/*.service $systemd_dir/*.timer /etc/systemd/system/"
+        echo "  sudo systemctl daemon-reload"
+        echo "  sudo systemctl enable rocket-blog-backup.timer"
+        echo "  sudo systemctl start rocket-blog-backup.timer"
+    fi
+}
+
 function start_prod() {
     if [ ! -f "/var/lib/docker/volumes/rocket_blog_letsencrypt_data/_data/live/blog.tdavis.dev/fullchain.pem" ]; then
         echo "SSL certificates not found. Running setup first..."
@@ -72,6 +123,10 @@ function start_prod() {
     echo "Production environment started!"
     echo "  • App: https://blog.tdavis.dev"
     echo "  • pgAdmin: http://localhost:5050"
+    
+    # Install systemd timers for automated backups
+    echo ""
+    install_systemd_timers
 }
 
 function setup_ssl() {
@@ -124,6 +179,22 @@ function clean_all() {
     fi
 }
 
+function backup_volumes() {
+    "$SCRIPT_DIR/docker-backup.sh" backup "$1"
+}
+
+function restore_volumes() {
+    "$SCRIPT_DIR/docker-backup.sh" restore "$1"
+}
+
+function list_backups() {
+    "$SCRIPT_DIR/docker-backup.sh" list
+}
+
+function clean_backups() {
+    "$SCRIPT_DIR/docker-backup.sh" clean "$1"
+}
+
 case "${1:-help}" in
     dev)
         start_dev
@@ -145,6 +216,18 @@ case "${1:-help}" in
         ;;
     logs)
         show_logs "$2"
+        ;;
+    backup)
+        backup_volumes "$2"
+        ;;
+    restore)
+        restore_volumes "$2"
+        ;;
+    backup-list)
+        list_backups
+        ;;
+    backup-clean)
+        clean_backups "$2"
         ;;
     stop)
         stop_services

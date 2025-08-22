@@ -429,6 +429,152 @@ docker run -p 8000:8000 \
   rocket-blog
 ```
 
+## Docker Volume Management and Backups
+
+### Volume Overview
+
+The Docker setup uses named volumes for persistent data storage:
+
+**Production Volumes:**
+- `postgres_data` - PostgreSQL database files
+- `app_data` - Application uploaded files and data  
+- `letsencrypt_data` - SSL certificates and Let's Encrypt data
+- `certbot_webroot` - Certbot domain validation files
+- `nginx_logs` - Nginx access and error logs
+
+**Development Volumes:**
+- `postgres_data` - PostgreSQL database files
+- `app_data` - Application uploaded files and data
+
+### Backup and Restore Operations
+
+The project includes comprehensive Docker volume backup functionality:
+
+```bash
+# Backup volumes (auto-detects running environment)
+./scripts/docker-deploy.sh backup
+
+# Backup specific environment
+./scripts/docker-deploy.sh backup prod
+./scripts/docker-deploy.sh backup dev
+
+# List available backups
+./scripts/docker-deploy.sh backup-list
+
+# Restore from latest backup
+./scripts/docker-deploy.sh restore
+
+# Restore specific environment
+./scripts/docker-deploy.sh restore prod
+./scripts/docker-deploy.sh restore dev
+
+# Clean old backups (default: keep 7 days)
+./scripts/docker-deploy.sh backup-clean
+
+# Clean old backups (custom retention)
+./scripts/docker-deploy.sh backup-clean 30
+```
+
+### Direct Backup Script Usage
+
+For advanced usage, you can use the backup script directly:
+
+```bash
+# Direct script usage with more options
+./scripts/docker-backup.sh backup [env]
+./scripts/docker-backup.sh restore [env]
+./scripts/docker-backup.sh restore-from /path/to/backup.tar.gz
+./scripts/docker-backup.sh list
+./scripts/docker-backup.sh clean [days]
+
+# Custom backup directory
+BACKUP_DIR=/custom/path ./scripts/docker-backup.sh backup
+```
+
+### Backup Contents
+
+Each backup includes:
+- **Volume data** - Complete filesystem contents of each Docker volume
+- **Metadata** - Backup timestamp, environment, Docker version, volume list
+- **Database dump** - Additional PostgreSQL dump for redundancy (when database is running)
+
+Backups are stored as compressed tar.gz files in `./backups/` directory.
+
+### Automated Backups with Systemd Timers
+
+The production deployment automatically sets up systemd timers for daily backups at 2:00 AM.
+
+```bash
+# Production deployment automatically installs backup timers
+just docker-prod
+
+# Manually install systemd timers
+just docker-backup-install-timers
+
+# Check timer status
+just docker-backup-timer-status
+sudo systemctl status rocket-blog-backup.timer
+
+# View backup service logs
+sudo journalctl -u rocket-blog-backup.service
+
+# List timer schedules
+sudo systemctl list-timers rocket-blog-backup.timer
+
+# Stop and disable automatic backups
+just docker-backup-timer-stop
+```
+
+The systemd timer:
+- Runs daily at 2:00 AM with a random delay up to 5 minutes
+- Automatically backs up production volumes
+- Cleans backups older than 7 days
+- Logs all operations to the system journal
+- Includes security restrictions for safer execution
+
+### Volume Inspection and Troubleshooting
+
+```bash
+# List all volumes
+docker volume ls
+
+# Inspect specific volume
+docker volume inspect rocket_blog_postgres_data
+
+# View volume contents
+docker run --rm -v rocket_blog_postgres_data:/data alpine ls -la /data
+
+# Check volume disk usage
+docker system df -v
+
+# Remove unused volumes (careful!)
+docker volume prune
+```
+
+### Data Recovery Scenarios
+
+**Complete Environment Recovery:**
+```bash
+# 1. Stop services
+./scripts/docker-deploy.sh stop
+
+# 2. Restore volumes
+./scripts/docker-deploy.sh restore prod
+
+# 3. Start services
+./scripts/docker-deploy.sh prod
+```
+
+**Selective Database Recovery:**
+```bash
+# If you have both volume backup and database dump
+# 1. Restore just the database volume
+./scripts/docker-backup.sh restore-from backup_file.tar.gz
+
+# 2. Or import from SQL dump
+docker-compose exec postgres psql -U master -d tdavis_dev < database_backup.sql
+```
+
 ## Security Considerations
 
 - The application runs as a non-root user (`app`) inside the container

@@ -350,6 +350,100 @@ sudo chown rocket_blog:rocket_blog /opt/rocket_blog/backup.sh
 echo "0 2 * * * /opt/rocket_blog/backup.sh" | sudo -u rocket_blog crontab -
 ```
 
+### Docker Volume Backup Strategy
+
+For Docker deployments, use the built-in Docker volume backup functionality:
+
+```bash
+# Backup Docker volumes (auto-detects environment)
+./scripts/docker-deploy.sh backup
+
+# Backup specific environment
+./scripts/docker-deploy.sh backup prod   # Production volumes
+./scripts/docker-deploy.sh backup dev    # Development volumes
+
+# List available backups
+./scripts/docker-deploy.sh backup-list
+
+# Restore from latest backup
+./scripts/docker-deploy.sh restore
+
+# Restore specific environment
+./scripts/docker-deploy.sh restore prod
+
+# Clean old backups (remove older than 7 days)
+./scripts/docker-deploy.sh backup-clean
+
+# Clean old backups (custom retention period)
+./scripts/docker-deploy.sh backup-clean 30  # Keep 30 days
+
+# Alternative: Use the backup script directly
+./scripts/docker-backup.sh backup           # Auto-detect environment
+./scripts/docker-backup.sh backup prod      # Backup production
+./scripts/docker-backup.sh restore          # Restore latest
+./scripts/docker-backup.sh list             # List backups
+./scripts/docker-backup.sh clean 14         # Keep 14 days
+```
+
+#### What Gets Backed Up
+
+**Production Environment:**
+- `postgres_data` - PostgreSQL database files
+- `app_data` - Application uploaded files and data
+- `letsencrypt_data` - SSL certificates
+- `certbot_webroot` - Certbot validation files
+- `nginx_logs` - Nginx access and error logs
+
+**Development Environment:**
+- `postgres_data` - PostgreSQL database files
+- `app_data` - Application uploaded files and data
+
+#### Backup Location
+
+Backups are stored in `./backups/` directory by default. You can customize this with:
+
+```bash
+# Custom backup directory
+BACKUP_DIR=/path/to/backups ./scripts/docker-backup.sh backup
+```
+
+#### Automated Backups
+
+The system supports automated backups through systemd timers (recommended) or cron jobs.
+
+##### Systemd Timers (Recommended)
+
+When deploying production (`just docker-prod`), systemd timers are automatically installed for daily backups. You can also install them manually:
+
+```bash
+# Install systemd timers for automated backups
+just docker-backup-install-timers
+
+# Check timer status
+just docker-backup-timer-status
+sudo systemctl status rocket-blog-backup.timer
+
+# View backup logs
+sudo journalctl -u rocket-blog-backup.service
+
+# Stop and disable timer
+just docker-backup-timer-stop
+```
+
+The systemd timer runs daily at 2:00 AM and automatically cleans backups older than 7 days.
+
+##### Cron Jobs (Alternative)
+
+For systems without systemd or manual control:
+
+```bash
+# Daily backup at 2 AM
+echo "0 2 * * * cd /opt/rocket_blog && ./scripts/docker-deploy.sh backup prod" | crontab -
+
+# Weekly cleanup (keep 30 days)
+echo "0 3 * * 0 cd /opt/rocket_blog && ./scripts/docker-deploy.sh backup-clean 30" | crontab -
+```
+
 ## 🚀 Performance Optimization
 
 ### Database Optimization
