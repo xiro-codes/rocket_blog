@@ -87,7 +87,9 @@ Welcome to Rocket Blog! This guide will help you understand how to use all the f
 
 2. **Edit Mode**
    - Click the "Edit" button (visible when logged in as admin)
-   - Modify title, content, or tags as needed
+   - Modify title, content, tags, or media as needed
+   - **Media Options**: You can either upload a video file OR provide a YouTube URL
+   - **Flexible Media**: If a YouTube download fails, you can upload a file instead
    - Click "Update" to save changes
 
 3. **Managing Published Status**
@@ -263,7 +265,8 @@ Your blog supports both video file uploads and YouTube video downloads:
 - **Size Limit**: Files up to 1GB are supported
 - **Security**: Uploaded files are safely stored
 - **Access Control**: File access respects post privacy settings
-- **YouTube Integration**: You can either upload a file OR provide a YouTube URL (not both)
+- **Flexible Media Options**: You can either upload a file OR provide a YouTube URL
+- **Fallback Support**: If YouTube download fails, you can switch to file upload when editing
 
 ## 📊 Blog Analytics (Coming Soon)
 

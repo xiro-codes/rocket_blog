@@ -10,7 +10,7 @@
 <hr class="terminal-divider">
 
 <div class="d-flex justify-content-center align-items-center">
-	<form action="{{form_url}}" method="post" class="terminal-form">
+	<form action="{{form_url}}" method="post" enctype="multipart/form-data" class="terminal-form">
 		<h3 class="text-center mb-4">[ EDIT POST CONFIGURATION ]</h3>
 		
 		<div>
@@ -46,6 +46,16 @@
 		<div>
 			<label for="text" class="form-label">Content:</label>
 			<textarea name="text" class="form-control" id="text" rows="8">{{post.text}}</textarea>
+		</div>
+		
+		<div>
+			<label for="file" class="form-label">Media File:</label>
+			<input type="file" name="file" id="file" class="form-control" accept="video/*" />
+			<div class="form-text">Upload a video file directly.</div>
+		</div>
+		
+		<div class="mb-3">
+			<label class="form-label">OR</label>
 		</div>
 		
 		<div>
@@ -378,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
 						break;
 					case 'failed':
 						const errorMsg = job.error_message ? `: ${job.error_message}` : '';
-						statusDiv.innerHTML = `<span class="text-danger">❌ YouTube download failed${errorMsg}</span>`;
+						statusDiv.innerHTML = `<span class="text-danger">❌ YouTube download failed${errorMsg}. You can upload a video file instead using the field above.</span>`;
 						break;
 					default:
 						statusDiv.innerHTML = 'Provide a YouTube URL to download the video. The download will happen in the background.';
