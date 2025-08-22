@@ -1,6 +1,9 @@
 use rocket::http::{CookieJar, Status};
 use rocket::request::{FromRequest, Outcome, Request};
+use rocket::State;
 use uuid::Uuid;
+use crate::services::AuthService;
+use sea_orm_rocket;
 
 pub mod admin;
 
@@ -121,9 +124,38 @@ impl<'r> FromRequest<'r> for AdminUser {
             }
         };
 
-        // For now, we'll assume any authenticated user is an admin
-        // TODO: In a real application, check database for admin status
-        log::debug!("AdminUser guard: granting admin access (TODO: implement proper admin check)");
-        Outcome::Success(AdminUser { token })
+        // Get the auth service and check if user is admin
+        let auth_service = match req.guard::<&State<AuthService>>().await.succeeded() {
+            Some(service) => service,
+            None => {
+                log::error!("AdminUser guard: AuthService not available");
+                return Outcome::Error((Status::InternalServerError, "Service unavailable"));
+            }
+        };
+
+        // Get database connection
+        let conn = match req.guard::<sea_orm_rocket::Connection<'_, crate::pool::Db>>().await.succeeded() {
+            Some(conn) => conn,
+            None => {
+                log::error!("AdminUser guard: Database connection not available");
+                return Outcome::Error((Status::InternalServerError, "Database unavailable"));
+            }
+        };
+
+        let db = conn.into_inner();
+        
+        // Check if token belongs to an admin
+        if let Some(account) = auth_service.check_token(db, token).await {
+            if account.admin {
+                log::debug!("AdminUser guard: admin access granted for user: {}", account.username);
+                return Outcome::Success(AdminUser { token });
+            } else {
+                log::debug!("AdminUser guard: access denied - user {} is not an admin", account.username);
+                return Outcome::Error((Status::Forbidden, "Admin access required"));
+            }
+        } else {
+            log::debug!("AdminUser guard: invalid token or user not found");
+            return Outcome::Error((Status::Unauthorized, "Invalid token"));
+        }
     }
 }

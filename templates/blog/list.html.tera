@@ -12,9 +12,13 @@
 
 	{%if token %}
 	<div class="btn-group mb-3">
+		{%if is_admin %}
 		<a class="btn btn-primary" href="/blog/create">[CREATE POST]</a>
+		{%endif%}
 		<a class="btn btn-success" href="/blog/search">[SEARCH]</a>
+		{%if is_admin %}
 		<a class="btn btn-secondary" href="/settings">[SETTINGS]</a>
+		{%endif%}
 		<a class="btn btn-primary" href="/auth/logout">[LOGOUT]</a>
 	</div>
 	{%else%}

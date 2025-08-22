@@ -74,7 +74,7 @@
 		<a class="btn btn-info" href="/blog">[← BACK TO POSTS]</a>
 		<a class="btn btn-success" href="/blog/search">[SEARCH]</a>
 	</div>
-	{%if token%}
+	{%if is_admin %}
 	<header class="btn-group">
 		{% if post.draft %}
 		<a class="btn btn-success" href="{{post.seq_id}}/publish">[PUBLISH]</a>
