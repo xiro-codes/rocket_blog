@@ -100,54 +100,6 @@ impl CoordinatorService {
         })
     }
 
-    /// Get blog post detail with all associated data
-    pub async fn get_blog_detail_data(
-        &self,
-        db: &DatabaseConnection,
-        id: Uuid,
-        token: Option<&str>,
-        client_ip: &str,
-    ) -> Result<BlogDetailData, String> {
-        // Get the post
-        let post = self.blog_service.find_by_id(db, id).await
-            .map_err(|e| format!("Database error: {}", e))?
-            .ok_or("Post not found".to_string())?;
-        
-        // Check if user is admin (for draft access)
-        let is_admin = if let Some(token_str) = token {
-            self.auth_service.is_admin_token(db, token_str).await
-        } else {
-            false
-        };
-        
-        // Check if post is published or user is admin
-        if post.draft.unwrap_or(false) && !is_admin {
-            return Err("Post not found".to_string());
-        }
-        
-        // Get tags for the post
-        let tags = self.tag_service.find_tags_by_post_id(db, post.id).await
-            .unwrap_or_default();
-        
-        // Get comments for the post
-        let comments = self.comment_service.find_many_by_post_id(db, post.id).await
-            .unwrap_or_default();
-        
-        // Get reaction summaries
-        let reaction_summaries = self.reaction_service
-            .get_posts_reaction_summaries(db, &[post.id], client_ip)
-            .await
-            .map(|hashmap| hashmap.into_values().collect())
-            .unwrap_or_default();
-        
-        Ok(BlogDetailData {
-            post,
-            tags,
-            comments,
-            reaction_summaries,
-        })
-    }
-
     /// Search blog posts with all associated data
     pub async fn search_blog_posts(
         &self,
@@ -225,14 +177,6 @@ pub struct BlogListData {
     pub all_tags: Vec<models::tag::Model>,
     pub reaction_summaries: Vec<crate::services::PostReactionSummary>,
     pub has_accounts: bool,
-}
-
-/// Data structure for blog detail view  
-pub struct BlogDetailData {
-    pub post: Post,
-    pub tags: Vec<models::tag::Model>,
-    pub comments: Vec<models::comment::Model>,
-    pub reaction_summaries: Vec<crate::services::PostReactionSummary>,
 }
 
 /// Data structure for blog search results

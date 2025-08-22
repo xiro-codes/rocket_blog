@@ -5,7 +5,7 @@ mod redirect_tests {
 
     #[test]
     fn test_catch_default_redirects_to_root() {
-        let redirect = catch_default();
+        let _redirect = catch_default();
         // Verify that catch_default redirects to "/"
         // Note: We can't directly test the redirect URI without additional setup
         // but we can verify the redirect is created

@@ -76,33 +76,4 @@ impl BackgroundJobService {
             .one(db)
             .await
     }
-
-    /// Get all pending jobs of a specific type
-    pub async fn get_pending_jobs(
-        &self,
-        db: &DbConn,
-        job_type: String,
-    ) -> Result<Vec<background_job::Model>, DbErr> {
-        BackgroundJob::find()
-            .filter(background_job::Column::JobType.eq(job_type))
-            .filter(background_job::Column::Status.eq(background_job::STATUS_PENDING))
-            .order_by_asc(background_job::Column::CreatedAt)
-            .all(db)
-            .await
-    }
-
-    /// Delete completed jobs older than a certain age
-    pub async fn cleanup_old_jobs(
-        &self,
-        db: &DbConn,
-        days_old: i64,
-    ) -> Result<DeleteResult, DbErr> {
-        let cutoff_date = Utc::now().naive_utc() - chrono::Duration::days(days_old);
-        
-        BackgroundJob::delete_many()
-            .filter(background_job::Column::Status.eq(background_job::STATUS_COMPLETED))
-            .filter(background_job::Column::UpdatedAt.lt(cutoff_date))
-            .exec(db)
-            .await
-    }
 }

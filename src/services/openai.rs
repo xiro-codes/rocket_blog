@@ -17,15 +17,6 @@ impl OpenAIService {
         }
     }
 
-    /// Check if OpenAI service is available (has valid API key in database)
-    pub async fn is_available(&self, db: &DatabaseConnection) -> bool {
-        self.settings_service
-            .get_openai_api_key(db)
-            .await
-            .unwrap_or(None)
-            .is_some()
-    }
-
     /// Get a configured OpenAI client if API key is available
     async fn get_client(&self, db: &DatabaseConnection) -> Result<Client<async_openai::config::OpenAIConfig>, String> {
         let api_key = self.settings_service

@@ -251,10 +251,6 @@ impl Service {
         p.update(db).await
     }
 
-    pub async fn delete_by_id(&self, _db: &DbConn, _id: Uuid) -> Result<DeleteResult, DbErr> {
-        todo!()
-    }
-
     pub async fn delete_by_seq_id(&self, db: &DbConn, id: i32) -> Result<(), DbErr> {
         let mut p = self.find_by_seq_id(db, id).await?.into_active_model();
         p.draft = Set(Some(true));

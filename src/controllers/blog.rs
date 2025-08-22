@@ -731,7 +731,7 @@ async fn add_reaction(
     };
 
     // Validate reaction type
-    if ReactionType::from_str(&reaction_type).is_none() {
+    if ReactionType::parse(&reaction_type).is_none() {
         return Err(Status::BadRequest);
     }
     

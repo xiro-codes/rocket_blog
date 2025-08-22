@@ -5,7 +5,7 @@ use models::{
     prelude::PostReaction,
 };
 use rocket::serde::{Deserialize, Serialize};
-use sea_orm::{ColumnTrait, DbConn, EntityTrait, QueryFilter, Set, ActiveModelTrait, TryIntoModel, PaginatorTrait};
+use sea_orm::{ColumnTrait, DbConn, EntityTrait, QueryFilter, Set, ActiveModelTrait, TryIntoModel};
 use std::collections::HashMap;
 use uuid::Uuid;
 
@@ -42,7 +42,7 @@ impl Service {
         session_id: Option<&str>,
     ) -> Result<post_reaction::Model, sea_orm::DbErr> {
         // Validate reaction type
-        if ReactionType::from_str(reaction_type).is_none() {
+        if ReactionType::parse(reaction_type).is_none() {
             return Err(sea_orm::DbErr::Custom(format!(
                 "Invalid reaction type: {}",
                 reaction_type
@@ -181,19 +181,4 @@ impl Service {
         Ok(summaries)
     }
 
-    /// Get total reaction count for a post (simple count)
-    pub async fn get_total_reaction_count(
-        &self,
-        db: &DbConn,
-        post_id: Uuid,
-    ) -> Result<i64, sea_orm::DbErr> {
-        use sea_orm::QuerySelect;
-
-        let count = PostReaction::find()
-            .filter(post_reaction::Column::PostId.eq(post_id))
-            .count(db)
-            .await?;
-
-        Ok(count as i64)
-    }
 }

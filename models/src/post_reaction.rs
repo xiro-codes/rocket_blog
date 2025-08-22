@@ -60,7 +60,7 @@ impl ReactionType {
         }
     }
 
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse(s: &str) -> Option<Self> {
         match s {
             "like" => Some(ReactionType::Like),
             "love" => Some(ReactionType::Love),

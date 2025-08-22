@@ -6,7 +6,7 @@ mod tests {
 
     #[test]
     fn test_catch_default() {
-        let redirect = catch_default();
+        let _redirect = catch_default();
         // Test that redirect is created successfully - we can't easily test the location
         // without more complex setup since Redirect doesn't expose location() publicly
         assert!(true); // Placeholder showing that redirect was created successfully

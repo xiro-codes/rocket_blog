@@ -210,22 +210,4 @@ impl YoutubeDownloadService {
         }
     }
 
-    /// Get download status for a post
-    pub async fn get_download_status(
-        &self,
-        db: &DbConn,
-        post_id: Uuid,
-    ) -> Result<Option<(String, Option<String>)>, DbErr> {
-        let job_service = BackgroundJobService::new();
-        
-        match job_service.get_job_by_entity(
-            db,
-            background_job::ENTITY_TYPE_POST.to_string(),
-            post_id,
-            background_job::JOB_TYPE_YOUTUBE_DOWNLOAD.to_string(),
-        ).await? {
-            Some(job) => Ok(Some((job.status, job.error_message))),
-            None => Ok(None),
-        }
-    }
 }
