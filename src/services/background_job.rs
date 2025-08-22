@@ -1,6 +1,6 @@
 use sea_orm::*;
 use uuid::Uuid;
-use chrono::{Utc, FixedOffset};
+use chrono::Utc;
 use models::{background_job, prelude::BackgroundJob};
 use serde_json;
 
@@ -22,7 +22,7 @@ impl BackgroundJobService {
         job_data: Option<serde_json::Value>,
     ) -> Result<background_job::Model, DbErr> {
         let job_id = Uuid::new_v4();
-        let now = Utc::now().with_timezone(&FixedOffset::east_opt(0).unwrap());
+        let now = Utc::now().naive_utc();
 
         let job = background_job::ActiveModel {
             id: Set(job_id),
@@ -55,7 +55,7 @@ impl BackgroundJobService {
         let mut job: background_job::ActiveModel = job.into();
         job.status = Set(status);
         job.error_message = Set(error_message);
-        job.updated_at = Set(Utc::now().with_timezone(&FixedOffset::east_opt(0).unwrap()));
+        job.updated_at = Set(Utc::now().naive_utc());
 
         job.update(db).await
     }
@@ -97,7 +97,7 @@ impl BackgroundJobService {
         db: &DbConn,
         days_old: i64,
     ) -> Result<DeleteResult, DbErr> {
-        let cutoff_date = Utc::now().with_timezone(&FixedOffset::east_opt(0).unwrap()) - chrono::Duration::days(days_old);
+        let cutoff_date = Utc::now().naive_utc() - chrono::Duration::days(days_old);
         
         BackgroundJob::delete_many()
             .filter(background_job::Column::Status.eq(background_job::STATUS_COMPLETED))

@@ -15,8 +15,8 @@ pub struct Model {
     pub status: String,
     pub error_message: Option<String>,
     pub job_data: Option<Json>,
-    pub created_at: DateTimeWithTimeZone,
-    pub updated_at: DateTimeWithTimeZone,
+    pub created_at: DateTime,
+    pub updated_at: DateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
