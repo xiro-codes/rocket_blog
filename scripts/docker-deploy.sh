@@ -21,6 +21,10 @@ function show_help() {
     echo "  renew-ssl          Force SSL certificate renewal"
     echo "  status             Show service status"
     echo "  logs [service]     Show logs (optional service name)"
+    echo "  backup [env]       Backup Docker volumes (env: prod|dev, auto-detect if not specified)"
+    echo "  restore [env]      Restore Docker volumes from latest backup"
+    echo "  backup-list        List available backups"
+    echo "  backup-clean [days] Remove backups older than N days (default: 7)"
     echo "  stop               Stop all services"
     echo "  clean              Stop and remove all containers/volumes"
     echo "  help               Show this help message"
@@ -31,6 +35,10 @@ function show_help() {
     echo "  $0 prod             # Start production with SSL"
     echo "  $0 logs nginx       # Show nginx logs only"
     echo "  $0 setup-ssl       # Generate SSL certificates"
+    echo "  $0 backup           # Backup volumes (auto-detect environment)"
+    echo "  $0 backup prod      # Backup production volumes"
+    echo "  $0 restore dev      # Restore development volumes"
+    echo "  $0 backup-clean 30  # Remove backups older than 30 days"
 }
 
 function start_dev() {
@@ -124,6 +132,22 @@ function clean_all() {
     fi
 }
 
+function backup_volumes() {
+    "$SCRIPT_DIR/docker-backup.sh" backup "$1"
+}
+
+function restore_volumes() {
+    "$SCRIPT_DIR/docker-backup.sh" restore "$1"
+}
+
+function list_backups() {
+    "$SCRIPT_DIR/docker-backup.sh" list
+}
+
+function clean_backups() {
+    "$SCRIPT_DIR/docker-backup.sh" clean "$1"
+}
+
 case "${1:-help}" in
     dev)
         start_dev
@@ -145,6 +169,18 @@ case "${1:-help}" in
         ;;
     logs)
         show_logs "$2"
+        ;;
+    backup)
+        backup_volumes "$2"
+        ;;
+    restore)
+        restore_volumes "$2"
+        ;;
+    backup-list)
+        list_backups
+        ;;
+    backup-clean)
+        clean_backups "$2"
         ;;
     stop)
         stop_services

@@ -8,3 +8,9 @@ models/src.backup/
 
 # Python cache files
 scripts/__pycache__/
+
+# Docker volume backups
+backups/
+
+# Test scripts (temporary)
+test-docker-backup.sh

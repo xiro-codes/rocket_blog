@@ -350,6 +350,75 @@ sudo chown rocket_blog:rocket_blog /opt/rocket_blog/backup.sh
 echo "0 2 * * * /opt/rocket_blog/backup.sh" | sudo -u rocket_blog crontab -
 ```
 
+### Docker Volume Backup Strategy
+
+For Docker deployments, use the built-in Docker volume backup functionality:
+
+```bash
+# Backup Docker volumes (auto-detects environment)
+./scripts/docker-deploy.sh backup
+
+# Backup specific environment
+./scripts/docker-deploy.sh backup prod   # Production volumes
+./scripts/docker-deploy.sh backup dev    # Development volumes
+
+# List available backups
+./scripts/docker-deploy.sh backup-list
+
+# Restore from latest backup
+./scripts/docker-deploy.sh restore
+
+# Restore specific environment
+./scripts/docker-deploy.sh restore prod
+
+# Clean old backups (remove older than 7 days)
+./scripts/docker-deploy.sh backup-clean
+
+# Clean old backups (custom retention period)
+./scripts/docker-deploy.sh backup-clean 30  # Keep 30 days
+
+# Alternative: Use the backup script directly
+./scripts/docker-backup.sh backup           # Auto-detect environment
+./scripts/docker-backup.sh backup prod      # Backup production
+./scripts/docker-backup.sh restore          # Restore latest
+./scripts/docker-backup.sh list             # List backups
+./scripts/docker-backup.sh clean 14         # Keep 14 days
+```
+
+#### What Gets Backed Up
+
+**Production Environment:**
+- `postgres_data` - PostgreSQL database files
+- `app_data` - Application uploaded files and data
+- `letsencrypt_data` - SSL certificates
+- `certbot_webroot` - Certbot validation files
+- `nginx_logs` - Nginx access and error logs
+
+**Development Environment:**
+- `postgres_data` - PostgreSQL database files
+- `app_data` - Application uploaded files and data
+
+#### Backup Location
+
+Backups are stored in `./backups/` directory by default. You can customize this with:
+
+```bash
+# Custom backup directory
+BACKUP_DIR=/path/to/backups ./scripts/docker-backup.sh backup
+```
+
+#### Automated Backups
+
+Add to crontab for automated Docker volume backups:
+
+```bash
+# Daily backup at 2 AM
+echo "0 2 * * * cd /opt/rocket_blog && ./scripts/docker-deploy.sh backup prod" | crontab -
+
+# Weekly cleanup (keep 30 days)
+echo "0 3 * * 0 cd /opt/rocket_blog && ./scripts/docker-deploy.sh backup-clean 30" | crontab -
+```
+
 ## 🚀 Performance Optimization
 
 ### Database Optimization

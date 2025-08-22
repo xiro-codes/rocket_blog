@@ -98,6 +98,22 @@ docker-clean:
 docker-help:
 	sh ./scripts/docker-deploy.sh help
 
+# Backup Docker volumes to filesystem
+docker-backup ENV="":
+	sh ./scripts/docker-deploy.sh backup {{ENV}}
+
+# Restore Docker volumes from backup
+docker-restore ENV="":
+	sh ./scripts/docker-deploy.sh restore {{ENV}}
+
+# List available Docker volume backups
+docker-backup-list:
+	sh ./scripts/docker-deploy.sh backup-list
+
+# Clean old Docker volume backups (default: 7 days)
+docker-backup-clean DAYS="7":
+	sh ./scripts/docker-deploy.sh backup-clean {{DAYS}}
+
 # Run tests in Docker container
 docker-test:
 	@echo "🧪 Building and running tests in Docker container..."
