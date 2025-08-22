@@ -14,7 +14,7 @@
 		
 		<div>
 			<label for="title" class="form-label">Title:</label>
-			<div class="d-flex">
+			<div class="d-flex form-input-group">
 				<input type="text" name="title" id="title" class="form-control me-2" placeholder="Enter post title..." />
 				{% if ai_available %}
 				<button type="button" id="generate-content-btn" class="btn btn-success">✨ Generate</button>
@@ -32,7 +32,7 @@
 		
 		<div>
 			<label for="excerpt" class="form-label">Excerpt:</label>
-			<div class="d-flex">
+			<div class="d-flex form-input-group">
 				<textarea name="excerpt" id="excerpt" rows="3" class="form-control me-2" 
 			          placeholder="Brief summary of the post (optional - will be auto-generated if left empty)"></textarea>
 				{% if ai_available %}
@@ -65,7 +65,7 @@
 		
 		<div class="mb-3">
 			<label for="tags" class="form-label">Tags (comma-separated):</label>
-			<div class="d-flex">
+			<div class="d-flex form-input-group">
 				<input type="text" class="form-control me-2" name="tags" id="tags" placeholder="e.g. rust, web development, tutorial">
 				{% if ai_available %}
 				<button type="button" id="generate-tags-btn" class="btn btn-outline-success">✨ Generate Tags</button>
@@ -74,8 +74,8 @@
 			<div class="form-text">Separate multiple tags with commas</div>
 		</div>
 		
-		<div class="justify-content-center d-flex m-1">
-			<button type="submit" name="action" value="draft" class="btn btn-secondary me-2">[SAVE AS DRAFT]</button>
+		<div class="justify-content-center d-flex m-1 flex-wrap gap-2">
+			<button type="submit" name="action" value="draft" class="btn btn-secondary">[SAVE AS DRAFT]</button>
 			<button type="submit" name="action" value="publish" class="btn btn-primary">[PUBLISH POST]</button>
 		</div>
 	</form>

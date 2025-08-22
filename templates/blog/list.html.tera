@@ -11,7 +11,7 @@
 	{% endif %}
 
 	{%if token %}
-	<div class="btn-group mb-3">
+	<div class="btn-group mb-3 flex-wrap">
 		{%if is_admin %}
 		<a class="btn btn-primary" href="/blog/create">[CREATE POST]</a>
 		{%endif%}
@@ -42,8 +42,8 @@
 <hr class="terminal-divider">
 
 <div class="row">
-	<div class="col-md-8">
-		<div class="mx-5 my-2">
+	<div class="col-12 col-lg-8">
+		<div class="mx-2 mx-md-5 my-2">
 			{% for post in posts %}
 			<li class="list-group-item">
 				{% if post.draft and token %}
@@ -91,7 +91,7 @@
 			{% endfor %}
 		</div>
 	</div>
-	<div class="col-md-4">
+	<div class="col-12 col-lg-4">
 		{% if all_tags %}
 		<div class="card">
 			<div class="card-header">
@@ -114,7 +114,7 @@
 <hr class="terminal-divider">
 
 <div class="d-flex justify-content-center m-2">
-	<footer class="btn-group align-items-center">
+	<footer class="btn-group align-items-center flex-wrap">
 		{% if page == 1 %}
 		<button class="btn btn-secondary" disabled>[PREV]</button>
 		{% else %}
