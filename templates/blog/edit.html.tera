@@ -61,10 +61,11 @@
 		<div>
 			<label for="youtube_url" class="form-label">YouTube URL:</label>
 			<input type="url" name="youtube_url" id="youtube_url" class="form-control" 
-			       placeholder="https://www.youtube.com/watch?v=..." />
+			       placeholder="https://www.youtube.com/watch?v=..." 
+			       value="{% if post.youtube_url %}{{ post.youtube_url }}{% endif %}" />
 			<div class="form-text">
 				<div id="youtube-status">
-					Provide a YouTube URL to download the video. The download will happen in the background.
+					Provide a YouTube URL to embed the video in your post.
 				</div>
 			</div>
 		</div>
@@ -351,58 +352,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	});
 	{% endif %}
-	
-	// Load background job status for YouTube downloads
-	loadBackgroundJobStatus();
-	
-	async function loadBackgroundJobStatus() {
-		try {
-			const postId = {{post.seq_id}};
-			const response = await fetch(`/blog/${postId}/background-job-status`);
-			const data = await response.json();
-			
-			if (data.success && data.job) {
-				const job = data.job;
-				const statusDiv = document.getElementById('youtube-status');
-				const youtubeUrlInput = document.getElementById('youtube_url');
-				
-				// Populate the YouTube URL field if available
-				if (job.youtube_url) {
-					youtubeUrlInput.value = job.youtube_url;
-				}
-				
-				// Display status based on job status
-				switch (job.status) {
-					case 'completed':
-						statusDiv.innerHTML = '<span class="text-success">✅ YouTube video downloaded successfully</span>';
-						break;
-					case 'downloading':
-						statusDiv.innerHTML = '<span class="text-info">⬇️ YouTube video is downloading...</span>';
-						// Poll for updates every 5 seconds if downloading
-						setTimeout(loadBackgroundJobStatus, 5000);
-						break;
-					case 'pending':
-						statusDiv.innerHTML = '<span class="text-warning">⏳ YouTube download is pending...</span>';
-						// Poll for updates every 5 seconds if pending
-						setTimeout(loadBackgroundJobStatus, 5000);
-						break;
-					case 'failed':
-						const errorMsg = job.error_message ? `: ${job.error_message}` : '';
-						statusDiv.innerHTML = `<span class="text-danger">❌ YouTube download failed${errorMsg}. You can upload a video file instead using the field above.</span>`;
-						break;
-					default:
-						statusDiv.innerHTML = 'Provide a YouTube URL to download the video. The download will happen in the background.';
-				}
-			} else {
-				// No background job found - show default message
-				document.getElementById('youtube-status').innerHTML = 'Provide a YouTube URL to download the video. The download will happen in the background.';
-			}
-		} catch (error) {
-			console.error('Failed to load background job status:', error);
-			// Show default message on error
-			document.getElementById('youtube-status').innerHTML = 'Provide a YouTube URL to download the video. The download will happen in the background.';
-		}
-	}
 });
 </script>
 {% endif %}

@@ -17,6 +17,9 @@ pub struct Model {
     pub draft: Option<bool>,
     pub date_published: DateTime,
     pub account_id: Uuid,
+    pub youtube_url: Option<String>,
+    pub download_status: Option<String>,
+    pub download_error: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

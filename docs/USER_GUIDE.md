@@ -233,21 +233,18 @@ The blog uses a modern dark theme by default:
 
 ### Video Streaming
 
-Your blog supports both video file uploads and YouTube video downloads:
+Your blog supports both video file uploads and YouTube video embeds:
 
 1. **Uploading Videos**
    - Videos can be included in blog posts
    - Supports large files up to 1GB
    - Automatic streaming optimization
 
-2. **YouTube Video Downloads**
-   - NEW: Provide a YouTube URL instead of uploading a file
-   - Videos are downloaded automatically in the background using yt-dlp
-   - Download status is displayed during the process:
-     - ⏳ **Pending**: Download queued
-     - ⬇️ **Downloading**: Video is being downloaded
-     - ✅ **Completed**: Download successful, video ready for streaming
-     - ❌ **Failed**: Download failed with error message
+2. **YouTube Video Embeds**
+   - NEW: Provide a YouTube URL to embed videos directly in your posts
+   - Videos are displayed using YouTube's native player
+   - No storage space used on your server
+   - Automatic responsive design
    - Supports various YouTube URL formats:
      - `https://www.youtube.com/watch?v=VIDEO_ID`
      - `https://youtu.be/VIDEO_ID`
@@ -258,15 +255,15 @@ Your blog supports both video file uploads and YouTube video downloads:
    - Videos stream efficiently with range request support
    - Viewers can seek to any position without full download
    - Works across all modern browsers
-   - Both uploaded and downloaded videos use the same streaming system
+   - Both uploaded videos and YouTube embeds integrate seamlessly into posts
 
 ### File Uploads
 
 - **Size Limit**: Files up to 1GB are supported
 - **Security**: Uploaded files are safely stored
 - **Access Control**: File access respects post privacy settings
-- **Flexible Media Options**: You can either upload a file OR provide a YouTube URL
-- **Fallback Support**: If YouTube download fails, you can switch to file upload when editing
+- **Flexible Media Options**: You can either upload a file OR provide a YouTube URL for embedding
+- **Easy Integration**: YouTube videos are embedded directly without taking up server storage
 
 ## 📊 Blog Analytics (Coming Soon)
 

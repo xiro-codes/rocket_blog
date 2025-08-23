@@ -110,9 +110,19 @@
 	</header>
 	{%endif%}
 </center>
-{%if post.path%}
-<div class="d-flex align-items-center justify-content-center">
-	<video class="object-fit-scale" src="{{post.seq_id}}/video" height="300" controls autoplay></video>
+{%if post.path or post.youtube_url%}
+<div class="d-flex align-items-center justify-content-center mb-4">
+	{% if post.youtube_url %}
+		<!-- YouTube Embed -->
+		<div class="youtube-embed-container" style="position: relative; width: 100%; max-width: 560px; height: 0; padding-bottom: 56.25%;">
+			<div id="youtube-embed" data-url="{{ post.youtube_url }}">
+				<p>Loading YouTube video...</p>
+			</div>
+		</div>
+	{% elif post.path %}
+		<!-- Local Video File -->
+		<video class="object-fit-scale" src="{{post.seq_id}}/video" height="300" controls autoplay></video>
+	{% endif %}
 </div>
 {%endif%}
 
@@ -328,5 +338,47 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+</script>
+
+<!-- YouTube Embed JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const youtubeEmbed = document.getElementById('youtube-embed');
+    if (youtubeEmbed) {
+        const url = youtubeEmbed.getAttribute('data-url');
+        if (url) {
+            const videoId = extractYouTubeVideoId(url);
+            if (videoId) {
+                youtubeEmbed.innerHTML = `
+                    <iframe src="https://www.youtube.com/embed/${videoId}" 
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                `;
+            } else {
+                youtubeEmbed.innerHTML = '<p class="text-danger">Invalid YouTube URL</p>';
+            }
+        }
+    }
+});
+
+function extractYouTubeVideoId(url) {
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=)([^&\n?#]+)/,
+        /(?:youtu\.be\/)([^&\n?#]+)/,
+        /(?:youtube\.com\/embed\/)([^&\n?#]+)/,
+        /(?:youtube\.com\/v\/)([^&\n?#]+)/
+    ];
+    
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) {
+            return match[1];
+        }
+    }
+    return null;
+}
 </script>
 {% endblock %}

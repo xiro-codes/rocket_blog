@@ -60,7 +60,7 @@
 			<label for="youtube_url" class="form-label">YouTube URL:</label>
 			<input type="url" name="youtube_url" id="youtube_url" class="form-control" 
 			       placeholder="https://www.youtube.com/watch?v=..." />
-			<div class="form-text">Provide a YouTube URL to download the video. The download will happen in the background.</div>
+			<div class="form-text">Provide a YouTube URL to embed the video in your post.</div>
 		</div>
 		
 		<div class="mb-3">

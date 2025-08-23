@@ -1,4 +1,4 @@
-use crate::services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService};
+use crate::services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService, YoutubeEmbedService, BackgroundJobService};
 use crate::controllers;
 use crate::config::AppConfig;
 use rocket::{fairing::AdHoc, Build, Rocket, State};
@@ -30,7 +30,7 @@ impl ServiceRegistry {
             .manage(SettingsService::new())
             .manage(TagService::new())
             .manage(CoordinatorService::new())
-            .manage(YoutubeDownloadService::new())
+            .manage(YoutubeEmbedService::new())
             .manage(BackgroundJobService::new())
     }
     
