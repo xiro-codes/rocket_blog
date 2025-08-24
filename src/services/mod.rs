@@ -18,6 +18,8 @@ mod openai;
 pub use openai::OpenAIService;
 mod ollama;
 pub use ollama::OllamaService;
+pub mod poll;
+pub use poll::PollService;
 mod reaction;
 pub use reaction::{PostReactionSummary, Service as ReactionService};
 mod settings;

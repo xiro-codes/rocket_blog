@@ -1,0 +1,132 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="terminal-header"></div>
+<div class="d-flex flex-column align-items-center justify-content-center">
+	<h1 class="terminal-prompt">Create Poll</h1>
+	{% if flash_kind and flash_message %}
+	<h3 class="btn-{{ flash_kind }} btn disabled">
+		{{ flash_message }}
+	</h3>
+	{% endif %}
+
+	<div class="btn-group mb-3 flex-wrap">
+		<a class="btn btn-success" href="/poll">[BACK TO POLLS]</a>
+		<a class="btn btn-info" href="/blog">[BLOG]</a>
+	</div>
+</div>
+
+<hr class="terminal-divider">
+
+<div class="row">
+	<div class="col-12 col-lg-8">
+		<div class="mx-2 mx-md-5 my-2">
+			<form method="post" action="/poll/">
+				<div class="mb-3">
+					<label for="title" class="form-label">Poll Title</label>
+					<input type="text" class="form-control" id="title" name="title" required>
+				</div>
+				
+				<div class="mb-3">
+					<label for="description" class="form-label">Description (Optional)</label>
+					<textarea class="form-control" id="description" name="description" rows="3" 
+							  placeholder="Provide context or details about your poll"></textarea>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">Poll Options</label>
+					<div id="poll-options">
+						<div class="input-group mb-2">
+							<input type="text" class="form-control" name="options" placeholder="Option 1" required>
+							<button type="button" class="btn btn-outline-danger" onclick="removeOption(this)" disabled>
+								Remove
+							</button>
+						</div>
+						<div class="input-group mb-2">
+							<input type="text" class="form-control" name="options" placeholder="Option 2" required>
+							<button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">
+								Remove
+							</button>
+						</div>
+					</div>
+					<button type="button" class="btn btn-outline-primary" onclick="addOption()">
+						Add Option
+					</button>
+					<small class="form-text text-muted">A poll must have at least 2 options.</small>
+				</div>
+
+				<div class="mb-3">
+					<button type="submit" class="btn btn-primary">[CREATE POLL]</button>
+					<a href="/poll" class="btn btn-secondary">[CANCEL]</a>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="col-12 col-lg-4 border-start">
+		<div class="mx-2 mx-md-5 my-2">
+			<h4>Poll Creation Tips</h4>
+			<ul>
+				<li><strong>Clear Title:</strong> Make your poll title descriptive</li>
+				<li><strong>Good Options:</strong> Provide clear, distinct choices</li>
+				<li><strong>Context:</strong> Use the description to give background</li>
+				<li><strong>Neutral Language:</strong> Avoid biased wording</li>
+			</ul>
+			
+			<hr>
+			
+			<h5>Example Poll</h5>
+			<p><strong>Title:</strong> "What's your favorite programming language?"</p>
+			<p><strong>Options:</strong></p>
+			<ul>
+				<li>Rust</li>
+				<li>JavaScript</li>
+				<li>Python</li>
+				<li>Go</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<script>
+let optionCount = 2;
+
+function addOption() {
+	optionCount++;
+	const container = document.getElementById('poll-options');
+	const newOption = document.createElement('div');
+	newOption.className = 'input-group mb-2';
+	newOption.innerHTML = `
+		<input type="text" class="form-control" name="options" placeholder="Option ${optionCount}" required>
+		<button type="button" class="btn btn-outline-danger" onclick="removeOption(this)">
+			Remove
+		</button>
+	`;
+	container.appendChild(newOption);
+	updateRemoveButtons();
+}
+
+function removeOption(button) {
+	const container = document.getElementById('poll-options');
+	const optionDiv = button.parentElement;
+	container.removeChild(optionDiv);
+	optionCount--;
+	updatePlaceholders();
+	updateRemoveButtons();
+}
+
+function updatePlaceholders() {
+	const inputs = document.querySelectorAll('#poll-options input[name="options"]');
+	inputs.forEach((input, index) => {
+		input.placeholder = `Option ${index + 1}`;
+	});
+}
+
+function updateRemoveButtons() {
+	const removeButtons = document.querySelectorAll('#poll-options .btn-outline-danger');
+	removeButtons.forEach((button, index) => {
+		// Disable remove button if only 2 options remain
+		button.disabled = removeButtons.length <= 2;
+	});
+}
+</script>
+{% endblock %}

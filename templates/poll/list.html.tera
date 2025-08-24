@@ -1,0 +1,80 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="terminal-header"></div>
+<div class="d-flex flex-column align-items-center justify-content-center">
+	<h1 class="terminal-prompt">Polls</h1>
+	{% if flash_kind and flash_message %}
+	<h3 class="btn-{{ flash_kind }} btn disabled">
+		{{ flash_message }}
+	</h3>
+	{% endif %}
+
+	{%if token %}
+	<div class="btn-group mb-3 flex-wrap">
+		{%if is_admin %}
+		<a class="btn btn-primary" href="/poll/create">[CREATE POLL]</a>
+		{%endif%}
+		<a class="btn btn-success" href="/blog">[BLOG]</a>
+		{%if is_admin %}
+		<a class="btn btn-secondary" href="/settings">[SETTINGS]</a>
+		{%endif%}
+		<a class="btn btn-primary" href="/auth/logout">[LOGOUT]</a>
+	</div>
+	{%else%}
+	<div class="mb-3">
+		<a class="btn btn-success" href="/blog">[BLOG]</a>
+		{% if not has_accounts %}
+		<a class="btn btn-warning" href="/auth/create-admin">[CREATE ADMIN ACCOUNT]</a>
+		{% else %}
+		<a class="btn btn-primary" href="/auth/">[LOGIN]</a>
+		{% endif %}
+	</div>
+	{%endif%}
+</div>
+
+<hr class="terminal-divider">
+
+<div class="row">
+	<div class="col-12 col-lg-8">
+		<div class="mx-2 mx-md-5 my-2">
+			{% if polls %}
+			{% for poll in polls %}
+			<li class="list-group-item">
+				{% if not poll.active and token %}
+				<span class="badge bg-warning text-dark ms-2">INACTIVE</span>
+				{% endif %}
+				<h4 class="terminal-text terminal-link">
+					<a href="/poll/{{poll.seq_id}}">{{ poll.title }}</a>
+				</h4>
+				{% if poll.description %}
+				<p class="text-muted">{{ poll.description }}</p>
+				{% endif %}
+				<small class="text-muted">
+					Published: {{ poll.date_published | date(format="%Y-%m-%d %H:%M") }}
+				</small>
+			</li>
+			{% endfor %}
+			{% else %}
+			<div class="text-center">
+				<h3>No polls available</h3>
+				<p>Check back later for new polls!</p>
+			</div>
+			{% endif %}
+		</div>
+	</div>
+	<div class="col-12 col-lg-4 border-start">
+		<div class="mx-2 mx-md-5 my-2">
+			<h3>Welcome to Polls</h3>
+			<p>Participate in community polls and share your opinions!</p>
+			<hr>
+			<p><strong>How to participate:</strong></p>
+			<ul>
+				<li>Click on any poll title to view and vote</li>
+				<li>Each poll allows one vote per visitor</li>
+				<li>Results are shown after voting</li>
+			</ul>
+		</div>
+	</div>
+</div>
+{% endblock %}

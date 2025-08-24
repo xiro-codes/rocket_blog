@@ -1,0 +1,105 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="terminal-header"></div>
+<div class="d-flex flex-column align-items-center justify-content-center">
+	<h1 class="terminal-prompt">{{ poll_result.poll.title }}</h1>
+	{% if flash_kind and flash_message %}
+	<h3 class="btn-{{ flash_kind }} btn disabled">
+		{{ flash_message }}
+	</h3>
+	{% endif %}
+
+	<div class="btn-group mb-3 flex-wrap">
+		<a class="btn btn-success" href="/poll">[BACK TO POLLS]</a>
+		<a class="btn btn-info" href="/blog">[BLOG]</a>
+		{%if token and is_admin %}
+		<a class="btn btn-warning" href="/poll/{{ poll_result.poll.seq_id }}/toggle">[{% if poll_result.poll.active %}DEACTIVATE{% else %}ACTIVATE{% endif %}]</a>
+		<a class="btn btn-danger" href="/poll/{{ poll_result.poll.seq_id }}/delete" onclick="return confirm('Are you sure you want to delete this poll?')">[DELETE]</a>
+		{%endif%}
+	</div>
+</div>
+
+<hr class="terminal-divider">
+
+<div class="row">
+	<div class="col-12 col-lg-8">
+		<div class="mx-2 mx-md-5 my-2">
+			<div class="card">
+				<div class="card-body">
+					<h2 class="card-title">{{ poll_result.poll.title }}</h2>
+					{% if poll_result.poll.description %}
+					<p class="card-text">{{ poll_result.poll.description }}</p>
+					{% endif %}
+					
+					{% if not poll_result.poll.active %}
+					<div class="alert alert-warning">
+						<strong>This poll is currently inactive.</strong>
+					</div>
+					{% endif %}
+
+					{% if poll_result.user_voted or not poll_result.poll.active %}
+					<!-- Show results -->
+					<h4>Results ({{ poll_result.total_votes }} total votes)</h4>
+					{% for option in poll_result.options %}
+					<div class="mb-3">
+						<div class="d-flex justify-content-between align-items-center">
+							<span>{{ option.option.text }}</span>
+							<span>{{ option.vote_count }} votes ({{ option.percentage | round(precision=1) }}%)</span>
+						</div>
+						<div class="progress">
+							<div class="progress-bar" role="progressbar" style="width: {{ option.percentage }}%" 
+								 aria-valuenow="{{ option.percentage }}" aria-valuemin="0" aria-valuemax="100">
+							</div>
+						</div>
+					</div>
+					{% endfor %}
+					
+					{% if poll_result.user_voted %}
+					<p class="text-muted mt-3">✓ You have already voted in this poll</p>
+					{% endif %}
+					
+					{% else %}
+					<!-- Show voting form -->
+					<h4>Cast Your Vote</h4>
+					<form method="post" action="/poll/{{ poll_result.poll.seq_id }}/vote">
+						{% for option in poll_result.options %}
+						<div class="form-check mb-2">
+							<input class="form-check-input" type="radio" name="option_id" value="{{ option.option.id }}" id="option{{ loop.index }}">
+							<label class="form-check-label" for="option{{ loop.index }}">
+								{{ option.option.text }}
+							</label>
+						</div>
+						{% endfor %}
+						<button type="submit" class="btn btn-primary mt-3">[VOTE]</button>
+					</form>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-12 col-lg-4 border-start">
+		<div class="mx-2 mx-md-5 my-2">
+			<h4>Poll Information</h4>
+			<p><strong>Published:</strong> {{ poll_result.poll.date_published | date(format="%Y-%m-%d %H:%M") }}</p>
+			<p><strong>Status:</strong> 
+				{% if poll_result.poll.active %}
+				<span class="badge bg-success">Active</span>
+				{% else %}
+				<span class="badge bg-warning">Inactive</span>
+				{% endif %}
+			</p>
+			<p><strong>Total Votes:</strong> {{ poll_result.total_votes }}</p>
+			
+			<hr>
+			
+			<h5>Poll Guidelines</h5>
+			<ul>
+				<li>One vote per visitor</li>
+				<li>Votes cannot be changed</li>
+				<li>Results are shown after voting</li>
+			</ul>
+		</div>
+	</div>
+</div>
+{% endblock %}

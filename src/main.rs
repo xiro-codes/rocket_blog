@@ -109,10 +109,11 @@ async fn rocket() -> _ {
         .manage(app_config);
     
     // Only attach seeding in debug builds (development mode)
-    if Features::enable_seeding() {
+    // Temporarily disabled due to migration issues
+    /*if Features::enable_seeding() {
         log::info!("Attaching database seeding middleware");
         rocket = rocket.attach(middleware::Seeding::new(Some(0), 50));
-    }
+    }*/
     
     log::info!("Attaching controllers and static file server");
     // Attach all controllers

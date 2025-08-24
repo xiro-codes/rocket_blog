@@ -11,6 +11,8 @@ mod comment;
 pub use comment::Controller as CommentController;
 mod feed;
 pub use feed::Controller as FeedController;
+mod poll;
+pub use poll::Controller as PollController;
 mod settings;
 pub use settings::Controller as SettingsController;
 mod seo;
