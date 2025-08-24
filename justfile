@@ -1,36 +1,76 @@
+# Multi-app workspace commands
+
+# Database migrations (shared across all apps)
 migrate: 
-	sea-orm-cli migrate -d migrations 
+	sea-orm-cli migrate -d shared/migrations 
 force-migrate:
-	sea-orm-cli migrate -d migrations fresh
+	sea-orm-cli migrate -d shared/migrations fresh
 new-migration NAME:
-  sea-orm-cli migrate -d migrations generate {{NAME}}
+  sea-orm-cli migrate -d shared/migrations generate {{NAME}}
 migrate-status:
-	sea-orm-cli migrate -d migrations status
+	sea-orm-cli migrate -d shared/migrations status
 
 # Generate models with custom code preserved in separate dto module
 gen-models:
 	# Remove only generated entity files, preserve dto.rs and other custom files
-	rm ./models/src/account.rs ./models/src/comment.rs ./models/src/post.rs ./models/src/prelude.rs ./models/src/lib.rs || true
-	sea-orm-cli generate entity -l --model-extra-attributes 'serde(crate="rocket::serde")' --with-serde both --with-copy-enums -o  ./models/src
-	sh ./scripts/fix_serde_imports.sh ./models/src
+	rm ./shared/models/src/account.rs ./shared/models/src/comment.rs ./shared/models/src/post.rs ./shared/models/src/prelude.rs ./shared/models/src/lib.rs || true
+	sea-orm-cli generate entity -l --model-extra-attributes 'serde(crate="rocket::serde")' --with-serde both --with-copy-enums -o  ./shared/models/src
+	sh ./scripts/fix_serde_imports.sh ./shared/models/src
 	# Add dto module to lib.rs if not present
-	echo "" >> ./models/src/lib.rs
-	echo "// Custom DTOs and form structures" >> ./models/src/lib.rs
-	echo "pub mod dto;" >> ./models/src/lib.rs
+	echo "" >> ./shared/models/src/lib.rs
+	echo "// Custom DTOs and form structures" >> ./shared/models/src/lib.rs
+	echo "pub mod dto;" >> ./shared/models/src/lib.rs
 	echo "✅ Models generated with fixed serde imports and preserved DTO module"
 
-# Local development commands
-# Build the application in release mode
-build:
+# Build all applications
+build-all:
 	cargo build --release
 
-# Build the application in debug mode (faster compilation)
-build-dev:
+# Build all applications in debug mode
+build-all-dev:
 	cargo build
 
-# Run all tests
-test:
+# Build specific applications
+build-blog:
+	cargo build --release -p blog
+
+build-blog-dev:
+	cargo build -p blog
+
+build-hello-world:
+	cargo build --release -p hello-world
+
+build-hello-world-dev:
+	cargo build -p hello-world
+
+# Legacy commands for compatibility
+build: build-blog
+build-dev: build-blog-dev
+
+# Run applications
+run-blog:
+	cd apps/blog && cargo run
+
+run-hello-world:
+	cd apps/hello-world && cargo run
+
+# Legacy commands for compatibility
+run: run-blog
+dev: run-blog
+
+# Test all applications
+test-all:
 	cargo test
+
+# Test specific applications
+test-blog:
+	cargo test -p blog
+
+test-hello-world:
+	cargo test -p hello-world
+
+# Legacy test commands
+test: test-all
 
 # Run specific test by name
 test-name NAME:

@@ -1,7 +1,10 @@
+use migrations::MigratorTrait;
+use rocket::{fairing, Build, Rocket};
+use sea_orm_rocket::{Database, rocket::figment::Figment, Config};
 use sea_orm::ConnectOptions;
-use sea_orm_rocket::{rocket::figment::Figment, Config, Database};
 use std::time::Duration;
 
+/// Database connection type
 #[derive(Database, Debug)]
 #[database("sea_orm")]
 pub struct Db(SeaOrmPool);
@@ -14,7 +17,6 @@ pub struct SeaOrmPool {
 #[rocket::async_trait]
 impl sea_orm_rocket::Pool for SeaOrmPool {
     type Error = sea_orm::DbErr;
-
     type Connection = sea_orm::DatabaseConnection;
 
     async fn init(figment: &Figment) -> Result<Self, Self::Error> {
@@ -29,11 +31,27 @@ impl sea_orm_rocket::Pool for SeaOrmPool {
             options.idle_timeout(Duration::from_secs(idle_timeout));
         }
         let conn = sea_orm::Database::connect(options).await?;
-
         Ok(SeaOrmPool { conn })
     }
 
     fn borrow(&self) -> &Self::Connection {
         &self.conn
     }
+}
+
+/// Run database migrations
+pub async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
+    log::info!("Starting database migrations...");
+    let conn = &Db::fetch(&rocket).unwrap().conn;
+    
+    match migrations::Migrator::up(conn, None).await {
+        Ok(_) => {
+            log::info!("Database migrations completed successfully");
+        }
+        Err(e) => {
+            log::error!("Database migration failed: {}", e);
+        }
+    }
+    
+    Ok(rocket)
 }
