@@ -91,7 +91,7 @@ async fn list_view(
 ) -> Result<Template, Status> {
     let page_num = page.unwrap_or(1);
     let size = page_size.unwrap_or(10);
-    log::info!("Blog list view requested - Page: {}, Size: {}, Client IP: {}", page_num, size, client_ip.0);
+    log::info!("Route accessed: GET /blog/?page={}&page_size={} - Blog list view requested, Client IP: {}", page_num, size, client_ip.0);
     
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     if token.is_some() {
@@ -174,6 +174,7 @@ async fn detail_view(
     id: i32,
     client_ip: ClientIp,
 ) -> Result<Template, Status> {
+    log::info!("Route accessed: GET /blog/{} - Blog post detail view requested, Client IP: {}", id, client_ip.0);
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
 
@@ -306,6 +307,7 @@ async fn search_get(
     jar: &CookieJar<'_>,
     client_ip: ClientIp,
 ) -> Result<Template, Status> {
+    log::info!("Route accessed: GET /blog/search?query={:?}&page={:?}&page_size={:?} - Search requested, Client IP: {}", query, page, page_size, client_ip.0);
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     
@@ -345,6 +347,7 @@ async fn search_get(
 async fn search_post(
     search_form: Form<SearchFormDTO>,
 ) -> Redirect {
+    log::info!("Route accessed: POST /blog/search - Search form submission with query: {:?}", search_form.query);
     let query = &search_form.query;
     if query.trim().is_empty() {
         Redirect::to(uri!("/blog/search"))
@@ -362,6 +365,7 @@ async fn video(
     range: Option<HttpRange>,
     id: i32,
 ) -> Result<StreamedFile, Status> {
+    log::info!("Route accessed: GET /blog/{}/video - Video streaming requested", id);
     let db = conn.into_inner();
     let post = match service.find_by_seq_id(db, id).await {
         Ok(post) => post,
@@ -424,6 +428,7 @@ async fn create_view(
     flash: Option<FlashMessage<'_>>,
     _admin: crate::guards::admin::Admin,
 ) -> Result<Template, Status> {
+    log::info!("Route accessed: GET /blog/create - Create blog post page requested");
     let db = conn.into_inner();
     
     // Check if any AI service is available
@@ -449,6 +454,7 @@ async fn create(
     jar: &CookieJar<'_>,
     form_data: Form<FormDTO<'_>>,
 ) -> Result<Flash<Redirect>, Status> {
+    log::info!("Route accessed: POST /blog/create - Create blog post form submission");
     if let Some(token) = ControllerBase::check_auth(jar)? {
         let db = conn.into_inner();
         let token = match Uuid::parse_str(&token) {
@@ -502,6 +508,7 @@ async fn edit_view(
     id: i32,
     _admin: crate::guards::admin::Admin,
 ) -> Result<Template, Status> {
+    log::info!("Route accessed: GET /blog/{}/edit - Edit blog post page requested", id);
     let db = conn.into_inner();
     let post = match service.find_by_seq_id(db, id).await {
         Ok(post) => post,
@@ -537,6 +544,7 @@ async fn edit(
     form_data: Form<FormDTO<'_>>,
     _admin: crate::guards::admin::Admin,
 ) -> Result<Flash<Redirect>, Status> {
+    log::info!("Route accessed: POST /blog/{}/edit - Edit blog post form submission", id);
     let db = conn.into_inner();
     
     // First get the post to get its ID
@@ -599,6 +607,7 @@ async fn posts_by_tag(
     jar: &CookieJar<'_>,
     client_ip: ClientIp,
 ) -> Result<Template, Status> {
+    log::info!("Route accessed: GET /blog/tag/{}?page={:?}&page_size={:?} - Posts by tag requested, Client IP: {}", slug, page, page_size, client_ip.0);
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     
@@ -639,6 +648,7 @@ async fn delete(
     id: i32,
     _admin: crate::guards::admin::Admin,
 ) -> Result<Flash<Redirect>, Status> {
+    log::info!("Route accessed: GET /blog/{}/delete - Delete blog post requested", id);
     let db = conn.into_inner();
     let _ = service.delete_by_seq_id(db, id).await;
     Ok(ControllerBase::success_redirect("/blog/", "Deleted Post"))
@@ -652,6 +662,7 @@ async fn publish(
     id: i32,
     jar: &CookieJar<'_>,
 ) -> Result<Flash<Redirect>, Status> {
+    log::info!("Route accessed: GET /blog/{}/publish - Publish blog post requested", id);
     if let Some(token) = ControllerBase::check_auth(jar)? {
         let db = conn.into_inner();
         let token = match Uuid::parse_str(&token) {
@@ -690,6 +701,7 @@ async fn add_reaction(
     reaction_type: String,
     client_ip: ClientIp,
 ) -> Result<Json<Value>, Status> {
+    log::info!("Route accessed: POST /blog/{}/react/{} - Add reaction requested, Client IP: {}", id, reaction_type, client_ip.0);
     let db = conn.into_inner();
     
     // Get post by seq_id to get the actual UUID
@@ -731,6 +743,7 @@ async fn remove_reaction(
     id: i32,
     client_ip: ClientIp,
 ) -> Result<Json<Value>, Status> {
+    log::info!("Route accessed: DELETE /blog/{}/react - Remove reaction requested, Client IP: {}", id, client_ip.0);
     let db = conn.into_inner();
     
     // Get post by seq_id to get the actual UUID
@@ -767,6 +780,7 @@ async fn get_reactions(
     id: i32,
     client_ip: ClientIp,
 ) -> Result<Json<Value>, Status> {
+    log::info!("Route accessed: GET /blog/{}/reactions - Get reactions requested, Client IP: {}", id, client_ip.0);
     let db = conn.into_inner();
     
     // Get post by seq_id to get the actual UUID
@@ -792,6 +806,7 @@ async fn generate_ai_content(
     jar: &CookieJar<'_>,
     generation_request: Json<Value>,
 ) -> Result<Json<Value>, Status> {
+    log::info!("Route accessed: POST /blog/generate-content - AI content generation requested");
     // Check authentication
     let token = ControllerBase::check_auth(jar)?;
     let db = conn.into_inner();
@@ -905,6 +920,7 @@ async fn get_background_job_status(
     id: i32,
     jar: &CookieJar<'_>,
 ) -> Result<Json<Value>, Status> {
+    log::info!("Route accessed: GET /blog/{}/background-job-status - Background job status requested", id);
     // Require authentication to view job status
     ControllerBase::require_auth(jar)?;
     

@@ -26,6 +26,7 @@ async fn sitemap_xml(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
 ) -> Result<content::RawXml<String>, Status> {
+    log::info!("Route accessed: GET /sitemap.xml - Sitemap requested");
     let db = conn.into_inner();
     
     // Fetch all published posts

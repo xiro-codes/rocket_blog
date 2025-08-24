@@ -33,7 +33,7 @@ async fn login_view(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
 ) -> Result<Template, Status> {
-    log::debug!("Serving login page");
+    log::info!("Route accessed: GET /auth/ - Login page requested");
     let db = conn.into_inner();
     
     // Check if any accounts exist, return 404 if none
@@ -57,7 +57,7 @@ async fn login(
     data: Form<AccountFormDTO>,
 ) -> Flash<Redirect> {
     let form_data = data.into_inner();
-    log::info!("Login attempt from controller for username: {}", form_data.username);
+    log::info!("Route accessed: POST /auth/ - Login attempt for username: {}", form_data.username);
     
     let db = conn.into_inner();
     if let Ok(token) = service.login(db, form_data).await {
@@ -72,7 +72,7 @@ async fn login(
 
 #[get("/logout")]
 async fn logout(jar: &CookieJar<'_>) -> Flash<Redirect> {
-    log::info!("User logout requested");
+    log::info!("Route accessed: GET /auth/logout - User logout requested");
     jar.remove_private(Cookie::from("token"));
     log::info!("User logged out successfully");
     ControllerBase::success_redirect("/blog/", "Logout successful.")
@@ -83,7 +83,7 @@ async fn create_admin_view(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
 ) -> Result<Template, Status> {
-    log::debug!("Serving create admin page");
+    log::info!("Route accessed: GET /auth/create-admin - Create admin page requested");
     let db = conn.into_inner();
     
     // Check if any accounts exist, redirect if they do
@@ -107,7 +107,7 @@ async fn create_admin(
     data: Form<AdminCreateFormDTO>,
 ) -> Flash<Redirect> {
     let form_data = data.into_inner();
-    log::info!("Admin account creation attempt for username: {}", form_data.username);
+    log::info!("Route accessed: POST /auth/create-admin - Admin account creation attempt for username: {}", form_data.username);
     
     let db = conn.into_inner();
     
@@ -125,7 +125,7 @@ async fn create_admin(
 
 #[get("/register")]
 async fn register_view() -> Template {
-    log::debug!("Serving user registration page");
+    log::info!("Route accessed: GET /auth/register - User registration page requested");
     Template::render(
         "auth/register",
         context! {}
@@ -140,7 +140,7 @@ async fn register(
     data: Form<AccountFormDTO>,
 ) -> Flash<Redirect> {
     let form_data = data.into_inner();
-    log::info!("User account registration attempt for username: {}", form_data.username);
+    log::info!("Route accessed: POST /auth/register - User account registration attempt for username: {}", form_data.username);
     
     let db = conn.into_inner();
     

@@ -35,6 +35,7 @@ async fn settings_view(
     _admin: Admin,
     service: &State<SettingsService>,
 ) -> Result<Template, Status> {
+    log::info!("Route accessed: GET /settings/ - Settings page requested");
     let db = conn.into_inner();
     
     // Get current settings (non-sensitive values)
@@ -79,6 +80,7 @@ async fn save_openai_settings(
     service: &State<SettingsService>,
     data: Form<SettingsFormDTO>,
 ) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /settings/openai - OpenAI settings save requested");
     let db = conn.into_inner();
     let form_data = data.into_inner();
     
@@ -110,6 +112,7 @@ async fn delete_openai_settings(
     _admin: Admin,
     service: &State<SettingsService>,
 ) -> Flash<Redirect> {
+    log::info!("Route accessed: DELETE /settings/openai - OpenAI settings deletion requested");
     let db = conn.into_inner();
     
     match service.delete_setting(db, "openai_api_key").await {
@@ -125,6 +128,7 @@ async fn save_ollama_settings(
     service: &State<SettingsService>,
     data: Form<OllamaSettingsFormDTO>,
 ) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /settings/ollama - Ollama settings save requested");
     let db = conn.into_inner();
     let form_data = data.into_inner();
     
@@ -175,6 +179,7 @@ async fn delete_ollama_settings(
     _admin: Admin,
     service: &State<SettingsService>,
 ) -> Flash<Redirect> {
+    log::info!("Route accessed: DELETE /settings/ollama - Ollama settings deletion requested");
     let db = conn.into_inner();
     
     let mut errors = Vec::new();
