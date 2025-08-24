@@ -1,12 +1,51 @@
-# Rocket Blog
+# Rocket Blog - Multi-App Workspace
 
-A modern, fast, and feature-rich blog application built with **Rust** and the **Rocket** web framework. This blog platform provides a clean interface for content management with a visual markdown editor, automatic post excerpts, user authentication, commenting system, and a powerful tagging system.
+A modern, fast, and feature-rich blog platform built with **Rust** and the **Rocket** web framework. This project now supports **multiple applications** using shared code, database migrations, and models.
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Rust Version](https://img.shields.io/badge/rust-1.70+-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-## ✨ Features
+## 🏗️ Project Structure
+
+This project has been restructured as a **multi-app workspace** that includes:
+
+- **Blog App** (`apps/blog/`) - The full-featured blog application
+- **Hello World Selection App** (`apps/hello-world/`) - Demo app showing shared structure
+- **Shared Components** (`shared/`) - Common models, migrations, and utilities
+
+For detailed information about the multi-app structure, see [Multi-App Structure Documentation](docs/MULTI_APP_STRUCTURE.md).
+
+## ⚡ Quick Start
+
+### Running the Blog Application
+```bash
+# Build and run the blog app
+just run-blog
+# or
+cd apps/blog && cargo run
+```
+
+### Running the Hello World Demo App
+```bash
+# Build and run the hello-world app
+just run-hello-world
+# or
+cd apps/hello-world && cargo run
+```
+
+### Building All Applications
+```bash
+# Build all apps
+just build-all
+# or
+cargo build --all
+```
+
+## 🚀 Applications
+
+### 1. Blog Application (`apps/blog/`)
+The main blog application with full features:
 
 ### Current Features
 - 📝 **Blog Management** - Create, edit, delete, and publish blog posts with markdown support
@@ -31,6 +70,16 @@ A modern, fast, and feature-rich blog application built with **Rust** and the **
   - RSS feed available at `/feed/rss` endpoint
   - Includes post excerpts for better feed content
   - XML-compliant RSS 2.0 format with proper metadata
+
+### 2. Hello World Selection App (`apps/hello-world/`)
+A demonstration application showing the shared structure usage:
+
+- 🏠 **Landing Page** - Welcome page with navigation
+- 👋 **Hello World Page** - Simple hello world demonstration
+- 🎯 **Interactive Selection System** - Choose from 3 different options with modal feedback
+- 🔗 **JSON API Endpoint** - RESTful API returning selection data as JSON
+- 📱 **Responsive Design** - Bootstrap-based UI that works on all devices
+- 🗄️ **Shared Database Support** - Can use the same database schema as the blog
 
 ### Planned Features ([See Roadmap](docs/FEATURE_SUGGESTIONS.md))
 - 🔍 **Search Functionality** - Full-text search across posts with advanced filtering

@@ -4,10 +4,8 @@ extern crate rocket;
 mod controllers;
 mod services;
 
-use common::database::{run_migrations, Db};
-use rocket::{fairing::AdHoc, response::Redirect, fs::FileServer};
+use rocket::{response::Redirect, fs::FileServer};
 use rocket_dyn_templates::Template;
-use sea_orm_rocket::Database;
 
 #[catch(default)]
 pub fn catch_default() -> Redirect {
@@ -21,13 +19,11 @@ async fn rocket() -> _ {
     let _ = common::utils::setup_logger();
     log::info!("Starting Hello World Selection application...");
     
-    // Build the rocket instance
+    // Build the rocket instance (without database for demo purposes)
     log::info!("Building Hello World Rocket instance...");
     rocket::build()
         .register("/", catchers![catch_default])
-        .attach(Db::init())
         .attach(Template::fairing())
-        .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
         .attach(services::HelloWorldService::fairing())
         .mount("/", routes![
             controllers::index,
