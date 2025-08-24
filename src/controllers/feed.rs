@@ -26,6 +26,7 @@ async fn rss_feed(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
 ) -> Result<content::RawXml<String>, Status> {
+    log::info!("Route accessed: GET /feed/rss - RSS feed requested");
     let db = conn.into_inner();
     
     // Fetch recent published posts

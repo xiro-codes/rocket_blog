@@ -91,7 +91,7 @@ async fn list_view(
 ) -> Result<Template, Status> {
     let page_num = page.unwrap_or(1);
     let size = page_size.unwrap_or(10);
-    log::info!("Blog list view requested - Page: {}, Size: {}, Client IP: {}", page_num, size, client_ip.0);
+    log::info!("Route accessed: GET /blog/?page={}&page_size={} - Blog list view requested, Client IP: {}", page_num, size, client_ip.0);
     
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     if token.is_some() {
@@ -174,6 +174,7 @@ async fn detail_view(
     id: i32,
     client_ip: ClientIp,
 ) -> Result<Template, Status> {
+    log::info!("Route accessed: GET /blog/{} - Blog post detail view requested, Client IP: {}", id, client_ip.0);
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
 
@@ -306,6 +307,7 @@ async fn search_get(
     jar: &CookieJar<'_>,
     client_ip: ClientIp,
 ) -> Result<Template, Status> {
+    log::info!("Route accessed: GET /blog/search?query={:?}&page={:?}&page_size={:?} - Search requested, Client IP: {}", query, page, page_size, client_ip.0);
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     
@@ -345,6 +347,7 @@ async fn search_get(
 async fn search_post(
     search_form: Form<SearchFormDTO>,
 ) -> Redirect {
+    log::info!("Route accessed: POST /blog/search - Search form submission with query: {:?}", search_form.query);
     let query = &search_form.query;
     if query.trim().is_empty() {
         Redirect::to(uri!("/blog/search"))

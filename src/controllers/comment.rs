@@ -39,6 +39,7 @@ async fn create(
     post_id: Uuid,
     form_data: Form<CommentFormDTO>,
 ) -> Result<Flash<Redirect>, Status> {
+    log::info!("Route accessed: POST /comment/create/{} - Comment creation requested", post_id);
     let db = conn.into_inner();
     
     // Check if user is authenticated
@@ -75,6 +76,7 @@ async fn reply(
     parent_id: Uuid,
     form_data: Form<CommentFormDTO>,
 ) -> Result<Flash<Redirect>, Status> {
+    log::info!("Route accessed: POST /comment/reply/{}/{} - Comment reply requested", post_id, parent_id);
     let db = conn.into_inner();
     
     // Check if user is authenticated

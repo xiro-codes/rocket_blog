@@ -20,7 +20,7 @@ impl Controller {
 
 #[get("/")]
 fn index() -> Redirect {
-    log::info!("Home page accessed - redirecting to blog");
+    log::info!("Route accessed: GET / - Home page accessed, redirecting to blog");
     Redirect::to("/blog/?page=1")
 }
 
