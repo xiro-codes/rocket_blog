@@ -111,7 +111,7 @@ cd rocket_blog
 ### 2. Database Setup
 ```bash
 # Start PostgreSQL with Docker (recommended)
-docker-compose -f scripts/docker/docker-compose.yml up postgres -d
+docker compose -f scripts/docker/docker-compose.yml up postgres -d
 
 # OR set up PostgreSQL manually and create database:
 # createdb tdavis_dev
@@ -213,7 +213,7 @@ cargo build --release
 
 ### Development Setup
 1. **Install Dependencies**: Rust, PostgreSQL, Just
-2. **Database**: Run `docker-compose -f scripts/docker/docker-compose.yml up postgres -d`
+2. **Database**: Run `docker compose -f scripts/docker/docker-compose.yml up postgres -d`
 3. **Migrations**: Run `just migrate`
 4. **Development**: Run `cargo run` for auto-reload
 5. **Testing**: Run `cargo test`
@@ -253,27 +253,54 @@ See [Feature Integration Guide](docs/TAG_INTEGRATION_EXAMPLE.md) for detailed ex
 
 ### Docker Deployment (Recommended)
 
-For a complete Docker setup with build instructions, see [Docker Guide](docs/DOCKER.md).
+For a complete Docker setup with build instructions, see [Docker Multi-App Guide](docs/DOCKER_MULTI_APP.md).
 
-**Development Options:**
+**Multi-App Development:**
+```bash
+# Run both blog and hello-world apps in development mode
+just docker-dev-multi
+
+# Live development with template/static file auto-reload
+just docker-dev-live-multi
+
+# Check application status
+just docker-status-multi
+
+# View logs for all applications
+just docker-logs-multi
+
+# View logs for specific application
+just docker-logs-multi blog-app
+just docker-logs-multi hello-world-app
+```
+
+**Single-App Development (Legacy):**
 ```bash
 # Standard development (debug builds, faster compilation)
 ./scripts/docker-deploy.sh dev
 
-# Live development (template/static file auto-reload)
+# Live development (template/static file auto-reload)  
 ./scripts/docker-deploy.sh dev-live
 
-# Or use docker-compose directly:
-docker-compose -f scripts/docker/docker-compose.dev.yml up --build      # Standard
-docker-compose -f scripts/docker/docker-compose.dev.live.yml up --build # Live template reload
+# Or use docker compose directly:
+docker compose -f scripts/docker/docker-compose.dev.yml up --build      # Multi-app
 ```
 
 **Production:**
 ```bash
-# Production with nginx reverse proxy and SSL
+# Multi-app production with nginx reverse proxy and SSL
+just docker-prod-multi
+
+# Legacy single-app production
 ./scripts/setup-ssl.sh  # First time only
 ./scripts/docker-deploy.sh prod
 ```
+
+**Multi-App Features:**
+- Both blog and hello-world applications running simultaneously
+- Shared database and infrastructure
+- Individual service management and logging
+- Nginx routing: main site → blog app, `/hello-world` → hello-world app
 
 **Development Features:**
 - Production builds compiled in clean containerized environment (cross-platform)
@@ -356,7 +383,8 @@ We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.
 ### Development Documentation
 - [**Contributing Guide**](docs/CONTRIBUTING.md) - How to contribute to the project
 - [**Deployment Guide**](docs/DEPLOYMENT.md) - Production deployment instructions
-- [**Docker Guide**](docs/DOCKER.md) - Container deployment and development
+- [**Docker Multi-App Guide**](docs/DOCKER_MULTI_APP.md) - Multi-application container setup
+- [**Docker Guide**](docs/DOCKER.md) - Legacy single-app container deployment
 - [**Development Setup**](docs/DEVELOPMENT.md) - Optimized development workflows
 - [**Database Migrations**](migrations/README.md) - Managing database changes
 - [**Development Scripts**](scripts/README.md) - Automation and tooling

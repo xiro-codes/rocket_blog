@@ -108,6 +108,32 @@ run:
 dev: run
 
 # Docker development and deployment commands
+
+# Multi-app Docker commands
+docker-dev-multi:
+	cd scripts/docker && docker compose -f docker-compose.dev.yml up --build
+
+docker-dev-live-multi:
+	cd scripts/docker && docker compose -f docker-compose.dev.live.yml up --build
+
+docker-prod-multi:
+	cd scripts/docker && docker compose -f docker-compose.yml up --build -d
+
+# Docker management commands for multi-app setup
+docker-stop-multi:
+	cd scripts/docker && docker compose down
+
+docker-logs-multi SERVICE="":
+	@if [ "{{SERVICE}}" = "" ]; then \
+		cd scripts/docker && docker compose logs -f; \
+	else \
+		cd scripts/docker && docker compose logs -f {{SERVICE}}; \
+	fi
+
+docker-status-multi:
+	cd scripts/docker && docker compose ps
+
+# Legacy single-app Docker commands (defaults to blog)
 docker-dev:
 	sh ./scripts/docker-deploy.sh dev
 
