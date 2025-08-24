@@ -212,6 +212,7 @@ impl CoordinatorService {
         let page_num = page.unwrap_or(1);
         let size = page_size.unwrap_or(10);
         log::debug!("Coordinator: getting posts by tag data - slug={}, page={}, size={}, client_ip={}", slug, page_num, size, client_ip);
+        let has_accounts = self.auth_service.has_any_accounts(db).await;
 
         // Check if user is admin to include drafts
         let is_admin = if let Some(token_str) = token {
@@ -285,6 +286,7 @@ impl CoordinatorService {
             all_tags,
             reaction_summaries,
             tag,
+            has_accounts,
         })
     }
 
@@ -343,4 +345,5 @@ pub struct BlogTagData {
     pub all_tags: Vec<models::tag::Model>,
     pub reaction_summaries: Vec<crate::services::PostReactionSummary>,
     pub tag: models::tag::Model,
+    pub has_accounts: bool,
 }

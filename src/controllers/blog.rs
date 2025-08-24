@@ -633,6 +633,7 @@ async fn posts_by_tag(
             page_size: tag_data.page_size,
             num_pages: tag_data.num_pages,
             token,
+            has_accounts: tag_data.has_accounts,
             all_tags: tag_data.all_tags,
             reaction_summaries: tag_data.reaction_summaries,
             tag_filter: tag_data.tag.name.clone(),
