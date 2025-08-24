@@ -6,7 +6,7 @@ use crate::{
     services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService},
     types::{HttpRange, StreamedFile},
 };
-use models::{dto::SearchFormDTO, post_reaction::ReactionType, tag, background_job};
+use models::{dto::SearchFormDTO, post_reaction::ReactionType, background_job};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -17,7 +17,6 @@ use rocket::{
     Build, Rocket, Route, State,
 };
 use rocket_dyn_templates::{context, Template};
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use sea_orm_rocket::Connection;
 use std::fs::File;
 use uuid::Uuid;
@@ -593,10 +592,7 @@ async fn edit(
 #[get("/tag/<slug>?<page>&<page_size>")]
 async fn posts_by_tag(
     conn: Connection<'_, Db>,
-    service: &State<BlogService>,
-    auth_service: &State<AuthService>,
-    reaction_service: &State<ReactionService>,
-    tag_service: &State<TagService>,
+    coordinator: &State<CoordinatorService>,
     slug: String,
     page: Option<u64>,
     page_size: Option<u64>,
@@ -606,60 +602,32 @@ async fn posts_by_tag(
     let token = ControllerBase::check_auth(jar).unwrap_or_default();
     let db = conn.into_inner();
     
-    // Check if user is admin to include drafts
-    let is_admin = if let Some(token_str) = &token {
-        if let Ok(token_uuid) = Uuid::parse_str(token_str) {
-            if let Some(account) = auth_service.check_token(db, token_uuid).await {
-                account.admin
-            } else {
-                false
-            }
-        } else {
-            false
-        }
-    } else {
-        false
-    };
-    
-    // Find tag by slug
-    let tag = tag::Entity::find()
-        .filter(tag::Column::Slug.eq(slug))
-        .one(db)
-        .await
-        .map_err(|_| Status::NotFound)?
-        .ok_or(Status::NotFound)?;
-    
-    // Get posts with this tag
-    let (posts, page, page_size, num_pages) = service
-        .paginate_posts_by_tag_include_drafts(db, tag.id, page, page_size, is_admin)
-        .await
-        .map_err(|_| Status::InternalServerError)?;
-
-    // Get all tags for the tag cloud
-    let all_tags = match tag_service.find_all_tags(db).await {
-        Ok(tags) => tags,
-        Err(_) => vec![], // Continue even if tag loading fails
-    };
-
-    // Get reaction summaries for all posts
-    let post_ids: Vec<Uuid> = posts.iter().map(|p| p.id).collect();
-    let reaction_summaries = reaction_service
-        .get_posts_reaction_summaries(db, &post_ids, &client_ip.0)
-        .await
-        .unwrap_or_default();
+    // Use coordinator service to get all data for the tag filter view
+    log::debug!("Fetching posts by tag data via coordinator service");
+    let tag_data = coordinator.get_posts_by_tag_data(
+        db,
+        &slug,
+        page,
+        page_size,
+        token.as_deref(),
+        &client_ip.0,
+    ).await.map_err(|e| {
+        log::error!("Failed to fetch posts by tag data: {}", e);
+        Status::InternalServerError
+    })?;
 
     Ok(Template::render(
         "blog/list",
         context! {
-            posts,
-            page,
-            page_size,
-            num_pages,
+            posts: tag_data.posts,
+            page: tag_data.page,
+            page_size: tag_data.page_size,
+            num_pages: tag_data.num_pages,
             token,
-            all_tags,
-            reaction_summaries,
-            tag_filter: tag.name.clone(),
-            title: format!("Posts tagged with '{}'", tag.name)
+            all_tags: tag_data.all_tags,
+            reaction_summaries: tag_data.reaction_summaries,
+            tag_filter: tag_data.tag.name.clone(),
+            title: format!("Posts tagged with '{}'", tag_data.tag.name)
         },
     ))
 }

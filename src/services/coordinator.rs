@@ -1,6 +1,6 @@
 use crate::services::{AuthService, BlogService, CommentService, ReactionService, TagService};
-use models::{dto::PostTitleResult, post::Model as Post};
-use sea_orm::DatabaseConnection;
+use models::{dto::PostTitleResult, post::Model as Post, tag};
+use sea_orm::{DatabaseConnection, ColumnTrait, EntityTrait, QueryFilter};
 use uuid::Uuid;
 
 /// Coordinator service that orchestrates operations across multiple services
@@ -199,6 +199,95 @@ impl CoordinatorService {
         })
     }
 
+    /// Get posts filtered by tag with all associated data
+    pub async fn get_posts_by_tag_data(
+        &self,
+        db: &DatabaseConnection,
+        slug: &str,
+        page: Option<u64>,
+        page_size: Option<u64>,
+        token: Option<&str>,
+        client_ip: &str,
+    ) -> Result<BlogTagData, String> {
+        let page_num = page.unwrap_or(1);
+        let size = page_size.unwrap_or(10);
+        log::debug!("Coordinator: getting posts by tag data - slug={}, page={}, size={}, client_ip={}", slug, page_num, size, client_ip);
+
+        // Check if user is admin to include drafts
+        let is_admin = if let Some(token_str) = token {
+            log::debug!("Coordinator: checking admin status for token");
+            self.auth_service.is_admin_token(db, token_str).await
+        } else {
+            log::debug!("Coordinator: no token provided, treating as non-admin");
+            false
+        };
+
+        if is_admin {
+            log::debug!("Coordinator: user is admin, including draft posts");
+        } else {
+            log::debug!("Coordinator: user is not admin, excluding draft posts");
+        }
+
+        // Find tag by slug
+        log::debug!("Coordinator: finding tag by slug: {}", slug);
+        let tag = tag::Entity::find()
+            .filter(tag::Column::Slug.eq(slug))
+            .one(db)
+            .await
+            .map_err(|e| {
+                let error_msg = format!("Failed to find tag: {}", e);
+                log::error!("Coordinator: {}", error_msg);
+                error_msg
+            })?
+            .ok_or_else(|| {
+                let error_msg = format!("Tag not found: {}", slug);
+                log::error!("Coordinator: {}", error_msg);
+                error_msg
+            })?;
+
+        // Get posts with this tag
+        log::debug!("Coordinator: fetching posts for tag: {}", tag.name);
+        let (posts, page, page_size, num_pages) = self.blog_service
+            .paginate_posts_by_tag_include_drafts(db, tag.id, Some(page_num), Some(size), is_admin)
+            .await
+            .map_err(|e| {
+                let error_msg = format!("Failed to get posts by tag: {}", e);
+                log::error!("Coordinator: {}", error_msg);
+                error_msg
+            })?;
+
+        // Get all tags for the tag cloud
+        log::debug!("Coordinator: fetching all tags");
+        let all_tags = self.tag_service.find_all_tags(db).await.unwrap_or_else(|e| {
+            log::warn!("Coordinator: failed to fetch tags: {}", e);
+            Vec::new()
+        });
+
+        // Get reaction summaries for all posts
+        log::debug!("Coordinator: fetching reaction summaries for {} posts", posts.len());
+        let post_ids: Vec<Uuid> = posts.iter().map(|p| p.id).collect();
+        let reaction_summaries = self.reaction_service
+            .get_posts_reaction_summaries(db, &post_ids, client_ip)
+            .await
+            .map(|hashmap| hashmap.into_values().collect())
+            .unwrap_or_else(|e| {
+                log::warn!("Coordinator: failed to fetch reaction summaries: {}", e);
+                Vec::new()
+            });
+
+        log::debug!("Coordinator: successfully fetched tag data for {} posts", posts.len());
+        
+        Ok(BlogTagData {
+            posts,
+            page,
+            page_size,
+            num_pages,
+            all_tags,
+            reaction_summaries,
+            tag,
+        })
+    }
+
     /// Check if token belongs to an admin user
     pub async fn is_admin(&self, db: &DatabaseConnection, token: Option<&str>) -> bool {
         if let Some(token_str) = token {
@@ -243,4 +332,15 @@ pub struct BlogSearchData {
     pub num_pages: u64,
     pub all_tags: Vec<models::tag::Model>,
     pub reaction_summaries: Vec<crate::services::PostReactionSummary>,
+}
+
+/// Data structure for blog tag filter results
+pub struct BlogTagData {
+    pub posts: Vec<models::dto::PostTitleResult>,
+    pub page: u64,
+    pub page_size: u64,
+    pub num_pages: u64,
+    pub all_tags: Vec<models::tag::Model>,
+    pub reaction_summaries: Vec<crate::services::PostReactionSummary>,
+    pub tag: models::tag::Model,
 }
