@@ -1,12 +1,51 @@
-# Rocket Blog
+# Rocket Blog - Multi-App Workspace
 
-A modern, fast, and feature-rich blog application built with **Rust** and the **Rocket** web framework. This blog platform provides a clean interface for content management with a visual markdown editor, automatic post excerpts, user authentication, commenting system, and a powerful tagging system.
+A modern, fast, and feature-rich blog platform built with **Rust** and the **Rocket** web framework. This project now supports **multiple applications** using shared code, database migrations, and models.
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Rust Version](https://img.shields.io/badge/rust-1.70+-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-## ✨ Features
+## 🏗️ Project Structure
+
+This project has been restructured as a **multi-app workspace** that includes:
+
+- **Blog App** (`apps/blog/`) - The full-featured blog application
+- **Hello World Selection App** (`apps/hello-world/`) - Demo app showing shared structure
+- **Shared Components** (`shared/`) - Common models, migrations, and utilities
+
+For detailed information about the multi-app structure, see [Multi-App Structure Documentation](docs/MULTI_APP_STRUCTURE.md).
+
+## ⚡ Quick Start
+
+### Running the Blog Application
+```bash
+# Build and run the blog app
+just run-blog
+# or
+cd apps/blog && cargo run
+```
+
+### Running the Hello World Demo App
+```bash
+# Build and run the hello-world app
+just run-hello-world
+# or
+cd apps/hello-world && cargo run
+```
+
+### Building All Applications
+```bash
+# Build all apps
+just build-all
+# or
+cargo build --all
+```
+
+## 🚀 Applications
+
+### 1. Blog Application (`apps/blog/`)
+The main blog application with full features:
 
 ### Current Features
 - 📝 **Blog Management** - Create, edit, delete, and publish blog posts with markdown support
@@ -31,6 +70,16 @@ A modern, fast, and feature-rich blog application built with **Rust** and the **
   - RSS feed available at `/feed/rss` endpoint
   - Includes post excerpts for better feed content
   - XML-compliant RSS 2.0 format with proper metadata
+
+### 2. Hello World Selection App (`apps/hello-world/`)
+A demonstration application showing the shared structure usage:
+
+- 🏠 **Landing Page** - Welcome page with navigation
+- 👋 **Hello World Page** - Simple hello world demonstration
+- 🎯 **Interactive Selection System** - Choose from 3 different options with modal feedback
+- 🔗 **JSON API Endpoint** - RESTful API returning selection data as JSON
+- 📱 **Responsive Design** - Bootstrap-based UI that works on all devices
+- 🗄️ **Shared Database Support** - Can use the same database schema as the blog
 
 ### Planned Features ([See Roadmap](docs/FEATURE_SUGGESTIONS.md))
 - 🔍 **Search Functionality** - Full-text search across posts with advanced filtering
@@ -62,7 +111,7 @@ cd rocket_blog
 ### 2. Database Setup
 ```bash
 # Start PostgreSQL with Docker (recommended)
-docker-compose -f scripts/docker/docker-compose.yml up postgres -d
+docker compose -f scripts/docker/docker-compose.yml up postgres -d
 
 # OR set up PostgreSQL manually and create database:
 # createdb tdavis_dev
@@ -164,7 +213,7 @@ cargo build --release
 
 ### Development Setup
 1. **Install Dependencies**: Rust, PostgreSQL, Just
-2. **Database**: Run `docker-compose -f scripts/docker/docker-compose.yml up postgres -d`
+2. **Database**: Run `docker compose -f scripts/docker/docker-compose.yml up postgres -d`
 3. **Migrations**: Run `just migrate`
 4. **Development**: Run `cargo run` for auto-reload
 5. **Testing**: Run `cargo test`
@@ -204,27 +253,54 @@ See [Feature Integration Guide](docs/TAG_INTEGRATION_EXAMPLE.md) for detailed ex
 
 ### Docker Deployment (Recommended)
 
-For a complete Docker setup with build instructions, see [Docker Guide](docs/DOCKER.md).
+For a complete Docker setup with build instructions, see [Docker Multi-App Guide](docs/DOCKER_MULTI_APP.md).
 
-**Development Options:**
+**Multi-App Development:**
+```bash
+# Run both blog and hello-world apps in development mode
+just docker-dev-multi
+
+# Live development with template/static file auto-reload
+just docker-dev-live-multi
+
+# Check application status
+just docker-status-multi
+
+# View logs for all applications
+just docker-logs-multi
+
+# View logs for specific application
+just docker-logs-multi blog-app
+just docker-logs-multi hello-world-app
+```
+
+**Single-App Development (Legacy):**
 ```bash
 # Standard development (debug builds, faster compilation)
 ./scripts/docker-deploy.sh dev
 
-# Live development (template/static file auto-reload)
+# Live development (template/static file auto-reload)  
 ./scripts/docker-deploy.sh dev-live
 
-# Or use docker-compose directly:
-docker-compose -f scripts/docker/docker-compose.dev.yml up --build      # Standard
-docker-compose -f scripts/docker/docker-compose.dev.live.yml up --build # Live template reload
+# Or use docker compose directly:
+docker compose -f scripts/docker/docker-compose.dev.yml up --build      # Multi-app
 ```
 
 **Production:**
 ```bash
-# Production with nginx reverse proxy and SSL
+# Multi-app production with nginx reverse proxy and SSL
+just docker-prod-multi
+
+# Legacy single-app production
 ./scripts/setup-ssl.sh  # First time only
 ./scripts/docker-deploy.sh prod
 ```
+
+**Multi-App Features:**
+- Both blog and hello-world applications running simultaneously
+- Shared database and infrastructure
+- Individual service management and logging
+- Nginx routing: main site → blog app, `/hello-world` → hello-world app
 
 **Development Features:**
 - Production builds compiled in clean containerized environment (cross-platform)
@@ -307,7 +383,8 @@ We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.
 ### Development Documentation
 - [**Contributing Guide**](docs/CONTRIBUTING.md) - How to contribute to the project
 - [**Deployment Guide**](docs/DEPLOYMENT.md) - Production deployment instructions
-- [**Docker Guide**](docs/DOCKER.md) - Container deployment and development
+- [**Docker Multi-App Guide**](docs/DOCKER_MULTI_APP.md) - Multi-application container setup
+- [**Docker Guide**](docs/DOCKER.md) - Legacy single-app container deployment
 - [**Development Setup**](docs/DEVELOPMENT.md) - Optimized development workflows
 - [**Database Migrations**](migrations/README.md) - Managing database changes
 - [**Development Scripts**](scripts/README.md) - Automation and tooling
