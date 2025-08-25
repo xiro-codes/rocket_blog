@@ -6,16 +6,16 @@ use rocket::futures::lock::Mutex;
 use sea_orm::*;
 use uuid::Uuid;
 
-use crate::services::base::BaseService;
+use crate::services::BaseService;
 
-pub struct Service {
+pub struct AuthService {
     base: BaseService,
     token_map: Mutex<HashMap<Token, AccountId>>,
 }
 type Token = Uuid;
 type AccountId = Uuid;
 
-impl Service {
+impl AuthService {
     pub fn new() -> Self {
         Self {
             base: BaseService::new(),

@@ -1,7 +1,10 @@
-use crate::services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService};
+use crate::services::{BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService};
 use crate::controllers;
 use crate::config::AppConfig;
 use rocket::{fairing::AdHoc, Build, Rocket, State};
+
+// Import shared auth components
+use common::auth::{AuthService, AuthController, AuthControllerConfig};
 
 /// Service registry for managing application services
 pub struct ServiceRegistry;
@@ -51,9 +54,17 @@ impl ControllerRegistry {
         log::info!("Registering application controllers...");
         log::debug!("Attaching controllers: Index (/), Auth (/auth), Blog (/blog), Comment (/comment), Feed (/feed), Settings (/settings), SEO (/)");
         
+        // Configure shared auth controller for blog app
+        let auth_config = AuthControllerConfig::new(
+            "/blog/".to_string(),  // redirect after login
+            "/blog/".to_string(),  // redirect after logout  
+            "/auth/".to_string(),  // redirect after register (back to login)
+        );
+        
         rocket
+            .manage(auth_config)
             .attach(controllers::IndexController::new("/".to_owned()))
-            .attach(controllers::AuthController::new("/auth".to_owned()))
+            .attach(AuthController::new("/auth".to_owned()))
             .attach(controllers::BlogController::new("/blog".to_owned()))
             .attach(controllers::CommentController::new("/comment".to_owned()))
             .attach(controllers::FeedController::new("/feed".to_owned()))

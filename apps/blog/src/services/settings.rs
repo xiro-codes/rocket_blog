@@ -6,7 +6,7 @@ use models::settings;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use uuid::Uuid;
 
-use crate::services::base::BaseService;
+use crate::services::BaseService;
 
 pub struct SettingsService {
     base: BaseService,

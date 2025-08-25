@@ -4,7 +4,7 @@ use async_openai::{Client, types::{
 }};
 use async_trait::async_trait;
 use sea_orm::DatabaseConnection;
-use crate::services::{ai_provider::AIProvider, base::BaseService, SettingsService};
+use crate::services::{ai_provider::AIProvider, BaseService, SettingsService};
 
 pub struct OpenAIService {
     base: BaseService,

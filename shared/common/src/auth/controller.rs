@@ -4,27 +4,77 @@ use rocket::{
     form::Form,
     http::{Cookie, CookieJar, Status},
     response::{Flash, Redirect},
+    routes, get, post,
     Build, Rocket, Route, State,
 };
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
 
-use crate::{
-    controllers::base::ControllerBase,
-    pool::Db,
-    services::AuthService,
-};
+use super::AuthService;
+use crate::database::Db;
 
-/// This Controller also provides the AuthService
-pub struct Controller {
-    base: ControllerBase,
+/// Base controller functionality for authentication
+pub struct ControllerBase;
+
+impl ControllerBase {
+    /// Check if user is authenticated and return token
+    pub fn check_auth(jar: &CookieJar<'_>) -> Result<Option<String>, Status> {
+        Ok(jar.get_private("token").map(|c| c.value().to_owned()))
+    }
+
+    /// Require authentication and return token, or return Unauthorized status
+    pub fn require_auth(jar: &CookieJar<'_>) -> Result<String, Status> {
+        Self::check_auth(jar)?.ok_or(Status::Unauthorized)
+    }
+
+    /// Create a success flash redirect
+    pub fn success_redirect<T: Into<String>, U: Into<String>>(
+        to: T,
+        message: U,
+    ) -> Flash<Redirect> {
+        Flash::success(Redirect::to(to.into()), message.into())
+    }
+
+    /// Create a danger flash redirect
+    pub fn danger_redirect<T: Into<String>, U: Into<String>>(to: T, message: U) -> Flash<Redirect> {
+        Flash::new(Redirect::to(to.into()), "danger", message.into())
+    }
 }
 
-impl Controller {
-    pub fn new(path: String) -> Self {
+/// Configuration for the Auth Controller
+pub struct AuthControllerConfig {
+    pub redirect_after_login: String,
+    pub redirect_after_logout: String,
+    pub redirect_after_register: String,
+}
+
+impl AuthControllerConfig {
+    pub fn new(
+        redirect_after_login: String,
+        redirect_after_logout: String,
+        redirect_after_register: String,
+    ) -> Self {
         Self {
-            base: ControllerBase::new(path),
+            redirect_after_login,
+            redirect_after_logout,
+            redirect_after_register,
         }
+    }
+}
+
+/// Shared Auth Controller that can be configured for different applications
+pub struct AuthController {
+    path: String,
+}
+
+impl AuthController {
+    pub fn new(path: String) -> Self {
+        Self { path }
+    }
+
+    /// Get the mount path for this controller
+    pub fn path(&self) -> &str {
+        &self.path
     }
 }
 
@@ -53,6 +103,7 @@ async fn login_view(
 async fn login(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
+    config: &State<AuthControllerConfig>,
     jar: &CookieJar<'_>,
     data: Form<AccountFormDTO>,
 ) -> Flash<Redirect> {
@@ -62,8 +113,8 @@ async fn login(
     let db = conn.into_inner();
     if let Ok(token) = service.login(db, form_data).await {
         jar.add_private(Cookie::new("token", token.to_string()));
-        log::info!("Login successful - redirecting to blog");
-        ControllerBase::success_redirect("/blog/", "Login successful.")
+        log::info!("Login successful - redirecting");
+        ControllerBase::success_redirect(&config.redirect_after_login, "Login successful.")
     } else {
         log::warn!("Login failed - redirecting back to login form");
         ControllerBase::danger_redirect("/auth/", "Login failed.")
@@ -71,11 +122,11 @@ async fn login(
 }
 
 #[get("/logout")]
-async fn logout(jar: &CookieJar<'_>) -> Flash<Redirect> {
+async fn logout(config: &State<AuthControllerConfig>, jar: &CookieJar<'_>) -> Flash<Redirect> {
     log::info!("Route accessed: GET /auth/logout - User logout requested");
     jar.remove_private(Cookie::from("token"));
     log::info!("User logged out successfully");
-    ControllerBase::success_redirect("/blog/", "Logout successful.")
+    ControllerBase::success_redirect(&config.redirect_after_logout, "Logout successful.")
 }
 
 #[get("/create-admin")]
@@ -103,6 +154,7 @@ async fn create_admin_view(
 async fn create_admin(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
+    config: &State<AuthControllerConfig>,
     _jar: &CookieJar<'_>,
     data: Form<AdminCreateFormDTO>,
 ) -> Flash<Redirect> {
@@ -114,7 +166,7 @@ async fn create_admin(
     match service.create_admin_account(db, form_data).await {
         Ok(account) => {
             log::info!("Admin account creation successful for: {} ({})", account.username, account.id);
-            ControllerBase::success_redirect("/blog", "Admin account created successfully! You can now log in.")
+            ControllerBase::success_redirect(&config.redirect_after_login, "Admin account created successfully! You can now log in.")
         }
         Err(e) => {
             log::error!("Admin account creation failed: {}", e);
@@ -136,6 +188,7 @@ async fn register_view() -> Template {
 async fn register(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
+    config: &State<AuthControllerConfig>,
     _jar: &CookieJar<'_>,
     data: Form<AccountFormDTO>,
 ) -> Flash<Redirect> {
@@ -147,7 +200,7 @@ async fn register(
     match service.create_user_account(db, form_data).await {
         Ok(account) => {
             log::info!("User account registration successful for: {} ({})", account.username, account.id);
-            ControllerBase::success_redirect("/auth", "Account created successfully! You can now log in.")
+            ControllerBase::success_redirect(&config.redirect_after_register, "Account created successfully! You can now log in.")
         }
         Err(e) => {
             log::error!("User account registration failed: {}", e);
@@ -156,8 +209,20 @@ async fn register(
     }
 }
 
-fn routes() -> Vec<Route> {
+pub fn routes() -> Vec<Route> {
     routes![login_view, login, logout, create_admin_view, create_admin, register_view, register]
 }
 
-crate::impl_controller_routes!(Controller, "Auth Controller", routes());
+#[rocket::async_trait]
+impl Fairing for AuthController {
+    fn info(&self) -> fairing::Info {
+        fairing::Info {
+            name: "Shared Auth Controller",
+            kind: Kind::Ignite,
+        }
+    }
+
+    async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
+        Ok(rocket.mount(self.path(), routes()))
+    }
+}

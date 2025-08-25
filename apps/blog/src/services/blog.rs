@@ -12,7 +12,7 @@ use rocket::State;
 use sea_orm::{ColumnTrait, JoinType, *};
 use uuid::Uuid;
 
-use crate::services::base::BaseService;
+use crate::services::BaseService;
 use crate::services::youtube::{YoutubeDownloadService, DownloadStatus};
 
 pub struct Service {

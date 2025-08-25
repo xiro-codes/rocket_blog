@@ -531,7 +531,7 @@ dependencies = [
  "rand_mt",
  "reqwest 0.11.27",
  "rocket",
- "rocket_dyn_templates",
+ "rocket_dyn_templates 0.1.0",
  "sea-orm",
  "sea-orm-rocket",
  "serde_json",
@@ -763,7 +763,9 @@ dependencies = [
  "log",
  "migrations",
  "models",
+ "pwhash",
  "rocket",
+ "rocket_dyn_templates 0.2.0",
  "sea-orm",
  "sea-orm-rocket",
  "serde",
@@ -1523,6 +1525,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "handlebars"
+version = "5.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d08485b96a0e6393e9e4d1b8d48cf74ad6c063cd905eb33f42c1ce3f0377539b"
+dependencies = [
+ "log",
+ "pest",
+ "pest_derive",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1573,7 +1589,7 @@ dependencies = [
  "migrations",
  "models",
  "rocket",
- "rocket_dyn_templates",
+ "rocket_dyn_templates 0.1.0",
  "sea-orm",
  "sea-orm-rocket",
  "serde",
@@ -3397,6 +3413,19 @@ dependencies = [
  "notify",
  "rocket",
  "tera",
+ "walkdir",
+]
+
+[[package]]
+name = "rocket_dyn_templates"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5bbab919c9e67df3f7ac6624a32ef897df4cd61c0969f4d66f3ced0534660d7a"
+dependencies = [
+ "handlebars",
+ "normpath",
+ "notify",
+ "rocket",
  "walkdir",
 ]
 

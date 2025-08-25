@@ -4,7 +4,7 @@ use sea_orm::*;
 use slug::slugify;
 use uuid::Uuid;
 
-use crate::services::base::BaseService;
+use crate::services::BaseService;
 
 pub struct TagService {
     base: BaseService,

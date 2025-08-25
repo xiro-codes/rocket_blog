@@ -1,11 +1,12 @@
-mod base;
-pub use base::BaseService;
+// Use shared base service instead of local one
+pub use common::services::BaseService;
 
 mod coordinator;
 pub use coordinator::{CoordinatorService, BlogListData, BlogDetailData, BlogSearchData, BlogTagData};
 
-mod auth;
-pub use auth::Service as AuthService;
+// Use shared auth service instead of local one
+pub use common::auth::AuthService;
+
 mod background_job;
 pub use background_job::BackgroundJobService;
 mod blog;

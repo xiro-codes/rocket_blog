@@ -6,6 +6,9 @@ mod services;
 
 use rocket::{response::Redirect, fs::FileServer};
 use rocket_dyn_templates::Template;
+use common::{auth::{AuthService, AuthController, AuthControllerConfig}, database::{Db, run_migrations}};
+use rocket::fairing::AdHoc;
+use sea_orm_rocket::Database;
 
 #[catch(default)]
 pub fn catch_default() -> Redirect {
@@ -19,12 +22,26 @@ async fn rocket() -> _ {
     let _ = common::utils::setup_logger();
     log::info!("Starting Hello World Selection application...");
     
-    // Build the rocket instance (without database for demo purposes)
+    // Configure auth controller for hello-world app
+    let auth_config = AuthControllerConfig::new(
+        "/".to_string(),       // redirect after login (to hello-world home)
+        "/".to_string(),       // redirect after logout (to hello-world home)
+        "/auth/".to_string(),  // redirect after register (back to login)
+    );
+    
+    // Build the rocket instance with optional database support
     log::info!("Building Hello World Rocket instance...");
     rocket::build()
         .register("/", catchers![catch_default])
         .attach(Template::fairing())
+        .attach(Db::init())
+        .attach(AdHoc::on_ignite("Run DB Migrations", |rocket| async {
+            run_migrations(rocket).await.unwrap()
+        }))
+        .manage(AuthService::new())
+        .manage(auth_config)
         .attach(services::HelloWorldService::fairing())
+        .attach(AuthController::new("/auth".to_owned()))
         .mount("/", routes![
             controllers::index,
             controllers::hello,

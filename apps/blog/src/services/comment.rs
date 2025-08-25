@@ -4,7 +4,7 @@ use sea_orm::*;
 use uuid::Uuid;
 use rocket::serde::{Deserialize, Serialize};
 
-use crate::services::base::BaseService;
+use crate::services::BaseService;
 
 /// Enhanced comment structure with resolved username
 #[derive(Clone, Debug, Serialize, Deserialize)]

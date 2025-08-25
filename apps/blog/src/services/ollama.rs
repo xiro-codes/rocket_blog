@@ -1,4 +1,4 @@
-use crate::services::{ai_provider::AIProvider, base::BaseService, SettingsService};
+use crate::services::{ai_provider::AIProvider, BaseService, SettingsService};
 use async_trait::async_trait;
 use reqwest::Client;
 use sea_orm::DatabaseConnection;

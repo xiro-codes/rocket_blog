@@ -1,4 +1,4 @@
-use crate::services::base::BaseService;
+use crate::services::BaseService;
 use chrono::Local;
 use models::{
     post_reaction::{self, ReactionType},
