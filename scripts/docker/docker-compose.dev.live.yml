@@ -25,14 +25,14 @@ services:
       timeout: 5s
       retries: 5
 
-  # The Blog application (live development with volume mounts)
-  blog-app:
+  # The Rust web application (live development with volume mounts)
+  app:
     build: 
       context: ../..
-      dockerfile: scripts/docker/Dockerfile.blog.dev
+      dockerfile: scripts/docker/Dockerfile.dev
     restart: always
     ports:
-      # Expose blog app port for development
+      # Expose app port for development
       - "8000:8000"
     environment:
       # Override database URL to use docker service name
@@ -42,44 +42,16 @@ services:
       ROCKET_ENV: development
     volumes:
       # Persist uploaded files
-      - blog_data:/app/data
+      - app_data:/app/data
       # Mount templates and static files for live editing
-      - ../../apps/blog/templates:/app/templates:ro
-      - ../../static:/app/static:ro
+      - ./templates:/app/templates:ro
+      - ./static:/app/static:ro
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       app-network:
         ipv4_address: 172.20.0.30
-
-  # The Hello World application (live development with volume mounts)
-  hello-world-app:
-    build: 
-      context: ../..
-      dockerfile: scripts/docker/Dockerfile.hello-world.dev
-    restart: always
-    ports:
-      # Expose hello-world app port for development
-      - "8001:8001"
-    environment:
-      # Override database URL to use docker service name (though hello-world may not use it)
-      ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
-      # Development environment settings
-      RUST_LOG: debug
-      ROCKET_ENV: development
-    volumes:
-      # Persist any data files
-      - hello_world_data:/app/data
-      # Mount templates and static files for live editing
-      - ../../apps/hello-world/templates:/app/templates:ro
-      - ../../static:/app/static:ro
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      app-network:
-        ipv4_address: 172.20.0.31
   
   # The pgAdmin GUI service
   pgadmin:
@@ -110,5 +82,4 @@ networks:
 # Define the named volumes for data persistence
 volumes:
   postgres_data:
-  blog_data:
-  hello_world_data:
+  app_data:
