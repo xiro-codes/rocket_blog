@@ -1,14 +1,14 @@
 use chrono::Utc;
 use models::{
-    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, NotificationSettingsFormDTO},
-    user_role, work_time_entry, notification_settings,
+    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO},
+    user_role, work_time_entry, notification_settings, pay_period,
 };
 use rust_decimal::Decimal;
 use sea_orm::*;
 use uuid::Uuid;
 use std::str::FromStr;
 
-use crate::services::BaseService;
+use crate::services::{BaseService, PayPeriodService};
 
 type DbConn = DatabaseConnection;
 
@@ -136,6 +136,7 @@ impl WorkTimeService {
             id: Set(entry_id),
             account_id: Set(account_id),
             user_role_id: Set(data.user_role_id),
+            pay_period_id: Set(None), // Will be set when the entry is completed
             start_time: Set(now.naive_utc()),
             end_time: Set(None),
             duration: Set(None),
@@ -165,14 +166,30 @@ impl WorkTimeService {
         let end_time = Utc::now();
         let duration = (end_time - active_entry.start_time.and_utc()).num_minutes() as i32;
 
+        // Find the appropriate pay period for this entry
+        let entry_date = active_entry.start_time.date();
+        let pay_period = pay_period::Entity::find()
+            .filter(pay_period::Column::AccountId.eq(account_id))
+            .filter(pay_period::Column::IsActive.eq(true))
+            .filter(pay_period::Column::StartDate.lte(entry_date))
+            .filter(pay_period::Column::EndDate.gte(entry_date))
+            .one(db)
+            .await?;
+
         let mut entry: work_time_entry::ActiveModel = active_entry.into();
         entry.end_time = Set(Some(end_time.naive_utc()));
         entry.duration = Set(Some(duration));
+        entry.pay_period_id = Set(pay_period.as_ref().map(|p| p.id));
         entry.is_active = Set(false);
         entry.updated_at = Set(end_time.naive_utc());
 
         let stopped_entry = entry.update(db).await?;
         log::info!("Time tracking stopped. Duration: {} minutes", duration);
+        
+        if let Some(pay_period) = pay_period {
+            log::info!("Assigned entry to pay period: {}", pay_period.period_name);
+        }
+        
         Ok(stopped_entry)
     }
 
@@ -229,11 +246,22 @@ impl WorkTimeService {
 
         let entry_id = BaseService::generate_id();
         let now = Utc::now();
+
+        // Find the appropriate pay period for this entry
+        let entry_date = start_time.date_naive();
+        let pay_period = pay_period::Entity::find()
+            .filter(pay_period::Column::AccountId.eq(account_id))
+            .filter(pay_period::Column::IsActive.eq(true))
+            .filter(pay_period::Column::StartDate.lte(entry_date))
+            .filter(pay_period::Column::EndDate.gte(entry_date))
+            .one(db)
+            .await?;
         
         let entry = work_time_entry::ActiveModel {
             id: Set(entry_id),
             account_id: Set(account_id),
             user_role_id: Set(data.user_role_id),
+            pay_period_id: Set(pay_period.as_ref().map(|p| p.id)),
             start_time: Set(start_time.naive_utc()),
             end_time: Set(end_time.map(|t| t.naive_utc())),
             duration: Set(duration),
@@ -247,6 +275,11 @@ impl WorkTimeService {
         .await?;
 
         log::info!("Manual work time entry created: {}", entry_id);
+        
+        if let Some(pay_period) = pay_period {
+            log::info!("Assigned manual entry to pay period: {}", pay_period.period_name);
+        }
+        
         Ok(entry)
     }
 
@@ -489,5 +522,68 @@ impl WorkTimeService {
         }
         
         Ok(notifications)
+    }
+
+    /// Get work time summary for a specific pay period
+    pub async fn get_work_time_summary_by_pay_period(
+        &self,
+        db: &DbConn,
+        account_id: Uuid,
+        pay_period_id: Option<Uuid>,
+    ) -> Result<PayPeriodSummaryDTO, DbErr> {
+        let mut query = work_time_entry::Entity::find()
+            .find_also_related(user_role::Entity)
+            .filter(work_time_entry::Column::AccountId.eq(account_id))
+            .filter(work_time_entry::Column::IsActive.eq(false)); // Only completed entries
+
+        if let Some(period_id) = pay_period_id {
+            query = query.filter(work_time_entry::Column::PayPeriodId.eq(period_id));
+        } else {
+            // Get entries without assigned pay period
+            query = query.filter(work_time_entry::Column::PayPeriodId.is_null());
+        }
+
+        let entries = query.all(db).await?;
+
+        let mut total_hours = Decimal::from(0);
+        let mut total_earnings = Decimal::from(0);
+        let mut currency = "USD".to_string();
+        let entries_count = entries.len() as i32;
+
+        for (entry, role) in entries {
+            if let (Some(role), Some(duration)) = (role, entry.duration) {
+                let hours = Decimal::from(duration) / Decimal::from(60);
+                total_hours += hours;
+                total_earnings += hours * role.hourly_wage;
+                currency = role.currency; // Use the last currency found
+            }
+        }
+
+        // Get pay period info if provided
+        let (pay_period_name, period_start_date, period_end_date) = if let Some(period_id) = pay_period_id {
+            let pay_period = pay_period::Entity::find_by_id(period_id)
+                .filter(pay_period::Column::AccountId.eq(account_id))
+                .one(db)
+                .await?;
+            
+            if let Some(period) = pay_period {
+                (Some(period.period_name), Some(period.start_date), Some(period.end_date))
+            } else {
+                (None, None, None)
+            }
+        } else {
+            (None, None, None)
+        };
+
+        Ok(PayPeriodSummaryDTO {
+            pay_period_id,
+            pay_period_name,
+            period_start_date,
+            period_end_date,
+            total_hours,
+            total_earnings,
+            currency,
+            entries_count,
+        })
     }
 }

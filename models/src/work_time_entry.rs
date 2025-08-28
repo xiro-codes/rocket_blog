@@ -11,6 +11,7 @@ pub struct Model {
     pub id: Uuid,
     pub account_id: Uuid,
     pub user_role_id: Uuid,
+    pub pay_period_id: Option<Uuid>,
     pub start_time: DateTime,
     pub end_time: Option<DateTime>,
     pub duration: Option<i32>, // Duration in minutes
@@ -35,6 +36,12 @@ pub enum Relation {
         to = "super::user_role::Column::Id"
     )]
     UserRole,
+    #[sea_orm(
+        belongs_to = "super::pay_period::Entity",
+        from = "Column::PayPeriodId",
+        to = "super::pay_period::Column::Id"
+    )]
+    PayPeriod,
 }
 
 impl Related<super::account::Entity> for Entity {
@@ -46,6 +53,12 @@ impl Related<super::account::Entity> for Entity {
 impl Related<super::user_role::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::UserRole.def()
+    }
+}
+
+impl Related<super::pay_period::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::PayPeriod.def()
     }
 }
 

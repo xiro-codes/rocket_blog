@@ -26,5 +26,7 @@ mod tag;
 pub use tag::TagService;
 mod work_time;
 pub use work_time::WorkTimeService;
+mod pay_period;
+pub use pay_period::PayPeriodService;
 mod youtube;
 pub use youtube::YoutubeDownloadService;

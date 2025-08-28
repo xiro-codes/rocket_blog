@@ -164,3 +164,43 @@ pub struct NotificationSettingsFormDTO {
     pub daily_goal_enabled: Option<bool>,
     pub daily_hours_goal: Option<String>, // Use String for form handling
 }
+
+/// Form DTO for creating/editing pay periods
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct PayPeriodFormDTO {
+    pub period_name: String,
+    pub start_date: String, // Use String for form handling, convert to Date in service
+    pub end_date: String,   // Use String for form handling, convert to Date in service
+}
+
+/// Result struct for pay period with summary information
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct PayPeriodWithSummaryDTO {
+    pub id: Uuid,
+    pub period_name: String,
+    pub start_date: chrono::NaiveDate,
+    pub end_date: chrono::NaiveDate,
+    pub is_active: bool,
+    pub created_at: DateTime<Utc>,
+    pub total_hours: Decimal,
+    pub total_earnings: Decimal,
+    pub currency: String,
+    pub entries_count: i32,
+    pub is_current: bool, // Whether this pay period includes today's date
+}
+
+/// Enhanced work time summary with pay period information
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct PayPeriodSummaryDTO {
+    pub pay_period_id: Option<Uuid>,
+    pub pay_period_name: Option<String>,
+    pub period_start_date: Option<chrono::NaiveDate>,
+    pub period_end_date: Option<chrono::NaiveDate>,
+    pub total_hours: Decimal,
+    pub total_earnings: Decimal,
+    pub currency: String,
+    pub entries_count: i32,
+}

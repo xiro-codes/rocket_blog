@@ -1,4 +1,4 @@
-use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO};
+use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO, PayPeriodFormDTO};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -14,7 +14,7 @@ use crate::{
     controllers::base::ControllerBase,
     guards::AuthenticatedUser,
     pool::Db,
-    services::WorkTimeService,
+    services::{WorkTimeService, PayPeriodService},
 };
 
 /// Controller for work time tracking functionality
@@ -263,6 +263,91 @@ async fn update_notifications(
     }
 }
 
+// Pay period management routes
+#[get("/payperiods")]
+async fn payperiods_view(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    pay_period_service: &State<PayPeriodService>,
+) -> Result<Template, Flash<Redirect>> {
+    log::info!("Route accessed: GET /worktime/payperiods - Pay periods management");
+    let db = conn.into_inner();
+    
+    match pay_period_service.get_pay_periods_with_summary(db, user.account_id).await {
+        Ok(pay_periods) => Ok(Template::render(
+            "worktime/payperiods",
+            context! {
+                page_title: "Manage Pay Periods",
+                pay_periods: pay_periods,
+                username: user.username,
+            }
+        )),
+        Err(e) => {
+            log::error!("Failed to load pay periods: {}", e);
+            Err(Flash::error(Redirect::to("/worktime"), "Failed to load pay periods"))
+        }
+    }
+}
+
+#[post("/payperiods", data = "<form>")]
+async fn create_pay_period(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    pay_period_service: &State<PayPeriodService>,
+    form: Form<PayPeriodFormDTO>,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /worktime/payperiods - Creating pay period");
+    let db = conn.into_inner();
+    
+    match pay_period_service.create_pay_period(db, user.account_id, form.into_inner()).await {
+        Ok(_) => Flash::success(Redirect::to("/worktime/payperiods"), "Pay period created successfully"),
+        Err(e) => {
+            log::error!("Failed to create pay period: {}", e);
+            Flash::error(Redirect::to("/worktime/payperiods"), &format!("Failed to create pay period: {}", e))
+        }
+    }
+}
+
+#[post("/payperiods/assign")]
+async fn auto_assign_entries(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    pay_period_service: &State<PayPeriodService>,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /worktime/payperiods/assign - Auto-assign entries");
+    let db = conn.into_inner();
+    
+    match pay_period_service.auto_assign_entries_to_pay_periods(db, user.account_id).await {
+        Ok(count) => Flash::success(
+            Redirect::to("/worktime/payperiods"), 
+            &format!("Successfully assigned {} work entries to pay periods", count)
+        ),
+        Err(e) => {
+            log::error!("Failed to auto-assign entries: {}", e);
+            Flash::error(Redirect::to("/worktime/payperiods"), "Failed to auto-assign entries")
+        }
+    }
+}
+
+#[post("/payperiods/<period_id>/delete")]
+async fn delete_pay_period(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    pay_period_service: &State<PayPeriodService>,
+    period_id: Uuid,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /worktime/payperiods/{}/delete - Deleting pay period", period_id);
+    let db = conn.into_inner();
+    
+    match pay_period_service.delete_pay_period(db, period_id, user.account_id).await {
+        Ok(_) => Flash::success(Redirect::to("/worktime/payperiods"), "Pay period deleted successfully"),
+        Err(e) => {
+            log::error!("Failed to delete pay period: {}", e);
+            Flash::error(Redirect::to("/worktime/payperiods"), "Failed to delete pay period")
+        }
+    }
+}
+
 #[rocket::async_trait]
 impl Fairing for Controller {
     fn info(&self) -> fairing::Info {
@@ -284,6 +369,10 @@ impl Fairing for Controller {
             delete_entry,
             notifications_view,
             update_notifications,
+            payperiods_view,
+            create_pay_period,
+            auto_assign_entries,
+            delete_pay_period,
         ];
         
         log::info!("Mounting work time routes at: {}", self.base.path());
