@@ -2,7 +2,6 @@
 #[macro_use]
 extern crate rocket;
 
-mod config;
 mod controllers;
 mod dto;
 mod features;
@@ -17,7 +16,7 @@ mod types;
 #[cfg(test)]
 mod tests;
 
-use config::AppConfig;
+use common::config::AppConfig;
 use features::Features;
 use registry::{ServiceRegistry, ControllerRegistry};
 use common::database::{Db};

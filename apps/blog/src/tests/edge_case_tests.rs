@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod edge_case_tests {
     use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, AIProviderService, OpenAIService, OllamaService, ReactionService, SettingsService, CoordinatorService, AIProvider};
-    use crate::config::AppConfig;
+    use common::config::AppConfig;
     use crate::middleware::Seeding;
     use crate::controllers::{AuthController, BlogController, CommentController, IndexController, FeedController};
     use crate::registry::{ServiceRegistry, ControllerRegistry};

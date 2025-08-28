@@ -1,4 +1,5 @@
-use crate::{config::AppConfig, dto::post::FormDTO};
+use crate::dto::post::FormDTO;
+use common::config::AppConfig;
 use chrono::Local;
 use models::{
     account,
@@ -78,7 +79,7 @@ impl Service {
         let fid = BaseService::generate_id().to_string();
         let path = if let Some(ref mut file) = data.file {
             if let Some(name) = file.name() {
-                let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
+                let path = format!("{}/{}_{}.webm", app_config.get_data_path(), fid, name);
                 log::debug!("Uploading file to: {}", path);
                 file
                     .copy_to(path.clone())
@@ -204,7 +205,7 @@ impl Service {
         if let Some(ref mut file) = data.file {
             if let Some(name) = file.name() {
                 let fid = BaseService::generate_id().to_string();
-                let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
+                let path = format!("{}/{}_{}.webm", app_config.get_data_path(), fid, name);
                 log::debug!("Uploading file to: {}", path);
                 file
                     .copy_to(path.clone())

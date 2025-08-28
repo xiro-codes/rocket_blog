@@ -1,12 +1,12 @@
 #[cfg(test)]
 mod tests {
-    use crate::config::AppConfig;
+    use common::config::AppConfig;
     use crate::tests::utils::create_test_figment;
 
     #[test]
     fn test_app_config_default() {
         let config = AppConfig::default();
-        assert_eq!(config.data_path, "/home/tod/.local/share/blog");
+        assert_eq!(config.get_data_path(), "/home/tod/.local/share/blog");
     }
 
     #[test]
@@ -15,7 +15,7 @@ mod tests {
         let figment = create_test_figment(Some(test_path.to_string()));
         
         let config = AppConfig::from_figment(&figment);
-        assert_eq!(config.data_path, test_path);
+        assert_eq!(config.get_data_path(), test_path);
     }
 
     #[test]

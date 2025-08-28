@@ -3,7 +3,7 @@ mod comprehensive_tests {
     //! Comprehensive tests for all main crate components
     //! These tests focus on basic functionality and don't require database connections
 
-    use crate::config::AppConfig;
+    use common::config::AppConfig;
     use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, CoordinatorService, ReactionService, AIProviderService, OpenAIService, OllamaService, SettingsService};
     use crate::controllers::{AuthController, BlogController, CommentController, IndexController, FeedController, ControllerBase};
     use crate::middleware::Seeding;
@@ -31,7 +31,7 @@ mod comprehensive_tests {
         #[test]
         fn test_app_config_default() {
             let config = AppConfig::default();
-            assert_eq!(config.data_path, "/home/tod/.local/share/blog");
+            assert_eq!(config.get_data_path(), "/home/tod/.local/share/blog");
         }
 
         #[test]

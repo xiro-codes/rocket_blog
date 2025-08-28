@@ -1,6 +1,6 @@
 use crate::services::{BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService};
 use crate::controllers;
-use crate::config::AppConfig;
+use common::config::AppConfig;
 use rocket::{fairing::AdHoc, Build, Rocket, State};
 
 // Import shared auth components
