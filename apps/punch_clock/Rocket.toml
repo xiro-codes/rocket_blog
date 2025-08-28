@@ -1,0 +1,3 @@
+[default]
+port = 8001
+# Database configuration will be read from the workspace .env file
