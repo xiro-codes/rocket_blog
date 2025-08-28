@@ -3,6 +3,7 @@ limits.file = "1 GB"
 limits.data-form = "1 GB"
 limits.form = "1 GB"
 data_path = "/home/tod/.local/share/blog"
+template_dir = "../../templates"
 
 [default.databases.sea_orm]
 url = "postgres://master:password@localhost/tdavis_dev"

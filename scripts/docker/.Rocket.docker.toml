@@ -4,9 +4,11 @@ limits.data-form = "1 GB"
 limits.form = "1 GB"
 data_path = "/app/data"
 address = "0.0.0.0"
+template_dir = "/app/templates"
 [default.databases.sea_orm]
 url = "postgres://master:password@postgres/tdavis_dev"
 
 [release]
 secret_key = "IbP06YnohvhdpzC/dHzUci4zUEL44Gl54fouYYvTxMg="
 data_path = "/app/data"
+template_dir = "/app/templates"

@@ -40,7 +40,7 @@ RUN useradd -m -u 1000 app
 WORKDIR /app
 
 # Copy static assets and templates for punch clock
-COPY apps/punch_clock/templates ./templates/
+COPY templates ./templates/
 COPY static ./static/
 COPY scripts/docker/.Rocket.punch-clock.toml ./Rocket.toml
 

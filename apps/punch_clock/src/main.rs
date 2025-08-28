@@ -34,7 +34,7 @@ async fn rocket() -> _ {
         "/punch-clock".to_string(),          // redirect_after_login
         "/punch-clock".to_string(),          // redirect_after_logout  
         "/punch-clock/auth".to_string(),     // redirect_after_register
-    );
+    ).with_template_prefix("punch_clock_auth".to_string());
     
     // Setup database with health monitoring
     let (db_health_fairing, db_health) = common::database::init_with_health();

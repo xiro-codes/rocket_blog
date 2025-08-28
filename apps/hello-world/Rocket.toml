@@ -1,3 +1,6 @@
+[default]
+template_dir = "../../templates"
+
 [app.sea_orm]
 url = "postgres://admin:admin@localhost:5432/rocket_blog"
 max_connections = 100
