@@ -183,6 +183,10 @@ docker-backup-list:
 docker-backup-clean DAYS="7":
 	sh ./scripts/docker-deploy.sh backup-clean {{DAYS}}
 
+# Export Docker volumes to folder for inspection
+docker-inspect ENV="":
+	sh ./scripts/docker-deploy.sh inspect {{ENV}}
+
 # Install systemd timers for automated backups
 docker-backup-install-timers:
 	@echo "🕒 Installing systemd timers for automated backups..."
@@ -357,6 +361,7 @@ help:
 	@echo "  docker-restore ENV          Restore Docker volumes from backup"
 	@echo "  docker-backup-list          List available Docker volume backups"
 	@echo "  docker-backup-clean DAYS    Clean old backups (default: 7 days)"
+	@echo "  docker-inspect ENV          Export volumes to folder for inspection"
 	@echo "  docker-backup-install-timers Install systemd timers for automated backups"
 	@echo "  docker-backup-timer-status  Check systemd backup timer status"
 	@echo "  docker-backup-timer-stop    Stop and disable systemd backup timer"

@@ -532,6 +532,50 @@ The systemd timer:
 - Logs all operations to the system journal
 - Includes security restrictions for safer execution
 
+### Volume Content Inspection
+
+For easy inspection of volume contents, you can export Docker volumes to a readable folder structure:
+
+```bash
+# Export volumes for inspection (auto-detects running environment)
+./scripts/docker-deploy.sh inspect
+
+# Export specific environment volumes
+./scripts/docker-deploy.sh inspect prod
+./scripts/docker-deploy.sh inspect dev
+
+# Or use the backup script directly
+./scripts/docker-backup.sh inspect dev
+
+# Using justfile commands
+just docker-inspect
+just docker-inspect dev
+```
+
+**What gets exported:**
+- Each volume is extracted to its own subdirectory
+- Files are preserved with original permissions and structure
+- No compression - browse and edit files directly
+- Includes inspection metadata with volume information
+- Exports are timestamped for multiple snapshots
+
+**Example usage:**
+```bash
+# Export development volumes
+./scripts/docker-deploy.sh inspect dev
+
+# Browse exported postgres data
+ls -la ./backups/volume_inspections/volumes_dev_20241201_120000/postgres_data/
+
+# View inspection summary
+cat ./backups/volume_inspections/volumes_dev_20241201_120000/inspection_info.txt
+
+# Edit a configuration file directly
+nano ./backups/volume_inspections/volumes_dev_20241201_120000/nginx_logs/access.log
+```
+
+**Exports are stored in:** `./backups/volume_inspections/volumes_{env}_{timestamp}/`
+
 ### Volume Inspection and Troubleshooting
 
 ```bash

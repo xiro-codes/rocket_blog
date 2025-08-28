@@ -25,6 +25,7 @@ function show_help() {
     echo "  restore [env]      Restore Docker volumes from latest backup"
     echo "  backup-list        List available backups"
     echo "  backup-clean [days] Remove backups older than N days (default: 7)"
+    echo "  inspect [env]      Export volumes to folder for inspection (env: prod|dev, auto-detect if not specified)"
     echo "  stop               Stop all services"
     echo "  clean              Stop and remove all containers/volumes"
     echo "  help               Show this help message"
@@ -195,6 +196,10 @@ function clean_backups() {
     "$SCRIPT_DIR/docker-backup.sh" clean "$1"
 }
 
+function inspect_volumes() {
+    "$SCRIPT_DIR/docker-backup.sh" inspect "$1"
+}
+
 case "${1:-help}" in
     dev)
         start_dev
@@ -228,6 +233,9 @@ case "${1:-help}" in
         ;;
     backup-clean)
         clean_backups "$2"
+        ;;
+    inspect)
+        inspect_volumes "$2"
         ;;
     stop)
         stop_services

@@ -23,6 +23,7 @@ function show_help() {
     echo "  backup [env]        Backup all volumes (env: prod|dev, default: auto-detect)"
     echo "  restore [env]       Restore volumes from latest backup"
     echo "  restore-from [file] Restore from specific backup file"
+    echo "  inspect [env]       Export volumes to folder for inspection (env: prod|dev, default: auto-detect)"
     echo "  list                List available backups"
     echo "  clean [days]        Remove backups older than N days (default: 7)"
     echo "  help                Show this help message"
@@ -36,6 +37,8 @@ function show_help() {
     echo "  $0 backup dev       # Backup development volumes"
     echo "  $0 restore          # Restore from latest backup"
     echo "  $0 restore-from backup_20241201_120000.tar.gz"
+    echo "  $0 inspect          # Export volumes to inspectable folder"
+    echo "  $0 inspect dev      # Export dev volumes to folder"
     echo "  $0 clean 30         # Remove backups older than 30 days"
 }
 
@@ -97,10 +100,10 @@ function backup_volumes() {
     local volumes=()
     case "$env" in
         prod)
-            volumes=("postgres_data" "app_data" "letsencrypt_data" "certbot_webroot" "nginx_logs")
+            volumes=("postgres_data" "blog_data" "hello_world_data" "punch_clock_data" "letsencrypt_data" "certbot_webroot" "nginx_logs")
             ;;
         dev)
-            volumes=("postgres_data" "app_data")
+            volumes=("postgres_data" "blog_data" "hello_world_data" "punch_clock_data")
             ;;
     esac
     
@@ -299,6 +302,115 @@ function clean_old_backups() {
     echo "Removed $count old backup files."
 }
 
+function inspect_volumes() {
+    local env="${1:-$(detect_environment)}"
+    
+    if [ "$env" = "none" ]; then
+        echo "No running Docker containers detected. Please specify environment: prod or dev"
+        exit 1
+    fi
+    
+    local compose_file=$(get_compose_file "$env")
+    local volume_prefix=$(get_volume_prefix "$env")
+    local inspect_dir="${BACKUP_DIR}/volume_inspections"
+    local inspection_name="volumes_${env}_${DATE}"
+    local inspection_path="$inspect_dir/$inspection_name"
+    
+    echo "Exporting Docker volumes for inspection: $env"
+    echo "Using compose file: $compose_file"
+    echo "Export directory: $inspection_path"
+    
+    # Create inspection directory
+    mkdir -p "$inspection_path"
+    
+    # Get volumes for the environment
+    local volumes=()
+    case "$env" in
+        prod)
+            volumes=("postgres_data" "blog_data" "hello_world_data" "punch_clock_data" "letsencrypt_data" "certbot_webroot" "nginx_logs")
+            ;;
+        dev)
+            volumes=("postgres_data" "blog_data" "hello_world_data" "punch_clock_data")
+            ;;
+    esac
+    
+    echo ""
+    echo "Exporting volumes to inspectable folders..."
+    
+    for volume in "${volumes[@]}"; do
+        local full_volume_name="${volume_prefix}_${volume}"
+        local volume_export_dir="$inspection_path/$volume"
+        
+        echo "Exporting volume: $full_volume_name -> $volume_export_dir/"
+        
+        # Check if volume exists
+        if ! docker volume inspect "$full_volume_name" >/dev/null 2>&1; then
+            echo "  ⚠️  Volume $full_volume_name not found, skipping..."
+            continue
+        fi
+        
+        # Create directory for this volume
+        mkdir -p "$volume_export_dir"
+        
+        # Export volume contents using a temporary container
+        # We use cp instead of tar to preserve directory structure
+        docker run --rm \
+            -v "$full_volume_name:/source:ro" \
+            -v "$volume_export_dir:/target" \
+            alpine:latest \
+            sh -c "cp -a /source/. /target/"
+        
+        # Get volume size info
+        local volume_size=$(docker run --rm -v "$full_volume_name:/data:ro" alpine:latest du -sh /data 2>/dev/null | cut -f1 || echo "unknown")
+        echo "  ✓ Exported $volume (size: $volume_size)"
+    done
+    
+    # Create inspection metadata file
+    cat > "$inspection_path/inspection_info.txt" << EOF
+Rocket Blog Docker Volume Inspection
+Generated: $(date)
+Environment: $env
+Hostname: $(hostname)
+Docker Version: $(docker --version)
+Volumes Exported: $(IFS=, ; echo "${volumes[*]}")
+Export Location: $inspection_path
+
+How to inspect volumes:
+- Each volume is exported to its own subdirectory
+- Files are preserved with original permissions and structure
+- You can browse, edit, or analyze the contents directly
+- This is a snapshot from $(date)
+
+Directory Structure:
+EOF
+    
+    # Add directory tree to the info file
+    if command -v tree >/dev/null 2>&1; then
+        echo "" >> "$inspection_path/inspection_info.txt"
+        tree -L 2 "$inspection_path" >> "$inspection_path/inspection_info.txt" 2>/dev/null || true
+    else
+        # Fallback to ls if tree is not available
+        echo "" >> "$inspection_path/inspection_info.txt"
+        ls -la "$inspection_path" >> "$inspection_path/inspection_info.txt"
+    fi
+    
+    echo ""
+    echo "✅ Volume inspection completed!"
+    echo ""
+    echo "📁 Exported volumes are available at:"
+    echo "   $inspection_path"
+    echo ""
+    echo "📋 View the inspection summary:"
+    echo "   cat $inspection_path/inspection_info.txt"
+    echo ""
+    echo "🔍 To inspect individual volumes:"
+    for volume in "${volumes[@]}"; do
+        if docker volume inspect "${volume_prefix}_${volume}" >/dev/null 2>&1; then
+            echo "   ls -la $inspection_path/$volume/"
+        fi
+    done
+}
+
 # Main command handling
 case "${1:-help}" in
     backup)
@@ -316,6 +428,9 @@ case "${1:-help}" in
         # Extract environment from filename or use auto-detect
         env=$(echo "$2" | grep -o '_\(prod\|dev\)_' | tr -d '_' || echo "")
         restore_volumes "$env" "$2"
+        ;;
+    inspect)
+        inspect_volumes "$2"
         ;;
     list)
         list_backups
