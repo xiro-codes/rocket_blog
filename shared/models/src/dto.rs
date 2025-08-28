@@ -93,3 +93,34 @@ pub struct OllamaSettingsFormDTO {
     pub ollama_model: String,
     pub ollama_enabled: bool,
 }
+
+/// Form DTO for work role creation and editing
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct WorkRoleFormDTO {
+    pub name: String,
+    pub hourly_rate: String, // String to handle form input, converted to Decimal in service
+    pub is_active: bool,
+}
+
+/// Form DTO for clocking in to a work session
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct ClockInFormDTO {
+    pub work_role_id: String, // String to handle form input, converted to Uuid in service
+}
+
+/// Result struct for work session with role information
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct WorkSessionWithRoleDTO {
+    pub id: Uuid,
+    pub account_id: Uuid,
+    pub work_role_id: Uuid,
+    pub clock_in_time: chrono::NaiveDateTime,
+    pub clock_out_time: Option<chrono::NaiveDateTime>,
+    pub duration_minutes: Option<i32>,
+    pub earnings: Option<rust_decimal::Decimal>,
+    pub role_name: String,
+    pub hourly_rate: rust_decimal::Decimal,
+}
