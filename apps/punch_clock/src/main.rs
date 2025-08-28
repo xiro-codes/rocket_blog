@@ -2,15 +2,13 @@
 extern crate rocket;
 
 mod controllers;
-mod services;
 mod guards;
 
-use common::database::Db;
+use common::{database::Db, services::{WorkRoleService, WorkSessionService}};
 use controllers::punch_clock::PunchClockController;
 use rocket::{fairing::AdHoc, fs::FileServer, response::Redirect};
 use rocket_dyn_templates::Template;
 use sea_orm_rocket::Database;
-use services::{WorkRoleService, WorkSessionService};
 
 #[catch(default)]
 pub fn catch_default() -> Redirect {

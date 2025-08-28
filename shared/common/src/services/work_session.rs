@@ -2,7 +2,7 @@ use sea_orm::*;
 use uuid::Uuid;
 use chrono::Utc;
 use models::{work_session, prelude::{WorkSession, WorkRole}, dto::{ClockInFormDTO, WorkSessionWithRoleDTO}};
-use common::services::BaseService;
+use crate::services::BaseService;
 use std::str::FromStr;
 use rust_decimal::Decimal;
 

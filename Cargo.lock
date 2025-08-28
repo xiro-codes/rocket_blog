@@ -766,6 +766,7 @@ dependencies = [
  "pwhash",
  "rocket",
  "rocket_dyn_templates 0.2.0",
+ "rust_decimal",
  "sea-orm",
  "sea-orm-rocket",
  "serde",

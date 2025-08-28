@@ -2,7 +2,7 @@ use sea_orm::*;
 use uuid::Uuid;
 use chrono::Utc;
 use models::{work_role, prelude::WorkRole, dto::WorkRoleFormDTO};
-use common::services::BaseService;
+use crate::services::BaseService;
 use rust_decimal::Decimal;
 use std::str::FromStr;
 

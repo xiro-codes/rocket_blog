@@ -6,11 +6,8 @@ use rocket::{
 };
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
-use common::database::Db;
-use crate::{
-    guards::{User, Admin},
-    services::{WorkRoleService, WorkSessionService},
-};
+use common::{database::Db, services::{WorkRoleService, WorkSessionService}};
+use crate::guards::{User, Admin};
 use models::dto::{WorkRoleFormDTO, ClockInFormDTO};
 
 pub struct PunchClockController;

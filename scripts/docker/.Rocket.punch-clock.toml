@@ -1,0 +1,26 @@
+[default]
+port = 8002
+address = "0.0.0.0"
+keep_alive = 5
+secret_key = "your-secret-key-replace-in-production"
+limits = { forms = "64 kB", json = "1 MiB" }
+
+[default.databases.sea_orm]
+url = "postgres://master:password@localhost/tdavis_dev"
+max_connections = 50
+min_connections = 5
+connect_timeout = 8
+idle_timeout = 8
+
+[release]
+port = 8002
+address = "0.0.0.0"
+log_level = "normal"
+secret_key = "your-secret-key-replace-in-production"
+
+[release.databases.sea_orm]
+url = "postgres://master:password@localhost/tdavis_dev"
+max_connections = 100
+min_connections = 10
+connect_timeout = 10
+idle_timeout = 10
