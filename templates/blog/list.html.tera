@@ -16,7 +16,6 @@
 		<a class="btn btn-primary" href="/blog/create">[CREATE POST]</a>
 		{%endif%}
 		<a class="btn btn-success" href="/blog/search">[SEARCH]</a>
-		<a class="btn btn-info" href="/worktime">⏱️ [WORK TIME]</a>
 		{%if is_admin %}
 		<a class="btn btn-secondary" href="/settings">[SETTINGS]</a>
 		{%endif%}

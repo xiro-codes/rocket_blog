@@ -151,3 +151,16 @@ pub struct WorkTimeEntryWithRoleDTO {
     pub currency: String,
     pub earnings: Option<Decimal>,
 }
+
+/// Form DTO for notification settings
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct NotificationSettingsFormDTO {
+    pub time_based_enabled: Option<bool>,
+    pub time_threshold_minutes: Option<String>, // Use String for form handling
+    pub earnings_based_enabled: Option<bool>,
+    pub earnings_threshold: Option<String>, // Use String for form handling
+    pub currency: Option<String>,
+    pub daily_goal_enabled: Option<bool>,
+    pub daily_hours_goal: Option<String>, // Use String for form handling
+}

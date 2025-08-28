@@ -10,12 +10,12 @@
                 
                 <div class="alert alert-info">
                     <h4>📱 PWA Offline Features</h4>
-                    <p>This Work Time Tracker PWA works offline. You can:</p>
+                    <p>This application works offline. You can:</p>
                     <ul class="list-unstyled">
-                        <li>✅ View cached work time entries</li>
-                        <li>✅ Access your role information</li>
-                        <li>✅ Use the timer (syncs when online)</li>
-                        <li>✅ Create manual entries (syncs when online)</li>
+                        <li>✅ View cached content</li>
+                        <li>✅ Access previously loaded data</li>
+                        <li>✅ Browse offline pages</li>
+                        <li>✅ Create content (syncs when online)</li>
                     </ul>
                 </div>
 
@@ -23,8 +23,8 @@
                     <h5>🔄 When you're back online:</h5>
                     <ul class="text-start">
                         <li>All offline changes will sync automatically</li>
-                        <li>Your time entries will be saved to the server</li>
-                        <li>Fresh data will be loaded</li>
+                        <li>Your data will be saved to the server</li>
+                        <li>Fresh content will be loaded</li>
                     </ul>
                 </div>
 
@@ -32,8 +32,8 @@
                     <button onclick="window.location.reload()" class="btn btn-primary">
                         🔄 Check Connection
                     </button>
-                    <a href="/worktime" class="btn btn-success ms-2">
-                        📊 View Cached Dashboard
+                    <a href="/blog" class="btn btn-success ms-2">
+                        📊 View Cached Content
                     </a>
                 </div>
 

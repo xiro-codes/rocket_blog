@@ -1,7 +1,7 @@
 use chrono::Utc;
 use models::{
-    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO},
-    user_role, work_time_entry,
+    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, NotificationSettingsFormDTO},
+    user_role, work_time_entry, notification_settings,
 };
 use rust_decimal::Decimal;
 use sea_orm::*;
@@ -351,5 +351,143 @@ impl WorkTimeService {
         
         log::info!("Work time entry deleted: {}", entry_id);
         Ok(())
+    }
+
+    // Notification Settings Management
+    pub async fn get_notification_settings(
+        &self,
+        db: &DbConn,
+        account_id: Uuid,
+    ) -> Result<Option<notification_settings::Model>, DbErr> {
+        notification_settings::Entity::find()
+            .filter(notification_settings::Column::AccountId.eq(account_id))
+            .one(db)
+            .await
+    }
+
+    pub async fn create_or_update_notification_settings(
+        &self,
+        db: &DbConn,
+        account_id: Uuid,
+        data: NotificationSettingsFormDTO,
+    ) -> Result<notification_settings::Model, DbErr> {
+        log::info!("Creating/updating notification settings for account {}", account_id);
+
+        // Parse numeric values from strings
+        let time_threshold_minutes = if let Some(val) = data.time_threshold_minutes {
+            if val.is_empty() { None } else {
+                Some(val.parse::<i32>().map_err(|_| DbErr::Custom("Invalid time threshold format".to_string()))?)
+            }
+        } else {
+            None
+        };
+
+        let earnings_threshold = if let Some(val) = data.earnings_threshold {
+            if val.is_empty() { None } else {
+                Some(Decimal::from_str(&val).map_err(|_| DbErr::Custom("Invalid earnings threshold format".to_string()))?)
+            }
+        } else {
+            None
+        };
+
+        let daily_hours_goal = if let Some(val) = data.daily_hours_goal {
+            if val.is_empty() { None } else {
+                Some(Decimal::from_str(&val).map_err(|_| DbErr::Custom("Invalid daily hours goal format".to_string()))?)
+            }
+        } else {
+            None
+        };
+
+        // Check if settings already exist
+        let existing = self.get_notification_settings(db, account_id).await?;
+        
+        if let Some(existing_settings) = existing {
+            // Update existing settings
+            let mut active_model: notification_settings::ActiveModel = existing_settings.into();
+            active_model.time_based_enabled = Set(data.time_based_enabled.unwrap_or(false));
+            active_model.time_threshold_minutes = Set(time_threshold_minutes);
+            active_model.earnings_based_enabled = Set(data.earnings_based_enabled.unwrap_or(false));
+            active_model.earnings_threshold = Set(earnings_threshold);
+            active_model.currency = Set(data.currency);
+            active_model.daily_goal_enabled = Set(data.daily_goal_enabled.unwrap_or(false));
+            active_model.daily_hours_goal = Set(daily_hours_goal);
+            active_model.updated_at = Set(Utc::now());
+            
+            active_model.update(db).await
+        } else {
+            // Create new settings
+            let settings_id = BaseService::generate_id();
+            let now = Utc::now();
+            
+            let notification_settings = notification_settings::ActiveModel {
+                id: Set(settings_id),
+                account_id: Set(account_id),
+                time_based_enabled: Set(data.time_based_enabled.unwrap_or(false)),
+                time_threshold_minutes: Set(time_threshold_minutes),
+                earnings_based_enabled: Set(data.earnings_based_enabled.unwrap_or(false)),
+                earnings_threshold: Set(earnings_threshold),
+                currency: Set(data.currency),
+                daily_goal_enabled: Set(data.daily_goal_enabled.unwrap_or(false)),
+                daily_hours_goal: Set(daily_hours_goal),
+                created_at: Set(now),
+                updated_at: Set(now),
+            };
+            
+            notification_settings.insert(db).await
+        }
+    }
+
+    pub async fn check_notification_triggers(
+        &self,
+        db: &DbConn,
+        account_id: Uuid,
+        current_session_duration_minutes: Option<i32>,
+        current_session_earnings: Option<Decimal>,
+    ) -> Result<Vec<String>, DbErr> {
+        let mut notifications = Vec::new();
+        
+        // Get notification settings
+        if let Some(settings) = self.get_notification_settings(db, account_id).await? {
+            // Check time-based notifications
+            if settings.time_based_enabled {
+                if let (Some(threshold), Some(duration)) = (settings.time_threshold_minutes, current_session_duration_minutes) {
+                    if duration >= threshold {
+                        notifications.push(format!("You've been working for {} minutes! Time for a break?", duration));
+                    }
+                }
+            }
+
+            // Check earnings-based notifications
+            if settings.earnings_based_enabled {
+                if let (Some(threshold), Some(earnings)) = (settings.earnings_threshold, current_session_earnings) {
+                    if earnings >= threshold {
+                        let currency = settings.currency.unwrap_or_else(|| "USD".to_string());
+                        notifications.push(format!("Great job! You've earned {} {} in this session!", earnings, currency));
+                    }
+                }
+            }
+
+            // Check daily goal notifications
+            if settings.daily_goal_enabled {
+                if let Some(daily_goal) = settings.daily_hours_goal {
+                    // Get today's total hours
+                    let today = Utc::now().date_naive();
+                    let tomorrow = today.succ_opt().unwrap_or(today);
+                    
+                    if let Ok(summary) = self.get_work_time_summary(
+                        db, 
+                        account_id, 
+                        Some(today.and_hms_opt(0, 0, 0).unwrap().and_utc()), 
+                        Some(tomorrow.and_hms_opt(0, 0, 0).unwrap().and_utc())
+                    ).await {
+                        if summary.total_hours >= daily_goal {
+                            notifications.push(format!("🎉 Daily goal achieved! You've worked {} hours today!", summary.total_hours));
+                        }
+                    }
+                }
+            }
+        }
+        
+        Ok(notifications)
     }
 }

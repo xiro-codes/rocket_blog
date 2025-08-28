@@ -6,6 +6,7 @@ pub mod account;
 pub mod background_job;
 pub mod comment;
 pub mod event;
+pub mod notification_settings;
 pub mod post;
 pub mod post_reaction;
 pub mod post_tag;

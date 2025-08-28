@@ -89,13 +89,16 @@
             <div class="terminal-box">
                 <h3>🧭 Quick Actions</h3>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <a href="/worktime/roles" class="btn btn-primary w-100 mb-2">👤 Manage Roles</a>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <a href="/worktime/entries" class="btn btn-info w-100 mb-2">📋 View All Entries</a>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <a href="/worktime/notifications" class="btn btn-warning w-100 mb-2">🔔 Notifications</a>
+                    </div>
+                    <div class="col-md-3">
                         <a href="/blog" class="btn btn-secondary w-100 mb-2">🏠 Back to Blog</a>
                     </div>
                 </div>

@@ -1,0 +1,266 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="terminal-header">🔔 Notification Settings</h1>
+            <p class="text-muted">Configure notifications for your work time tracking</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/worktime">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Notifications</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="terminal-box">
+                <h3>⚙️ Notification Preferences</h3>
+                <form method="post" action="/worktime/notifications">
+                    <!-- Time-based notifications -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5>⏰ Time-Based Notifications</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    id="time_based_enabled" 
+                                    name="time_based_enabled" 
+                                    value="true"
+                                    {% if settings and settings.time_based_enabled %}checked{% endif %}
+                                >
+                                <label class="form-check-label" for="time_based_enabled">
+                                    Enable time-based notifications
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="time_threshold_minutes" class="form-label">
+                                    Notify after (minutes):
+                                </label>
+                                <input 
+                                    type="number" 
+                                    class="form-control terminal-input" 
+                                    id="time_threshold_minutes" 
+                                    name="time_threshold_minutes" 
+                                    min="15" 
+                                    max="480" 
+                                    step="15"
+                                    value="{% if settings and settings.time_threshold_minutes %}{{ settings.time_threshold_minutes }}{% endif %}"
+                                    placeholder="120"
+                                >
+                                <small class="form-text text-muted">Get notified after working for this many minutes (15-480 minutes)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Earnings-based notifications -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5>💰 Earnings-Based Notifications</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    id="earnings_based_enabled" 
+                                    name="earnings_based_enabled" 
+                                    value="true"
+                                    {% if settings and settings.earnings_based_enabled %}checked{% endif %}
+                                >
+                                <label class="form-check-label" for="earnings_based_enabled">
+                                    Enable earnings-based notifications
+                                </label>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <label for="earnings_threshold" class="form-label">
+                                        Notify after earning:
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        class="form-control terminal-input" 
+                                        id="earnings_threshold" 
+                                        name="earnings_threshold" 
+                                        min="1" 
+                                        step="0.01"
+                                        value="{% if settings and settings.earnings_threshold %}{{ settings.earnings_threshold }}{% endif %}"
+                                        placeholder="100.00"
+                                    >
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="currency" class="form-label">Currency:</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control terminal-input" 
+                                        id="currency" 
+                                        name="currency" 
+                                        maxlength="3"
+                                        value="{% if settings and settings.currency %}{{ settings.currency }}{% else %}USD{% endif %}"
+                                        placeholder="USD"
+                                    >
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">Get notified when you earn this amount in a single session</small>
+                        </div>
+                    </div>
+
+                    <!-- Daily goal notifications -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5>🎯 Daily Goal Notifications</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    id="daily_goal_enabled" 
+                                    name="daily_goal_enabled" 
+                                    value="true"
+                                    {% if settings and settings.daily_goal_enabled %}checked{% endif %}
+                                >
+                                <label class="form-check-label" for="daily_goal_enabled">
+                                    Enable daily goal notifications
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="daily_hours_goal" class="form-label">
+                                    Daily hours goal:
+                                </label>
+                                <input 
+                                    type="number" 
+                                    class="form-control terminal-input" 
+                                    id="daily_hours_goal" 
+                                    name="daily_hours_goal" 
+                                    min="0.5" 
+                                    max="16" 
+                                    step="0.5"
+                                    value="{% if settings and settings.daily_hours_goal %}{{ settings.daily_hours_goal }}{% endif %}"
+                                    placeholder="8.0"
+                                >
+                                <small class="form-text text-muted">Get notified when you reach your daily hours goal (0.5-16 hours)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-success">💾 Save Settings</button>
+                        <a href="/worktime" class="btn btn-secondary">🔙 Back to Dashboard</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="terminal-box">
+                <h4>📱 Browser Permissions</h4>
+                <p class="text-muted">To receive notifications, you need to grant permission:</p>
+                <button id="request-permission" class="btn btn-primary mb-2">🔔 Enable Notifications</button>
+                <div id="permission-status" class="alert alert-info">
+                    <small>Status: <span id="permission-text">Checking...</span></small>
+                </div>
+                
+                <h5>ℹ️ How it works</h5>
+                <ul class="list-unstyled">
+                    <li>⏰ <strong>Time notifications:</strong> Remind you to take breaks</li>
+                    <li>💰 <strong>Earnings notifications:</strong> Celebrate reaching earning milestones</li>
+                    <li>🎯 <strong>Daily goals:</strong> Track progress toward daily targets</li>
+                </ul>
+                
+                <div class="alert alert-warning">
+                    <small><strong>Note:</strong> Notifications work even when the app is in the background!</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Check and request notification permission
+function checkPermission() {
+    const permissionText = document.getElementById('permission-text');
+    const permissionStatus = document.getElementById('permission-status');
+    
+    if (!('Notification' in window)) {
+        permissionText.textContent = 'Not supported';
+        permissionStatus.className = 'alert alert-danger';
+        return;
+    }
+    
+    switch (Notification.permission) {
+        case 'granted':
+            permissionText.textContent = 'Granted ✅';
+            permissionStatus.className = 'alert alert-success';
+            break;
+        case 'denied':
+            permissionText.textContent = 'Denied ❌';
+            permissionStatus.className = 'alert alert-danger';
+            break;
+        default:
+            permissionText.textContent = 'Not requested';
+            permissionStatus.className = 'alert alert-warning';
+            break;
+    }
+}
+
+document.getElementById('request-permission').addEventListener('click', function() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(function(permission) {
+            checkPermission();
+            if (permission === 'granted') {
+                new Notification('Work Time Tracker', {
+                    body: 'Notifications are now enabled! 🎉',
+                    icon: '/static/icon-192x192.png'
+                });
+            }
+        });
+    }
+});
+
+// Check permission on page load
+checkPermission();
+
+// Test notification button (for development)
+function testNotification() {
+    if (Notification.permission === 'granted') {
+        new Notification('Test Notification', {
+            body: 'This is a test notification from Work Time Tracker',
+            icon: '/static/icon-192x192.png'
+        });
+    }
+}
+
+// Auto-enable/disable threshold inputs based on checkboxes
+document.getElementById('time_based_enabled').addEventListener('change', function() {
+    document.getElementById('time_threshold_minutes').disabled = !this.checked;
+});
+
+document.getElementById('earnings_based_enabled').addEventListener('change', function() {
+    document.getElementById('earnings_threshold').disabled = !this.checked;
+    document.getElementById('currency').disabled = !this.checked;
+});
+
+document.getElementById('daily_goal_enabled').addEventListener('change', function() {
+    document.getElementById('daily_hours_goal').disabled = !this.checked;
+});
+
+// Initialize disabled state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const timeCheckbox = document.getElementById('time_based_enabled');
+    const earningsCheckbox = document.getElementById('earnings_based_enabled');
+    const dailyCheckbox = document.getElementById('daily_goal_enabled');
+    
+    document.getElementById('time_threshold_minutes').disabled = !timeCheckbox.checked;
+    document.getElementById('earnings_threshold').disabled = !earningsCheckbox.checked;
+    document.getElementById('currency').disabled = !earningsCheckbox.checked;
+    document.getElementById('daily_hours_goal').disabled = !dailyCheckbox.checked;
+});
+</script>
+{% endblock %}

@@ -1,4 +1,4 @@
-use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO};
+use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -219,6 +219,50 @@ async fn delete_entry(
     }
 }
 
+#[get("/notifications")]
+async fn notifications_view(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    service: &State<WorkTimeService>,
+) -> Result<Template, Flash<Redirect>> {
+    log::info!("Route accessed: GET /worktime/notifications - Notification settings view");
+    let db = conn.into_inner();
+    
+    match service.get_notification_settings(db, user.account_id).await {
+        Ok(settings) => Ok(Template::render(
+            "worktime/notifications",
+            context! {
+                page_title: "Notification Settings",
+                settings: settings,
+                username: user.username,
+            }
+        )),
+        Err(e) => {
+            log::error!("Failed to load notification settings: {}", e);
+            Err(Flash::error(Redirect::to("/worktime"), "Failed to load notification settings"))
+        }
+    }
+}
+
+#[post("/notifications", data = "<form>")]
+async fn update_notifications(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    service: &State<WorkTimeService>,
+    form: Form<NotificationSettingsFormDTO>,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /worktime/notifications - Updating notification settings");
+    let db = conn.into_inner();
+    
+    match service.create_or_update_notification_settings(db, user.account_id, form.into_inner()).await {
+        Ok(_) => Flash::success(Redirect::to("/worktime/notifications"), "Notification settings updated successfully"),
+        Err(e) => {
+            log::error!("Failed to update notification settings: {}", e);
+            Flash::error(Redirect::to("/worktime/notifications"), "Failed to update notification settings")
+        }
+    }
+}
+
 #[rocket::async_trait]
 impl Fairing for Controller {
     fn info(&self) -> fairing::Info {
@@ -238,6 +282,8 @@ impl Fairing for Controller {
             entries_view,
             create_manual_entry,
             delete_entry,
+            notifications_view,
+            update_notifications,
         ];
         
         log::info!("Mounting work time routes at: {}", self.base.path());
