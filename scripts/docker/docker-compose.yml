@@ -23,11 +23,11 @@ services:
     ports:
       - "5432:5432"
 
-  # The Rust web application
-  app:
+  # The Blog application
+  blog-app:
     build: 
       context: ../..
-      dockerfile: scripts/docker/Dockerfile
+      dockerfile: scripts/docker/Dockerfile.blog
     restart: always
     # No direct port exposure - nginx will proxy to this
     environment:
@@ -35,13 +35,33 @@ services:
       ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
     volumes:
       # Persist uploaded files
-      - app_data:/app/data
+      - blog_data:/app/data
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       app-network:
         ipv4_address: 172.20.0.30
+
+  # The Hello World application
+  hello-world-app:
+    build: 
+      context: ../..
+      dockerfile: scripts/docker/Dockerfile.hello-world
+    restart: always
+    # No direct port exposure - nginx will proxy to this
+    environment:
+      # Override database URL to use docker service name (though hello-world may not use it)
+      ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
+    volumes:
+      # Persist any data files
+      - hello_world_data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.31
 
   # Nginx reverse proxy with SSL termination
   nginx:
@@ -58,7 +78,8 @@ services:
       - certbot_webroot:/var/www/certbot
       - nginx_logs:/var/log/nginx
     depends_on:
-      - app
+      - blog-app
+      - hello-world-app
     networks:
       app-network:
         ipv4_address: 172.20.0.40
@@ -111,7 +132,8 @@ networks:
 # Define the named volumes for data persistence
 volumes:
   postgres_data:
-  app_data:
+  blog_data:
+  hello_world_data:
   letsencrypt_data:
   certbot_webroot:
   nginx_logs:

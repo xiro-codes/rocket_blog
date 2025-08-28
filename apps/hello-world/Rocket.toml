@@ -1,0 +1,10 @@
+[app.sea_orm]
+url = "postgres://admin:admin@localhost:5432/rocket_blog"
+max_connections = 100
+min_connections = 5
+connect_timeout = 8
+acquire_timeout = 8
+idle_timeout = 8
+max_lifetime = 8
+sqlx_logging = true
+sqlx_logging_level = "debug"
