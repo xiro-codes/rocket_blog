@@ -1,6 +1,7 @@
 [default]
 port = 8002
 address = "127.0.0.1"
+template_dir = "templates"
 
 [default.databases.sea_orm]
 url = "postgres://master:password@localhost/tdavis_dev"
