@@ -21,4 +21,8 @@ features = ["http2", "json", "uuid"]
 
 [dependencies.sea-orm]
 version = "1.1.1"
-features = ["sqlx-postgres", "runtime-tokio-rustls", "macros"]
+features = ["sqlx-postgres", "runtime-tokio-rustls", "macros", "with-rust_decimal"]
+
+[dependencies.rust_decimal]
+version = "1.37.2"
+features = ["serde"]

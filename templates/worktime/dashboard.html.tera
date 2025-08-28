@@ -1,0 +1,160 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="terminal-header">⏱️ Work Time Dashboard</h1>
+            <p class="text-muted">Welcome back, {{ username }}!</p>
+        </div>
+    </div>
+
+    <!-- Active Timer Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="terminal-box">
+                <h3>🟢 Active Timer</h3>
+                {% if active_entry %}
+                    <div class="alert alert-success">
+                        <strong>⏰ Timer Running</strong><br>
+                        Started: {{ active_entry.start_time | date(format='%Y-%m-%d %H:%M:%S') }}<br>
+                        {% if active_entry.description %}Description: {{ active_entry.description }}<br>{% endif %}
+                        {% if active_entry.project %}Project: {{ active_entry.project }}<br>{% endif %}
+                        <div class="mt-2">
+                            <form method="post" action="/worktime/stop" class="d-inline">
+                                <button type="submit" class="btn btn-danger">⏹️ Stop Timer</button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>No active timer. Start tracking your work time:</p>
+                    <form method="post" action="/worktime/start" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="user_role_id" class="form-label">Role</label>
+                            <select class="form-control terminal-input" id="user_role_id" name="user_role_id" required>
+                                <option value="">Select a role...</option>
+                                {% for role in roles %}
+                                    <option value="{{ role.id }}">{{ role.role_name }} ({{ role.hourly_wage }} {{ role.currency }}/hr)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="description" class="form-label">Description (optional)</label>
+                            <input type="text" class="form-control terminal-input" id="description" name="description" placeholder="What are you working on?">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="project" class="form-label">Project (optional)</label>
+                            <input type="text" class="form-control terminal-input" id="project" name="project" placeholder="Project name">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success">▶️ Start Timer</button>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="terminal-box text-center">
+                <h4>📊 Total Hours</h4>
+                <p class="fs-3 text-primary">{{ summary.total_hours | round(precision=2) }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="terminal-box text-center">
+                <h4>💰 Total Earnings</h4>
+                <p class="fs-3 text-success">{{ summary.total_earnings | round(precision=2) }} {{ summary.currency }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="terminal-box text-center">
+                <h4>📝 Entries</h4>
+                <p class="fs-3 text-info">{{ summary.entries_count }}</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="terminal-box text-center">
+                <h4>⚙️ Roles</h4>
+                <p class="fs-3 text-warning">{{ roles | length }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="terminal-box">
+                <h3>🧭 Quick Actions</h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <a href="/worktime/roles" class="btn btn-primary w-100 mb-2">👤 Manage Roles</a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/worktime/entries" class="btn btn-info w-100 mb-2">📋 View All Entries</a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/blog" class="btn btn-secondary w-100 mb-2">🏠 Back to Blog</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Entries -->
+    <div class="row">
+        <div class="col-12">
+            <div class="terminal-box">
+                <h3>📝 Recent Entries</h3>
+                {% if recent_entries %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Role</th>
+                                    <th>Duration</th>
+                                    <th>Description</th>
+                                    <th>Project</th>
+                                    <th>Earnings</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in recent_entries %}
+                                <tr>
+                                    <td>{{ entry.start_time | date(format='%Y-%m-%d') }}</td>
+                                    <td>{{ entry.role_name }}</td>
+                                    <td>
+                                        {% if entry.duration %}
+                                            {{ (entry.duration / 60) | round(precision=2) }}h
+                                        {% else %}
+                                            <span class="text-warning">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ entry.description | default(value="—") }}</td>
+                                    <td>{{ entry.project | default(value="—") }}</td>
+                                    <td>
+                                        {% if entry.earnings %}
+                                            {{ entry.earnings | round(precision=2) }} {{ entry.currency }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center">
+                        <a href="/worktime/entries" class="btn btn-outline-primary">View All Entries</a>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No entries yet. Start tracking your work time!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

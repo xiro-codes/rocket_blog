@@ -24,5 +24,7 @@ mod settings;
 pub use settings::SettingsService;
 mod tag;
 pub use tag::TagService;
+mod work_time;
+pub use work_time::WorkTimeService;
 mod youtube;
 pub use youtube::YoutubeDownloadService;

@@ -1,0 +1,128 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="terminal-header">👤 Manage Roles & Wages</h1>
+            <p class="text-muted">Define your different work roles and hourly rates.</p>
+            <a href="/worktime" class="btn btn-secondary mb-3">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Create New Role -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="terminal-box">
+                <h3>➕ Add New Role</h3>
+                <form method="post" action="/worktime/roles" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="role_name" class="form-label">Role Name</label>
+                        <input type="text" class="form-control terminal-input" id="role_name" name="role_name" required placeholder="e.g., Software Developer">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="hourly_wage" class="form-label">Hourly Wage</label>
+                        <input type="number" step="0.01" class="form-control terminal-input" id="hourly_wage" name="hourly_wage" required placeholder="25.00">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="currency" class="form-label">Currency</label>
+                        <select class="form-control terminal-input" id="currency" name="currency" required>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="CAD">CAD (C$)</option>
+                            <option value="AUD">AUD (A$)</option>
+                            <option value="JPY">JPY (¥)</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-success">💾 Create Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Roles -->
+    <div class="row">
+        <div class="col-12">
+            <div class="terminal-box">
+                <h3>📋 Your Roles</h3>
+                {% if roles %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Role Name</th>
+                                    <th>Hourly Wage</th>
+                                    <th>Currency</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for role in roles %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ role.role_name }}</strong>
+                                    </td>
+                                    <td class="text-success">
+                                        {{ role.hourly_wage }}
+                                    </td>
+                                    <td>
+                                        {{ role.currency }}
+                                    </td>
+                                    <td>
+                                        {% if role.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ role.created_at | date(format='%Y-%m-%d') }}
+                                    </td>
+                                    <td>
+                                        <!-- Edit and Delete buttons can be added here -->
+                                        <button class="btn btn-sm btn-outline-primary" disabled>✏️ Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger" disabled>🗑️ Delete</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <h5>📝 No roles defined yet</h5>
+                        <p>Create your first role to start tracking time and calculating earnings. You can have multiple roles for different types of work or clients.</p>
+                        <p><strong>Examples:</strong></p>
+                        <ul>
+                            <li>Frontend Developer - $35/hr</li>
+                            <li>Consulting - $50/hr</li>
+                            <li>Code Review - $30/hr</li>
+                            <li>Project Management - $40/hr</li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="terminal-box">
+                <h3>💡 Tips</h3>
+                <ul>
+                    <li><strong>Multiple Roles:</strong> Create different roles for different types of work or clients</li>
+                    <li><strong>Accurate Rates:</strong> Set realistic hourly rates based on your experience and market rates</li>
+                    <li><strong>Regular Updates:</strong> Update your rates as your skills and experience grow</li>
+                    <li><strong>Currency Consistency:</strong> Use the same currency for all roles to get accurate totals</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

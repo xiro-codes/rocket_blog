@@ -10,6 +10,8 @@ pub mod admin;
 /// Request guard for authenticated users
 pub struct AuthenticatedUser {
     pub token: Uuid,
+    pub account_id: Uuid,
+    pub username: String,
 }
 
 #[rocket::async_trait]
@@ -27,20 +29,58 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
             }
         };
         
-        if let Some(token_cookie) = jar.get_private("token") {
-            log::debug!("AuthenticatedUser guard: found token cookie");
-            if let Ok(token) = Uuid::parse_str(token_cookie.value()) {
-                log::debug!("AuthenticatedUser guard: valid token format: {}", token);
-                return Outcome::Success(AuthenticatedUser { token });
-            } else {
-                log::debug!("AuthenticatedUser guard: invalid token format");
+        let token = match jar.get_private("token") {
+            Some(cookie) => match Uuid::parse_str(cookie.value()) {
+                Ok(uuid) => {
+                    log::debug!("AuthenticatedUser guard: found valid token: {}", uuid);
+                    uuid
+                }
+                Err(_) => {
+                    log::debug!("AuthenticatedUser guard: invalid token format");
+                    return Outcome::Error((Status::Unauthorized, "Invalid token"));
+                }
+            },
+            None => {
+                log::debug!("AuthenticatedUser guard: no token found");
+                return Outcome::Error((Status::Unauthorized, "Authentication required"));
             }
-        } else {
-            log::debug!("AuthenticatedUser guard: no token cookie found");
-        }
+        };
         
-        log::debug!("AuthenticatedUser guard: authentication failed");
-        Outcome::Error((Status::Unauthorized, "Authentication required"))
+        // Get the auth service and verify token
+        let auth_service = match req.guard::<&State<AuthService>>().await.succeeded() {
+            Some(service) => service,
+            None => {
+                log::error!("AuthenticatedUser guard: AuthService not available");
+                return Outcome::Error((Status::InternalServerError, "Service unavailable"));
+            }
+        };
+
+        // Get database connection
+        let conn = match req.guard::<sea_orm_rocket::Connection<'_, crate::pool::Db>>().await.succeeded() {
+            Some(conn) => conn,
+            None => {
+                log::error!("AuthenticatedUser guard: Database connection not available");
+                return Outcome::Error((Status::InternalServerError, "Database unavailable"));
+            }
+        };
+        
+        let db = conn.into_inner();
+
+        // Check if token is valid and get account info
+        match auth_service.check_token(db, token).await {
+            Some(account) => {
+                log::debug!("AuthenticatedUser guard: authenticated user: {}", account.username);
+                Outcome::Success(AuthenticatedUser {
+                    token,
+                    account_id: account.id,
+                    username: account.username,
+                })
+            }
+            None => {
+                log::debug!("AuthenticatedUser guard: invalid token");
+                Outcome::Error((Status::Unauthorized, "Invalid token"))
+            }
+        }
     }
 }
 
