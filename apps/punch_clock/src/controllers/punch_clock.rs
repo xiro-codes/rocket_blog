@@ -6,7 +6,7 @@ use rocket::{
 };
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
-use common::{database::Db, utils::Utils};
+use common::{database::Db, utils::Utils, auth::AuthService};
 use crate::{guards::{User, Admin}, services::{WorkRoleService, WorkSessionService}};
 use models::dto::{WorkRoleFormDTO, ClockInFormDTO};
 
@@ -16,6 +16,7 @@ impl PunchClockController {
     pub fn routes() -> Vec<Route> {
         routes![
             dashboard,
+            login_redirect,
             clock_in_view,
             clock_in,
             clock_out,
@@ -29,6 +30,24 @@ impl PunchClockController {
             offline_page
         ]
     }
+}
+
+/// Redirect unauthenticated users to login
+#[get("/", rank = 2)]
+async fn login_redirect(
+    conn: Connection<'_, Db>,
+    auth_service: &State<AuthService>,
+) -> Result<Redirect, Template> {
+    let db = conn.into_inner();
+    
+    // Check if any accounts exist
+    if !auth_service.has_any_accounts(db).await {
+        // No accounts exist - redirect to create admin
+        return Ok(Redirect::to("/punch-clock/auth/create-admin"));
+    }
+    
+    // Accounts exist - redirect to login
+    Ok(Redirect::to("/punch-clock/auth/"))
 }
 
 /// Main dashboard view

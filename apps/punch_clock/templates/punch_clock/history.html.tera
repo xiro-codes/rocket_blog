@@ -126,7 +126,7 @@
                             </td>
                             <td>
                                 {% if session.duration_minutes %}
-                                    {{ session.duration_minutes // 60 }}h {{ session.duration_minutes % 60 }}m
+                                    {{ session.duration_minutes }} minutes
                                 {% else %}
                                     <span class="status-active">In Progress</span>
                                 {% endif %}

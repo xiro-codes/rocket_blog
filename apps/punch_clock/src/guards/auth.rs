@@ -1,10 +1,13 @@
 use rocket::{
     http::Status,
     request::{FromRequest, Outcome, Request},
+    State,
 };
 use rocket::http::CookieJar;
 use uuid::Uuid;
 use std::str::FromStr;
+use sea_orm_rocket::Connection;
+use common::{database::Db, auth::AuthService};
 
 /// Request guard for authenticated users
 pub struct User {
@@ -25,9 +28,15 @@ impl<'r> FromRequest<'r> for User {
         
         if let Some(token_cookie) = jar.get_private("token") {
             if let Ok(token_uuid) = Uuid::from_str(token_cookie.value()) {
-                // In a real implementation, you would validate the token against the database
-                // For now, we'll just use the token as the user ID
-                return Outcome::Success(User { id: token_uuid });
+                // Get database connection and auth service
+                if let Some(db_conn) = request.guard::<Connection<Db>>().await.succeeded() {
+                    if let Some(auth_service) = request.guard::<&State<AuthService>>().await.succeeded() {
+                        let db = db_conn.into_inner();
+                        if let Some(account) = auth_service.check_token(db, token_uuid).await {
+                            return Outcome::Success(User { id: account.id });
+                        }
+                    }
+                }
             }
         }
         
@@ -44,9 +53,17 @@ impl<'r> FromRequest<'r> for Admin {
         
         if let Some(token_cookie) = jar.get_private("token") {
             if let Ok(token_uuid) = Uuid::from_str(token_cookie.value()) {
-                // In a real implementation, you would check if the user is an admin
-                // For now, we'll assume all authenticated users can be admins for role management
-                return Outcome::Success(Admin { id: token_uuid });
+                // Get database connection and auth service
+                if let Some(db_conn) = request.guard::<Connection<Db>>().await.succeeded() {
+                    if let Some(auth_service) = request.guard::<&State<AuthService>>().await.succeeded() {
+                        let db = db_conn.into_inner();
+                        if let Some(account) = auth_service.check_token(db, token_uuid).await {
+                            if account.admin {
+                                return Outcome::Success(Admin { id: account.id });
+                            }
+                        }
+                    }
+                }
             }
         }
         

@@ -147,6 +147,7 @@
         <a href="/punch-clock" class="btn btn-primary">Dashboard</a>
         <a href="/punch-clock/history" class="btn btn-secondary">Work History</a>
         <a href="/punch-clock/roles" class="btn btn-secondary">Manage Roles</a>
+        <a href="/punch-clock/auth/logout" class="btn btn-danger">Logout</a>
     </div>
 
     {% if flash %}
