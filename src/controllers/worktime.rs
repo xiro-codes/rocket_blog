@@ -369,10 +369,10 @@ impl Fairing for Controller {
             delete_entry,
             notifications_view,
             update_notifications,
-            payperiods_view,
-            create_pay_period,
-            auto_assign_entries,
-            delete_pay_period,
+            // payperiods_view,
+            // create_pay_period,
+            // auto_assign_entries,
+            // delete_pay_period,  // Temporarily disabled for debugging
         ];
         
         log::info!("Mounting work time routes at: {}", self.base.path());
