@@ -2,7 +2,7 @@ use sea_orm::*;
 use uuid::Uuid;
 use chrono::Utc;
 use models::{work_session, prelude::{WorkSession, WorkRole}, dto::{ClockInFormDTO, WorkSessionWithRoleDTO}};
-use crate::services::BaseService;
+use common::{services::BaseService, utils::Utils};
 use std::str::FromStr;
 use rust_decimal::Decimal;
 
@@ -33,19 +33,18 @@ impl WorkSessionService {
                 DbErr::Custom("Invalid work role ID".to_owned())
             })?;
 
-        // Verify the role exists and is active
-        let role = WorkRole::find_by_id(work_role_id)
-            .one(db)
-            .await?
-            .ok_or(DbErr::Custom("Work role not found".to_owned()))?;
+        // Verify the role exists and is active using shared utility
+        let role = BaseService::ensure_exists::<WorkRole>(db, work_role_id, "WorkRole").await?;
 
         if !role.is_active {
             return Err(DbErr::Custom("Work role is not active".to_owned()));
         }
 
-        let now = Utc::now().naive_utc();
+        let now = BaseService::now();
+        let session_id = BaseService::generate_id();
+        
         let session = work_session::ActiveModel {
-            id: Set(BaseService::generate_id()),
+            id: Set(session_id),
             account_id: Set(account_id),
             work_role_id: Set(work_role_id),
             clock_in_time: Set(now),
@@ -57,7 +56,7 @@ impl WorkSessionService {
         };
 
         let result = session.insert(db).await?;
-        log::info!("Successfully clocked in account {} for session {}", account_id, result.id);
+        BaseService::log_entity_creation("WorkSession", session_id, &format!("account {} clocked in for role {}", account_id, role.name));
         Ok(result)
     }
 
@@ -69,18 +68,14 @@ impl WorkSessionService {
             .ok_or(DbErr::Custom("No active session found".to_owned()))?;
 
         // Get the role to calculate earnings
-        let role = WorkRole::find_by_id(active_session.work_role_id)
-            .one(db)
-            .await?
-            .ok_or(DbErr::Custom("Work role not found".to_owned()))?;
+        let role = BaseService::ensure_exists::<WorkRole>(db, active_session.work_role_id, "WorkRole").await?;
 
-        let clock_out_time = Utc::now().naive_utc();
+        let clock_out_time = BaseService::now();
         let duration = clock_out_time.signed_duration_since(active_session.clock_in_time);
         let duration_minutes = duration.num_minutes() as i32;
         
-        // Calculate earnings: (minutes / 60) * hourly_rate
-        let hours_worked = Decimal::from(duration_minutes) / Decimal::from(60);
-        let earnings = hours_worked * role.hourly_rate;
+        // Calculate earnings using shared utility
+        let earnings = self.calculate_earnings(duration_minutes, role.hourly_rate);
 
         let mut session: work_session::ActiveModel = active_session.into();
         session.clock_out_time = Set(Some(clock_out_time));
@@ -89,8 +84,12 @@ impl WorkSessionService {
         session.updated_at = Set(clock_out_time);
 
         let result = session.update(db).await?;
-        log::info!("Successfully clocked out account {} for session {}, worked {} minutes, earned ${}", 
-                  account_id, result.id, duration_minutes, earnings);
+        
+        let (hours, minutes) = Utils::format_duration_display(duration_minutes);
+        BaseService::log_entity_update("WorkSession", result.id, 
+            &format!("account {} clocked out: {}h {}m, earned ${}", 
+                account_id, hours, minutes, Utils::format_currency(earnings)));
+        
         Ok(result)
     }
 
@@ -173,5 +172,12 @@ impl WorkSessionService {
             .sum();
 
         Ok((total_minutes, total_earnings))
+    }
+
+    /// Calculate earnings based on duration and hourly rate
+    /// This is punch-clock specific business logic
+    fn calculate_earnings(&self, duration_minutes: i32, hourly_rate: Decimal) -> Decimal {
+        let hours_worked = Utils::minutes_to_hours_decimal(duration_minutes);
+        hours_worked * hourly_rate
     }
 }

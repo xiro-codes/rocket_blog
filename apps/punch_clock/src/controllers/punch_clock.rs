@@ -6,8 +6,8 @@ use rocket::{
 };
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
-use common::{database::Db, services::{WorkRoleService, WorkSessionService}};
-use crate::guards::{User, Admin};
+use common::{database::Db, utils::Utils};
+use crate::{guards::{User, Admin}, services::{WorkRoleService, WorkSessionService}};
 use models::dto::{WorkRoleFormDTO, ClockInFormDTO};
 
 pub struct PunchClockController;
@@ -25,7 +25,8 @@ impl PunchClockController {
             roles_create,
             roles_edit_view,
             roles_edit,
-            roles_delete
+            roles_delete,
+            offline_page
         ]
     }
 }
@@ -56,14 +57,18 @@ async fn dashboard(
     let available_roles = work_role_service.find_active(db).await
         .map_err(|_| Status::InternalServerError)?;
     
+    // Format duration using shared utilities
+    let (today_hours, today_mins) = Utils::format_duration_display(today_minutes);
+    let (total_hours, total_mins) = Utils::format_duration_display(total_minutes);
+    
     Ok(Template::render("punch_clock/dashboard", context! {
         active_session,
-        today_hours: today_minutes / 60,
-        today_minutes: today_minutes % 60,
-        today_earnings,
-        total_hours: total_minutes / 60,
-        total_minutes: total_minutes % 60,
-        total_earnings,
+        today_hours,
+        today_minutes: today_mins,
+        today_earnings: Utils::format_currency(today_earnings),
+        total_hours,
+        total_minutes: total_mins,
+        total_earnings: Utils::format_currency(total_earnings),
         available_roles,
     }))
 }
@@ -273,4 +278,10 @@ async fn roles_delete(
             Flash::error(Redirect::to("/punch-clock/roles"), &format!("Failed to delete role: {}", e))
         }
     }
+}
+
+/// Offline page for PWA
+#[get("/offline")]
+async fn offline_page() -> Template {
+    Template::render("punch_clock/offline", context! {})
 }

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punch Clock - Offline</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+        .offline-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 50px;
+        }
+        .offline-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📱</div>
+        <h1>You're Offline</h1>
+        <p>It looks like you're not connected to the internet. The Punch Clock app works offline for basic functionality.</p>
+        
+        <h3>What you can do:</h3>
+        <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+            <li>View cached data from your last session</li>
+            <li>Access basic app features</li>
+            <li>Data will sync when you're back online</li>
+        </ul>
+        
+        <button class="btn" onclick="window.location.reload()">Try Again</button>
+        <a href="/punch-clock/" class="btn">Go to Dashboard</a>
+    </div>
+
+    <script>
+        // Check if we're back online and reload
+        window.addEventListener('online', function() {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Punch Clock - Dashboard</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Track your work time and earnings with different roles">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Punch Clock">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/punch-clock/static/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/punch-clock/static/icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="/punch-clock/static/icons/icon-192x192.png">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/punch-clock/static/manifest.json">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -188,5 +204,86 @@
             <div class="stat-label">Total Earnings</div>
         </div>
     </div>
+
+    <!-- PWA Install Banner -->
+    <div id="installBanner" style="display: none; position: fixed; bottom: 20px; left: 20px; right: 20px; background: #667eea; color: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>Install Punch Clock App</strong>
+                <br><small>Add to your home screen for quick access!</small>
+            </div>
+            <div>
+                <button id="installBtn" class="btn" style="background: white; color: #667eea; margin-left: 10px;">Install</button>
+                <button id="dismissBtn" style="background: transparent; border: 1px solid white; color: white; padding: 8px 12px; border-radius: 5px; margin-left: 5px;">Later</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/punch-clock/static/sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(function(err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        const installBanner = document.getElementById('installBanner');
+        const installBtn = document.getElementById('installBtn');
+        const dismissBtn = document.getElementById('dismissBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Show the install banner
+            installBanner.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                // Clear the deferredPrompt
+                deferredPrompt = null;
+            }
+            // Hide the banner
+            installBanner.style.display = 'none';
+        });
+
+        dismissBtn.addEventListener('click', () => {
+            installBanner.style.display = 'none';
+        });
+
+        // Handle app installation
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('Punch Clock app was installed');
+            installBanner.style.display = 'none';
+        });
+
+        // Network status indication
+        function updateOnlineStatus() {
+            if (navigator.onLine) {
+                document.body.style.borderTop = '3px solid #28a745';
+            } else {
+                document.body.style.borderTop = '3px solid #dc3545';
+            }
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+    </script>
 </body>
 </html>

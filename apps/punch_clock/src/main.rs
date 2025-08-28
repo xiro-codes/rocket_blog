@@ -3,8 +3,10 @@ extern crate rocket;
 
 mod controllers;
 mod guards;
+mod services;
 
-use common::{database::Db, services::{WorkRoleService, WorkSessionService}};
+use common::database::Db;
+use services::{WorkRoleService, WorkSessionService};
 use controllers::punch_clock::PunchClockController;
 use rocket::{fairing::AdHoc, fs::FileServer, response::Redirect};
 use rocket_dyn_templates::Template;
@@ -31,5 +33,6 @@ async fn rocket() -> _ {
         .manage(WorkRoleService::new())
         .manage(WorkSessionService::new())
         .mount("/punch-clock", PunchClockController::routes())
+        .mount("/punch-clock/static", FileServer::from("./static/"))
         .mount("/static", FileServer::from("./static/"))
 }
