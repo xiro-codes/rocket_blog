@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Punch Clock - Offline</title>
+    <title>Punch Clock - Service Unavailable</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,6 +24,14 @@
             font-size: 4em;
             margin-bottom: 20px;
         }
+        .error-details {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
         .btn {
             display: inline-block;
             padding: 12px 24px;
@@ -40,30 +48,121 @@
         .btn:hover {
             opacity: 0.9;
         }
+        .btn.retry {
+            background-color: #28a745;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-offline {
+            background-color: #dc3545;
+        }
+        .status-checking {
+            background-color: #ffc107;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <div class="offline-container">
-        <div class="offline-icon">📱</div>
-        <h1>You're Offline</h1>
+        <div class="offline-icon">⚠️</div>
+        <h1>Service Unavailable</h1>
+        
+        {% if error %}
+        <p>The database service is currently unavailable. The application cannot function without database access.</p>
+        
+        <div class="error-details">
+            <strong>Error Details:</strong><br>
+            {{ error }}
+        </div>
+        {% else %}
         <p>It looks like you're not connected to the internet. The Punch Clock app works offline for basic functionality.</p>
+        {% endif %}
+        
+        <div style="margin: 20px 0;">
+            <span id="status-indicator" class="status-indicator status-offline"></span>
+            <span id="status-text">Database Offline</span>
+        </div>
         
         <h3>What you can do:</h3>
         <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+            {% if error %}
+            <li>Wait for the database service to be restored</li>
+            <li>Contact your system administrator</li>
+            <li>Check your network connection</li>
+            {% else %}
             <li>View cached data from your last session</li>
             <li>Access basic app features</li>
             <li>Data will sync when you're back online</li>
+            {% endif %}
         </ul>
         
-        <button class="btn" onclick="window.location.reload()">Try Again</button>
+        {% if show_retry %}
+        <button class="btn retry" onclick="checkDatabase()">Check Database</button>
+        {% endif %}
+        <button class="btn" onclick="window.location.reload()">Reload Page</button>
         <a href="/punch-clock/" class="btn">Go to Dashboard</a>
     </div>
 
     <script>
+        let isChecking = false;
+        
+        async function checkDatabase() {
+            if (isChecking) return;
+            
+            isChecking = true;
+            const indicator = document.getElementById('status-indicator');
+            const text = document.getElementById('status-text');
+            
+            indicator.className = 'status-indicator status-checking';
+            text.textContent = 'Checking...';
+            
+            try {
+                const response = await fetch('/punch-clock/status/database');
+                const status = await response.json();
+                
+                if (status.healthy) {
+                    indicator.className = 'status-indicator';
+                    indicator.style.backgroundColor = '#28a745';
+                    text.textContent = 'Database Online';
+                    
+                    // Database is back online - redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/punch-clock/';
+                    }, 1000);
+                } else {
+                    indicator.className = 'status-indicator status-offline';
+                    text.textContent = 'Database Offline';
+                    
+                    if (status.error) {
+                        console.log('Database error:', status.error);
+                    }
+                }
+            } catch (error) {
+                indicator.className = 'status-indicator status-offline';
+                text.textContent = 'Check Failed';
+                console.error('Database check failed:', error);
+            }
+            
+            isChecking = false;
+        }
+        
         // Check if we're back online and reload
         window.addEventListener('online', function() {
-            window.location.reload();
+            checkDatabase();
         });
+        
+        // Auto-check database every 30 seconds
+        setInterval(checkDatabase, 30000);
     </script>
 </body>
 </html>

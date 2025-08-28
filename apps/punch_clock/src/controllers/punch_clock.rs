@@ -6,11 +6,24 @@ use rocket::{
 };
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
-use common::{database::Db, utils::Utils, auth::AuthService};
+use common::{database::{Db, DatabaseHealth}, utils::Utils, auth::AuthService};
 use crate::{guards::{User, Admin}, services::{WorkRoleService, WorkSessionService}};
 use models::dto::{WorkRoleFormDTO, ClockInFormDTO};
 
 pub struct PunchClockController;
+
+/// Check database health and return offline template if unavailable
+async fn check_database_or_offline(db_health: &DatabaseHealth) -> Option<Template> {
+    if !db_health.is_healthy() {
+        log::warn!("Database unavailable, showing offline page");
+        Some(Template::render("punch_clock/offline", context! {
+            error: db_health.get_last_error(),
+            show_retry: true,
+        }))
+    } else {
+        None
+    }
+}
 
 impl PunchClockController {
     pub fn routes() -> Vec<Route> {
@@ -27,7 +40,8 @@ impl PunchClockController {
             roles_edit_view,
             roles_edit,
             roles_delete,
-            offline_page
+            offline_page,
+            database_status
         ]
     }
 }
@@ -35,9 +49,22 @@ impl PunchClockController {
 /// Redirect unauthenticated users to login
 #[get("/", rank = 2)]
 async fn login_redirect(
-    conn: Connection<'_, Db>,
+    conn: Option<Connection<'_, Db>>,
     auth_service: &State<AuthService>,
+    db_health: &State<DatabaseHealth>,
 ) -> Result<Redirect, Template> {
+    // Check database health first
+    if let Some(offline_template) = check_database_or_offline(db_health).await {
+        return Err(offline_template);
+    }
+
+    let Some(conn) = conn else {
+        return Err(Template::render("punch_clock/offline", context! {
+            error: Some("Database connection not available".to_string()),
+            show_retry: true,
+        }));
+    };
+
     let db = conn.into_inner();
     
     // Check if any accounts exist
@@ -53,11 +80,24 @@ async fn login_redirect(
 /// Main dashboard view
 #[get("/")]
 async fn dashboard(
-    conn: Connection<'_, Db>,
+    conn: Option<Connection<'_, Db>>,
     user: User,
     work_role_service: &State<WorkRoleService>,
     work_session_service: &State<WorkSessionService>,
+    db_health: &State<DatabaseHealth>,
 ) -> Result<Template, Status> {
+    // Check database health first
+    if let Some(offline_template) = check_database_or_offline(db_health).await {
+        return Ok(offline_template);
+    }
+
+    let Some(conn) = conn else {
+        return Ok(Template::render("punch_clock/offline", context! {
+            error: Some("Database connection not available".to_string()),
+            show_retry: true,
+        }));
+    };
+
     let db = conn.into_inner();
     
     // Get active session
@@ -95,10 +135,23 @@ async fn dashboard(
 /// Clock in view
 #[get("/clock-in")]
 async fn clock_in_view(
-    conn: Connection<'_, Db>,
+    conn: Option<Connection<'_, Db>>,
     _user: User,
     work_role_service: &State<WorkRoleService>,
+    db_health: &State<DatabaseHealth>,
 ) -> Result<Template, Status> {
+    // Check database health first
+    if let Some(offline_template) = check_database_or_offline(db_health).await {
+        return Ok(offline_template);
+    }
+
+    let Some(conn) = conn else {
+        return Ok(Template::render("punch_clock/offline", context! {
+            error: Some("Database connection not available".to_string()),
+            show_retry: true,
+        }));
+    };
+
     let db = conn.into_inner();
     
     let roles = work_role_service.find_active(db).await
@@ -112,11 +165,21 @@ async fn clock_in_view(
 /// Process clock in
 #[post("/clock-in", data = "<data>")]
 async fn clock_in(
-    conn: Connection<'_, Db>,
+    conn: Option<Connection<'_, Db>>,
     user: User,
     work_session_service: &State<WorkSessionService>,
     data: Form<ClockInFormDTO>,
+    db_health: &State<DatabaseHealth>,
 ) -> Flash<Redirect> {
+    // Check database health first
+    if !db_health.is_healthy() {
+        return Flash::error(Redirect::to("/punch-clock"), "Database unavailable - cannot clock in");
+    }
+
+    let Some(conn) = conn else {
+        return Flash::error(Redirect::to("/punch-clock"), "Database connection not available");
+    };
+
     let db = conn.into_inner();
     let form_data = data.into_inner();
     
@@ -134,10 +197,20 @@ async fn clock_in(
 /// Process clock out
 #[post("/clock-out")]
 async fn clock_out(
-    conn: Connection<'_, Db>,
+    conn: Option<Connection<'_, Db>>,
     user: User,
     work_session_service: &State<WorkSessionService>,
+    db_health: &State<DatabaseHealth>,
 ) -> Flash<Redirect> {
+    // Check database health first
+    if !db_health.is_healthy() {
+        return Flash::error(Redirect::to("/punch-clock"), "Database unavailable - cannot clock out");
+    }
+
+    let Some(conn) = conn else {
+        return Flash::error(Redirect::to("/punch-clock"), "Database connection not available");
+    };
+
     let db = conn.into_inner();
     
     match work_session_service.clock_out(db, user.id).await {
@@ -303,4 +376,15 @@ async fn roles_delete(
 #[get("/offline")]
 async fn offline_page() -> Template {
     Template::render("punch_clock/offline", context! {})
+}
+
+/// Database health status endpoint
+#[get("/status/database")]
+async fn database_status(db_health: &State<DatabaseHealth>) -> rocket::serde::json::Json<serde_json::Value> {
+    use rocket::serde::json::json;
+    
+    rocket::serde::json::Json(json!({
+        "healthy": db_health.is_healthy(),
+        "error": db_health.get_last_error(),
+    }))
 }
