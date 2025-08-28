@@ -39,8 +39,8 @@ async fn rocket() -> _ {
     // Build the rocket instance
     rocket::build()
         .register("/", catchers![catch_default])
-        .attach(Db::init())
         .attach(Template::fairing())
+        .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", common::database::run_migrations))
         .attach(AuthController::new("/punch-clock/auth".to_string()))
         .manage(app_config)
