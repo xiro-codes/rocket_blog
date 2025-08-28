@@ -11,6 +11,8 @@ pub mod post_reaction;
 pub mod post_tag;
 pub mod tag;
 pub mod settings;
+pub mod work_role;
+pub mod work_session;
 
 // Custom DTOs and form structures
 pub mod dto;

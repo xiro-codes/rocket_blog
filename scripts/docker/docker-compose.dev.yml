@@ -77,6 +77,34 @@ services:
     networks:
       app-network:
         ipv4_address: 172.20.0.31
+
+  # The Punch Clock application (development build)
+  punch-clock-app:
+    build: 
+      context: ../..
+      dockerfile: scripts/docker/Dockerfile.punch-clock.dev
+    restart: always
+    ports:
+      # Expose punch clock app port for development
+      - "8002:8002"
+    environment:
+      # Override database URL to use docker service name
+      ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
+      # Development environment settings
+      RUST_LOG: debug
+      ROCKET_ENV: development
+    volumes:
+      # Persist punch clock data files
+      - punch_clock_data:/app/data
+      # Optional: Mount source code for development (uncomment as needed)
+      # - ../../apps/punch_clock/templates:/app/templates:ro
+      # - ../../static:/app/static:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.32
   
   # The pgAdmin GUI service
   pgadmin:
@@ -109,3 +137,4 @@ volumes:
   postgres_data:
   blog_data:
   hello_world_data:
+  punch_clock_data:

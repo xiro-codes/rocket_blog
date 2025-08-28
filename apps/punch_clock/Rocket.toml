@@ -1,0 +1,12 @@
+[default]
+port = 8002
+address = "127.0.0.1"
+template_dir = "../../templates"
+
+[default.databases.sea_orm]
+url = "postgres://master:password@localhost/tdavis_dev"
+max_connections = 4
+min_connections = 1
+connect_timeout = 8
+idle_timeout = 8
+sqlx_logging = true

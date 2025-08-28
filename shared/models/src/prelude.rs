@@ -9,3 +9,5 @@ pub use super::post_reaction::Entity as PostReaction;
 pub use super::post_tag::Entity as PostTag;
 pub use super::tag::Entity as Tag;
 pub use super::settings::Entity as Settings;
+pub use super::work_role::Entity as WorkRole;
+pub use super::work_session::Entity as WorkSession;

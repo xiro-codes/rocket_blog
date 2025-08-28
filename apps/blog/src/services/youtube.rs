@@ -1,7 +1,7 @@
 use std::process::Command;
 use std::path::Path;
 use uuid::Uuid;
-use crate::config::AppConfig;
+use common::config::AppConfig;
 use rocket::State;
 use sea_orm::*;
 use models::{background_job, prelude::BackgroundJob};
@@ -79,7 +79,7 @@ impl YoutubeDownloadService {
         // Create job data
         let job_data = YoutubeJobData {
             youtube_url: youtube_url.clone(),
-            data_path: app_config.data_path.clone(),
+            data_path: app_config.get_data_path(),
         };
 
         // Create background job

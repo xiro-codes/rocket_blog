@@ -4,6 +4,7 @@ members = [
     "shared/migrations", 
     "shared/common",
     "apps/blog",
-    "apps/hello-world"
+    "apps/hello-world",
+    "apps/punch_clock"
 ]
 resolver = "2"

@@ -1,0 +1,40 @@
+[package]
+name = "punch_clock"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Shared dependencies
+common = { path = "../../shared/common" }
+models = { path = "../../shared/models" }
+migrations = { path = "../../shared/migrations" }
+
+# Rocket framework
+rocket = { version = "0.5", features = ["http2", "json", "uuid", "secrets"] }
+rocket_dyn_templates = { version = "0.1", features = ["tera"] }
+sea-orm-rocket = "0.5.5"
+
+# Database and ORM
+sea-orm = { version = "1.1.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros", "mock"] }
+
+# Date and time
+chrono = { version = "0.4.31", features = ["serde"] }
+
+# Utilities
+uuid = { version = "1.4.1", features = ["v4", "serde"] }
+log = "0.4.27"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+async-trait = "0.1.74"
+
+# Security and crypto
+pwhash = "1.0.0"
+
+# Decimal arithmetic
+rust_decimal = "1.37"
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["test-util"] }

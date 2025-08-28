@@ -46,6 +46,7 @@ pub struct AuthControllerConfig {
     pub redirect_after_login: String,
     pub redirect_after_logout: String,
     pub redirect_after_register: String,
+    pub template_prefix: String,
 }
 
 impl AuthControllerConfig {
@@ -58,7 +59,13 @@ impl AuthControllerConfig {
             redirect_after_login,
             redirect_after_logout,
             redirect_after_register,
+            template_prefix: "auth".to_string(), // default to "auth"
         }
+    }
+
+    pub fn with_template_prefix(mut self, template_prefix: String) -> Self {
+        self.template_prefix = template_prefix;
+        self
     }
 }
 
@@ -82,6 +89,7 @@ impl AuthController {
 async fn login_view(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
+    config: &State<AuthControllerConfig>,
 ) -> Result<Template, Status> {
     log::info!("Route accessed: GET /auth/ - Login page requested");
     let db = conn.into_inner();
@@ -94,7 +102,7 @@ async fn login_view(
     
     log::debug!("Login page served successfully");
     Ok(Template::render(
-        "auth/login",
+        format!("{}/login", config.template_prefix),
         context! {}
     ))
 }
@@ -133,6 +141,7 @@ async fn logout(config: &State<AuthControllerConfig>, jar: &CookieJar<'_>) -> Fl
 async fn create_admin_view(
     conn: Connection<'_, Db>,
     service: &State<AuthService>,
+    config: &State<AuthControllerConfig>,
 ) -> Result<Template, Status> {
     log::info!("Route accessed: GET /auth/create-admin - Create admin page requested");
     let db = conn.into_inner();
@@ -145,7 +154,7 @@ async fn create_admin_view(
     
     log::debug!("Create admin page served successfully");
     Ok(Template::render(
-        "auth/create_admin",
+        format!("{}/create_admin", config.template_prefix),
         context! {}
     ))
 }
@@ -176,10 +185,10 @@ async fn create_admin(
 }
 
 #[get("/register")]
-async fn register_view() -> Template {
+async fn register_view(config: &State<AuthControllerConfig>) -> Template {
     log::info!("Route accessed: GET /auth/register - User registration page requested");
     Template::render(
-        "auth/register",
+        format!("{}/register", config.template_prefix),
         context! {}
     )
 }

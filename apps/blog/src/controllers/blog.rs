@@ -1,11 +1,11 @@
 use crate::{
-    config::AppConfig,
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
     services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService},
     types::{HttpRange, StreamedFile},
 };
+use common::config::AppConfig;
 use models::{dto::SearchFormDTO, post_reaction::ReactionType, background_job};
 use rocket::{
     fairing::{self, Fairing, Kind},

@@ -51,7 +51,7 @@ RUN useradd -m -u 1000 app
 WORKDIR /app
 
 # Copy static assets and templates for hello-world
-COPY apps/hello-world/templates ./templates/
+COPY templates ./templates/
 COPY static ./static/
 COPY scripts/docker/.Rocket.hello-world.toml ./Rocket.toml
 
