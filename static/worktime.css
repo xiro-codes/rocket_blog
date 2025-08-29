@@ -414,7 +414,7 @@
 /* Mobile Responsive Design */
 @media (max-width: 768px) {
     .worktime-container {
-        padding: var(--spacing-sm);
+        padding: var(--spacing-xs);
     }
     
     .worktime-content {
@@ -422,55 +422,83 @@
     }
     
     .worktime-title {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
+        margin-bottom: var(--spacing-sm);
     }
     
     .timer-display {
-        font-size: 2rem;
-        padding: var(--spacing-lg);
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-sm);
-    }
-    
-    .auth-container {
-        margin: var(--spacing-lg) auto;
-        padding: var(--spacing-lg);
-    }
-    
-    .worktime-card {
+        font-size: 1.75rem;
         padding: var(--spacing-md);
     }
     
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xs);
+        margin: var(--spacing-md) 0;
+    }
+    
+    .auth-container {
+        margin: var(--spacing-md) auto;
+        padding: var(--spacing-md);
+    }
+    
+    .worktime-card {
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+    
     .worktime-card-header {
-        padding: var(--spacing-sm) var(--spacing-md);
-        margin: calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md)) var(--spacing-md) calc(-1 * var(--spacing-md));
+        padding: var(--spacing-xs) var(--spacing-sm);
+        margin: calc(-1 * var(--spacing-sm)) calc(-1 * var(--spacing-sm)) var(--spacing-sm) calc(-1 * var(--spacing-sm));
+    }
+    
+    .worktime-hero {
+        padding: var(--spacing-lg) var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
     }
 }
 
 @media (max-width: 480px) {
+    .worktime-container {
+        padding: var(--spacing-xs);
+    }
+    
     .worktime-title {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
+        margin-bottom: var(--spacing-xs);
     }
     
     .timer-display {
         font-size: 1.5rem;
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
     }
     
     .worktime-container .btn {
         padding: var(--spacing-xs) var(--spacing-sm);
-        font-size: 0.875rem;
+        font-size: 0.8rem;
     }
     
     .stat-value {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
     
     .stat-label {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-xs);
+    }
+    
+    .worktime-hero {
+        padding: var(--spacing-md) var(--spacing-xs);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .worktime-card {
+        padding: var(--spacing-xs);
+        margin-bottom: var(--spacing-sm);
     }
 }
 
@@ -538,4 +566,159 @@
     color: var(--text-white);
     text-align: center;
     margin-bottom: var(--spacing-xl);
+}
+
+/* Hamburger Menu Styles */
+.menu-toggle {
+    display: none;
+    background: var(--primary);
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--text-white);
+    padding: var(--spacing-sm);
+    font-size: 1.2rem;
+    cursor: pointer;
+    position: fixed;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    z-index: 1001;
+    box-shadow: var(--shadow-md);
+}
+
+.side-menu {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 280px;
+    height: 100vh;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+    padding: var(--spacing-xl) var(--spacing-md);
+}
+
+.side-menu.open {
+    right: 0;
+}
+
+.side-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+}
+
+.side-menu-overlay.show {
+    display: block;
+}
+
+.side-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.side-menu-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.close-menu {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+}
+
+.side-menu .btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9rem;
+}
+
+.side-menu .btn:last-child {
+    margin-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-md);
+}
+
+/* Hide default navigation on mobile */
+@media (max-width: 768px) {
+    .worktime-nav {
+        display: none;
+    }
+    
+    .menu-toggle {
+        display: block;
+    }
+}
+
+/* Better table responsiveness */
+.table-responsive {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.worktime-container .table {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.worktime-container .table th,
+.worktime-container .table td {
+    padding: var(--spacing-sm);
+    vertical-align: middle;
+}
+
+/* Mobile table improvements */
+@media (max-width: 768px) {
+    .table-responsive {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+    }
+    
+    .worktime-container .table {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
+    
+    .worktime-container .table th,
+    .worktime-container .table td {
+        padding: var(--spacing-xs);
+        white-space: nowrap;
+    }
+    
+    .worktime-container .table th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .worktime-container .table {
+        font-size: 0.75rem;
+    }
+    
+    .worktime-container .table th,
+    .worktime-container .table td {
+        padding: var(--spacing-xs);
+    }
 }

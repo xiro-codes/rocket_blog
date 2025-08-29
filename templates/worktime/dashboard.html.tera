@@ -1,6 +1,41 @@
 {% extends "worktime_base" %}
 
 {% block content %}
+<!-- Mobile Menu Toggle -->
+<button class="menu-toggle" id="menu-toggle">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Side Menu Overlay -->
+<div class="side-menu-overlay" id="side-menu-overlay"></div>
+
+<!-- Side Menu -->
+<div class="side-menu" id="side-menu">
+    <div class="side-menu-header">
+        <h4 class="side-menu-title">
+            <i class="fas fa-compass me-2"></i>Quick Actions
+        </h4>
+        <button class="close-menu" id="close-menu">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <a href="/worktime/roles" class="btn btn-primary">
+        <i class="fas fa-user-tag me-2"></i>Manage Roles
+    </a>
+    <a href="/worktime/payperiods" class="btn btn-success">
+        <i class="fas fa-calendar-alt me-2"></i>Pay Periods
+    </a>
+    <a href="/worktime/entries" class="btn btn-info">
+        <i class="fas fa-list-ul me-2"></i>View Entries
+    </a>
+    <a href="/worktime/notifications" class="btn btn-warning">
+        <i class="fas fa-bell me-2"></i>Notifications
+    </a>
+    <a href="/blog" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Blog
+    </a>
+</div>
+
 <!-- Hero Section -->
 <div class="worktime-hero">
     <h1 class="worktime-title mb-3">
@@ -51,8 +86,8 @@
             <p class="text-muted">No active timer. Start tracking your productive work time.</p>
         </div>
         
-        <form method="post" action="/worktime/start" class="row g-3">
-            <div class="col-md-6">
+        <form method="post" action="/worktime/start" class="row g-2">
+            <div class="col-12">
                 <label for="user_role_id" class="form-label">
                     <i class="fas fa-user-tag me-1"></i>Role
                 </label>
@@ -63,13 +98,13 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-6">
+            <div class="col-12">
                 <label for="description" class="form-label">
                     <i class="fas fa-clipboard-list me-1"></i>Description (optional)
                 </label>
                 <input type="text" class="form-control" id="description" name="description" placeholder="What are you working on?">
             </div>
-            <div class="col-md-6">
+            <div class="col-12">
                 <label for="project" class="form-label">
                     <i class="fas fa-folder me-1"></i>Project (optional)
                 </label>
@@ -164,8 +199,7 @@
                         <th>Date</th>
                         <th>Role</th>
                         <th>Duration</th>
-                        <th class="d-none d-md-table-cell">Description</th>
-                        <th class="d-none d-lg-table-cell">Project</th>
+                        <th class="d-none d-sm-table-cell">Description</th>
                         <th>Earnings</th>
                     </tr>
                 </thead>
@@ -176,15 +210,14 @@
                         <td>{{ entry.role_name }}</td>
                         <td>
                             {% if entry.duration %}
-                                {{ (entry.duration / 60) | round(precision=2) }}h
+                                {{ (entry.duration / 60) | round(precision=1) }}h
                             {% else %}
                                 <span class="status-badge status-active">
                                     <i class="fas fa-circle"></i>Active
                                 </span>
                             {% endif %}
                         </td>
-                        <td class="d-none d-md-table-cell">{{ entry.description | default(value="—") }}</td>
-                        <td class="d-none d-lg-table-cell">{{ entry.project | default(value="—") }}</td>
+                        <td class="d-none d-sm-table-cell">{{ entry.description | default(value="—") | truncate(length=20) }}</td>
                         <td>
                             {% if entry.earnings %}
                                 ${{ entry.earnings | round(precision=2) }}

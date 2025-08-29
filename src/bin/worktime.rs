@@ -26,6 +26,12 @@ pub fn catch_default() -> Redirect {
     Redirect::to("/worktime")
 }
 
+#[catch(401)]
+pub fn catch_unauthorized() -> Redirect {
+    log::info!("Unauthorized access detected - redirecting to login");
+    Redirect::to("/auth")
+}
+
 /// CORS fairing for PWA functionality
 pub struct CORS;
 
@@ -256,7 +262,7 @@ async fn rocket() -> Rocket<Build> {
     // Build the base rocket instance
     log::info!("Building Work Time Tracker Rocket instance and attaching services...");
     let mut rocket = create_base_rocket()
-        .register("/", catchers![catch_default])
+        .register("/", catchers![catch_default, catch_unauthorized])
         .attach(Template::fairing())
         .attach(CORS);
     

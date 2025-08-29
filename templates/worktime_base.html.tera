@@ -160,6 +160,45 @@
 			if (document.getElementById('live-timer')) {
 				setInterval(updateTimerDisplay, 1000);
 			}
+
+			// Hamburger menu functionality
+			document.addEventListener('DOMContentLoaded', function() {
+				const menuToggle = document.getElementById('menu-toggle');
+				const sideMenu = document.getElementById('side-menu');
+				const sideMenuOverlay = document.getElementById('side-menu-overlay');
+				const closeMenu = document.getElementById('close-menu');
+
+				function openMenu() {
+					sideMenu.classList.add('open');
+					sideMenuOverlay.classList.add('show');
+					document.body.style.overflow = 'hidden';
+				}
+
+				function closeMenuFunc() {
+					sideMenu.classList.remove('open');
+					sideMenuOverlay.classList.remove('show');
+					document.body.style.overflow = '';
+				}
+
+				if (menuToggle) {
+					menuToggle.addEventListener('click', openMenu);
+				}
+
+				if (closeMenu) {
+					closeMenu.addEventListener('click', closeMenuFunc);
+				}
+
+				if (sideMenuOverlay) {
+					sideMenuOverlay.addEventListener('click', closeMenuFunc);
+				}
+
+				// Close menu on escape key
+				document.addEventListener('keydown', function(e) {
+					if (e.key === 'Escape' && sideMenu && sideMenu.classList.contains('open')) {
+						closeMenuFunc();
+					}
+				});
+			});
 		</script>
 		
 		{% block script %}
