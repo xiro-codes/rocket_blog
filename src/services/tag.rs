@@ -34,9 +34,9 @@ impl TagService {
     }
 
     pub async fn find_all_tags(&self, db: &DbConn) -> Result<Vec<tag::Model>, DbErr> {
-        tag::Entity::find()
-            .order_by_asc(tag::Column::Name)
-            .all(db)
+        tag::Entity::query()
+            .order_asc(tag::Column::Name)
+            .get(db)
             .await
     }
 
@@ -86,14 +86,13 @@ impl TagService {
     pub async fn find_or_create_tag(&self, db: &DbConn, name: &str) -> Result<tag::Model, DbErr> {
         let slug = slugify(name);
 
-        if let Ok(existing_tag) = tag::Entity::find()
-            .filter(tag::Column::Slug.eq(&slug))
-            .one(db)
-            .await
-        {
-            if let Some(tag) = existing_tag {
-                return Ok(tag);
-            }
+        let existing_tag = tag::Entity::query()
+            .where_eq(tag::Column::Slug, &slug)
+            .first(db)
+            .await?;
+
+        if let Some(tag) = existing_tag {
+            return Ok(tag);
         }
 
         self.create_tag(db, name, None).await

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use models::{account, dto::{AccountFormDTO, AdminCreateFormDTO}, prelude::Account};
+use models::{account, dto::{AccountFormDTO, AdminCreateFormDTO}};
 use pwhash::bcrypt;
 use rocket::futures::lock::Mutex;
 use sea_orm::*;
@@ -26,9 +26,9 @@ impl Service {
     pub async fn login(&self, db: &DbConn, data: AccountFormDTO) -> Result<Token, DbErr> {
         log::debug!("Authentication attempt for username: {}", data.username);
         
-        let ac = Account::find()
-            .filter(account::Column::Username.eq(&data.username))
-            .one(db)
+        let ac = account::Entity::query()
+            .where_eq(account::Column::Username, &data.username)
+            .first(db)
             .await
             .unwrap();
             
@@ -65,7 +65,10 @@ impl Service {
         
         if let Some(id) = id {
             log::debug!("Token found in memory, fetching account: {}", id);
-            let account = Account::find_by_id(id).one(db).await;
+            let account = account::Entity::query()
+                .where_eq(account::Column::Id, id)
+                .first(db)
+                .await;
             match &account {
                 Ok(Some(acc)) => {
                     log::debug!("Token validated for user: {} ({})", acc.username, acc.id);
@@ -86,7 +89,7 @@ impl Service {
 
     pub async fn has_any_accounts(&self, db: &DbConn) -> bool {
         log::debug!("Checking if any accounts exist in database");
-        match Account::find().limit(1).one(db).await {
+        match account::Entity::query().limit(1).first(db).await {
             Ok(Some(_)) => {
                 log::debug!("Found existing account(s) in database");
                 true
@@ -143,9 +146,9 @@ impl Service {
         log::info!("Attempting to create user account for username: {}", data.username);
         
         // Check if username already exists
-        let existing_user = Account::find()
-            .filter(account::Column::Username.eq(&data.username))
-            .one(db)
+        let existing_user = account::Entity::query()
+            .where_eq(account::Column::Username, &data.username)
+            .first(db)
             .await?;
             
         if existing_user.is_some() {

@@ -2,8 +2,9 @@
 
 use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
+use query_builder_macro::QueryBuilder;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, QueryBuilder)]
 #[sea_orm(table_name = "comment")]
 #[serde(crate = "rocket::serde")]
 pub struct Model {

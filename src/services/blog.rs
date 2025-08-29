@@ -182,12 +182,11 @@ impl Service {
         id: i32,
         mut data: FormDTO<'_>,
     ) -> Result<post::Model, DbErr> {
-        let mut p: post::ActiveModel = Post::find()
-            .filter(post::Column::SeqId.eq(id))
-            .one(db)
-            .await?
-            .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", id)))
-            .map(Into::into)?;
+        let result = post::Entity::query()
+            .where_eq(post::Column::SeqId, id)
+            .first(db)
+            .await?;
+        let mut p: post::ActiveModel = BaseService::handle_not_found(result, "Post")?.into();
         let text = markdown::to_html(data.text.as_str());
         let excerpt = Self::generate_excerpt(&data.text, data.excerpt);
         
@@ -266,12 +265,11 @@ impl Service {
     }
 
     pub async fn publish_by_seq_id(&self, db: &DbConn, id: i32) -> Result<post::Model, DbErr> {
-        let mut p: post::ActiveModel = Post::find()
-            .filter(post::Column::SeqId.eq(id))
-            .one(db)
-            .await?
-            .ok_or(DbErr::RecordNotFound(format!("Post with id: {}", id)))
-            .map(Into::into)?;
+        let result = post::Entity::query()
+            .where_eq(post::Column::SeqId, id)
+            .first(db)
+            .await?;
+        let mut p: post::ActiveModel = BaseService::handle_not_found(result, "Post")?.into();
         
         p.draft = Set(Some(false));
         p.date_published = Set(Local::now().naive_local());
@@ -279,13 +277,16 @@ impl Service {
     }
 
     pub async fn find_by_id(&self, db: &DbConn, id: Uuid) -> Result<Option<post::Model>, DbErr> {
-        Post::find_by_id(id).one(db).await
+        post::Entity::query()
+            .where_eq(post::Column::Id, id)
+            .first(db)
+            .await
     }
 
     pub async fn find_by_seq_id(&self, db: &DbConn, id: i32) -> Result<post::Model, DbErr> {
-        let result = Post::find()
-            .filter(post::Column::SeqId.eq(id))
-            .one(db)
+        let result = post::Entity::query()
+            .where_eq(post::Column::SeqId, id)
+            .first(db)
             .await?;
         BaseService::handle_not_found(result, "Post")
     }
@@ -468,11 +469,11 @@ impl Service {
     ) -> Result<Vec<post::Model>, DbErr> {
         let limit = limit.unwrap_or(20); // Default to 20 recent posts
         
-        Post::find()
-            .filter(post::Column::Draft.eq(false))
-            .order_by_desc(post::Column::DatePublished)
+        post::Entity::query()
+            .where_eq(post::Column::Draft, false)
+            .order_desc(post::Column::DatePublished)
             .limit(limit)
-            .all(db)
+            .get(db)
             .await
     }
 
