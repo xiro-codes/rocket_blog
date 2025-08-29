@@ -1,3 +1,33 @@
+# Generate and open Rust documentation
+doc:
+	@echo "📚 Generating Rust documentation..."
+	cargo doc --lib --no-deps --document-private-items
+	@echo "✅ Documentation generated successfully"
+
+# Generate and open Rust documentation in browser
+doc-open:
+	@echo "📚 Generating and opening Rust documentation..."
+	cargo doc --lib --no-deps --document-private-items --open
+	@echo "✅ Documentation opened in browser"
+
+# Generate documentation for all workspace members
+doc-all:
+	@echo "📚 Generating documentation for entire workspace..."
+	cargo doc --workspace --no-deps --document-private-items
+	@echo "✅ Workspace documentation generated successfully"
+
+# Generate and open documentation for all workspace members
+doc-all-open:
+	@echo "📚 Generating and opening workspace documentation..."
+	cargo doc --workspace --no-deps --document-private-items --open
+	@echo "✅ Workspace documentation opened in browser"
+
+# Clean documentation artifacts
+doc-clean:
+	@echo "🧹 Cleaning documentation artifacts..."
+	cargo clean --doc
+	@echo "✅ Documentation artifacts cleaned"
+
 migrate: 
 	sea-orm-cli migrate -d migrations 
 force-migrate:
@@ -257,6 +287,13 @@ help:
 	@echo "  force-migrate        Fresh migration (drops all data)"
 	@echo "  new-migration NAME   Create new migration"
 	@echo "  gen-models           Generate SeaORM models"
+	@echo ""
+	@echo "📚 Documentation:"
+	@echo "  doc                  Generate Rust documentation"
+	@echo "  doc-open             Generate and open documentation in browser"
+	@echo "  doc-all              Generate documentation for entire workspace"
+	@echo "  doc-all-open         Generate and open workspace documentation"
+	@echo "  doc-clean            Clean documentation artifacts"
 	@echo ""
 	@echo "🦀 Local Development:"
 	@echo "  build                Build application (release mode)"

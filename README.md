@@ -163,6 +163,8 @@ rocket_blog/
 # Development workflow
 just migrate           # Run database migrations
 just gen-models       # Generate ORM models from database
+just doc              # Generate Rust documentation
+just doc-open         # Generate and open documentation
 cargo run            # Start development server
 cargo test           # Run tests
 cargo check         # Check code without building
@@ -170,6 +172,27 @@ cargo check         # Check code without building
 # Production build
 cargo build --release
 ```
+
+### API Documentation
+
+The codebase includes comprehensive API documentation that can be generated and viewed:
+
+```bash
+# Generate documentation
+just doc
+
+# Generate and open in browser
+just doc-open
+
+# Generate for entire workspace
+just doc-all-open
+```
+
+The generated documentation includes:
+- **Complete API Reference** - All public types, functions, and modules
+- **Usage Examples** - Code examples for key functionality  
+- **Architecture Overview** - How different components interact
+- **Type Documentation** - Detailed parameter and return type information
 
 ### Development Setup
 1. **Install Dependencies**: Rust, PostgreSQL, Just

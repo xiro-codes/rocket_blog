@@ -1,18 +1,91 @@
-// Shared library for both blog and worktime binaries
+//! # Rocket Blog Application Library
+//!
+//! A modern, fast, and feature-rich blog application built with **Rust** and the **Rocket** web framework.
+//! This library serves as the shared foundation for both the blog and work time tracker binaries.
+//!
+//! ## Overview
+//!
+//! This crate provides a complete web application framework with:
+//! - **Blog Management**: Create, edit, delete, and publish blog posts with markdown support
+//! - **Authentication System**: Secure login/logout with admin privileges
+//! - **Comment System**: Reader engagement with moderation capabilities
+//! - **Media Support**: Video streaming with range requests
+//! - **Database Integration**: PostgreSQL with SeaORM for type-safe queries
+//! - **Template Engine**: Server-side rendering with Tera templates
+//!
+//! ## Architecture
+//!
+//! The application follows a modular architecture with clear separation of concerns:
+//! - **Controllers**: Handle HTTP requests and responses
+//! - **Services**: Contain business logic and database operations
+//! - **Models**: Type-safe database entities
+//! - **Middleware**: Handle authentication, seeding, and request processing
+//! - **Guards**: Route protection and access control
+//!
+//! ## Usage
+//!
+//! ```rust,no_run
+//! use app::{create_base_rocket, setup_logger};
+//!
+//! #[tokio::main]
+//! async fn main() {
+//!     // Setup logging
+//!     setup_logger().expect("Failed to setup logger");
+//!     
+//!     // Create and launch the rocket instance
+//!     let rocket = create_base_rocket();
+//!     // Add your specific routes and launch...
+//! }
+//! ```
+//!
+//! ## Features
+//!
+//! - **Type Safety**: Leverages Rust's type system for safe database operations
+//! - **Performance**: Async/await throughout with efficient request handling
+//! - **Security**: Built-in authentication, CSRF protection, and input validation
+//! - **Scalability**: Modular design supporting multiple deployment configurations
+//!
+//! ## Configuration
+//!
+//! Configuration is handled through Rocket's Figment system. See [`config`] module for details.
+
 #[macro_use]
 extern crate rocket;
 
+/// Application configuration and settings management
 pub mod config;
+
+/// HTTP route handlers and request/response processing
 pub mod controllers;
+
+/// Data Transfer Objects for API communication
 pub mod dto;
+
+/// Feature flags and environment-specific configurations
 pub mod features;
+
+/// Route guards for authentication and authorization
 pub mod guards;
+
+/// Request/response middleware and application lifecycle hooks
 pub mod middleware;
+
+/// Database connection pool management
 pub mod pool;
+
+/// Service and controller registration system
 pub mod registry;
+
+/// Enhanced service registry with advanced dependency injection
 pub mod enhanced_registry;
+
+/// Custom response types and HTTP response builders
 pub mod responders;
+
+/// Business logic and data access layer
 pub mod services;
+
+/// Type definitions and custom data structures
 pub mod types;
 
 #[cfg(test)]
@@ -29,6 +102,31 @@ use rocket::{fairing, fairing::AdHoc, Build, Rocket};
 use sea_orm_rocket::Database;
 use std::time::SystemTime;
 
+/// Runs database migrations on application startup.
+///
+/// This function is called during Rocket's ignition phase to ensure the database
+/// schema is up to date before the application starts handling requests.
+///
+/// # Arguments
+///
+/// * `rocket` - The Rocket instance being built
+///
+/// # Returns
+///
+/// Returns `Ok(rocket)` on successful migration, or logs errors and continues
+/// with the rocket instance if migrations fail.
+///
+/// # Examples
+///
+/// This function is typically used as a fairing:
+///
+/// ```rust,no_run
+/// use rocket::fairing::AdHoc;
+/// use app::run_migrations;
+///
+/// let rocket = rocket::build()
+///     .attach(AdHoc::try_on_ignite("Migrations", run_migrations));
+/// ```
 pub async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     log::info!("Starting database migrations...");
     let conn = &Db::fetch(&rocket).unwrap().conn;
@@ -45,7 +143,18 @@ pub async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     Ok(rocket)
 }
 
-/// Unified log filter for noisy dependencies
+/// Filters out noisy log messages from dependencies.
+///
+/// This function is used to reduce log verbosity by filtering out messages
+/// from known noisy dependencies like Rocket, SeaORM, SQLx, etc.
+///
+/// # Arguments
+///
+/// * `meta` - Log metadata containing the target information
+///
+/// # Returns
+///
+/// Returns `true` if the log should be filtered out, `false` otherwise.
 fn should_filter_log(meta: &log::Metadata) -> bool {
     let target = meta.target();
     // Filter out noisy log targets
@@ -56,7 +165,33 @@ fn should_filter_log(meta: &log::Metadata) -> bool {
     target.eq("_")
 }
 
-/// Setup application logging with clean filtering
+/// Sets up application logging with clean filtering and appropriate output channels.
+///
+/// Configures the logging system with:
+/// - RFC3339 timestamp formatting
+/// - Configurable log levels based on features
+/// - Filtering of noisy dependency logs
+/// - File output to `output.log`
+/// - Console output in development mode
+///
+/// # Returns
+///
+/// Returns `Ok(())` on successful setup, or a `fern::InitError` if logging
+/// could not be initialized.
+///
+/// # Examples
+///
+/// ```rust,no_run
+/// use app::setup_logger;
+///
+/// setup_logger().expect("Failed to setup logger");
+/// ```
+///
+/// # Errors
+///
+/// This function will return an error if:
+/// - The log file cannot be created or written to
+/// - The logging system has already been initialized
 pub fn setup_logger() -> Result<(), fern::InitError> {
     let mut dispatch = fern::Dispatch::new()
         .format(|out, message, record| {
@@ -81,7 +216,31 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
     Ok(())
 }
 
-/// Create base rocket instance with common configuration
+/// Creates a base Rocket instance with common configuration and services.
+///
+/// This function provides a pre-configured Rocket instance with:
+/// - Database connection pool initialization
+/// - Database migration setup
+/// - Application configuration management
+/// - Base middleware and fairings
+///
+/// This serves as the foundation for both the blog and worktime binaries,
+/// allowing them to add their specific routes and configurations on top.
+///
+/// # Returns
+///
+/// Returns a configured `Rocket<Build>` instance ready for route attachment
+/// and launching.
+///
+/// # Examples
+///
+/// ```rust,no_run
+/// use app::create_base_rocket;
+/// use rocket::routes;
+///
+/// let rocket = create_base_rocket()
+///     .mount("/api", routes![/* your routes */]);
+/// ```
 pub fn create_base_rocket() -> Rocket<Build> {
     let figment = rocket::Config::figment();
     let app_config = AppConfig::from_figment(&figment);
