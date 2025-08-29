@@ -9,6 +9,7 @@
 
 use app::{
     features::Features,
+    controllers::worktime_auth::WorkTimeAuthController,
     controllers,
     services::{AuthService, WorkTimeService, PayPeriodService},
     create_base_rocket
@@ -16,9 +17,6 @@ use app::{
 use rocket::{fs::FileServer, response::Redirect, Build, Rocket, Request, Response, catchers, catch, launch, get};
 use rocket_dyn_templates::Template;
 use rocket::{http::Header, fairing::{Fairing, Info, Kind}};
-
-mod worktime_auth;
-use worktime_auth::WorkTimeAuthController;
 
 #[catch(default)]
 pub fn catch_default() -> Redirect {

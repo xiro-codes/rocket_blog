@@ -17,3 +17,4 @@ mod seo;
 pub use seo::Controller as SeoController;
 mod worktime;
 pub use worktime::Controller as WorkTimeController;
+pub mod worktime_auth;

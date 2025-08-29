@@ -10,7 +10,7 @@ use rocket::{
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
 
-use app::{
+use crate::{
     pool::Db,
     services::AuthService,
 };
