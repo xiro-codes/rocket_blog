@@ -70,7 +70,7 @@ services:
   # Nginx reverse proxy with SSL termination
   nginx:
     build:
-      context: ./nginx
+      context: ../../nginx
       dockerfile: Dockerfile
     restart: always
     ports:
