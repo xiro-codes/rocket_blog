@@ -72,6 +72,47 @@ http {
             add_header Content-Type text/plain;
         }
     }
+
+    # Work Time Tracker HTTP server
+    server {
+        listen 80;
+        server_name worktime.tdavis.dev;
+        
+        # Allow certbot challenges
+        location /.well-known/acme-challenge/ {
+            root /var/www/certbot;
+        }
+        
+        # Proxy to worktime app for now (until SSL is set up)
+        location / {
+            # Use a resolver to allow nginx to start even if app is not available
+            resolver 127.0.0.11 valid=30s;
+            set $upstream worktime:8001;
+            
+            proxy_pass http://$upstream;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # File upload support
+            client_max_body_size 1G;
+            
+            # Handle backend errors gracefully
+            proxy_connect_timeout 5s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+            
+            # Custom error pages for when app is not available
+            error_page 502 503 504 /50x.html;
+        }
+        
+        # Error page for when app is not available
+        location = /50x.html {
+            return 200 "Work Time Tracker is starting up... Please wait a moment and refresh.";
+            add_header Content-Type text/plain;
+        }
+    }
 }
 EOF
     echo "HTTP-only configuration created successfully."

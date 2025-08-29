@@ -1,103 +1,76 @@
 {% extends "worktime_base" %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="worktime-hero">
-    <h1 class="worktime-title mb-3">
-        <i class="fas fa-lock me-2"></i>Work Time Tracker Login
-    </h1>
-    <p class="mb-0">Access your work time tracking dashboard and manage your sessions.</p>
-</div>
+<div class="worktime-container">
+	<div class="worktime-content">
+		<div class="text-center mb-4">
+			<h1 class="worktime-title">🕐 Work Time Tracker</h1>
+			<p class="worktime-subtitle">Access your work time tracking dashboard and manage your sessions.</p>
+		</div>
 
-<!-- Login Form -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-user me-2"></i>Sign In
-        </h3>
-    </div>
-    
-    <form action="/auth" method="post" class="row g-3">
-        <div class="col-12">
-            <label for="username" class="form-label">
-                <i class="fas fa-user me-1"></i>Username
-            </label>
-            <input type="text" name="username" id="username" class="form-control" placeholder="Enter your username..." required />
-        </div>
-        
-        <div class="col-12">
-            <label for="password" class="form-label">
-                <i class="fas fa-lock me-1"></i>Password
-            </label>
-            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password..." required />
-        </div>
-        
-        <div class="col-12 text-center">
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-sign-in-alt me-2"></i>Sign In
-            </button>
-        </div>
-        
-        <div class="col-12 text-center">
-            <a href="/auth/register" class="btn btn-secondary">
-                <i class="fas fa-user-plus me-2"></i>Create Account
-            </a>
-        </div>
-    </form>
-</div>
+		<div class="row justify-content-center">
+			<div class="col-md-6 col-lg-4">
+				<div class="worktime-card">
+					<div class="worktime-card-header">
+						<h3 class="text-center mb-0">Login to TimeTracker</h3>
+					</div>
+					<form action="/login" method="post">
+						<div class="mb-3">
+							<label for="username" class="form-label">Username</label>
+							<input type="text" name="username" id="username" class="form-control" placeholder="Enter your username..." required />
+						</div>
+						
+						<div class="mb-3">
+							<label for="password" class="form-label">Password</label>
+							<input type="password" name="password" id="password" class="form-control" placeholder="Enter your password..." required />
+						</div>
+						
+						<div class="d-grid mb-3">
+							<button type="submit" class="btn btn-primary">Sign In</button>
+						</div>
+						
+						<div class="text-center">
+							<a href="/register" class="btn btn-secondary btn-sm">Create Account</a>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
 
-{% if flash %}
-<div class="alert alert-{{ flash.0 }} mt-3">
-    <i class="fas fa-info-circle me-2"></i>{{ flash.1 }}
-</div>
-{% endif %}
+		{% if flash %}
+		<div class="row justify-content-center">
+			<div class="col-md-6 col-lg-4">
+				<div class="alert alert-{{ flash.0 }} text-center">
+					{{ flash.1 }}
+				</div>
+			</div>
+		</div>
+		{% endif %}
 
-<!-- Features Section -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-star me-2"></i>Work Time Tracker Features
-        </h3>
-    </div>
-    
-    <div class="row g-3">
-        <div class="col-md-6">
-            <div class="feature-item">
-                <i class="fas fa-clock text-primary"></i>
-                <span>Track work time with role-based hourly wages</span>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="feature-item">
-                <i class="fas fa-chart-bar text-success"></i>
-                <span>Manage pay periods and view earnings</span>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="feature-item">
-                <i class="fas fa-bell text-warning"></i>
-                <span>Configurable notifications for time and earnings</span>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="feature-item">
-                <i class="fas fa-mobile-alt text-info"></i>
-                <span>Progressive Web App with offline support</span>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="feature-item">
-                <i class="fas fa-target text-danger"></i>
-                <span>Set daily goals and productivity targets</span>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="feature-item">
-                <i class="fas fa-sync-alt text-secondary"></i>
-                <span>Real-time synchronization across devices</span>
-            </div>
-        </div>
-    </div>
+		<div class="row justify-content-center mt-4">
+			<div class="col-md-8 col-lg-6">
+				<div class="worktime-card">
+					<h4 class="text-center mb-3">📊 Work Time Tracker Features</h4>
+					<div class="row">
+						<div class="col-md-6">
+							<ul class="list-unstyled">
+								<li class="mb-2">⏰ Track work time with role-based hourly wages</li>
+								<li class="mb-2">📊 Manage pay periods and view earnings</li>
+								<li class="mb-2">🔔 Configurable notifications for time and earnings</li>
+							</ul>
+						</div>
+						<div class="col-md-6">
+							<ul class="list-unstyled">
+								<li class="mb-2">📱 Progressive Web App with offline support</li>
+								<li class="mb-2">🎯 Set daily goals and productivity targets</li>
+								<li class="mb-2">💰 Comprehensive earnings reports</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 {% endblock %}

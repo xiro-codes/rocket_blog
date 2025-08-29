@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::controllers::{AuthController, BlogController, CommentController, IndexController, FeedController, ControllerBase};
+    use crate::controllers::{AuthController, BlogController, CommentController, IndexController, FeedController, ControllerBase, WorkTimeController};
     use uuid::Uuid;
 
     mod controller_base_tests {
@@ -85,6 +85,29 @@ mod tests {
             
             // Should create successfully
             assert_eq!(std::mem::size_of_val(&controller), std::mem::size_of::<FeedController>());
+        }
+    }
+
+    mod worktime_controller_tests {
+        use super::*;
+        use crate::controllers::WorkTimeController;
+
+        #[test]
+        fn test_worktime_controller_new_root_path() {
+            let path = "/".to_string();
+            let controller = WorkTimeController::new(path.clone());
+            
+            // Should create successfully and accept root path
+            assert_eq!(std::mem::size_of_val(&controller), std::mem::size_of::<WorkTimeController>());
+        }
+
+        #[test]
+        fn test_worktime_controller_new_worktime_path() {
+            let path = "/worktime".to_string();
+            let controller = WorkTimeController::new(path.clone());
+            
+            // Should still work with worktime path for backwards compatibility
+            assert_eq!(std::mem::size_of_val(&controller), std::mem::size_of::<WorkTimeController>());
         }
     }
 }
