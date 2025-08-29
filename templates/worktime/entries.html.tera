@@ -129,9 +129,7 @@
 </div>
 {% endif %}
 
-{% endblock %}
 
-{% block content %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -329,7 +327,8 @@
         </div>
     </div>
 </div>
-
+{% endblock %}
+{% block script%}
 <script>
 // Auto-fill current time for start time
 document.addEventListener('DOMContentLoaded', function() {

@@ -168,42 +168,6 @@
 </div>
 {% endif %}
 
-{% endblock %}
-
-{% block script %}
-<script>
-function viewPeriodDetails(id, name) {
-    // For now, show an alert with basic info
-    // In the future, this could open a modal with detailed breakdown
-    alert(`Pay Period: ${name}\n\nClick OK to view detailed breakdown.`);
-    // Redirect to detailed view (if implemented)
-    // window.location.href = `/worktime/payperiods/${id}`;
-}
-
-// Set today's date as default for start date
-document.addEventListener('DOMContentLoaded', function() {
-    const today = new Date().toISOString().split('T')[0];
-    const startDateInput = document.getElementById('start_date');
-    const endDateInput = document.getElementById('end_date');
-    
-    if (!startDateInput.value) {
-        startDateInput.value = today;
-    }
-    
-    // Update end date when start date changes
-    startDateInput.addEventListener('change', function() {
-        const startDate = new Date(this.value);
-        if (startDate) {
-            // Default to end of month
-            const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
-            endDateInput.value = endDate.toISOString().split('T')[0];
-        }
-    });
-});
-</script>
-{% endblock %}
-
-{% block content %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -337,8 +301,39 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </div>
+{% endblock %}
 
+
+{% block script %}
 <script>
+function viewPeriodDetails(id, name) {
+    // For now, show an alert with basic info
+    // In the future, this could open a modal with detailed breakdown
+    alert(`Pay Period: ${name}\n\nClick OK to view detailed breakdown.`);
+    // Redirect to detailed view (if implemented)
+    // window.location.href = `/worktime/payperiods/${id}`;
+}
+
+// Set today's date as default for start date
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    
+    if (!startDateInput.value) {
+        startDateInput.value = today;
+    }
+    
+    // Update end date when start date changes
+    startDateInput.addEventListener('change', function() {
+        const startDate = new Date(this.value);
+        if (startDate) {
+            // Default to end of month
+            const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+            endDateInput.value = endDate.toISOString().split('T')[0];
+        }
+    });
+});
 function viewPeriodDetails(periodId) {
     // You can implement a modal or redirect to a detailed view
     window.location.href = '/worktime/entries?period=' + periodId;
@@ -357,4 +352,4 @@ document.getElementById('start_date').addEventListener('change', function() {
     }
 });
 </script>
-{% endblock %}
+{% endblock script %}
