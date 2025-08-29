@@ -1,11 +1,16 @@
-// Service Worker for Work Time Tracker PWA
-const CACHE_NAME = 'worktime-tracker-v1';
+// Service Worker for Rocket Blog PWA
+const CACHE_NAME = 'rocket-blog-pwa-v1';
 const urlsToCache = [
+  '/',
+  '/blog',
   '/worktime',
-  '/worktime/roles',
-  '/worktime/entries',
   '/static/style.css',
+  '/static/worktime.css',
   '/static/manifest.json',
+  '/static/icon-192x192.png',
+  '/static/icon-512x512.png',
+  '/static/icon-96x96.png',
+  '/static/icon-180x180.png',
   // Add offline fallback page
   '/offline'
 ];

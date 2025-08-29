@@ -1,13 +1,25 @@
 {
-  "name": "Work Time Tracker",
-  "short_name": "TimeTracker",
-  "description": "Progressive Web App for tracking work time with role-based wages",
-  "start_url": "/worktime",
+  "name": "Rocket Blog & Time Tracker",
+  "short_name": "RocketBlog",
+  "description": "Modern blog platform with integrated work time tracking capabilities",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0c1116",
   "theme_color": "#00ff41",
   "orientation": "portrait-primary",
   "icons": [
+    {
+      "src": "/static/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-180x180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/static/icon-192x192.png",
       "sizes": "192x192",
@@ -21,9 +33,9 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "business", "utilities"],
+  "categories": ["productivity", "business", "utilities", "lifestyle"],
   "lang": "en",
-  "scope": "/worktime/",
+  "scope": "/",
   "screenshots": [
     {
       "src": "/static/screenshot-desktop.png",
@@ -42,26 +54,26 @@
   ],
   "shortcuts": [
     {
-      "name": "Start Timer",
-      "short_name": "Start",
-      "description": "Quickly start time tracking",
-      "url": "/worktime?action=start",
+      "name": "Blog Home",
+      "short_name": "Blog",
+      "description": "View latest blog posts",
+      "url": "/",
       "icons": [
         {
-          "src": "/static/icon-play.png",
+          "src": "/static/icon-96x96.png",
           "sizes": "96x96",
           "type": "image/png"
         }
       ]
     },
     {
-      "name": "View Entries",
-      "short_name": "Entries",
-      "description": "View all time entries",
-      "url": "/worktime/entries",
+      "name": "Start Timer",
+      "short_name": "Timer",
+      "description": "Start work time tracking",
+      "url": "/worktime?action=start",
       "icons": [
         {
-          "src": "/static/icon-list.png",
+          "src": "/static/icon-96x96.png",
           "sizes": "96x96",
           "type": "image/png"
         }
