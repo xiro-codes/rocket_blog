@@ -12,7 +12,7 @@ use rocket::State;
 use sea_orm::{ColumnTrait, JoinType, *};
 use uuid::Uuid;
 
-use crate::services::base::BaseService;
+use crate::{services::base::BaseService, impl_service_with_base};
 use crate::services::youtube::{YoutubeDownloadService, DownloadStatus};
 
 pub struct Service {
@@ -22,11 +22,6 @@ pub struct Service {
 const DEFAULT_PAGE_SIZE: u64 = 39;
 
 impl Service {
-    pub fn new() -> Self {
-        Self {
-            base: BaseService::new(),
-        }
-    }
 
     /// Generate an excerpt from the text content if no excerpt is provided
     fn generate_excerpt(text: &str, provided_excerpt: Option<String>) -> Option<String> {
@@ -775,3 +770,5 @@ impl Service {
             .await
     }
 }
+
+impl_service_with_base!(Service);

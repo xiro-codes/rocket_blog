@@ -5,7 +5,7 @@ use crate::config::AppConfig;
 use rocket::State;
 use sea_orm::*;
 use models::{background_job, prelude::BackgroundJob};
-use crate::services::BackgroundJobService;
+use crate::{services::BackgroundJobService, impl_service};
 use serde_json;
 
 pub struct YoutubeDownloadService;
@@ -229,3 +229,5 @@ impl YoutubeDownloadService {
         }
     }
 }
+
+impl_service!(YoutubeDownloadService);

@@ -491,39 +491,28 @@ async fn delete_pay_period(
     }
 }
 
-#[rocket::async_trait]
-impl Fairing for Controller {
-    fn info(&self) -> fairing::Info {
-        fairing::Info {
-            name: "Work Time Controller",
-            kind: Kind::Ignite,
-        }
-    }
-
-    async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        let routes = routes![
-            home,
-            login,
-            logout,
-            register_view,
-            register,
-            dashboard,
-            roles_view,
-            create_role,
-            start_tracking,
-            stop_tracking,
-            entries_view,
-            create_manual_entry,
-            delete_entry,
-            notifications_view,
-            update_notifications,
-            // payperiods_view,
-            // create_pay_period,
-            // auto_assign_entries,
-            // delete_pay_period,  // Temporarily disabled for debugging
-        ];
-        
-        log::info!("Mounting work time routes at: {}", self.base.path());
-        Ok(rocket.mount(self.base.path(), routes))
-    }
+fn routes() -> Vec<rocket::Route> {
+    routes![
+        home,
+        login,
+        logout,
+        register_view,
+        register,
+        dashboard,
+        roles_view,
+        create_role,
+        start_tracking,
+        stop_tracking,
+        entries_view,
+        create_manual_entry,
+        delete_entry,
+        notifications_view,
+        update_notifications,
+        // payperiods_view,
+        // create_pay_period,
+        // auto_assign_entries,
+        // delete_pay_period,  // Temporarily disabled for debugging
+    ]
 }
+
+crate::impl_controller_routes!(Controller, "Work Time Controller", routes());

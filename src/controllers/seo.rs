@@ -103,16 +103,4 @@ fn routes() -> Vec<Route> {
     routes![sitemap_xml]
 }
 
-#[rocket::async_trait]
-impl Fairing for Controller {
-    fn info(&self) -> fairing::Info {
-        fairing::Info {
-            name: "SEO Controller",
-            kind: Kind::Ignite,
-        }
-    }
-    
-    async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        Ok(rocket.mount(self.base.path(), routes()))
-    }
-}
+crate::impl_controller_routes!(Controller, "SEO Controller", routes());

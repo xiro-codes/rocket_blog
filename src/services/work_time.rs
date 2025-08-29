@@ -6,7 +6,7 @@ use models::{
 use sea_orm::*;
 use uuid::Uuid;
 
-use crate::services::{BaseService, PayPeriodService};
+use crate::{services::{BaseService, PayPeriodService}, impl_service_with_base};
 
 type DbConn = DatabaseConnection;
 
@@ -15,11 +15,6 @@ pub struct WorkTimeService {
 }
 
 impl WorkTimeService {
-    pub fn new() -> Self {
-        Self {
-            base: BaseService::new(),
-        }
-    }
 
     // User Role Management
     pub async fn create_user_role(
@@ -585,3 +580,5 @@ impl WorkTimeService {
         })
     }
 }
+
+impl_service_with_base!(WorkTimeService);

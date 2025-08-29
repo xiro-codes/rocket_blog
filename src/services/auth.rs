@@ -6,7 +6,7 @@ use rocket::futures::lock::Mutex;
 use sea_orm::*;
 use uuid::Uuid;
 
-use crate::services::base::BaseService;
+use crate::{services::base::BaseService, impl_service_custom};
 
 pub struct Service {
     base: BaseService,
@@ -209,3 +209,5 @@ impl Service {
         }
     }
 }
+
+impl_service_custom!(Service);
