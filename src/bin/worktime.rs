@@ -20,8 +20,8 @@ use rocket::{http::Header, fairing::{Fairing, Info, Kind}};
 
 #[catch(default)]
 pub fn catch_default() -> Redirect {
-    log::warn!("Unhandled route accessed - redirecting to worktime dashboard");
-    Redirect::to("/worktime")
+    log::warn!("Unhandled route accessed - redirecting to dashboard");
+    Redirect::to("/")
 }
 
 #[catch(401)]
@@ -72,21 +72,15 @@ pub struct WorkTimeControllerRegistry;
 impl WorkTimeControllerRegistry {
     pub fn attach_all_controllers(rocket: Rocket<Build>) -> Rocket<Build> {
         log::info!("Registering work time application controllers...");
-        log::debug!("Attaching controllers: WorkTimeAuth (/auth), WorkTime (/worktime, /)");
+        log::debug!("Attaching controllers: WorkTimeAuth (/auth), WorkTime (/, /)");
         
         rocket
             .attach(WorkTimeAuthController::new("/auth".to_owned()))
-            .attach(controllers::WorkTimeController::new("/worktime".to_owned()))
-            // Add a root route that redirects to worktime dashboard
-            .mount("/", rocket::routes![worktime_root])
+            .attach(controllers::WorkTimeController::new("/".to_owned()))
     }
 }
 
-/// Root route handler that redirects to worktime dashboard
-#[get("/")]
-pub fn worktime_root() -> Redirect {
-    Redirect::to("/worktime")
-}
+
 
 /// PWA manifest route
 #[get("/manifest.json")]
@@ -95,7 +89,7 @@ pub fn manifest() -> (rocket::http::ContentType, String) {
   \"name\": \"Work Time Tracker\",
   \"short_name\": \"TimeTracker\",
   \"description\": \"Progressive Web App for tracking work time with role-based wages and configurable notifications\",
-  \"start_url\": \"/worktime\",
+  \"start_url\": \"/\",
   \"display\": \"standalone\",
   \"background_color\": \"#1a1a1a\",
   \"theme_color\": \"#00ff00\",
@@ -138,11 +132,11 @@ pub fn manifest() -> (rocket::http::ContentType, String) {
 pub fn service_worker() -> (rocket::http::ContentType, String) {
     let sw = "const CACHE_NAME = 'worktime-tracker-v1';
 const urlsToCache = [
-  '/worktime',
-  '/worktime/roles',
-  '/worktime/entries',
-  '/worktime/notifications',
-  '/worktime/payperiods',
+  '/',
+  '/roles',
+  '/entries',
+  '/notifications',
+  '/payperiods',
   '/static/worktime/app.css',
   '/static/worktime/app.js',
   '/static/worktime/icon-192.png',
@@ -244,7 +238,7 @@ pub fn offline_page() -> (rocket::http::ContentType, String) {
             <p>Please check your internet connection and try again.</p>
         </div>
         <button class=\"retry-btn\" onclick=\"window.location.reload()\">Retry Connection</button>
-        <button class=\"retry-btn\" onclick=\"window.location.href='/worktime'\">Go to Dashboard</button>
+        <button class=\"retry-btn\" onclick=\"window.location.href='/'\">Go to Dashboard</button>
     </div>
 </body>
 </html>".to_string();
