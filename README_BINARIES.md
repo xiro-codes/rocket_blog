@@ -80,3 +80,59 @@ Then run with profiles:
 ROCKET_PROFILE=default cargo run --bin blog      # runs on port 8000
 ROCKET_PROFILE=worktime cargo run --bin worktime # runs on port 8001
 ```
+
+## Docker Deployment
+
+The dual-binary architecture supports containerized deployment with several Docker configurations:
+
+### Production Deployment
+```bash
+# Build and run both services with nginx proxy
+cd scripts/docker/
+docker-compose up -d
+
+# Blog accessible at: http://localhost/
+# Work time tracker accessible at: http://localhost/worktime/
+```
+
+### Development Deployment
+```bash
+# Build and run both services for development
+cd scripts/docker/
+docker-compose -f docker-compose.dev.yml up -d
+
+# Blog accessible at: http://localhost/
+# Work time tracker accessible at: http://localhost/worktime/
+```
+
+### Individual Service Deployment
+```bash
+# Build the Docker image
+docker build -f scripts/docker/Dockerfile -t rocket-blog .
+
+# Run blog service only
+docker run -d -p 8000:8000 --name blog-service rocket-blog ./blog
+
+# Run work time tracker service only  
+docker run -d -p 8001:8001 --name worktime-service rocket-blog ./worktime
+```
+
+### Container-Only Features
+
+All Docker configurations are designed to be completely container-isolated:
+- ✅ No host PC port exposures (except through nginx)
+- ✅ All services communicate within Docker networks
+- ✅ Independent scaling for each binary
+- ✅ Shared database and file storage
+- ✅ Automatic SSL certificate management (production)
+- ✅ Container-native logging and monitoring
+
+### Available Docker Files
+
+- `Dockerfile` - Production multi-stage build with both binaries
+- `Dockerfile.dev` - Development build with faster compile times
+- `Dockerfile.test` - Test environment for both binaries
+- `Dockerfile.coverage` - Code coverage analysis with Tarpaulin
+- `docker-compose.yml` - Production deployment with nginx and SSL
+- `docker-compose.dev.yml` - Development deployment with nginx
+- `docker-compose.dev.live.yml` - Container-only live development
