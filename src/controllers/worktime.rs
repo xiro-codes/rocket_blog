@@ -258,6 +258,45 @@ async fn create_role(
     }
 }
 
+#[post("/roles/edit/<role_id>", data = "<form>")]
+async fn edit_role(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    service: &State<WorkTimeService>,
+    role_id: Uuid,
+    form: Form<UserRoleFormDTO>,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /roles/edit/{} - Editing user role", role_id);
+    let db = conn.into_inner();
+    
+    match service.update_user_role(db, role_id, user.account_id, form.into_inner()).await {
+        Ok(_) => Flash::success(Redirect::to("/roles"), "Role updated successfully"),
+        Err(e) => {
+            log::error!("Failed to update user role: {}", e);
+            Flash::error(Redirect::to("/roles"), "Failed to update role")
+        }
+    }
+}
+
+#[post("/roles/delete/<role_id>")]
+async fn delete_role(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    service: &State<WorkTimeService>,
+    role_id: Uuid,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /roles/delete/{} - Deleting user role", role_id);
+    let db = conn.into_inner();
+    
+    match service.delete_user_role(db, role_id, user.account_id).await {
+        Ok(_) => Flash::success(Redirect::to("/roles"), "Role deleted successfully"),
+        Err(e) => {
+            log::error!("Failed to delete user role: {}", e);
+            Flash::error(Redirect::to("/roles"), "Failed to delete role")
+        }
+    }
+}
+
 #[post("/start", data = "<form>")]
 async fn start_tracking(
     conn: Connection<'_, Db>,
@@ -520,6 +559,8 @@ fn routes() -> Vec<rocket::Route> {
         dashboard,
         roles_view,
         create_role,
+        edit_role,
+        delete_role,
         start_tracking,
         stop_tracking,
         entries_view,
@@ -530,7 +571,7 @@ fn routes() -> Vec<rocket::Route> {
         payperiods_view,
         create_pay_period,
         auto_assign_entries,
-        delete_pay_period,  // Temporarily disabled for debugging
+        delete_pay_period,
     ]
 }
 
