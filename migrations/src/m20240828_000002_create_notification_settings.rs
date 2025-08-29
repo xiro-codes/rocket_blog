@@ -41,7 +41,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(NotificationSettings::EarningsThreshold)
-                            .decimal_len(10, 2)
+                            .double()
                             .null(),
                     )
                     .col(
@@ -58,7 +58,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(NotificationSettings::DailyHoursGoal)
-                            .decimal_len(4, 2)
+                            .double()
                             .null(),
                     )
                     .col(

@@ -3,10 +3,8 @@ use models::{
     dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO},
     user_role, work_time_entry, notification_settings, pay_period,
 };
-use rust_decimal::Decimal;
 use sea_orm::*;
 use uuid::Uuid;
-use std::str::FromStr;
 
 use crate::services::{BaseService, PayPeriodService};
 
@@ -33,7 +31,7 @@ impl WorkTimeService {
         log::info!("Creating user role '{}' for account {}", data.role_name, account_id);
         
         // Parse hourly wage from string
-        let hourly_wage = Decimal::from_str(&data.hourly_wage)
+        let hourly_wage = data.hourly_wage.parse::<f64>()
             .map_err(|_| DbErr::Custom("Invalid hourly wage format".to_string()))?;
         
         let role_id = BaseService::generate_id();
@@ -79,7 +77,7 @@ impl WorkTimeService {
             .ok_or(DbErr::RecordNotFound("User role not found".to_string()))?;
 
         // Parse hourly wage from string
-        let hourly_wage = Decimal::from_str(&data.hourly_wage)
+        let hourly_wage = data.hourly_wage.parse::<f64>()
             .map_err(|_| DbErr::Custom("Invalid hourly wage format".to_string()))?;
 
         let mut role: user_role::ActiveModel = role.into();
@@ -308,7 +306,7 @@ impl WorkTimeService {
         for (entry, role) in entries {
             if let Some(role) = role {
                 let earnings = if let Some(duration) = entry.duration {
-                    let hours = Decimal::from(duration) / Decimal::from(60);
+                    let hours = duration as f64 / 60.0;
                     Some(hours * role.hourly_wage)
                 } else {
                     None
@@ -354,14 +352,14 @@ impl WorkTimeService {
 
         let entries = query.all(db).await?;
 
-        let mut total_hours = Decimal::from(0);
-        let mut total_earnings = Decimal::from(0);
+        let mut total_hours = 0.0;
+        let mut total_earnings = 0.0;
         let mut currency = "USD".to_string();
         let entries_count = entries.len() as i32;
 
         for (entry, role) in entries {
             if let (Some(role), Some(duration)) = (role, entry.duration) {
-                let hours = Decimal::from(duration) / Decimal::from(60);
+                let hours = duration as f64 / 60.0;
                 total_hours += hours;
                 total_earnings += hours * role.hourly_wage;
                 currency = role.currency; // Use the last currency found
@@ -417,7 +415,7 @@ impl WorkTimeService {
 
         let earnings_threshold = if let Some(val) = data.earnings_threshold {
             if val.is_empty() { None } else {
-                Some(Decimal::from_str(&val).map_err(|_| DbErr::Custom("Invalid earnings threshold format".to_string()))?)
+                Some(val.parse::<f64>().map_err(|_| DbErr::Custom("Invalid earnings threshold format".to_string()))?)
             }
         } else {
             None
@@ -425,7 +423,7 @@ impl WorkTimeService {
 
         let daily_hours_goal = if let Some(val) = data.daily_hours_goal {
             if val.is_empty() { None } else {
-                Some(Decimal::from_str(&val).map_err(|_| DbErr::Custom("Invalid daily hours goal format".to_string()))?)
+                Some(val.parse::<f64>().map_err(|_| DbErr::Custom("Invalid daily hours goal format".to_string()))?)
             }
         } else {
             None
@@ -475,7 +473,7 @@ impl WorkTimeService {
         db: &DbConn,
         account_id: Uuid,
         current_session_duration_minutes: Option<i32>,
-        current_session_earnings: Option<Decimal>,
+        current_session_earnings: Option<f64>,
     ) -> Result<Vec<String>, DbErr> {
         let mut notifications = Vec::new();
         
@@ -545,14 +543,14 @@ impl WorkTimeService {
 
         let entries = query.all(db).await?;
 
-        let mut total_hours = Decimal::from(0);
-        let mut total_earnings = Decimal::from(0);
+        let mut total_hours = 0.0;
+        let mut total_earnings = 0.0;
         let mut currency = "USD".to_string();
         let entries_count = entries.len() as i32;
 
         for (entry, role) in entries {
             if let (Some(role), Some(duration)) = (role, entry.duration) {
-                let hours = Decimal::from(duration) / Decimal::from(60);
+                let hours = duration as f64 / 60.0;
                 total_hours += hours;
                 total_earnings += hours * role.hourly_wage;
                 currency = role.currency; // Use the last currency found

@@ -8,7 +8,6 @@ use rocket::{
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
 use uuid::Uuid;
-use rust_decimal::Decimal;
 
 use crate::{
     controllers::base::ControllerBase,
@@ -45,8 +44,8 @@ async fn dashboard(
             let recent_entries = service.get_work_entries_with_roles(db, user.account_id, Some(10), None).await.unwrap_or_default();
             let summary = service.get_work_time_summary(db, user.account_id, None, None).await.unwrap_or_else(|_| {
                 WorkTimeSummaryDTO {
-                    total_hours: Decimal::from(0),
-                    total_earnings: Decimal::from(0),
+                    total_hours: 0.0,
+                    total_earnings: 0.0,
                     currency: "USD".to_string(),
                     entries_count: 0,
                 }

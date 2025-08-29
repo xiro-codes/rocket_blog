@@ -15,7 +15,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(UserRole::Id).uuid().not_null().primary_key())
                     .col(ColumnDef::new(UserRole::AccountId).uuid().not_null())
                     .col(ColumnDef::new(UserRole::RoleName).string().not_null())
-                    .col(ColumnDef::new(UserRole::HourlyWage).decimal().not_null())
+                    .col(ColumnDef::new(UserRole::HourlyWage).double().not_null())
                     .col(ColumnDef::new(UserRole::Currency).string().not_null().default("USD"))
                     .col(ColumnDef::new(UserRole::IsActive).boolean().not_null().default(true))
                     .col(ColumnDef::new(UserRole::CreatedAt).timestamp().not_null())

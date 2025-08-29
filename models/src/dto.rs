@@ -8,7 +8,6 @@ use rocket::FromForm;
 use sea_orm::{DerivePartialModel, FromQueryResult};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
-use rust_decimal::Decimal;
 
 /// Form DTO for account authentication and registration
 #[derive(
@@ -101,7 +100,7 @@ pub struct OllamaSettingsFormDTO {
 #[serde(crate = "rocket::serde")]
 pub struct UserRoleFormDTO {
     pub role_name: String,
-    pub hourly_wage: String, // Use String to handle form input, convert to Decimal in service
+    pub hourly_wage: String, // Use String to handle form input, convert to f64 in service
     pub currency: String,
 }
 
@@ -129,8 +128,8 @@ pub struct TimeTrackingControlDTO {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct WorkTimeSummaryDTO {
-    pub total_hours: Decimal,
-    pub total_earnings: Decimal,
+    pub total_hours: f64,
+    pub total_earnings: f64,
     pub currency: String,
     pub entries_count: i32,
 }
@@ -147,9 +146,9 @@ pub struct WorkTimeEntryWithRoleDTO {
     pub project: Option<String>,
     pub is_active: bool,
     pub role_name: String,
-    pub hourly_wage: Decimal,
+    pub hourly_wage: f64,
     pub currency: String,
-    pub earnings: Option<Decimal>,
+    pub earnings: Option<f64>,
 }
 
 /// Form DTO for notification settings
@@ -184,8 +183,8 @@ pub struct PayPeriodWithSummaryDTO {
     pub end_date: chrono::NaiveDate,
     pub is_active: bool,
     pub created_at: DateTime<Utc>,
-    pub total_hours: Decimal,
-    pub total_earnings: Decimal,
+    pub total_hours: f64,
+    pub total_earnings: f64,
     pub currency: String,
     pub entries_count: i32,
     pub is_current: bool, // Whether this pay period includes today's date
@@ -199,8 +198,8 @@ pub struct PayPeriodSummaryDTO {
     pub pay_period_name: Option<String>,
     pub period_start_date: Option<chrono::NaiveDate>,
     pub period_end_date: Option<chrono::NaiveDate>,
-    pub total_hours: Decimal,
-    pub total_earnings: Decimal,
+    pub total_hours: f64,
+    pub total_earnings: f64,
     pub currency: String,
     pub entries_count: i32,
 }

@@ -2,9 +2,8 @@
 
 use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
-use rust_decimal::Decimal;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "user_role")]
 #[serde(crate = "rocket::serde")]
 pub struct Model {
@@ -12,7 +11,7 @@ pub struct Model {
     pub id: Uuid,
     pub account_id: Uuid,
     pub role_name: String,
-    pub hourly_wage: Decimal,
+    pub hourly_wage: f64,
     pub currency: String,
     pub is_active: bool,
     pub created_at: DateTime,

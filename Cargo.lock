@@ -172,7 +172,6 @@ dependencies = [
  "reqwest 0.11.27",
  "rocket",
  "rocket_dyn_templates",
- "rust_decimal",
  "sea-orm",
  "sea-orm-rocket",
  "serde_json",
@@ -2301,7 +2300,6 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "rocket",
- "rust_decimal",
  "sea-orm",
  "uuid",
 ]

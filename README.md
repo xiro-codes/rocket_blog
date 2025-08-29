@@ -194,6 +194,7 @@ See [Feature Integration Guide](docs/TAG_INTEGRATION_EXAMPLE.md) for detailed ex
 - **Frontend**: Server-side rendered HTML with Tera templates
 - **Styling**: Bootstrap 5 for responsive design
 - **Authentication**: Token-based with secure cookies
+- **Numeric Types**: f64 for monetary calculations (simplified from rust_decimal)
 
 ### Key Components
 - **Controllers**: Handle HTTP requests and responses
@@ -243,10 +244,12 @@ docker-compose -f scripts/docker/docker-compose.dev.live.yml up --build # Live t
 - No SSL complexity for faster iteration
 
 **Production Features:**
+- **Dual Binary Support**: Blog and work time tracker as separate services
 - Nginx reverse proxy with SSL termination
 - Automatic SSL certificate generation and renewal
 - Production-optimized container images
 - Secure defaults with proper headers
+- Independent scaling of blog and worktime applications
 
 **NixOS Users:** The Docker approach solves build issues on NixOS by building inside the container. See the [Docker Guide](docs/DOCKER.md) for troubleshooting SSL certificate issues and alternative build strategies.
 

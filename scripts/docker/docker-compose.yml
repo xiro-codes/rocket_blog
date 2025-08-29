@@ -23,16 +23,18 @@ services:
     ports:
       - "5432:5432"
 
-  # The Rust web application
-  app:
+  # The blog application service
+  blog:
     build: 
       context: ../..
       dockerfile: scripts/docker/Dockerfile
     restart: always
+    command: ["./blog"]
     # No direct port exposure - nginx will proxy to this
     environment:
       # Override database URL to use docker service name
       ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
+      ROCKET_PORT: 8000
     volumes:
       # Persist uploaded files
       - app_data:/app/data
@@ -42,6 +44,28 @@ services:
     networks:
       app-network:
         ipv4_address: 172.20.0.30
+
+  # The work time tracker PWA service
+  worktime:
+    build: 
+      context: ../..
+      dockerfile: scripts/docker/Dockerfile
+    restart: always
+    command: ["./worktime"]
+    # No direct port exposure - nginx will proxy to this
+    environment:
+      # Override database URL to use docker service name
+      ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
+      ROCKET_PORT: 8001
+    volumes:
+      # Persist uploaded files
+      - app_data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.31
 
   # Nginx reverse proxy with SSL termination
   nginx:
@@ -58,7 +82,8 @@ services:
       - certbot_webroot:/var/www/certbot
       - nginx_logs:/var/log/nginx
     depends_on:
-      - app
+      - blog
+      - worktime
     networks:
       app-network:
         ipv4_address: 172.20.0.40

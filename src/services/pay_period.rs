@@ -3,10 +3,8 @@ use models::{
     dto::{PayPeriodFormDTO, PayPeriodWithSummaryDTO, PayPeriodSummaryDTO},
     pay_period, work_time_entry, user_role,
 };
-use rust_decimal::Decimal;
 use sea_orm::*;
 use uuid::Uuid;
-use std::str::FromStr;
 
 use crate::services::BaseService;
 
@@ -128,14 +126,14 @@ impl PayPeriodService {
                 .all(db)
                 .await?;
 
-            let mut total_hours = Decimal::from(0);
-            let mut total_earnings = Decimal::from(0);
+            let mut total_hours = 0.0;
+            let mut total_earnings = 0.0;
             let mut currency = "USD".to_string();
             let entries_count = entries.len() as i32;
 
             for (entry, role) in entries {
                 if let (Some(role), Some(duration)) = (role, entry.duration) {
-                    let hours = Decimal::from(duration) / Decimal::from(60);
+                    let hours = duration as f64 / 60.0;
                     total_hours += hours;
                     total_earnings += hours * role.hourly_wage;
                     currency = role.currency; // Use the last currency found
@@ -338,14 +336,14 @@ impl PayPeriodService {
             .all(db)
             .await?;
 
-        let mut total_hours = Decimal::from(0);
-        let mut total_earnings = Decimal::from(0);
+        let mut total_hours = 0.0;
+        let mut total_earnings = 0.0;
         let mut currency = "USD".to_string();
         let entries_count = entries.len() as i32;
 
         for (entry, role) in entries {
             if let (Some(role), Some(duration)) = (role, entry.duration) {
-                let hours = Decimal::from(duration) / Decimal::from(60);
+                let hours = duration as f64 / 60.0;
                 total_hours += hours;
                 total_earnings += hours * role.hourly_wage;
                 currency = role.currency; // Use the last currency found
