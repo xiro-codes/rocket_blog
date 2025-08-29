@@ -30,6 +30,7 @@ markdown = "1.0.0"
 migrations = {path = "./migrations" }
 mime_guess = "2.0.5"
 models = { path = "./models" }
+query_builder_macro = { path = "./query_builder_macro" }
 pwhash = "1.0.0"
 rand = "0.8.1"
 rand_mt = "5.0.0"
@@ -65,4 +66,4 @@ features = ["v4", "serde"]
 tokio = { version = "1.0", features = ["test-util"] }
 
 [workspace]
-members = ["migrations", "models"]
+members = ["migrations", "models", "query_builder_macro"]
