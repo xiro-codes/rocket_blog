@@ -622,8 +622,35 @@ impl Service {
         }
     }
 
-    /// Example method using the new CodeIgniter3-style query builder
-    /// This demonstrates how to integrate the query builder into existing services
+    /// Find recent published posts using the CodeIgniter3-style query builder.
+    ///
+    /// This method demonstrates the integration of the new query builder into existing
+    /// service patterns. It provides a simpler, more readable alternative to traditional
+    /// Sea-ORM queries while maintaining the same performance and type safety.
+    ///
+    /// # Parameters
+    ///
+    /// * `db` - Database connection reference
+    /// * `limit` - Optional limit for number of results (defaults to 10)
+    ///
+    /// # Returns
+    ///
+    /// A vector of published post models, ordered by publication date (newest first)
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let recent_posts = blog_service
+    ///     .find_recent_published_posts_qb(&db, Some(5))
+    ///     .await?;
+    /// ```
+    ///
+    /// # Query Builder Benefits
+    ///
+    /// Compare this implementation with traditional Sea-ORM:
+    /// - More readable method names (`where_eq` vs `filter(Column::eq())`)
+    /// - Familiar syntax for developers coming from CodeIgniter 3
+    /// - Same type safety and performance as native Sea-ORM
     pub async fn find_recent_published_posts_qb(
         &self,
         db: &DbConn,
@@ -639,7 +666,42 @@ impl Service {
             .await
     }
 
-    /// Another example: Find posts by author using query builder
+    /// Find posts by a specific author using the query builder.
+    ///
+    /// Demonstrates conditional query building with the CodeIgniter3-style interface.
+    /// Shows how to build dynamic queries by conditionally adding filters based on
+    /// input parameters.
+    ///
+    /// # Parameters
+    ///
+    /// * `db` - Database connection reference
+    /// * `author_id` - UUID of the author to filter by
+    /// * `include_drafts` - Whether to include draft posts in results
+    ///
+    /// # Returns
+    ///
+    /// A vector of post models by the specified author
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// // Get only published posts
+    /// let published_posts = blog_service
+    ///     .find_posts_by_author_qb(&db, author_id, false)
+    ///     .await?;
+    /// 
+    /// // Get all posts including drafts
+    /// let all_posts = blog_service
+    ///     .find_posts_by_author_qb(&db, author_id, true)
+    ///     .await?;
+    /// ```
+    ///
+    /// # Dynamic Query Building
+    ///
+    /// This method demonstrates how to conditionally modify queries:
+    /// - Start with base conditions (author filter)
+    /// - Conditionally add additional filters (draft status)
+    /// - Maintain fluent interface throughout
     pub async fn find_posts_by_author_qb(
         &self,
         db: &DbConn,
@@ -659,7 +721,42 @@ impl Service {
             .await
     }
 
-    /// Example: Search posts using query builder (simpler than the complex tsquery version)
+    /// Simple text search using the query builder's LIKE functionality.
+    ///
+    /// Provides a straightforward alternative to the more complex full-text search
+    /// implementation. Uses the query builder's `like()` method which automatically
+    /// wraps the search term with wildcards for substring matching.
+    ///
+    /// # Parameters
+    ///
+    /// * `db` - Database connection reference
+    /// * `search_term` - Text to search for in post titles
+    /// * `limit` - Optional limit for number of results (defaults to 10)
+    ///
+    /// # Returns
+    ///
+    /// A vector of published posts with titles matching the search term
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let rust_posts = blog_service
+    ///     .simple_search_posts_qb(&db, "rust programming", Some(20))
+    ///     .await?;
+    /// ```
+    ///
+    /// # Search Behavior
+    ///
+    /// - Searches within post titles using case-insensitive LIKE matching
+    /// - Only returns published posts (draft = false)
+    /// - Results ordered by publication date (newest first)
+    /// - Search term is automatically wrapped with % wildcards
+    ///
+    /// # Performance Note
+    ///
+    /// This method uses simple LIKE matching which may be slower than full-text
+    /// search for large datasets. For complex search requirements, consider using
+    /// the PostgreSQL full-text search implementation in `search_posts()`.
     pub async fn simple_search_posts_qb(
         &self,
         db: &DbConn,
