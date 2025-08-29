@@ -147,11 +147,26 @@
 						const now = new Date();
 						const diff = Math.floor((now - start) / 1000);
 						
-						const hours = Math.floor(diff / 3600);
-						const minutes = Math.floor((diff % 3600) / 60);
-						const seconds = diff % 60;
+						// Debug logging (can be removed later)
+						if (diff < 0) {
+							console.warn('Timer: Start time is in the future!', {
+								startTime: startTime,
+								start: start,
+								now: now,
+								diff: diff
+							});
+						}
 						
-						timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+						// Handle negative values properly (when start time is in the future)
+						const isNegative = diff < 0;
+						const absDiff = Math.abs(diff);
+						
+						const hours = Math.floor(absDiff / 3600);
+						const minutes = Math.floor((absDiff % 3600) / 60);
+						const seconds = absDiff % 60;
+						
+						const sign = isNegative ? '-' : '';
+						timerElement.textContent = `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 					}
 				}
 			}
