@@ -621,4 +621,59 @@ impl Service {
             terms.join(" & ")
         }
     }
+
+    /// Example method using the new CodeIgniter3-style query builder
+    /// This demonstrates how to integrate the query builder into existing services
+    pub async fn find_recent_published_posts_qb(
+        &self,
+        db: &DbConn,
+        limit: Option<u64>,
+    ) -> Result<Vec<models::post::Model>, DbErr> {
+        let limit = limit.unwrap_or(10);
+        
+        models::post::Entity::query()
+            .where_eq(models::post::Column::Draft, false)
+            .order_desc(models::post::Column::DatePublished)
+            .limit(limit)
+            .get(db)
+            .await
+    }
+
+    /// Another example: Find posts by author using query builder
+    pub async fn find_posts_by_author_qb(
+        &self,
+        db: &DbConn,
+        author_id: Uuid,
+        include_drafts: bool,
+    ) -> Result<Vec<models::post::Model>, DbErr> {
+        let mut query = models::post::Entity::query()
+            .where_eq(models::post::Column::AccountId, author_id);
+
+        if !include_drafts {
+            query = query.where_eq(models::post::Column::Draft, false);
+        }
+
+        query
+            .order_desc(models::post::Column::DatePublished)
+            .get(db)
+            .await
+    }
+
+    /// Example: Search posts using query builder (simpler than the complex tsquery version)
+    pub async fn simple_search_posts_qb(
+        &self,
+        db: &DbConn,
+        search_term: &str,
+        limit: Option<u64>,
+    ) -> Result<Vec<models::post::Model>, DbErr> {
+        let limit = limit.unwrap_or(10);
+        
+        models::post::Entity::query()
+            .like(models::post::Column::Title, search_term)
+            .where_eq(models::post::Column::Draft, false)
+            .order_desc(models::post::Column::DatePublished)
+            .limit(limit)
+            .get(db)
+            .await
+    }
 }

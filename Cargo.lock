@@ -167,6 +167,7 @@ dependencies = [
  "mime_guess",
  "models",
  "pwhash",
+ "query_builder_macro",
  "rand 0.8.5",
  "rand_mt",
  "reqwest 0.11.27",
@@ -2299,6 +2300,7 @@ name = "models"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "query_builder_macro",
  "rocket",
  "sea-orm",
  "uuid",
@@ -2924,6 +2926,16 @@ dependencies = [
  "rand 0.8.5",
  "sha-1",
  "sha2 0.9.9",
+]
+
+[[package]]
+name = "query_builder_macro"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "sea-orm",
+ "syn 2.0.105",
 ]
 
 [[package]]
