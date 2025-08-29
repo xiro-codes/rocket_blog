@@ -722,3 +722,31 @@
         padding: var(--spacing-xs);
     }
 }
+
+/* Feature item styling for login/register pages */
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    border-radius: calc(var(--border-radius) / 2);
+    background: var(--bg-secondary);
+    margin-bottom: var(--spacing-sm);
+    transition: all 0.2s ease;
+}
+
+.feature-item:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.feature-item i {
+    font-size: 1.2rem;
+    min-width: 20px;
+}
+
+.feature-item span {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
