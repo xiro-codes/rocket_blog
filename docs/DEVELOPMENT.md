@@ -21,7 +21,8 @@ docker-compose -f docker-compose.dev.yml up --build
 
 **Features:**
 - Debug builds (faster compilation than release builds)
-- App exposed on http://localhost:8000
+- Blog exposed on http://localhost:8000
+- Work Time Tracker exposed on http://localhost:8001
 - PostgreSQL database on localhost:5432
 - pgAdmin on http://localhost:5050
 - Optimized for development with proper logging
@@ -132,11 +133,12 @@ For development, debug builds provide much faster iteration while maintaining fu
 
 ### Port Conflicts
 
-If ports 8000, 5432, or 5050 are already in use:
+If ports 8000, 8001, 5432, or 5050 are already in use:
 
 ```bash
 # Check what's using the ports
 lsof -i :8000
+lsof -i :8001
 lsof -i :5432  
 lsof -i :5050
 
@@ -191,7 +193,8 @@ The development environment uses static IP addresses for stable connections:
 
 - **PostgreSQL**: Always available at `172.20.0.10`
 - **pgAdmin**: Always available at `172.20.0.20`
-- **App**: Always available at `172.20.0.30`
+- **Blog App**: Always available at `172.20.0.30`
+- **Work Time Tracker App**: Always available at `172.20.0.31`
 
 If pgAdmin loses connection to PostgreSQL, verify the database server configuration uses IP `172.20.0.10` instead of the hostname `postgres`.
 
