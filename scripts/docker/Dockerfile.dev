@@ -1,5 +1,5 @@
-# Alternative Dockerfile for environments with SSL certificate issues
-# This uses a pre-built Rust image with all dependencies already cached
+# Development Dockerfile for dual-binary architecture  
+# This builds both blog and worktime binaries in development mode
 
 FROM rust:1.89-bookworm AS builder
 
@@ -27,12 +27,8 @@ COPY migrations ./migrations/
 COPY models ./models/
 COPY src ./src/
 
-# Build with error handling
-RUN cargo build || \
-    (echo "Build failed, trying with offline mode..." && \
-     cargo build --offline) || \
-    (echo "Offline build failed, trying with network retry..." && \
-     sleep 5 && cargo build )
+# Build both binaries in development mode for faster compile times
+RUN cargo build --bin blog --bin worktime
 
 # Runtime stage
 FROM debian:bookworm-slim
@@ -56,12 +52,16 @@ COPY templates ./templates/
 COPY static ./static/
 COPY scripts/docker/.Rocket.docker.toml ./Rocket.toml
 
-COPY --from=builder /app/target/debug/app ./rocket-template
+# Copy both built binaries from builder stage
+COPY --from=builder /app/target/debug/blog ./blog
+COPY --from=builder /app/target/debug/worktime ./worktime
 
-RUN mkdir -p /app/data && chown -R app:app /app && chmod +x ./rocket-template
+RUN mkdir -p /app/data && chown -R app:app /app && chmod +x ./blog ./worktime
 
 USER app
 
-EXPOSE 8000
+# Expose ports for both services
+EXPOSE 8000 8001
 
-CMD ["./rocket-template"]
+# Default to blog binary (can be overridden in docker-compose)
+CMD ["./blog"]

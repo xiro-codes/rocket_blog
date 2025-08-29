@@ -1,4 +1,4 @@
-# Docker image for running code coverage with Tarpaulin in Rocket Blog
+# Docker image for running code coverage with Tarpaulin in Rocket Blog dual-binary architecture
 # This Dockerfile creates a containerized test environment with coverage reporting
 
 FROM rust:1.89-bookworm
@@ -11,8 +11,13 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     wget \
+    python3 \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/* \
     && update-ca-certificates
+
+# Install yt-dlp for testing youtube download functionality
+RUN pip3 install --no-cache-dir --break-system-packages yt-dlp
 
 # Set working directory
 WORKDIR /app
@@ -25,7 +30,11 @@ COPY models ./models/
 # Copy source code
 COPY src ./src/
 
-# Create a script that installs tarpaulin and runs coverage
+# Copy templates and static files for integration tests
+COPY templates ./templates/
+COPY static ./static/
+
+# Create a script that installs tarpaulin and runs coverage for both binaries
 RUN echo '#!/bin/bash\n\
 set -e\n\
 echo "Installing cargo-tarpaulin..."\n\
@@ -37,8 +46,8 @@ cargo install cargo-tarpaulin --version=0.31.0 || {\n\
     chmod +x /usr/local/bin/cargo-tarpaulin && \\\n\
     rm cargo-tarpaulin-x86_64-unknown-linux-musl.tar.gz\n\
 }\n\
-echo "Running cargo tarpaulin..."\n\
-cargo tarpaulin --verbose --timeout 60 --package app\n\
+echo "Running cargo tarpaulin for dual-binary architecture..."\n\
+cargo tarpaulin --verbose --timeout 60 --package app --bin blog --bin worktime\n\
 ' > /app/run_coverage.sh && chmod +x /app/run_coverage.sh
 
 # Run coverage with Tarpaulin (install at runtime to avoid SSL build issues)
