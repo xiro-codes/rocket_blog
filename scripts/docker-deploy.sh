@@ -33,7 +33,7 @@ function show_help() {
     echo "  $0 dev              # Start development environment"
     echo "  $0 dev-live         # Start development with live template reloading"
     echo "  $0 prod             # Start production with SSL"
-    echo "  $0 logs nginx       # Show nginx logs only"
+    echo "  $0 logs blog        # Show blog logs only"
     echo "  $0 setup-ssl       # Generate SSL certificates"
     echo "  $0 backup           # Backup volumes (auto-detect environment)"
     echo "  $0 backup prod      # Backup production volumes"
@@ -46,11 +46,12 @@ function start_dev() {
     docker compose -f scripts/docker/docker-compose.dev.yml up -d --build
     echo ""
     echo "Development environment started!"
-    echo "  • App: http://localhost:8000"
+    echo "  • Blog: http://localhost:8000"
+    echo "  • Work Time Tracker: http://localhost:8001"
     echo "  • pgAdmin: http://localhost:5050"
     echo "  • Database: localhost:5432"
     echo ""
-    echo "This uses production builds compiled in a clean container environment."
+    echo "This uses debug builds compiled in a clean container environment."
     echo "For live template/static file editing, use: $0 dev-live"
 }
 
@@ -59,13 +60,14 @@ function start_dev_live() {
     docker compose -f scripts/docker/docker-compose.dev.live.yml up -d --build
     echo ""
     echo "Live development environment started!"
-    echo "  • App: http://localhost:8000 (templates/static files auto-reload)"
+    echo "  • Blog: http://localhost:8000 (templates/static files auto-reload)"
+    echo "  • Work Time Tracker: http://localhost:8001 (templates/static files auto-reload)"
     echo "  • pgAdmin: http://localhost:5050"
     echo "  • Database: localhost:5432"
     echo ""
     echo "Your templates and static files are mounted into the container."
     echo "Changes to HTML templates and CSS/JS will be immediately visible."
-    echo "View logs with: $0 logs app"
+    echo "View logs with: $0 logs blog"
 }
 
 function install_systemd_timers() {

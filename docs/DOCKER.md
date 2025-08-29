@@ -19,11 +19,13 @@ This guide provides instructions for building and running the Rocket Blog applic
 # For local development with direct app access
 just docker-dev
 # OR: docker-compose -f scripts/docker/docker-compose.dev.yml up --build
-# Access: http://localhost:8000
-# pgAdmin: http://localhost:5050
+# Access: 
+#   - Blog: http://localhost:8000
+#   - Work Time Tracker: http://localhost:8001
+#   - pgAdmin: http://localhost:5050
 ```
 
-**Note**: Development mode bypasses nginx and exposes the app directly, avoiding any SSL/redirect issues.
+**Note**: Development mode bypasses nginx and exposes the applications directly, avoiding any SSL/redirect issues.
 
 ### Production (with SSL)
 ```bash
@@ -80,7 +82,8 @@ just docker-logs app
 
 ### Services in Production
 - **nginx**: Reverse proxy with SSL termination (ports 80/443)
-- **app**: Rocket blog application (internal only)
+- **blog**: Rocket blog application (internal only)
+- **worktime**: Work Time Tracker PWA application (internal only)
 - **postgres**: Database (internal only)
 - **pgAdmin**: Database admin interface (port 5050, optional)
 
@@ -103,7 +106,8 @@ just docker-dev
 # OR: docker-compose -f scripts/docker/docker-compose.dev.yml up --build
 
 # Access points:
-# - App: http://localhost:8000
+# - Blog: http://localhost:8000
+# - Work Time Tracker: http://localhost:8001
 # - pgAdmin: http://localhost:5050
 # - Database: localhost:5432
 ```
@@ -117,7 +121,8 @@ just docker-dev-live
 # OR: docker-compose -f scripts/docker/docker-compose.dev.live.yml up --build
 
 # Access points:
-# - App: http://localhost:8000 (auto-reloads on code changes)
+# - Blog: http://localhost:8000 (auto-reloads on code changes)
+# - Work Time Tracker: http://localhost:8001 (auto-reloads on code changes)
 # - pgAdmin: http://localhost:5050
 # - Database: localhost:5432
 ```
@@ -259,7 +264,9 @@ If you encounter "The page isn't redirecting properly" errors:
 ```bash
 # Bypass nginx entirely for local testing
 ./scripts/docker-deploy.sh dev
-# Access: http://localhost:8000
+# Access: 
+#   - Blog: http://localhost:8000
+#   - Work Time Tracker: http://localhost:8001
 ```
 
 #### Solution 2: Check SSL Certificate Status
@@ -373,7 +380,8 @@ All Docker Compose configurations use a custom bridge network with static IP add
 - **IP Assignments**:
   - PostgreSQL: `172.20.0.10`
   - pgAdmin: `172.20.0.20`
-  - App: `172.20.0.30`
+  - Blog App: `172.20.0.30`
+  - Work Time Tracker App: `172.20.0.31`
   - nginx: `172.20.0.40` (production only)
   - certbot: `172.20.0.50` (production only)
 
