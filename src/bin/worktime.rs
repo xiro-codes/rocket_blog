@@ -17,6 +17,9 @@ use rocket::{fs::FileServer, response::Redirect, Build, Rocket, Request, Respons
 use rocket_dyn_templates::Template;
 use rocket::{http::Header, fairing::{Fairing, Info, Kind}};
 
+mod worktime_auth;
+use worktime_auth::WorkTimeAuthController;
+
 #[catch(default)]
 pub fn catch_default() -> Redirect {
     log::warn!("Unhandled route accessed - redirecting to worktime dashboard");
@@ -65,10 +68,10 @@ pub struct WorkTimeControllerRegistry;
 impl WorkTimeControllerRegistry {
     pub fn attach_all_controllers(rocket: Rocket<Build>) -> Rocket<Build> {
         log::info!("Registering work time application controllers...");
-        log::debug!("Attaching controllers: Auth (/auth), WorkTime (/worktime, /)");
+        log::debug!("Attaching controllers: WorkTimeAuth (/auth), WorkTime (/worktime, /)");
         
         rocket
-            .attach(controllers::AuthController::new("/auth".to_owned()))
+            .attach(WorkTimeAuthController::new("/auth".to_owned()))
             .attach(controllers::WorkTimeController::new("/worktime".to_owned()))
             // Add a root route that redirects to worktime dashboard
             .mount("/", rocket::routes![worktime_root])
