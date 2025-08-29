@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		
+		<!-- SEO Meta Tags -->
+		<title>{% if page_title %}{{ page_title }}{% else %}Work Time Tracker - Professional Time Management{% endif %}</title>
+		<meta name="description" content="{% if page_description %}{{ page_description }}{% else %}Professional work time tracking application with role-based wages, notifications, and comprehensive reporting.{% endif %}">
+		<meta name="keywords" content="{% if page_keywords %}{{ page_keywords }}{% else %}time tracking, work time, productivity, wages, time management, professional{% endif %}">
+		<meta name="author" content="Work Time Tracker">
+		
+		<!-- Canonical URL -->
+		<link rel="canonical" href="{% if canonical_url %}{{ canonical_url }}{% else %}/worktime{% endif %}">
+		
+		<!-- Open Graph Meta Tags -->
+		<meta property="og:title" content="{% if page_title %}{{ page_title }}{% else %}Work Time Tracker{% endif %}">
+		<meta property="og:description" content="{% if page_description %}{{ page_description }}{% else %}Professional work time tracking application{% endif %}">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="{% if canonical_url %}{{ canonical_url }}{% else %}/worktime{% endif %}">
+		<meta property="og:site_name" content="Work Time Tracker">
+		<meta property="og:locale" content="en_US">
+		
+		<!-- Twitter Card Meta Tags -->
+		<meta name="twitter:card" content="summary">
+		<meta name="twitter:title" content="{% if page_title %}{{ page_title }}{% else %}Work Time Tracker{% endif %}">
+		<meta name="twitter:description" content="{% if page_description %}{{ page_description }}{% else %}Professional work time tracking application{% endif %}">
+		
+		<!-- PWA Manifest -->
+		<link rel="manifest" href="/static/manifest.json">
+		
+		<!-- PWA Meta Tags -->
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="default">
+		<meta name="apple-mobile-web-app-title" content="TimeTracker">
+		<meta name="msapplication-TileColor" content="#8FB8DC">
+		<meta name="msapplication-tap-highlight" content="no">
+		<meta name="theme-color" content="#8FB8DC">
+		
+		<!-- PWA Icons -->
+		<link rel="apple-touch-icon" href="/static/icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192x192.png">
+		<link rel="icon" type="image/png" sizes="512x512" href="/static/icon-512x512.png">
+		
+		<!-- Bootstrap CSS -->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+			integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+		
+		<!-- Custom Worktime CSS -->
+		<link rel="stylesheet" href="/static/worktime.css" />
+		
+		<!-- Font Awesome for icons -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	</head>
+
+	<body>
+		<div class="worktime-container">
+			<div class="worktime-content">
+				{% block content %}
+				{% endblock %}
+			</div>
+		</div>
+
+		<!-- Bootstrap JavaScript -->
+		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+				integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+				crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+				integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+				crossorigin="anonymous"></script>
+		
+		<!-- PWA Service Worker Registration -->
+		<script>
+			// Register service worker for PWA functionality
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					navigator.serviceWorker.register('/static/sw.js')
+						.then((registration) => {
+							console.log('SW registered: ', registration);
+							
+							// Check for updates
+							registration.addEventListener('updatefound', () => {
+								const newWorker = registration.installing;
+								newWorker.addEventListener('statechange', () => {
+									if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+										// New update available
+										console.log('New version available! Please refresh.');
+									}
+								});
+							});
+						})
+						.catch((registrationError) => {
+							console.log('SW registration failed: ', registrationError);
+						});
+				});
+			}
+
+			// PWA Install prompt
+			let deferredPrompt;
+			window.addEventListener('beforeinstallprompt', (e) => {
+				e.preventDefault();
+				deferredPrompt = e;
+				
+				// Show install button if available
+				const installBtn = document.getElementById('install-btn');
+				if (installBtn) {
+					installBtn.style.display = 'block';
+					installBtn.addEventListener('click', installPWA);
+				}
+			});
+
+			// Handle PWA installation
+			function installPWA() {
+				if (deferredPrompt) {
+					deferredPrompt.prompt();
+					deferredPrompt.userChoice.then((choiceResult) => {
+						if (choiceResult.outcome === 'accepted') {
+							console.log('User accepted the install prompt');
+							const installBtn = document.getElementById('install-btn');
+							if (installBtn) {
+								installBtn.style.display = 'none';
+							}
+						}
+						deferredPrompt = null;
+					});
+				}
+			}
+
+			// Notification helpers
+			function requestNotificationPermission() {
+				if ('Notification' in window && Notification.permission === 'default') {
+					Notification.requestPermission().then(permission => {
+						console.log('Notification permission:', permission);
+					});
+				}
+			}
+
+			// Auto-update timer display (if on dashboard)
+			function updateTimerDisplay() {
+				const timerElement = document.getElementById('live-timer');
+				if (timerElement) {
+					const startTime = timerElement.dataset.startTime;
+					if (startTime) {
+						const start = new Date(startTime);
+						const now = new Date();
+						const diff = Math.floor((now - start) / 1000);
+						
+						const hours = Math.floor(diff / 3600);
+						const minutes = Math.floor((diff % 3600) / 60);
+						const seconds = diff % 60;
+						
+						timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+					}
+				}
+			}
+
+			// Update timer every second if active
+			if (document.getElementById('live-timer')) {
+				setInterval(updateTimerDisplay, 1000);
+			}
+		</script>
+		
+		{% block script %}
+		{% endblock %}
+	</body>
+
+</html>

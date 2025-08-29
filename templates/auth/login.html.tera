@@ -1,44 +1,80 @@
-{% extends "base" %}
+{% extends "worktime_base" %}
 
 {% block content %}
-<div class="terminal-header"></div>
-<center>
-	<h1 class="terminal-cursor">System Login</h1>
-	<p class="text-muted">Enter your credentials to access the admin panel.</p>
-</center>
+<div class="auth-container">
+    <div class="auth-logo">
+        <i class="fas fa-clock text-primary" style="font-size: 3rem;"></i>
+    </div>
+    
+    <h1 class="auth-title">Welcome to Time Tracker</h1>
+    <p class="auth-subtitle">Sign in to track your productive work hours and manage your time effectively.</p>
 
-<hr class="terminal-divider">
-
-<div class="d-flex justify-content-center align-items-center">
-	<form action="/auth/" method="post" class="terminal-form">
-		<h3 class="text-center mb-4">[ SYSTEM LOGIN ]</h3>
-		
-		<div>
-			<label for="username" class="form-label">Username:</label>
-			<input type="text" name="username" id="username" class="form-control" placeholder="Enter username..." required />
-		</div>
-		
-		<div>
-			<label for="password" class="form-label">Password:</label>
-			<input type="password" name="password" id="password" class="form-control" placeholder="Enter password..." required />
-		</div>
-		
-		<div class="justify-content-center d-flex m-1">
-			<button type="submit" class="btn btn-primary">[AUTHENTICATE]</button>
-		</div>
-		
-		<div class="text-center mt-3">
-			<div class="btn-group flex-wrap gap-2">
-				<a href="/auth/register" class="btn btn-info btn-sm">[REGISTER NEW ACCOUNT]</a>
-				<a href="/blog" class="btn btn-secondary btn-sm">[← BACK TO BLOG]</a>
-			</div>
-		</div>
-	</form>
+    <form action="/auth/" method="post">
+        <div class="mb-3">
+            <label for="username" class="form-label">
+                <i class="fas fa-user me-1"></i>Username
+            </label>
+            <input type="text" name="username" id="username" class="form-control" placeholder="Enter your username" required />
+        </div>
+        
+        <div class="mb-4">
+            <label for="password" class="form-label">
+                <i class="fas fa-lock me-1"></i>Password
+            </label>
+            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required />
+        </div>
+        
+        <div class="d-grid mb-4">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </button>
+        </div>
+        
+        <div class="text-center">
+            <div class="d-flex flex-column gap-2">
+                <a href="/auth/register" class="btn btn-outline-primary">
+                    <i class="fas fa-user-plus me-2"></i>Create New Account
+                </a>
+                <a href="/blog" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Blog
+                </a>
+            </div>
+        </div>
+    </form>
+    
+    <!-- Features highlight -->
+    <div class="mt-5 text-center">
+        <h5 class="text-muted mb-3">Why use Time Tracker?</h5>
+        <div class="row text-start">
+            <div class="col-6">
+                <small class="text-muted">
+                    <i class="fas fa-clock text-primary me-2"></i>Track work hours
+                </small>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">
+                    <i class="fas fa-dollar-sign text-success me-2"></i>Calculate earnings
+                </small>
+            </div>
+            <div class="col-6 mt-2">
+                <small class="text-muted">
+                    <i class="fas fa-bell text-warning me-2"></i>Smart notifications
+                </small>
+            </div>
+            <div class="col-6 mt-2">
+                <small class="text-muted">
+                    <i class="fas fa-chart-line text-info me-2"></i>Detailed reports
+                </small>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% if flash %}
-<div class="alert alert-{{ flash.0 }} text-center mt-3">
-	{{ flash.1 }}
+<div class="auth-container mt-3">
+    <div class="alert alert-{{ flash.0 }}">
+        <i class="fas fa-info-circle me-2"></i>{{ flash.1 }}
+    </div>
 </div>
 {% endif %}
 
