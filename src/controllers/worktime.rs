@@ -515,10 +515,10 @@ fn routes() -> Vec<rocket::Route> {
         delete_entry,
         notifications_view,
         update_notifications,
-        // payperiods_view,
-        // create_pay_period,
-        // auto_assign_entries,
-        // delete_pay_period,  // Temporarily disabled for debugging
+        payperiods_view,
+        create_pay_period,
+        auto_assign_entries,
+        delete_pay_period,  // Temporarily disabled for debugging
     ]
 }
 
