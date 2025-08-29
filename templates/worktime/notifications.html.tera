@@ -1,238 +1,6 @@
 {% extends "worktime_base" %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="worktime-title mb-0">
-        <i class="fas fa-bell me-2"></i>Notification Settings
-    </h1>
-    <a href="/worktime" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-    </a>
-</div>
-
-<!-- Browser Permission Notice -->
-<div class="worktime-card" id="permission-notice">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-shield-alt me-2"></i>Browser Permissions
-        </h3>
-    </div>
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <p class="mb-1">Enable browser notifications to receive alerts while working.</p>
-            <small class="text-muted">You can disable this at any time in your browser settings.</small>
-        </div>
-        <button class="btn btn-primary" onclick="requestNotificationPermission()">
-            <i class="fas fa-bell me-2"></i>Enable Notifications
-        </button>
-    </div>
-</div>
-
-<!-- Time-based Notifications -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-clock me-2"></i>Time-based Notifications
-        </h3>
-    </div>
-    
-    <form method="post" action="/worktime/notifications/time">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="time_enabled" name="enabled" 
-                           {% if time_notifications.enabled %}checked{% endif %}>
-                    <label class="form-check-label" for="time_enabled">
-                        <strong>Enable time-based notifications</strong>
-                    </label>
-                </div>
-                <small class="text-muted">Get notified after working for a specific amount of time</small>
-            </div>
-            <div class="col-md-6">
-                <label for="time_threshold" class="form-label">Notify after (minutes)</label>
-                <select class="form-control" id="time_threshold" name="threshold">
-                    <option value="15" {% if time_notifications.threshold == 15 %}selected{% endif %}>15 minutes</option>
-                    <option value="30" {% if time_notifications.threshold == 30 %}selected{% endif %}>30 minutes</option>
-                    <option value="60" {% if time_notifications.threshold == 60 %}selected{% endif %}>1 hour</option>
-                    <option value="120" {% if time_notifications.threshold == 120 %}selected{% endif %}>2 hours</option>
-                    <option value="240" {% if time_notifications.threshold == 240 %}selected{% endif %}>4 hours</option>
-                    <option value="480" {% if time_notifications.threshold == 480 %}selected{% endif %}>8 hours</option>
-                </select>
-            </div>
-            <div class="col-12 text-center">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save me-2"></i>Save Time Settings
-                </button>
-            </div>
-        </div>
-    </form>
-</div>
-
-<!-- Earnings-based Notifications -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-dollar-sign me-2"></i>Earnings-based Notifications
-        </h3>
-    </div>
-    
-    <form method="post" action="/worktime/notifications/earnings">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="earnings_enabled" name="enabled" 
-                           {% if earnings_notifications.enabled %}checked{% endif %}>
-                    <label class="form-check-label" for="earnings_enabled">
-                        <strong>Enable earnings-based notifications</strong>
-                    </label>
-                </div>
-                <small class="text-muted">Get notified when you reach a certain earnings amount in a session</small>
-            </div>
-            <div class="col-md-6">
-                <label for="earnings_threshold" class="form-label">Notify after earning</label>
-                <div class="input-group">
-                    <span class="input-group-text">$</span>
-                    <input type="number" step="0.01" class="form-control" id="earnings_threshold" 
-                           name="threshold" value="{{ earnings_notifications.threshold | default(value='50.00') }}" 
-                           placeholder="50.00">
-                </div>
-            </div>
-            <div class="col-12 text-center">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save me-2"></i>Save Earnings Settings
-                </button>
-            </div>
-        </div>
-    </form>
-</div>
-
-<!-- Daily Goal Notifications -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-target me-2"></i>Daily Goal Notifications
-        </h3>
-    </div>
-    
-    <form method="post" action="/worktime/notifications/daily">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="daily_enabled" name="enabled" 
-                           {% if daily_notifications.enabled %}checked{% endif %}>
-                    <label class="form-check-label" for="daily_enabled">
-                        <strong>Enable daily goal notifications</strong>
-                    </label>
-                </div>
-                <small class="text-muted">Get notified when you reach your daily hours target</small>
-            </div>
-            <div class="col-md-6">
-                <label for="daily_threshold" class="form-label">Daily hours goal</label>
-                <select class="form-control" id="daily_threshold" name="threshold">
-                    <option value="0.5" {% if daily_notifications.threshold == 0.5 %}selected{% endif %}>0.5 hours</option>
-                    <option value="1" {% if daily_notifications.threshold == 1 %}selected{% endif %}>1 hour</option>
-                    <option value="2" {% if daily_notifications.threshold == 2 %}selected{% endif %}>2 hours</option>
-                    <option value="4" {% if daily_notifications.threshold == 4 %}selected{% endif %}>4 hours</option>
-                    <option value="6" {% if daily_notifications.threshold == 6 %}selected{% endif %}>6 hours</option>
-                    <option value="8" {% if daily_notifications.threshold == 8 %}selected{% endif %}>8 hours</option>
-                    <option value="10" {% if daily_notifications.threshold == 10 %}selected{% endif %}>10 hours</option>
-                    <option value="12" {% if daily_notifications.threshold == 12 %}selected{% endif %}>12 hours</option>
-                    <option value="16" {% if daily_notifications.threshold == 16 %}selected{% endif %}>16 hours</option>
-                </select>
-            </div>
-            <div class="col-12 text-center">
-                <button type="submit" class="btn btn-warning">
-                    <i class="fas fa-save me-2"></i>Save Daily Settings
-                </button>
-            </div>
-        </div>
-    </form>
-</div>
-
-<!-- Notification Preview -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-eye me-2"></i>Test Notifications
-        </h3>
-    </div>
-    <div class="text-center">
-        <p class="text-muted mb-3">Test your notification settings to make sure they're working properly.</p>
-        <button class="btn btn-info" onclick="testNotification()">
-            <i class="fas fa-play me-2"></i>Send Test Notification
-        </button>
-    </div>
-</div>
-
-{% if flash %}
-<div class="alert alert-{{ flash.0 }} mt-3">
-    <i class="fas fa-info-circle me-2"></i>{{ flash.1 }}
-</div>
-{% endif %}
-
-{% endblock %}
-
-{% block script %}
-<script>
-function requestNotificationPermission() {
-    if ('Notification' in window) {
-        Notification.requestPermission().then(permission => {
-            const notice = document.getElementById('permission-notice');
-            if (permission === 'granted') {
-                notice.innerHTML = `
-                    <div class="worktime-card-header">
-                        <h3 class="mb-0">
-                            <i class="fas fa-check-circle me-2 text-success"></i>Notifications Enabled
-                        </h3>
-                    </div>
-                    <p class="mb-0 text-success">Browser notifications are now enabled! You'll receive alerts based on your settings below.</p>
-                `;
-                notice.className = 'worktime-card alert-success';
-            } else {
-                notice.innerHTML = `
-                    <div class="worktime-card-header">
-                        <h3 class="mb-0">
-                            <i class="fas fa-times-circle me-2 text-danger"></i>Notifications Disabled
-                        </h3>
-                    </div>
-                    <p class="mb-0 text-danger">Notifications were not enabled. You can enable them manually in your browser settings.</p>
-                `;
-                notice.className = 'worktime-card alert-danger';
-            }
-        });
-    } else {
-        alert('This browser does not support notifications.');
-    }
-}
-
-function testNotification() {
-    if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('Time Tracker Test', {
-            body: 'Your notifications are working perfectly! 🎉',
-            icon: '/static/icon-192x192.png',
-            badge: '/static/icon-192x192.png'
-        });
-    } else {
-        alert('Please enable notifications first using the button above.');
-    }
-}
-
-// Check notification permission on load
-document.addEventListener('DOMContentLoaded', function() {
-    if ('Notification' in window && Notification.permission === 'granted') {
-        const notice = document.getElementById('permission-notice');
-        notice.innerHTML = `
-            <div class="worktime-card-header">
-                <h3 class="mb-0">
-                    <i class="fas fa-check-circle me-2 text-success"></i>Notifications Enabled
-                </h3>
-            </div>
-            <p class="mb-0 text-success">Browser notifications are enabled and ready to use!</p>
-        `;
-        notice.className = 'worktime-card alert-success';
-    }
-});
-</script>
 
 <div class="container-fluid">
     <div class="row">
@@ -241,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <p class="text-muted">Configure notifications for your work time tracking</p>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/worktime">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Notifications</li>
                 </ol>
             </nav>
@@ -252,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="col-md-8">
             <div class="terminal-box">
                 <h3>⚙️ Notification Preferences</h3>
-                <form method="post" action="/worktime/notifications">
+                <form method="post" action="/notifications">
                     <!-- Time-based notifications -->
                     <div class="card mb-3">
                         <div class="card-header">
@@ -385,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     <div class="d-flex justify-content-between">
                         <button type="submit" class="btn btn-success">💾 Save Settings</button>
-                        <a href="/worktime" class="btn btn-secondary">🔙 Back to Dashboard</a>
+                        <a href="/" class="btn btn-secondary">🔙 Back to Dashboard</a>
                     </div>
                 </form>
             </div>
