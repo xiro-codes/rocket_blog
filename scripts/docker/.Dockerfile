@@ -1,13 +1,20 @@
-# Use a Debian slim base image for consistency
+# Alternative runtime Dockerfile for dual-binary architecture
+# This expects binaries to be built on host and copied/mounted into container
+
 FROM debian:bookworm-slim
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     libssl3 \
     libpq5 \
-		patchelf \
+    patchelf \
     ca-certificates \
+    python3 \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
+
+# Install yt-dlp for youtube download functionality
+RUN pip3 install --no-cache-dir --break-system-packages yt-dlp
 
 # Create app user
 RUN useradd -m -u 1000 app
@@ -20,24 +27,28 @@ COPY templates ./templates/
 COPY static ./static/
 COPY scripts/docker/.Rocket.docker.toml ./Rocket.toml
 
-# For development, expect binary to be mounted or copied
+# For development, expect binaries to be mounted or copied
 # This allows building on host and running in container
-COPY target/release/rocket-template ./rocket-template
+COPY target/release/blog ./blog
+COPY target/release/worktime ./worktime
 
 # Create data directory for file uploads
 RUN mkdir -p /app/data && chown -R app:app /app
 
-# Ensure binary is executable if it exists
-RUN if [ -f ./rocket-template ]; then chmod +x ./rocket-template; fi
+# Ensure binaries are executable if they exist
+RUN if [ -f ./blog ]; then chmod +x ./blog; fi && \
+    if [ -f ./worktime ]; then chmod +x ./worktime; fi
+
+# Patch executables to use the correct dynamic linker
 RUN LD_PATH=$(find / -name "ld-linux-x86-64.so.2") && \
-    # Patch the executable to use the Alpine dynamic linker
-    patchelf --set-interpreter "$LD_PATH" ./rocket-template
+    if [ -f ./blog ]; then patchelf --set-interpreter "$LD_PATH" ./blog; fi && \
+    if [ -f ./worktime ]; then patchelf --set-interpreter "$LD_PATH" ./worktime; fi
 
 # Change to app user
 USER app
 
-# Expose port
-EXPOSE 8000
+# Expose ports for both services
+EXPOSE 8000 8001
 
-# Run the application
-CMD ["./rocket-template"]
+# Default to blog binary (can be overridden)
+CMD ["./blog"]

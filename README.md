@@ -1,10 +1,19 @@
 # Rocket Blog
 
-A modern, fast, and feature-rich blog application built with **Rust** and the **Rocket** web framework. This blog platform provides a clean interface for content management with a visual markdown editor, automatic post excerpts, user authentication, commenting system, and a powerful tagging system.
+A modern, fast, and feature-rich blog application built with **Rust** and the **Rocket** web framework. This platform provides both a blog system and a Progressive Web App (PWA) work time tracker as separate binaries.
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Rust Version](https://img.shields.io/badge/rust-1.70+-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+
+## 🏗️ Architecture
+
+This application consists of **two separate binaries**:
+
+- **Blog Binary** (`blog`) - Complete blog platform with content management
+- **Work Time Tracker Binary** (`worktime`) - PWA for time tracking with role-based wages
+
+See [README_BINARIES.md](README_BINARIES.md) for detailed information about running each binary.
 
 ## ✨ Features
 
@@ -185,6 +194,7 @@ See [Feature Integration Guide](docs/TAG_INTEGRATION_EXAMPLE.md) for detailed ex
 - **Frontend**: Server-side rendered HTML with Tera templates
 - **Styling**: Bootstrap 5 for responsive design
 - **Authentication**: Token-based with secure cookies
+- **Numeric Types**: f64 for monetary calculations (simplified from rust_decimal)
 
 ### Key Components
 - **Controllers**: Handle HTTP requests and responses
@@ -234,10 +244,12 @@ docker-compose -f scripts/docker/docker-compose.dev.live.yml up --build # Live t
 - No SSL complexity for faster iteration
 
 **Production Features:**
+- **Dual Binary Support**: Blog and work time tracker as separate services
 - Nginx reverse proxy with SSL termination
 - Automatic SSL certificate generation and renewal
 - Production-optimized container images
 - Secure defaults with proper headers
+- Independent scaling of blog and worktime applications
 
 **NixOS Users:** The Docker approach solves build issues on NixOS by building inside the container. See the [Docker Guide](docs/DOCKER.md) for troubleshooting SSL certificate issues and alternative build strategies.
 

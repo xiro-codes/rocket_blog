@@ -1,5 +1,5 @@
-# Docker image for running tests in Rocket Blog
-# This Dockerfile creates a containerized test environment
+# Docker image for running tests in Rocket Blog dual-binary architecture
+# This Dockerfile creates a containerized test environment for both binaries
 
 FROM rust:1.89-bookworm
 
@@ -9,7 +9,12 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libpq-dev \
     ca-certificates \
+    python3 \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
+
+# Install yt-dlp for testing youtube download functionality
+RUN pip3 install --no-cache-dir --break-system-packages yt-dlp
 
 # Set working directory
 WORKDIR /app
@@ -22,5 +27,9 @@ COPY models ./models/
 # Copy source code
 COPY src ./src/
 
-# Run tests directly (no pre-build step to avoid issues)
-CMD ["cargo", "test", "--", "--nocapture"]
+# Copy templates and static files for integration tests
+COPY templates ./templates/
+COPY static ./static/
+
+# Run tests for both binaries (no pre-build step to avoid issues)
+CMD ["cargo", "test", "--bins", "--", "--nocapture"]

@@ -3,6 +3,7 @@ use rocket::{
     response::Redirect,
     Build, Rocket, Route,
 };
+use rocket_dyn_templates::{context, Template};
 
 use crate::controllers::base::ControllerBase;
 
@@ -24,8 +25,17 @@ fn index() -> Redirect {
     Redirect::to("/blog/?page=1")
 }
 
+#[get("/offline")]
+fn offline() -> Template {
+    log::info!("Route accessed: GET /offline - PWA offline page");
+    Template::render("offline", context! {
+        page_title: "Offline - Work Time Tracker",
+        page_description: "Work Time Tracker is currently offline but still functional"
+    })
+}
+
 fn routes() -> Vec<Route> {
-    routes![index]
+    routes![index, offline]
 }
 
 #[rocket::async_trait]

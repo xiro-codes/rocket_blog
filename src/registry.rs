@@ -1,4 +1,4 @@
-use crate::services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService};
+use crate::services::{AuthService, BlogService, CommentService, OpenAIService, OllamaService, AIProviderService, ReactionService, SettingsService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService, WorkTimeService, PayPeriodService};
 use crate::controllers;
 use crate::config::AppConfig;
 use rocket::{fairing::AdHoc, Build, Rocket, State};
@@ -17,7 +17,7 @@ impl ServiceRegistry {
         ai_service.add_provider(Box::new(OpenAIService::new()));
         ai_service.add_provider(Box::new(OllamaService::new()));
         
-        log::debug!("Attaching services: Auth, Blog, Comment, OpenAI, Ollama, AIProvider, Reaction, Settings, Tag, Coordinator, YouTube, BackgroundJob");
+        log::debug!("Attaching services: Auth, Blog, Comment, OpenAI, Ollama, AIProvider, Reaction, Settings, Tag, Coordinator, YouTube, BackgroundJob, WorkTime, PayPeriod");
         
         rocket
             .manage(AuthService::new())
@@ -32,6 +32,8 @@ impl ServiceRegistry {
             .manage(CoordinatorService::new())
             .manage(YoutubeDownloadService::new())
             .manage(BackgroundJobService::new())
+            .manage(WorkTimeService::new())
+            .manage(PayPeriodService::new())
     }
     
     /// Create a fairing that initializes services
@@ -49,7 +51,7 @@ impl ControllerRegistry {
     /// Attach all application controllers to Rocket
     pub fn attach_all_controllers(rocket: Rocket<Build>) -> Rocket<Build> {
         log::info!("Registering application controllers...");
-        log::debug!("Attaching controllers: Index (/), Auth (/auth), Blog (/blog), Comment (/comment), Feed (/feed), Settings (/settings), SEO (/)");
+        log::debug!("Attaching controllers: Index (/), Auth (/auth), Blog (/blog), Comment (/comment), Feed (/feed), Settings (/settings), WorkTime (/worktime), SEO (/)");
         
         rocket
             .attach(controllers::IndexController::new("/".to_owned()))
@@ -58,6 +60,7 @@ impl ControllerRegistry {
             .attach(controllers::CommentController::new("/comment".to_owned()))
             .attach(controllers::FeedController::new("/feed".to_owned()))
             .attach(controllers::SettingsController::new("/settings".to_owned()))
+            .attach(controllers::WorkTimeController::new("/worktime".to_owned()))
             .attach(controllers::SeoController::new("/".to_owned()))
     }
     

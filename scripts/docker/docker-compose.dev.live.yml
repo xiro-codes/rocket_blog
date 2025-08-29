@@ -1,20 +1,18 @@
-# Docker Compose for Live Development with Source Code Mounting
-# This version mounts source code for live development workflows
+# Docker Compose for Live Development with dual-binary architecture
+# This version is container-only with no host PC interactions
 
 services:
   # The database service
   postgres:
     image: postgres:13 # Using a specific version is recommended
     restart: always
-    ports:
-      - "5432:5432"  # Expose for development access
     environment:
       # Sets the default user, password, and database as specified
       POSTGRES_USER: master
       POSTGRES_PASSWORD: password
       POSTGRES_DB: tdavis_dev
     volumes:
-      # Persists the database data to a named volume on the host
+      # Persists the database data to a named volume
       - postgres_data:/var/lib/postgresql/data
     networks:
       app-network:
@@ -25,35 +23,72 @@ services:
       timeout: 5s
       retries: 5
 
-  # The Rust web application (live development with volume mounts)
-  app:
+  # The blog application service (live development)
+  blog:
     build: 
       context: ../..
       dockerfile: scripts/docker/Dockerfile.dev
     restart: always
-    ports:
-      # Expose app port for development
-      - "8000:8000"
+    command: ["./blog"]
     environment:
       # Override database URL to use docker service name
       ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
+      ROCKET_PORT: 8000
       # Development environment settings
       RUST_LOG: debug
       ROCKET_ENV: development
     volumes:
       # Persist uploaded files
       - app_data:/app/data
-      # Mount templates and static files for live editing
-      - ./templates:/app/templates:ro
-      - ./static:/app/static:ro
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       app-network:
         ipv4_address: 172.20.0.30
+
+  # The work time tracker PWA service (live development)
+  worktime:
+    build: 
+      context: ../..
+      dockerfile: scripts/docker/Dockerfile.dev
+    restart: always
+    command: ["./worktime"]
+    environment:
+      # Override database URL to use docker service name
+      ROCKET_DATABASES__SEA_ORM__URL: "postgres://master:password@postgres/tdavis_dev"
+      ROCKET_PORT: 8001
+      # Development environment settings
+      RUST_LOG: debug
+      ROCKET_ENV: development
+    volumes:
+      # Persist uploaded files
+      - app_data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.31
   
-  # The pgAdmin GUI service
+  # Nginx reverse proxy for development
+  nginx:
+    build:
+      context: ../../nginx
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - blog
+      - worktime
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.40
+
+  # The pgAdmin GUI service (internal access only)
   pgadmin:
     image: dpage/pgadmin4
     restart: always
@@ -61,9 +96,6 @@ services:
       # Sets the login credentials for the pgAdmin web interface
       PGADMIN_DEFAULT_EMAIL: master@example.com
       PGADMIN_DEFAULT_PASSWORD: password
-    ports:
-      # Maps the container's web server port to a host port (5050)
-      - "5050:80"
     depends_on:
       # Ensures the postgres service starts before pgAdmin
       - postgres
@@ -83,3 +115,4 @@ networks:
 volumes:
   postgres_data:
   app_data:
+  nginx_logs:

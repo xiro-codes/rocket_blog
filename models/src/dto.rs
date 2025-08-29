@@ -7,6 +7,7 @@ use rocket::serde::{Deserialize, Serialize};
 use rocket::FromForm;
 use sea_orm::{DerivePartialModel, FromQueryResult};
 use uuid::Uuid;
+use chrono::{DateTime, Utc};
 
 /// Form DTO for account authentication and registration
 #[derive(
@@ -92,4 +93,113 @@ pub struct OllamaSettingsFormDTO {
     pub ollama_url: String,
     pub ollama_model: String,
     pub ollama_enabled: bool,
+}
+
+/// Form DTO for creating user roles
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct UserRoleFormDTO {
+    pub role_name: String,
+    pub hourly_wage: String, // Use String to handle form input, convert to f64 in service
+    pub currency: String,
+}
+
+/// Form DTO for creating work time entries
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct WorkTimeEntryFormDTO {
+    pub user_role_id: Uuid,
+    pub start_time: Option<String>, // Use String for form handling
+    pub end_time: Option<String>,
+    pub description: Option<String>,
+    pub project: Option<String>,
+}
+
+/// Form DTO for time tracking controls (start/stop)
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct TimeTrackingControlDTO {
+    pub user_role_id: Uuid,
+    pub description: Option<String>,
+    pub project: Option<String>,
+}
+
+/// Result struct for work time summary queries
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct WorkTimeSummaryDTO {
+    pub total_hours: f64,
+    pub total_earnings: f64,
+    pub currency: String,
+    pub entries_count: i32,
+}
+
+/// Result struct for work time entry with role information
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct WorkTimeEntryWithRoleDTO {
+    pub id: Uuid,
+    pub start_time: DateTime<Utc>,
+    pub end_time: Option<DateTime<Utc>>,
+    pub duration: Option<i32>,
+    pub description: Option<String>,
+    pub project: Option<String>,
+    pub is_active: bool,
+    pub role_name: String,
+    pub hourly_wage: f64,
+    pub currency: String,
+    pub earnings: Option<f64>,
+}
+
+/// Form DTO for notification settings
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct NotificationSettingsFormDTO {
+    pub time_based_enabled: Option<bool>,
+    pub time_threshold_minutes: Option<String>, // Use String for form handling
+    pub earnings_based_enabled: Option<bool>,
+    pub earnings_threshold: Option<String>, // Use String for form handling
+    pub currency: Option<String>,
+    pub daily_goal_enabled: Option<bool>,
+    pub daily_hours_goal: Option<String>, // Use String for form handling
+}
+
+/// Form DTO for creating/editing pay periods
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct PayPeriodFormDTO {
+    pub period_name: String,
+    pub start_date: String, // Use String for form handling, convert to Date in service
+    pub end_date: String,   // Use String for form handling, convert to Date in service
+}
+
+/// Result struct for pay period with summary information
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct PayPeriodWithSummaryDTO {
+    pub id: Uuid,
+    pub period_name: String,
+    pub start_date: chrono::NaiveDate,
+    pub end_date: chrono::NaiveDate,
+    pub is_active: bool,
+    pub created_at: DateTime<Utc>,
+    pub total_hours: f64,
+    pub total_earnings: f64,
+    pub currency: String,
+    pub entries_count: i32,
+    pub is_current: bool, // Whether this pay period includes today's date
+}
+
+/// Enhanced work time summary with pay period information
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct PayPeriodSummaryDTO {
+    pub pay_period_id: Option<Uuid>,
+    pub pay_period_name: Option<String>,
+    pub period_start_date: Option<chrono::NaiveDate>,
+    pub period_end_date: Option<chrono::NaiveDate>,
+    pub total_hours: f64,
+    pub total_earnings: f64,
+    pub currency: String,
+    pub entries_count: i32,
 }

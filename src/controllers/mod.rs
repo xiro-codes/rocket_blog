@@ -15,3 +15,5 @@ mod settings;
 pub use settings::Controller as SettingsController;
 mod seo;
 pub use seo::Controller as SeoController;
+mod worktime;
+pub use worktime::Controller as WorkTimeController;

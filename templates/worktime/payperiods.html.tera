@@ -1,0 +1,360 @@
+{% extends "worktime_base" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="worktime-title mb-0">
+        <i class="fas fa-calendar-alt me-2"></i>Pay Periods
+    </h1>
+    <a href="/worktime" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+
+<!-- Create New Pay Period -->
+<div class="worktime-card">
+    <div class="worktime-card-header">
+        <h3 class="mb-0">
+            <i class="fas fa-plus me-2"></i>Create New Pay Period
+        </h3>
+    </div>
+    
+    <form method="post" action="/worktime/payperiods/create" class="row g-3">
+        <div class="col-md-4">
+            <label for="name" class="form-label">
+                <i class="fas fa-tag me-1"></i>Period Name
+            </label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="e.g., January 2024" required>
+            <small class="form-text text-muted">Choose a descriptive name for this pay period</small>
+        </div>
+        <div class="col-md-4">
+            <label for="start_date" class="form-label">
+                <i class="fas fa-play me-1"></i>Start Date
+            </label>
+            <input type="date" class="form-control" id="start_date" name="start_date" required>
+        </div>
+        <div class="col-md-4">
+            <label for="end_date" class="form-label">
+                <i class="fas fa-stop me-1"></i>End Date
+            </label>
+            <input type="date" class="form-control" id="end_date" name="end_date" required>
+        </div>
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Create Pay Period
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Auto-assign Unassigned Entries -->
+{% if unassigned_count > 0 %}
+<div class="worktime-card">
+    <div class="worktime-card-header">
+        <h3 class="mb-0">
+            <i class="fas fa-magic me-2"></i>Auto-assign Entries
+        </h3>
+    </div>
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <p class="mb-1">You have <strong>{{ unassigned_count }}</strong> unassigned time entries.</p>
+            <small class="text-muted">Automatically assign them to appropriate pay periods based on their dates.</small>
+        </div>
+        <form method="post" action="/worktime/payperiods/assign" class="d-inline">
+            <button type="submit" class="btn btn-warning">
+                <i class="fas fa-magic me-2"></i>Auto-assign Entries
+            </button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- Existing Pay Periods -->
+<div class="worktime-card">
+    <div class="worktime-card-header">
+        <h3 class="mb-0">
+            <i class="fas fa-list me-2"></i>Your Pay Periods
+        </h3>
+    </div>
+    
+    {% if pay_periods %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Period Name</th>
+                        <th>Date Range</th>
+                        <th>Status</th>
+                        <th class="d-none d-md-table-cell">Hours</th>
+                        <th class="d-none d-md-table-cell">Earnings</th>
+                        <th class="d-none d-lg-table-cell">Entries</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for period in pay_periods %}
+                    <tr>
+                        <td>
+                            <strong>{{ period.name }}</strong>
+                            {% if period.is_current %}
+                                <span class="status-badge status-active ms-2">
+                                    <i class="fas fa-circle"></i>Current
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>
+                                {{ period.start_date | date(format='%m/%d/%Y') }} - 
+                                {{ period.end_date | date(format='%m/%d/%Y') }}
+                            </small>
+                        </td>
+                        <td>
+                            {% if period.is_current %}
+                                <span class="badge" style="background-color: var(--success); color: var(--text-primary);">
+                                    <i class="fas fa-calendar-check me-1"></i>Active
+                                </span>
+                            {% else %}
+                                {% set now = date() %}
+                                {% set end_date = period.end_date %}
+                                {% if end_date < now %}
+                                    <span class="badge" style="background-color: var(--text-muted); color: var(--text-white);">
+                                        <i class="fas fa-archive me-1"></i>Completed
+                                    </span>
+                                {% else %}
+                                    <span class="badge" style="background-color: var(--info); color: var(--text-primary);">
+                                        <i class="fas fa-clock me-1"></i>Upcoming
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td class="d-none d-md-table-cell">
+                            <strong>{{ period.total_hours | round(precision=1) }}h</strong>
+                        </td>
+                        <td class="d-none d-md-table-cell">
+                            <strong class="text-success">${{ period.total_earnings | round(precision=2) }}</strong>
+                        </td>
+                        <td class="d-none d-lg-table-cell text-muted">
+                            {{ period.entries_count }}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-info btn-sm" 
+                                        onclick="viewPeriodDetails({{ period.id }}, '{{ period.name }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <form method="post" action="/worktime/payperiods/delete/{{ period.id }}" class="d-inline" 
+                                      onsubmit="return confirm('Are you sure you want to delete this pay period?')">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center">
+            <i class="fas fa-calendar-alt text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+            <p class="text-muted mt-3">No pay periods created yet. Create your first pay period to organize your work time!</p>
+        </div>
+    {% endif %}
+</div>
+
+{% if flash %}
+<div class="alert alert-{{ flash.0 }} mt-3">
+    <i class="fas fa-info-circle me-2"></i>{{ flash.1 }}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block script %}
+<script>
+function viewPeriodDetails(id, name) {
+    // For now, show an alert with basic info
+    // In the future, this could open a modal with detailed breakdown
+    alert(`Pay Period: ${name}\n\nClick OK to view detailed breakdown.`);
+    // Redirect to detailed view (if implemented)
+    // window.location.href = `/worktime/payperiods/${id}`;
+}
+
+// Set today's date as default for start date
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    
+    if (!startDateInput.value) {
+        startDateInput.value = today;
+    }
+    
+    // Update end date when start date changes
+    startDateInput.addEventListener('change', function() {
+        const startDate = new Date(this.value);
+        if (startDate) {
+            // Default to end of month
+            const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+            endDateInput.value = endDate.toISOString().split('T')[0];
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="terminal-header">📅 Pay Period Management</h1>
+            <p class="text-muted">Manage your work time pay periods, {{ username }}!</p>
+        </div>
+    </div>
+
+    <!-- Create New Pay Period Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="terminal-box">
+                <h3>➕ Create New Pay Period</h3>
+                <form method="post" action="/worktime/payperiods" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="period_name" class="form-label">Period Name</label>
+                        <input type="text" class="form-control terminal-input" id="period_name" name="period_name" 
+                               placeholder="e.g., December 2024, Week 1-2 Jan 2025" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control terminal-input" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control terminal-input" id="end_date" name="end_date" required>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">📅 Create Pay Period</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-Assign Unassigned Entries -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="terminal-box">
+                <h3>🔄 Auto-Assign Entries</h3>
+                <p>Automatically assign unassigned work time entries to appropriate pay periods based on their dates.</p>
+                <form method="post" action="/worktime/payperiods/assign" class="d-inline">
+                    <button type="submit" class="btn btn-warning">🔄 Auto-Assign All Unassigned Entries</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Pay Periods -->
+    <div class="row">
+        <div class="col-12">
+            <div class="terminal-box">
+                <h3>📋 Your Pay Periods</h3>
+                {% if pay_periods %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Period Name</th>
+                                    <th>Date Range</th>
+                                    <th>Status</th>
+                                    <th>Total Hours</th>
+                                    <th>Total Earnings</th>
+                                    <th>Entries</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for period in pay_periods %}
+                                <tr{% if period.is_current %} class="table-success"{% endif %}>
+                                    <td>
+                                        <strong>{{ period.period_name }}</strong>
+                                        {% if period.is_current %}
+                                            <span class="badge bg-success ms-2">Current</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ period.start_date | date(format='%Y-%m-%d') }} to {{ period.end_date | date(format='%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if period.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ period.total_hours | round(precision=2) }} hrs</td>
+                                    <td>{{ period.currency }} {{ period.total_earnings | round(precision=2) }}</td>
+                                    <td>{{ period.entries_count }} entries</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-info" 
+                                                    onclick="viewPeriodDetails('{{ period.id }}')">
+                                                👁️ View
+                                            </button>
+                                            <form method="post" action="/worktime/payperiods/{{ period.id }}/delete" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="return confirm('Are you sure you want to delete this pay period?')">
+                                                    🗑️ Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <h4>🏁 No Pay Periods Yet!</h4>
+                        <p>Create your first pay period to start organizing your work time entries.</p>
+                        <p><strong>Tip:</strong> Pay periods help you track earnings over specific time ranges like weekly, bi-weekly, or monthly periods.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="terminal-box">
+                <h3>🚀 Quick Actions</h3>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/worktime" class="btn btn-outline-primary">🏠 Dashboard</a>
+                    <a href="/worktime/roles" class="btn btn-outline-secondary">⚙️ Manage Roles</a>
+                    <a href="/worktime/entries" class="btn btn-outline-secondary">📊 View All Entries</a>
+                    <a href="/worktime/notifications" class="btn btn-outline-secondary">🔔 Notifications</a>
+                    <a href="/blog" class="btn btn-outline-success">📝 Back to Blog</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewPeriodDetails(periodId) {
+    // You can implement a modal or redirect to a detailed view
+    window.location.href = '/worktime/entries?period=' + periodId;
+}
+
+// Auto-set current date for end date when start date changes
+document.getElementById('start_date').addEventListener('change', function() {
+    const startDate = new Date(this.value);
+    const endDate = document.getElementById('end_date');
+    
+    if (!endDate.value) {
+        // Set end date to start date + 13 days (2 weeks) by default
+        const defaultEndDate = new Date(startDate);
+        defaultEndDate.setDate(defaultEndDate.getDate() + 13);
+        endDate.value = defaultEndDate.toISOString().split('T')[0];
+    }
+});
+</script>
+{% endblock %}

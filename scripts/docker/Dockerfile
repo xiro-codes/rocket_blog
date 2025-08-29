@@ -23,10 +23,10 @@ COPY models ./models/
 # Copy source code
 COPY src ./src/
 
-# Build the application in release mode
+# Build the application in release mode for both binaries
 # Note: If you encounter SSL certificate issues during build,
 # see the README.md for alternative build approaches
-RUN cargo build --release
+RUN cargo build --release --bin blog --bin worktime
 
 # Stage 2: Runtime image  
 FROM debian:bookworm-slim
@@ -54,21 +54,21 @@ COPY templates ./templates/
 COPY static ./static/
 COPY scripts/docker/.Rocket.docker.toml ./Rocket.toml
 
-# Copy the built binary from builder stage
-# Note: The binary is named "app" in Cargo.toml but we rename it to rocket-template for consistency
-COPY --from=builder /app/target/release/app ./rocket-template
+# Copy the built binaries from builder stage
+COPY --from=builder /app/target/release/blog ./blog
+COPY --from=builder /app/target/release/worktime ./worktime
 
 # Create data directory for file uploads
 RUN mkdir -p /app/data && chown -R app:app /app
 
-# Ensure binary is executable
-RUN chmod +x ./rocket-template
+# Ensure binaries are executable
+RUN chmod +x ./blog ./worktime
 
 # Change to app user
 USER app
 
-# Expose port
-EXPOSE 8000
+# Expose ports for both services
+EXPOSE 8000 8001
 
-# Run the application
-CMD ["./rocket-template"]
+# Run the blog application by default (can be overridden)
+CMD ["./blog"]

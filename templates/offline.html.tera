@@ -1,0 +1,67 @@
+{% extends "base" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="terminal-box text-center">
+                <h1 class="terminal-header">🔌 Offline</h1>
+                <p class="lead">You're currently offline, but don't worry!</p>
+                
+                <div class="alert alert-info">
+                    <h4>📱 PWA Offline Features</h4>
+                    <p>This application works offline. You can:</p>
+                    <ul class="list-unstyled">
+                        <li>✅ View cached content</li>
+                        <li>✅ Access previously loaded data</li>
+                        <li>✅ Browse offline pages</li>
+                        <li>✅ Create content (syncs when online)</li>
+                    </ul>
+                </div>
+
+                <div class="mt-4">
+                    <h5>🔄 When you're back online:</h5>
+                    <ul class="text-start">
+                        <li>All offline changes will sync automatically</li>
+                        <li>Your data will be saved to the server</li>
+                        <li>Fresh content will be loaded</li>
+                    </ul>
+                </div>
+
+                <div class="mt-4">
+                    <button onclick="window.location.reload()" class="btn btn-primary">
+                        🔄 Check Connection
+                    </button>
+                    <a href="/blog" class="btn btn-success ms-2">
+                        📊 View Cached Content
+                    </a>
+                </div>
+
+                <div class="mt-4 text-muted">
+                    <small>
+                        💡 Tip: Add this app to your home screen for the best offline experience!
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-reload when connection is restored
+window.addEventListener('online', () => {
+    console.log('Connection restored, reloading...');
+    window.location.reload();
+});
+
+// Show current connection status
+function updateConnectionStatus() {
+    const status = navigator.onLine ? 'Online' : 'Offline';
+    console.log('Connection status:', status);
+}
+
+window.addEventListener('online', updateConnectionStatus);
+window.addEventListener('offline', updateConnectionStatus);
+updateConnectionStatus();
+</script>
+{% endblock %}

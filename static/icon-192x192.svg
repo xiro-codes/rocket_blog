@@ -1,0 +1,6 @@
+<svg width="192" height="192" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" fill="#0c1116"/>
+  <circle cx="96" cy="96" r="70" fill="none" stroke="#00ff41" stroke-width="4"/>
+  <polygon points="86,66 86,126 126,96" fill="#00ff41"/>
+  <text x="96" y="150" text-anchor="middle" fill="#00ff41" font-family="monospace" font-size="14">TIME</text>
+</svg>
