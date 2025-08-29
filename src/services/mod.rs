@@ -1,5 +1,5 @@
 mod base;
-pub use base::BaseService;
+pub use base::{BaseService, ServiceHelpers, ManagedService, CrudService};
 
 mod coordinator;
 pub use coordinator::{CoordinatorService, BlogListData, BlogDetailData, BlogSearchData, BlogTagData};

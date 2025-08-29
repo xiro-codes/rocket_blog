@@ -7,6 +7,7 @@ use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, Qu
 use uuid::Uuid;
 
 use crate::services::base::BaseService;
+use crate::{impl_service_custom, services::base::ServiceHelpers};
 
 pub struct SettingsService {
     base: BaseService,
@@ -255,6 +256,8 @@ impl SettingsService {
         }
     }
 }
+
+impl_service_custom!(SettingsService);
 
 #[cfg(test)]
 mod tests {

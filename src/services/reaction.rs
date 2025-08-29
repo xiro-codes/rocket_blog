@@ -1,4 +1,5 @@
 use crate::services::base::BaseService;
+use crate::{impl_service_with_base, services::base::ServiceHelpers};
 use chrono::Local;
 use models::{
     post_reaction::{self, ReactionType},
@@ -30,12 +31,6 @@ pub struct PostReactionSummary {
 }
 
 impl Service {
-    pub fn new() -> Self {
-        Self {
-            base: BaseService::new(),
-        }
-    }
-
     /// Add or update a reaction to a post
     pub async fn add_reaction(
         &self,
@@ -201,3 +196,5 @@ impl Service {
         Ok(count as i64)
     }
 }
+
+impl_service_with_base!(Service);

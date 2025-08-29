@@ -10,12 +10,16 @@ pub mod guards;
 pub mod middleware;
 pub mod pool;
 pub mod registry;
+pub mod enhanced_registry;
 pub mod responders;
 pub mod services;
 pub mod types;
 
 #[cfg(test)]
 pub mod tests;
+
+#[cfg(test)]
+pub mod examples;
 
 use config::AppConfig;
 use features::Features;
