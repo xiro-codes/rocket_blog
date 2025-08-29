@@ -1,3 +1,9 @@
+//! Custom type definitions and HTTP request/response handling.
+//!
+//! This module provides specialized types for handling file streaming,
+//! HTTP range requests, and other custom data structures used throughout
+//! the application.
+
 use rocket::{
     http::Status,
     outcome::Outcome,
@@ -10,13 +16,50 @@ use std::{
     io::{self, prelude::*, Cursor, SeekFrom},
     sync::Mutex,
 };
+
+/// A file that can be streamed with HTTP range request support.
+///
+/// This type handles both full file downloads and partial content requests
+/// (HTTP 206 responses) for efficient media streaming. It automatically
+/// determines the MIME type based on the file extension.
+///
+/// # Features
+///
+/// - Support for HTTP range requests (partial content)
+/// - Automatic MIME type detection
+/// - Thread-safe file access with mutex protection
+/// - Efficient streaming for large files
 pub struct StreamedFile {
     file: Mutex<File>,
     size: u64,
     range: Option<std::ops::Range<u64>>,
     content_type: String,
 }
+
 impl StreamedFile {
+    /// Creates a new `StreamedFile` from a file path.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - Path to the file to stream
+    /// * `range` - Optional byte range for partial content requests
+    ///
+    /// # Returns
+    ///
+    /// Returns a `StreamedFile` instance or an IO error if the file cannot be opened.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// use app::types::StreamedFile;
+    ///
+    /// // Full file
+    /// let file = StreamedFile::new("/path/to/video.mp4", None)?;
+    ///
+    /// // Partial content (bytes 1000-2000)
+    /// let file = StreamedFile::new("/path/to/video.mp4", Some(1000..2001))?;
+    /// # Ok::<(), std::io::Error>(())
+    /// ```
     pub fn new(path: &str, range: Option<std::ops::Range<u64>>) -> io::Result<Self> {
         let file = File::open(path)?;
         let size = file.metadata()?.len();
@@ -32,6 +75,17 @@ impl StreamedFile {
     }
 }
 impl<'r> Responder<'r, 'static> for StreamedFile {
+    /// Responds with file content, supporting both full and partial content requests.
+    ///
+    /// This implementation handles:
+    /// - Full file downloads (HTTP 200)
+    /// - Partial content requests (HTTP 206)
+    /// - Proper HTTP headers for range requests
+    /// - MIME type detection and Content-Type headers
+    ///
+    /// # Returns
+    ///
+    /// Returns a Rocket response with appropriate status code and headers.
     fn respond_to(self, _req: &'r Request<'_>) -> rocket::response::Result<'static> {
         let mut response = Response::build();
         response.raw_header("Accept-Ranges", "bytes");
@@ -78,11 +132,47 @@ impl<'r> Responder<'r, 'static> for StreamedFile {
         response.ok()
     }
 }
+/// HTTP Range request wrapper for extracting byte ranges from requests.
+///
+/// This type implements Rocket's `FromRequest` trait to automatically
+/// parse HTTP Range headers and extract the requested byte range.
+///
+/// Supports various range formats:
+/// - `bytes=start-end` - Specific byte range
+/// - `bytes=start-` - From start to end of file
+/// - `bytes=-suffix` - Last N bytes of file
+///
+/// # Examples
+///
+/// ```rust,no_run
+/// use rocket::get;
+/// use app::types::HttpRange;
+///
+/// #[get("/video/<id>")]
+/// async fn stream_video(id: u32, range: Option<HttpRange>) -> Result<StreamedFile, Status> {
+///     let file_path = format!("/videos/{}.mp4", id);
+///     let byte_range = range.map(|r| r.0);
+///     StreamedFile::new(&file_path, byte_range)
+///         .map_err(|_| Status::NotFound)
+/// }
+/// ```
 pub struct HttpRange(pub std::ops::Range<u64>);
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for HttpRange {
     type Error = ();
+    
+    /// Extracts HTTP Range header and parses it into a byte range.
+    ///
+    /// Parses various range formats and validates the range values.
+    /// Returns `Outcome::Forward` if no Range header is present,
+    /// allowing other handlers to process the request.
+    ///
+    /// # Returns
+    ///
+    /// - `Success(HttpRange)` - Valid range header parsed
+    /// - `Forward(Status::Ok)` - No range header present
+    /// - `Error(Status::RangeNotSatisfiable)` - Invalid range format
     async fn from_request(req: &'r Request<'_>) -> request::Outcome<Self, Self::Error> {
         if let Some(range_header) = req.headers().get_one("Range") {
             let range_str = range_header.trim_start_matches("bytes=");
