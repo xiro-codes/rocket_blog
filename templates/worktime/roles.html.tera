@@ -87,7 +87,7 @@
                         </td>
                         <td>
                             <div class="d-flex gap-2">
-                                <button class="btn btn-warning btn-sm" onclick="editRole({{ role.id }}, '{{ role.role_name }}', {{ role.hourly_wage }}, '{{ role.currency }}')">
+                                <button class="btn btn-warning btn-sm" onclick="editRole('{{ role.id }}', '{{ role.role_name }}', {{ role.hourly_wage }}, '{{ role.currency }}')">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <form method="post" action="/roles/delete/{{ role.id }}" class="d-inline" 
