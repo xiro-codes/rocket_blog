@@ -307,6 +307,15 @@ async fn entries_view(
     match service.get_work_entries_with_roles(db, user.account_id, Some(50), None).await {
         Ok(entries) => {
             let roles = service.get_user_roles(db, user.account_id).await.unwrap_or_default();
+            let summary = service.get_work_time_summary(db, user.account_id, None, None).await.unwrap_or_else(|_| {
+                WorkTimeSummaryDTO {
+                    total_hours: 0.0,
+                    total_earnings: 0.0,
+                    currency: "USD".to_string(),
+                    entries_count: 0,
+                }
+            });
+            
             Ok(Template::render(
                 "worktime/entries",
                 context! {
@@ -314,6 +323,9 @@ async fn entries_view(
                     entries: entries,
                     roles: roles,
                     username: user.username,
+                    total_entries: summary.entries_count,
+                    total_hours: summary.total_hours,
+                    total_earnings: summary.total_earnings,
                 }
             ))
         }
