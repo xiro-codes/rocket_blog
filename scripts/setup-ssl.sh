@@ -29,6 +29,17 @@ docker compose -f scripts/docker/docker-compose.yml run --rm certbot \
     --force-renewal \
     -d blog.tdavis.dev
 
+docker compose -f scripts/docker/docker-compose.yml run --rm certbot \
+    certonly \
+    --webroot \
+    --webroot-path=/var/www/certbot \
+    --email me@tdavis.dev \
+    --agree-tos \
+    --no-eff-email \
+    --force-renewal \
+    -d worktime.tdavis.dev
+
+
 # Check if certificate generation was successful
 if [ $? -eq 0 ]; then
     echo "SSL certificates generated successfully!"
