@@ -1,9 +1,10 @@
-use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO, PayPeriodFormDTO};
+use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO, PayPeriodFormDTO, AccountFormDTO};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
     response::{Flash, Redirect},
     routes, Build, Rocket, State,
+    http::{Cookie, CookieJar},
 };
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
@@ -11,9 +12,9 @@ use uuid::Uuid;
 
 use crate::{
     controllers::base::ControllerBase,
-    guards::AuthenticatedUser,
+    guards::{AuthenticatedUser, OptionalUser},
     pool::Db,
-    services::{WorkTimeService, PayPeriodService},
+    services::{WorkTimeService, PayPeriodService, AuthService},
 };
 
 /// Controller for work time tracking functionality
@@ -30,12 +31,155 @@ impl Controller {
 }
 
 #[get("/")]
+async fn home(
+    conn: Connection<'_, Db>,
+    user: OptionalUser,
+    service: &State<WorkTimeService>,
+    auth_service: &State<AuthService>,
+) -> Result<Template, Flash<Redirect>> {
+    log::info!("Route accessed: GET / - Work time home page");
+    let db = conn.into_inner();
+    
+    // If user has a token, verify it and show dashboard
+    if let Some(token) = user.token {
+        if let Some(account) = auth_service.check_token(db, token).await {
+            // User is authenticated, show dashboard
+            match service.get_user_roles(db, account.id).await {
+                Ok(roles) => {
+                    let active_entry = service.get_active_entry(db, account.id).await.unwrap_or(None);
+                    let recent_entries = service.get_work_entries_with_roles(db, account.id, Some(10), None).await.unwrap_or_default();
+                    let summary = service.get_work_time_summary(db, account.id, None, None).await.unwrap_or_else(|_| {
+                        WorkTimeSummaryDTO {
+                            total_hours: 0.0,
+                            total_earnings: 0.0,
+                            currency: "USD".to_string(),
+                            entries_count: 0,
+                        }
+                    });
+                    
+                    return Ok(Template::render(
+                        "worktime/dashboard",
+                        context! {
+                            page_title: "Work Time Dashboard",
+                            roles: roles,
+                            active_entry: active_entry,
+                            recent_entries: recent_entries,
+                            summary: summary,
+                            username: account.username,
+                        }
+                    ));
+                }
+                Err(e) => {
+                    log::error!("Failed to load work time dashboard: {}", e);
+                    return Err(Flash::error(Redirect::to("/"), "Failed to load dashboard"));
+                }
+            }
+        }
+    }
+    
+    // User is not authenticated or invalid token, show login page
+    // Check if any accounts exist, return 404 if none
+    if !auth_service.has_any_accounts(db).await {
+        log::info!("No accounts exist in system - worktime login page not available");
+        return Err(Flash::error(Redirect::to("/"), "No accounts available"));
+    }
+    
+    log::debug!("Worktime login page served successfully");
+    Ok(Template::render(
+        "worktime/login",
+        context! {
+            page_title: "Work Time Tracker Login",
+        }
+    ))
+}
+
+#[post("/login", data = "<form>")]
+async fn login(
+    conn: Connection<'_, Db>,
+    service: &State<AuthService>,
+    form: Form<AccountFormDTO>,
+    cookies: &CookieJar<'_>,
+) -> Flash<Redirect> {
+    let form_data = form.into_inner();
+    log::info!("Route accessed: POST /login - Worktime login attempt for username: {}", form_data.username);
+    
+    let db = conn.into_inner();
+    if let Ok(token) = service.login(db, form_data).await {
+        cookies.add_private(Cookie::new("token", token.to_string()));
+        log::info!("Worktime authentication successful - Redirecting to worktime dashboard");
+        Flash::success(
+            Redirect::to("/"),
+            "Login successful! Welcome to your work time tracker.",
+        )
+    } else {
+        log::warn!("Worktime authentication failed - Redirecting back to login form");
+        Flash::error(
+            Redirect::to("/"),
+            "Invalid username or password. Please try again.",
+        )
+    }
+}
+
+#[get("/logout")]
+async fn logout(cookies: &CookieJar<'_>) -> Flash<Redirect> {
+    log::info!("Route accessed: GET /logout - Worktime user logout requested");
+    
+    cookies.remove_private(Cookie::from("token"));
+    
+    log::debug!("Worktime user successfully logged out - Redirecting to worktime login");
+    Flash::success(
+        Redirect::to("/"),
+        "Logout successful.",
+    )
+}
+
+#[get("/register")]
+async fn register_view() -> Template {
+    log::info!("Route accessed: GET /register - Worktime user registration page requested");
+    Template::render(
+        "worktime/register",
+        context! {
+            page_title: "Create Work Time Tracker Account",
+        }
+    )
+}
+
+#[post("/register", data = "<form>")]
+async fn register(
+    conn: Connection<'_, Db>,
+    service: &State<AuthService>,
+    form: Form<AccountFormDTO>,
+) -> Flash<Redirect> {
+    let form_data = form.into_inner();
+    let username = form_data.username.clone();
+    log::info!("Route accessed: POST /register - Worktime user account registration attempt for username: {}", username);
+    
+    let db = conn.into_inner();
+    match service.create_user_account(db, form_data).await {
+        Ok(account) => {
+            log::info!("Worktime user account created successfully for username: {} - Redirecting to worktime login", account.username);
+            Flash::success(
+                Redirect::to("/"),
+                "Account created successfully! You can now log in to access the work time tracker.",
+            )
+        }
+        Err(e) => {
+            log::warn!("Failed to create worktime user account for username: {} - Error: {}", username, e);
+            Flash::error(
+                Redirect::to("/register"),
+                "Failed to create account. Username may already exist or be invalid.",
+            )
+        }
+    }
+}
+
+#[get("/dashboard")]
 async fn dashboard(
     conn: Connection<'_, Db>,
     user: AuthenticatedUser,
     service: &State<WorkTimeService>,
 ) -> Result<Template, Flash<Redirect>> {
-    log::info!("Route accessed: GET / - Work time dashboard");
+    log::info!("Route accessed: GET /dashboard - Work time dashboard");
     let db = conn.into_inner();
     
     match service.get_user_roles(db, user.account_id).await {
@@ -358,6 +502,11 @@ impl Fairing for Controller {
 
     async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
         let routes = routes![
+            home,
+            login,
+            logout,
+            register_view,
+            register,
             dashboard,
             roles_view,
             create_role,

@@ -1,57 +1,75 @@
-{% extends "base" %}
+{% extends "worktime_base" %}
 
 {% block content %}
-<div class="terminal-header"></div>
-<center>
-	<h1 class="terminal-cursor">Work Time Tracker Registration</h1>
-	<p class="text-muted">Create an account to start tracking your work time and manage your earnings.</p>
-</center>
-
-<hr class="terminal-divider">
-
-<div class="d-flex justify-content-center align-items-center">
-	<form action="/auth/register" method="post" class="terminal-form">
-		<h3 class="text-center mb-4">[ WORKTIME REGISTRATION ]</h3>
-		
-		<div>
-			<label for="username" class="form-label">Username:</label>
-			<input type="text" name="username" id="username" class="form-control" placeholder="Choose a username..." required />
+<div class="worktime-container">
+	<div class="worktime-content">
+		<div class="text-center mb-4">
+			<h1 class="worktime-title">🚀 Create Account</h1>
+			<p class="worktime-subtitle">Create an account to start tracking your work time and manage your earnings.</p>
 		</div>
-		
-		<div>
-			<label for="password" class="form-label">Password:</label>
-			<input type="password" name="password" id="password" class="form-control" placeholder="Create a password..." required />
-		</div>
-		
-		<div class="justify-content-center d-flex m-1">
-			<button type="submit" class="btn btn-primary">[REGISTER]</button>
-		</div>
-		
-		<div class="text-center mt-3">
-			<a href="/auth" class="btn btn-secondary btn-sm">[← BACK TO LOGIN]</a>
-		</div>
-	</form>
-</div>
 
-{% if flash %}
-<div class="alert alert-{{ flash.0 }} text-center mt-3">
-	{{ flash.1 }}
-</div>
-{% endif %}
+		<div class="row justify-content-center">
+			<div class="col-md-6 col-lg-4">
+				<div class="worktime-card">
+					<div class="worktime-card-header">
+						<h3 class="text-center mb-0">Register for TimeTracker</h3>
+					</div>
+					<form action="/register" method="post">
+						<div class="mb-3">
+							<label for="username" class="form-label">Username</label>
+							<input type="text" name="username" id="username" class="form-control" placeholder="Choose a username..." required />
+						</div>
+						
+						<div class="mb-3">
+							<label for="password" class="form-label">Password</label>
+							<input type="password" name="password" id="password" class="form-control" placeholder="Create a password..." required />
+						</div>
+						
+						<div class="d-grid mb-3">
+							<button type="submit" class="btn btn-primary">Create Account</button>
+						</div>
+						
+						<div class="text-center">
+							<a href="/" class="btn btn-secondary btn-sm">← Back to Login</a>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
 
-<div class="text-center mt-4">
-	<div class="terminal-box">
-		<h4>🚀 Get Started with Work Time Tracking</h4>
-		<div class="text-start mt-3">
-			<p><strong>After registration, you'll be able to:</strong></p>
-			<ul>
-				<li>⚙️ Set up roles with different hourly rates</li>
-				<li>⏱️ Track work sessions with start/stop timer</li>
-				<li>📋 Organize work into configurable pay periods</li>
-				<li>🎯 Set up notifications and daily goals</li>
-				<li>💰 View detailed earnings and time reports</li>
-				<li>📱 Access everything offline via PWA</li>
-			</ul>
+		{% if flash %}
+		<div class="row justify-content-center">
+			<div class="col-md-6 col-lg-4">
+				<div class="alert alert-{{ flash.0 }} text-center">
+					{{ flash.1 }}
+				</div>
+			</div>
+		</div>
+		{% endif %}
+
+		<div class="row justify-content-center mt-4">
+			<div class="col-md-8 col-lg-6">
+				<div class="worktime-card">
+					<h4 class="text-center mb-3">🎯 Get Started with Work Time Tracking</h4>
+					<p class="text-center mb-3"><strong>After registration, you'll be able to:</strong></p>
+					<div class="row">
+						<div class="col-md-6">
+							<ul class="list-unstyled">
+								<li class="mb-2">⚙️ Set up roles with different hourly rates</li>
+								<li class="mb-2">⏱️ Track work sessions with start/stop timer</li>
+								<li class="mb-2">📋 Organize work into configurable pay periods</li>
+							</ul>
+						</div>
+						<div class="col-md-6">
+							<ul class="list-unstyled">
+								<li class="mb-2">🎯 Set up notifications and daily goals</li>
+								<li class="mb-2">💰 View detailed earnings and time reports</li>
+								<li class="mb-2">📱 Access everything offline via PWA</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>

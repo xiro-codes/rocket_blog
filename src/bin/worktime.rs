@@ -9,7 +9,6 @@
 
 use app::{
     features::Features,
-    controllers::worktime_auth::WorkTimeAuthController,
     controllers,
     services::{AuthService, WorkTimeService, PayPeriodService},
     create_base_rocket
@@ -27,7 +26,7 @@ pub fn catch_default() -> Redirect {
 #[catch(401)]
 pub fn catch_unauthorized() -> Redirect {
     log::info!("Unauthorized access detected - redirecting to login");
-    Redirect::to("/auth")
+    Redirect::to("/")
 }
 
 /// CORS fairing for PWA functionality
@@ -72,10 +71,9 @@ pub struct WorkTimeControllerRegistry;
 impl WorkTimeControllerRegistry {
     pub fn attach_all_controllers(rocket: Rocket<Build>) -> Rocket<Build> {
         log::info!("Registering work time application controllers...");
-        log::debug!("Attaching controllers: WorkTimeAuth (/auth), WorkTime (/, /)");
+        log::debug!("Attaching controllers: WorkTime (/)");
         
         rocket
-            .attach(WorkTimeAuthController::new("/auth".to_owned()))
             .attach(controllers::WorkTimeController::new("/".to_owned()))
     }
 }
