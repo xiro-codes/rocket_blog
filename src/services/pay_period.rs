@@ -312,6 +312,22 @@ impl PayPeriodService {
         Ok(assigned_count)
     }
 
+    /// Get count of unassigned work time entries for a user
+    pub async fn get_unassigned_entries_count(
+        &self,
+        db: &DbConn,
+        account_id: Uuid,
+    ) -> Result<i32, DbErr> {
+        let count = work_time_entry::Entity::find()
+            .filter(work_time_entry::Column::AccountId.eq(account_id))
+            .filter(work_time_entry::Column::PayPeriodId.is_null())
+            .filter(work_time_entry::Column::IsActive.eq(false)) // Only completed entries
+            .count(db)
+            .await?;
+        
+        Ok(count as i32)
+    }
+
     /// Get pay period summary for a specific pay period
     pub async fn get_pay_period_summary(
         &self,
