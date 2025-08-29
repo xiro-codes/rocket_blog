@@ -1,10 +1,19 @@
 # Rocket Blog
 
-A modern, fast, and feature-rich blog application built with **Rust** and the **Rocket** web framework. This blog platform provides a clean interface for content management with a visual markdown editor, automatic post excerpts, user authentication, commenting system, and a powerful tagging system.
+A modern, fast, and feature-rich blog application built with **Rust** and the **Rocket** web framework. This platform provides both a blog system and a Progressive Web App (PWA) work time tracker as separate binaries.
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Rust Version](https://img.shields.io/badge/rust-1.70+-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+
+## 🏗️ Architecture
+
+This application consists of **two separate binaries**:
+
+- **Blog Binary** (`blog`) - Complete blog platform with content management
+- **Work Time Tracker Binary** (`worktime`) - PWA for time tracking with role-based wages
+
+See [README_BINARIES.md](README_BINARIES.md) for detailed information about running each binary.
 
 ## ✨ Features
 

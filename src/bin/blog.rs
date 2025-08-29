@@ -9,7 +9,6 @@
 //! - Background job processing
 
 use app::{
-    config::AppConfig, 
     features::Features,
     controllers,
     services::{
@@ -18,10 +17,9 @@ use app::{
         CoordinatorService, YoutubeDownloadService, BackgroundJobService
     },
     middleware,
-    create_base_rocket,
-    setup_logger
+    create_base_rocket
 };
-use rocket::{fairing::AdHoc, fs::FileServer, response::Redirect, Build, Rocket};
+use rocket::{fs::FileServer, response::Redirect, Build, Rocket, catchers, catch, launch};
 use rocket_dyn_templates::Template;
 
 #[catch(default)]
@@ -81,7 +79,7 @@ impl BlogControllerRegistry {
 }
 
 #[launch]
-async fn rocket() -> _ {
+async fn rocket() -> Rocket<Build> {
     log::info!("Starting Rocket Blog application...");
     log::debug!("Development mode: {}", Features::is_development());
     log::debug!("Seeding enabled: {}", Features::enable_seeding());

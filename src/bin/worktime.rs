@@ -8,14 +8,12 @@
 //! - Independent authentication and operation
 
 use app::{
-    config::AppConfig, 
     features::Features,
     controllers,
     services::{AuthService, WorkTimeService, PayPeriodService},
-    create_base_rocket,
-    setup_logger
+    create_base_rocket
 };
-use rocket::{fairing::AdHoc, fs::FileServer, response::Redirect, Build, Rocket, Request, Response};
+use rocket::{fs::FileServer, response::Redirect, Build, Rocket, Request, Response, catchers, catch, launch, get};
 use rocket_dyn_templates::Template;
 use rocket::{http::Header, fairing::{Fairing, Info, Kind}};
 
@@ -85,58 +83,57 @@ pub fn worktime_root() -> Redirect {
 
 /// PWA manifest route
 #[get("/manifest.json")]
-pub fn manifest() -> (rocket::http::ContentType, &'static str) {
-    let manifest = r#"{
-  "name": "Work Time Tracker",
-  "short_name": "TimeTracker",
-  "description": "Progressive Web App for tracking work time with role-based wages and configurable notifications",
-  "start_url": "/worktime",
-  "display": "standalone",
-  "background_color": "#1a1a1a",
-  "theme_color": "#00ff00",
-  "orientation": "portrait-primary",
-  "icons": [
+pub fn manifest() -> (rocket::http::ContentType, String) {
+    let manifest = "{
+  \"name\": \"Work Time Tracker\",
+  \"short_name\": \"TimeTracker\",
+  \"description\": \"Progressive Web App for tracking work time with role-based wages and configurable notifications\",
+  \"start_url\": \"/worktime\",
+  \"display\": \"standalone\",
+  \"background_color\": \"#1a1a1a\",
+  \"theme_color\": \"#00ff00\",
+  \"orientation\": \"portrait-primary\",
+  \"icons\": [
     {
-      "src": "/static/worktime/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      \"src\": \"/static/worktime/icon-192.png\",
+      \"sizes\": \"192x192\",
+      \"type\": \"image/png\",
+      \"purpose\": \"any maskable\"
     },
     {
-      "src": "/static/worktime/icon-512.png", 
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      \"src\": \"/static/worktime/icon-512.png\",
+      \"sizes\": \"512x512\",
+      \"type\": \"image/png\",
+      \"purpose\": \"any maskable\"
     }
   ],
-  "categories": ["productivity", "business"],
-  "screenshots": [
+  \"categories\": [\"productivity\", \"business\"],
+  \"screenshots\": [
     {
-      "src": "/static/worktime/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
+      \"src\": \"/static/worktime/screenshot-wide.png\",
+      \"sizes\": \"1280x720\",
+      \"type\": \"image/png\",
+      \"form_factor\": \"wide\"
     },
     {
-      "src": "/static/worktime/screenshot-narrow.png", 
-      "sizes": "720x1280",
-      "type": "image/png",
-      "form_factor": "narrow"
+      \"src\": \"/static/worktime/screenshot-narrow.png\",
+      \"sizes\": \"720x1280\",
+      \"type\": \"image/png\",
+      \"form_factor\": \"narrow\"
     }
   ]
-}"#;
+}".to_string();
     (rocket::http::ContentType::JSON, manifest)
 }
 
 /// Service worker route
 #[get("/sw.js")]
-pub fn service_worker() -> (rocket::http::ContentType, &'static str) {
-    let sw = r#"
-const CACHE_NAME = 'worktime-tracker-v1';
+pub fn service_worker() -> (rocket::http::ContentType, String) {
+    let sw = "const CACHE_NAME = 'worktime-tracker-v1';
 const urlsToCache = [
   '/worktime',
   '/worktime/roles',
-  '/worktime/entries', 
+  '/worktime/entries',
   '/worktime/notifications',
   '/worktime/payperiods',
   '/static/worktime/app.css',
@@ -182,19 +179,18 @@ self.addEventListener('activate', function(event) {
       );
     })
   );
-});
-"#;
+});".to_string();
     (rocket::http::ContentType::JavaScript, sw)
 }
 
 /// Offline page route
 #[get("/offline.html")]
-pub fn offline_page() -> (rocket::http::ContentType, &'static str) {
-    let offline_html = r#"<!DOCTYPE html>
-<html lang="en">
+pub fn offline_page() -> (rocket::http::ContentType, String) {
+    let offline_html = "<!DOCTYPE html>
+<html lang=\"en\">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
     <title>Offline - Work Time Tracker</title>
     <style>
         body {
@@ -231,25 +227,25 @@ pub fn offline_page() -> (rocket::http::ContentType, &'static str) {
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="ascii-art">
+    <div class=\"container\">
+        <div class=\"ascii-art\">
 ⚠️ OFFLINE MODE ⚠️
         </div>
-        <div class="message">
+        <div class=\"message\">
             <h1>You're currently offline</h1>
             <p>Work Time Tracker is not available right now.</p>
             <p>Please check your internet connection and try again.</p>
         </div>
-        <button class="retry-btn" onclick="window.location.reload()">Retry Connection</button>
-        <button class="retry-btn" onclick="window.location.href='/worktime'">Go to Dashboard</button>
+        <button class=\"retry-btn\" onclick=\"window.location.reload()\">Retry Connection</button>
+        <button class=\"retry-btn\" onclick=\"window.location.href='/worktime'\">Go to Dashboard</button>
     </div>
 </body>
-</html>"#;
+</html>".to_string();
     (rocket::http::ContentType::HTML, offline_html)
 }
 
 #[launch]
-async fn rocket() -> _ {
+async fn rocket() -> Rocket<Build> {
     log::info!("Starting Work Time Tracker PWA application...");
     log::debug!("Development mode: {}", Features::is_development());
     log::debug!("Log level: {:?}", Features::log_level());
