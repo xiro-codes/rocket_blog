@@ -1,4 +1,4 @@
-use crate::services::{ai_provider::AIProvider, base::BaseService, SettingsService};
+use crate::{services::{ai_provider::AIProvider, base::BaseService, SettingsService}, impl_service_custom};
 use async_trait::async_trait;
 use reqwest::Client;
 use sea_orm::DatabaseConnection;
@@ -190,3 +190,5 @@ mod tests {
         assert_eq!(service.provider_name(), "Ollama");
     }
 }
+
+impl_service_custom!(OllamaService);

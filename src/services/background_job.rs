@@ -1,3 +1,4 @@
+use crate::impl_service;
 use sea_orm::*;
 use uuid::Uuid;
 use chrono::Utc;
@@ -106,3 +107,5 @@ impl BackgroundJobService {
             .await
     }
 }
+
+impl_service!(BackgroundJobService);

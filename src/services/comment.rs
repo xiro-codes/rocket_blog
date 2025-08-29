@@ -4,7 +4,7 @@ use sea_orm::*;
 use uuid::Uuid;
 use rocket::serde::{Deserialize, Serialize};
 
-use crate::services::base::BaseService;
+use crate::{services::base::BaseService, impl_service_with_base};
 
 /// Enhanced comment structure with resolved username
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -28,11 +28,6 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn new() -> Self {
-        Self {
-            base: BaseService::new(),
-        }
-    }
 
     pub async fn create(
         &self,
@@ -183,3 +178,5 @@ impl Service {
         }
     }
 }
+
+impl_service_with_base!(Service);

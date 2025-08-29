@@ -1,4 +1,4 @@
-use crate::services::{AuthService, BlogService, CommentService, ReactionService, TagService};
+use crate::{services::{AuthService, BlogService, CommentService, ReactionService, TagService}, impl_service_custom};
 use models::{dto::PostTitleResult, post::Model as Post, tag};
 use sea_orm::{DatabaseConnection, ColumnTrait, EntityTrait, QueryFilter};
 use uuid::Uuid;
@@ -347,3 +347,5 @@ pub struct BlogTagData {
     pub tag: models::tag::Model,
     pub has_accounts: bool,
 }
+
+impl_service_custom!(CoordinatorService);

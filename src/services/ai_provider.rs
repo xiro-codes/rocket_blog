@@ -1,3 +1,4 @@
+use crate::impl_service_custom;
 use async_trait::async_trait;
 use sea_orm::DatabaseConnection;
 
@@ -82,3 +83,5 @@ impl AIProviderService {
         false
     }
 }
+
+impl_service_custom!(AIProviderService);

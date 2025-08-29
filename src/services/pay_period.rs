@@ -6,7 +6,7 @@ use models::{
 use sea_orm::*;
 use uuid::Uuid;
 
-use crate::services::BaseService;
+use crate::{services::BaseService, impl_service_with_base};
 
 type DbConn = DatabaseConnection;
 
@@ -15,11 +15,6 @@ pub struct PayPeriodService {
 }
 
 impl PayPeriodService {
-    pub fn new() -> Self {
-        Self {
-            base: BaseService::new(),
-        }
-    }
 
     /// Create a new pay period
     pub async fn create_pay_period(
@@ -362,3 +357,5 @@ impl PayPeriodService {
         })
     }
 }
+
+impl_service_with_base!(PayPeriodService);

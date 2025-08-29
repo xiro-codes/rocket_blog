@@ -11,44 +11,35 @@ use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
 
 use crate::{
+    controllers::base::ControllerBase,
     pool::Db,
     services::AuthService,
 };
 
 /// Worktime-specific authentication controller
 pub struct WorkTimeAuthController {
-    pub path: String,
+    base: ControllerBase,
 }
 
 impl WorkTimeAuthController {
     pub fn new(path: String) -> Self {
-        Self { path }
-    }
-
-    fn routes(&self) -> Vec<Route> {
-        routes![
-            worktime_login_view,
-            worktime_login,
-            worktime_logout,
-            worktime_register_view,
-            worktime_register
-        ]
-    }
-}
-
-#[rocket::async_trait]
-impl Fairing for WorkTimeAuthController {
-    fn info(&self) -> Info {
-        Info {
-            name: "WorkTime Auth Controller",
-            kind: Kind::Ignite,
+        Self { 
+            base: ControllerBase::new(path),
         }
     }
-
-    async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        Ok(rocket.mount(&self.path, self.routes()))
-    }
 }
+
+fn routes() -> Vec<Route> {
+    routes![
+        worktime_login_view,
+        worktime_login,
+        worktime_logout,
+        worktime_register_view,
+        worktime_register
+    ]
+}
+
+crate::impl_controller_routes!(WorkTimeAuthController, "WorkTime Auth Controller", routes());
 
 #[get("/")]
 async fn worktime_login_view(
