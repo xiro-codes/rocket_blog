@@ -80,107 +80,7 @@ impl WorkTimeControllerRegistry {
 
 
 
-/// PWA manifest route
-#[get("/manifest.json")]
-pub fn manifest() -> (rocket::http::ContentType, String) {
-    let manifest = "{
-  \"name\": \"Work Time Tracker\",
-  \"short_name\": \"TimeTracker\",
-  \"description\": \"Progressive Web App for tracking work time with role-based wages and configurable notifications\",
-  \"start_url\": \"/\",
-  \"display\": \"standalone\",
-  \"background_color\": \"#1a1a1a\",
-  \"theme_color\": \"#00ff00\",
-  \"orientation\": \"portrait-primary\",
-  \"icons\": [
-    {
-      \"src\": \"/static/worktime/icon-192.png\",
-      \"sizes\": \"192x192\",
-      \"type\": \"image/png\",
-      \"purpose\": \"any maskable\"
-    },
-    {
-      \"src\": \"/static/worktime/icon-512.png\",
-      \"sizes\": \"512x512\",
-      \"type\": \"image/png\",
-      \"purpose\": \"any maskable\"
-    }
-  ],
-  \"categories\": [\"productivity\", \"business\"],
-  \"screenshots\": [
-    {
-      \"src\": \"/static/worktime/screenshot-wide.png\",
-      \"sizes\": \"1280x720\",
-      \"type\": \"image/png\",
-      \"form_factor\": \"wide\"
-    },
-    {
-      \"src\": \"/static/worktime/screenshot-narrow.png\",
-      \"sizes\": \"720x1280\",
-      \"type\": \"image/png\",
-      \"form_factor\": \"narrow\"
-    }
-  ]
-}".to_string();
-    (rocket::http::ContentType::JSON, manifest)
-}
 
-/// Service worker route
-#[get("/sw.js")]
-pub fn service_worker() -> (rocket::http::ContentType, String) {
-    let sw = "const CACHE_NAME = 'worktime-tracker-v1';
-const urlsToCache = [
-  '/',
-  '/roles',
-  '/entries',
-  '/notifications',
-  '/payperiods',
-  '/static/worktime/app.css',
-  '/static/worktime/app.js',
-  '/static/worktime/icon-192.png',
-  '/static/worktime/icon-512.png',
-  '/offline.html'
-];
-
-self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        return cache.addAll(urlsToCache);
-      })
-  );
-});
-
-self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request).catch(function() {
-          return caches.match('/offline.html');
-        });
-      }
-    )
-  );
-});
-
-self.addEventListener('activate', function(event) {
-  event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-});".to_string();
-    (rocket::http::ContentType::JavaScript, sw)
-}
 
 /// Offline page route
 #[get("/offline.html")]
@@ -259,9 +159,8 @@ async fn rocket() -> Rocket<Build> {
     // Attach work time-specific services
     rocket = WorkTimeServiceRegistry::attach_all_services(rocket);
     
-    log::info!("Attaching work time controllers, PWA routes, and static file server");
-    // Attach work time controllers and PWA routes
+    // Attach work time controllers and static file server
     WorkTimeControllerRegistry::attach_all_controllers(rocket)
-        .mount("/", rocket::routes![manifest, service_worker, offline_page])
+        .mount("/", rocket::routes![offline_page])
         .mount("/static", FileServer::from("./static/"))
 }

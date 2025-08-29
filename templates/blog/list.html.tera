@@ -20,6 +20,7 @@
 		<a class="btn btn-secondary" href="/settings">[SETTINGS]</a>
 		{%endif%}
 		<a class="btn btn-primary" href="/auth/logout">[LOGOUT]</a>
+		<button id="install-btn" class="btn btn-info" onclick="installPWA()" style="display: none;">[INSTALL APP]</button>
 	</div>
 	{%else%}
 	<div class="mb-3">
@@ -29,6 +30,7 @@
 		{% else %}
 		<a class="btn btn-primary" href="/auth/">[LOGIN]</a>
 		{% endif %}
+		<button id="install-btn" class="btn btn-info" onclick="installPWA()" style="display: none;">[INSTALL APP]</button>
 	</div>
 	{% if not has_accounts %}
 	<div class="alert alert-info text-center mx-5">
