@@ -1,3 +1,28 @@
+//! Request guards for authentication and authorization.
+//!
+//! This module provides Rocket request guards that handle user authentication
+//! and authorization checks. Guards automatically validate user sessions and
+//! permissions before allowing access to protected routes.
+//!
+//! ## Available Guards
+//!
+//! - [`AuthenticatedUser`] - Requires valid user session
+//! - [`admin::AdminUser`] - Requires admin privileges
+//!
+//! ## Usage
+//!
+//! Guards are used as route parameters to automatically enforce access control:
+//!
+//! ```rust,no_run
+//! use rocket::get;
+//! use app::guards::AuthenticatedUser;
+//!
+//! #[get("/profile")]
+//! async fn user_profile(user: AuthenticatedUser) -> String {
+//!     format!("Welcome, {}!", user.username)
+//! }
+//! ```
+
 use rocket::http::{CookieJar, Status};
 use rocket::request::{FromRequest, Outcome, Request};
 use rocket::State;
@@ -5,9 +30,32 @@ use uuid::Uuid;
 use crate::services::AuthService;
 use sea_orm_rocket;
 
+/// Admin-specific request guards
 pub mod admin;
 
-/// Request guard for authenticated users
+/// Request guard for authenticated users.
+///
+/// Validates that the request contains a valid session token and extracts
+/// user information for use in route handlers. Automatically handles
+/// session validation and user lookup.
+///
+/// # Fields
+///
+/// * `token` - The user's session token
+/// * `account_id` - Unique identifier for the user account
+/// * `username` - The user's display name
+///
+/// # Examples
+///
+/// ```rust,no_run
+/// use rocket::get;
+/// use app::guards::AuthenticatedUser;
+///
+/// #[get("/dashboard")]
+/// async fn dashboard(user: AuthenticatedUser) -> String {
+///     format!("Dashboard for user: {}", user.username)
+/// }
+/// ```
 pub struct AuthenticatedUser {
     pub token: Uuid,
     pub account_id: Uuid,
