@@ -94,7 +94,7 @@
                     {% for period in pay_periods %}
                     <tr>
                         <td>
-                            <strong>{{ period.name }}</strong>
+                            <strong>{{ period.period_name }}</strong>
                             {% if period.is_current %}
                                 <span class="status-badge status-active ms-2">
                                     <i class="fas fa-circle"></i>Current
@@ -138,7 +138,7 @@
                         <td>
                             <div class="d-flex gap-1">
                                 <button class="btn btn-info btn-sm" 
-                                        onclick="viewPeriodDetails({{ period.id }}, '{{ period.name }}')">
+                                        onclick="viewPeriodDetails({{ period.id }}, '{{ period.period_name }}')">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <form method="post" action="/worktime/payperiods/delete/{{ period.id }}" class="d-inline" 

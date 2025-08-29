@@ -417,14 +417,21 @@ async fn payperiods_view(
     let db = conn.into_inner();
     
     match pay_period_service.get_pay_periods_with_summary(db, user.account_id).await {
-        Ok(pay_periods) => Ok(Template::render(
-            "worktime/payperiods",
-            context! {
-                page_title: "Manage Pay Periods",
-                pay_periods: pay_periods,
-                username: user.username,
-            }
-        )),
+        Ok(pay_periods) => {
+            // Get unassigned entries count
+            let unassigned_count = pay_period_service.get_unassigned_entries_count(db, user.account_id).await
+                .unwrap_or(0);
+            
+            Ok(Template::render(
+                "worktime/payperiods",
+                context! {
+                    page_title: "Manage Pay Periods",
+                    pay_periods: pay_periods,
+                    username: user.username,
+                    unassigned_count: unassigned_count,
+                }
+            ))
+        },
         Err(e) => {
             log::error!("Failed to load pay periods: {}", e);
             Err(Flash::error(Redirect::to("/"), "Failed to load pay periods"))
