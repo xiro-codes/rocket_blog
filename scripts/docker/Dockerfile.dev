@@ -25,6 +25,7 @@ RUN mkdir -p ~/.cargo && \
 COPY Cargo.toml Cargo.lock ./
 COPY migrations ./migrations/
 COPY models ./models/
+COPY query_builder_macro ./query_builder_macro
 COPY src ./src/
 
 # Build both binaries in development mode for faster compile times

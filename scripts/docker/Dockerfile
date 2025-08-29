@@ -19,7 +19,7 @@ WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
 COPY migrations ./migrations/
 COPY models ./models/
-
+COPY query_builder_macro ./query_builder_macro
 # Copy source code
 COPY src ./src/
 
