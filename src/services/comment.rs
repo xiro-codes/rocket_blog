@@ -64,7 +64,10 @@ impl Service {
     }
 
     pub async fn find_by_id(&self, db: &DbConn, id: Uuid) -> Result<comment::Model, DbErr> {
-        let result = Comment::find_by_id(id).one(db).await?;
+        let result = comment::Entity::query()
+            .where_eq(comment::Column::Id, id)
+            .first(db)
+            .await?;
         BaseService::handle_not_found(result, "Comment")
     }
 
@@ -73,10 +76,10 @@ impl Service {
         db: &DbConn,
         post_id: Uuid,
     ) -> Result<Vec<comment::Model>, DbErr> {
-        Comment::find()
-            .filter(comment::Column::PostId.eq(post_id))
-            .order_by_desc(comment::Column::DatePublished)
-            .all(db)
+        comment::Entity::query()
+            .where_eq(comment::Column::PostId, post_id)
+            .order_desc(comment::Column::DatePublished)
+            .get(db)
             .await
     }
 

@@ -6,7 +6,7 @@ use models::{
     prelude::PostReaction,
 };
 use rocket::serde::{Deserialize, Serialize};
-use sea_orm::{ColumnTrait, DbConn, EntityTrait, QueryFilter, Set, ActiveModelTrait, TryIntoModel, PaginatorTrait};
+use sea_orm::{ColumnTrait, DbConn, EntityTrait, QueryFilter, Set, ActiveModelTrait, TryIntoModel};
 use std::collections::HashMap;
 use uuid::Uuid;
 
@@ -86,10 +86,10 @@ impl Service {
         post_id: Uuid,
         ip_address: &str,
     ) -> Result<post_reaction::Model, sea_orm::DbErr> {
-        let reaction = PostReaction::find()
-            .filter(post_reaction::Column::PostId.eq(post_id))
-            .filter(post_reaction::Column::IpAddress.eq(ip_address))
-            .one(db)
+        let reaction = post_reaction::Entity::query()
+            .where_eq(post_reaction::Column::PostId, post_id)
+            .where_eq(post_reaction::Column::IpAddress, ip_address)
+            .first(db)
             .await?
             .ok_or(sea_orm::DbErr::RecordNotFound(
                 "No reaction found for this user and post".to_string(),
@@ -107,10 +107,10 @@ impl Service {
         post_id: Uuid,
         ip_address: &str,
     ) -> Result<Option<post_reaction::Model>, sea_orm::DbErr> {
-        PostReaction::find()
-            .filter(post_reaction::Column::PostId.eq(post_id))
-            .filter(post_reaction::Column::IpAddress.eq(ip_address))
-            .one(db)
+        post_reaction::Entity::query()
+            .where_eq(post_reaction::Column::PostId, post_id)
+            .where_eq(post_reaction::Column::IpAddress, ip_address)
+            .first(db)
             .await
     }
 
@@ -186,10 +186,8 @@ impl Service {
         db: &DbConn,
         post_id: Uuid,
     ) -> Result<i64, sea_orm::DbErr> {
-        use sea_orm::QuerySelect;
-
-        let count = PostReaction::find()
-            .filter(post_reaction::Column::PostId.eq(post_id))
+        let count = post_reaction::Entity::query()
+            .where_eq(post_reaction::Column::PostId, post_id)
             .count(db)
             .await?;
 
