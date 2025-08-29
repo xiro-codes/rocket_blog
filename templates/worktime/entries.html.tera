@@ -87,7 +87,7 @@
                                     <td>
                                         {% if entry.duration %}
                                             {% if entry.duration >= 60 %}
-                                                {{ (entry.duration // 60) }}h {{ (entry.duration % 60) }}m
+                                                {{ (entry.duration / 60) }}h {{ (entry.duration % 60) }}m
                                             {% else %}
                                                 {{ entry.duration }}m
                                             {% endif %}

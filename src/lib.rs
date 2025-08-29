@@ -83,7 +83,8 @@ pub fn create_base_rocket() -> Rocket<Build> {
     let app_config = AppConfig::from_figment(&figment);
     
     // Setup logging - ignore errors if already initialized
-    let _ = setup_logger();
+
+    // let _ = setup_logger();
     
     // Build the base rocket instance with common components
     let rocket = rocket::build()
