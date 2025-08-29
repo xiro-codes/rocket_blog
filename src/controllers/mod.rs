@@ -1,5 +1,5 @@
 mod base;
-pub use base::ControllerBase;
+pub use base::{ControllerBase, ControllerHelpers, AdminController, MountableController};
 
 mod index;
 pub use index::Controller as IndexController;

@@ -9,6 +9,73 @@ use sea_orm_rocket::Connection;
 
 use crate::{pool::Db, services::CoordinatorService};
 
+/// Trait for common controller behaviors
+pub trait ControllerHelpers {
+    /// Check if user is authenticated and return token
+    fn check_auth(jar: &CookieJar<'_>) -> Result<Option<String>, Status> {
+        Ok(jar.get_private("token").map(|c| c.value().to_owned()))
+    }
+
+    /// Require authentication and return token, or return Unauthorized status
+    fn require_auth(jar: &CookieJar<'_>) -> Result<String, Status> {
+        Self::check_auth(jar)?.ok_or(Status::Unauthorized)
+    }
+
+    /// Create a success flash redirect
+    fn success_redirect<T: Into<String>, U: Into<String>>(
+        to: T,
+        message: U,
+    ) -> Flash<Redirect> {
+        Flash::success(Redirect::to(to.into()), message.into())
+    }
+
+    /// Create a danger flash redirect
+    fn danger_redirect<T: Into<String>, U: Into<String>>(to: T, message: U) -> Flash<Redirect> {
+        Flash::new(Redirect::to(to.into()), "danger", message.into())
+    }
+
+    /// Extract flash message content for template context
+    fn extract_flash(flash: Option<FlashMessage<'_>>) -> Option<(String, String)> {
+        flash.map(|f| {
+            let (kind, message) = f.into_inner();
+            (kind.to_string(), message)
+        })
+    }
+}
+
+/// Trait for controllers that need admin authentication
+pub trait AdminController: ControllerHelpers {
+    /// Check if user is authenticated and is admin using coordinator service
+    async fn check_admin_auth(
+        conn: Connection<'_, Db>,
+        coordinator: &State<CoordinatorService>,
+        jar: &CookieJar<'_>,
+    ) -> Result<bool, Status> {
+        let token = Self::check_auth(jar)?;
+        let db = conn.into_inner();
+        Ok(coordinator.is_admin(db, token.as_deref()).await)
+    }
+
+    /// Require admin authentication using coordinator service
+    async fn require_admin_auth(
+        conn: Connection<'_, Db>,
+        coordinator: &State<CoordinatorService>,
+        jar: &CookieJar<'_>,
+    ) -> Result<(), Status> {
+        let token = Self::check_auth(jar)?;
+        let db = conn.into_inner();
+        coordinator.require_admin(db, token.as_deref()).await
+            .map_err(|_| Status::Unauthorized)?;
+        Ok(())
+    }
+}
+
+/// Trait for controllers that can be mounted to a Rocket instance
+pub trait MountableController {
+    fn path(&self) -> &str;
+    fn name(&self) -> &'static str;
+}
+
 /// Common controller functionality
 pub struct ControllerBase {
     path: String,
@@ -23,63 +90,57 @@ impl ControllerBase {
         &self.path
     }
 
-    /// Check if user is authenticated and return token
+    /// Check if user is authenticated and return token (backward compatibility)
     pub fn check_auth(jar: &CookieJar<'_>) -> Result<Option<String>, Status> {
-        Ok(jar.get_private("token").map(|c| c.value().to_owned()))
+        <Self as ControllerHelpers>::check_auth(jar)
     }
 
-    /// Require authentication and return token, or return Unauthorized status
+    /// Require authentication and return token, or return Unauthorized status (backward compatibility)
     pub fn require_auth(jar: &CookieJar<'_>) -> Result<String, Status> {
-        Self::check_auth(jar)?.ok_or(Status::Unauthorized)
+        <Self as ControllerHelpers>::require_auth(jar)
     }
 
-    /// Check if user is authenticated and is admin using coordinator service
+    /// Create a success flash redirect (backward compatibility)
+    pub fn success_redirect<T: Into<String>, U: Into<String>>(
+        to: T,
+        message: U,
+    ) -> Flash<Redirect> {
+        <Self as ControllerHelpers>::success_redirect(to, message)
+    }
+
+    /// Create a danger flash redirect (backward compatibility)
+    pub fn danger_redirect<T: Into<String>, U: Into<String>>(to: T, message: U) -> Flash<Redirect> {
+        <Self as ControllerHelpers>::danger_redirect(to, message)
+    }
+
+    /// Extract flash message content for template context (backward compatibility)
+    pub fn extract_flash(flash: Option<FlashMessage<'_>>) -> Option<(String, String)> {
+        <Self as ControllerHelpers>::extract_flash(flash)
+    }
+
+    /// Check if user is authenticated and is admin using coordinator service (backward compatibility)
     #[allow(dead_code)]
     pub async fn check_admin_auth(
         conn: Connection<'_, Db>,
         coordinator: &State<CoordinatorService>,
         jar: &CookieJar<'_>,
     ) -> Result<bool, Status> {
-        let token = Self::check_auth(jar)?;
-        let db = conn.into_inner();
-        Ok(coordinator.is_admin(db, token.as_deref()).await)
+        <Self as AdminController>::check_admin_auth(conn, coordinator, jar).await
     }
 
-    /// Require admin authentication using coordinator service
+    /// Require admin authentication using coordinator service (backward compatibility)
     #[allow(dead_code)]
     pub async fn require_admin_auth(
         conn: Connection<'_, Db>,
         coordinator: &State<CoordinatorService>,
         jar: &CookieJar<'_>,
     ) -> Result<(), Status> {
-        let token = Self::check_auth(jar)?;
-        let db = conn.into_inner();
-        coordinator.require_admin(db, token.as_deref()).await
-            .map_err(|_| Status::Unauthorized)?;
-        Ok(())
-    }
-
-    /// Create a success flash redirect
-    pub fn success_redirect<T: Into<String>, U: Into<String>>(
-        to: T,
-        message: U,
-    ) -> Flash<Redirect> {
-        Flash::success(Redirect::to(to.into()), message.into())
-    }
-
-    /// Create a danger flash redirect
-    pub fn danger_redirect<T: Into<String>, U: Into<String>>(to: T, message: U) -> Flash<Redirect> {
-        Flash::new(Redirect::to(to.into()), "danger", message.into())
-    }
-
-    /// Extract flash message content for template context
-    pub fn extract_flash(flash: Option<FlashMessage<'_>>) -> Option<(String, String)> {
-        flash.map(|f| {
-            let (kind, message) = f.into_inner();
-            (kind.to_string(), message)
-        })
+        <Self as AdminController>::require_admin_auth(conn, coordinator, jar).await
     }
 }
+
+impl ControllerHelpers for ControllerBase {}
+impl AdminController for ControllerBase {}
 
 /// Macro to implement Fairing for controllers with a service (deprecated - use impl_controller_routes!)
 #[macro_export]
@@ -119,6 +180,92 @@ macro_rules! impl_controller_routes {
             async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
                 Ok(rocket.mount(self.base.path(), $routes))
             }
+        }
+    };
+}
+
+/// Enhanced macro to implement a complete controller with traits
+#[macro_export]
+macro_rules! impl_controller {
+    ($controller:ty, $name:expr, $routes:expr) => {
+        impl $crate::controllers::MountableController for $controller {
+            fn path(&self) -> &str {
+                self.base.path()
+            }
+            
+            fn name(&self) -> &'static str {
+                $name
+            }
+        }
+        
+        impl $crate::controllers::ControllerHelpers for $controller {}
+        
+        #[rocket::async_trait]
+        impl rocket::fairing::Fairing for $controller {
+            fn info(&self) -> rocket::fairing::Info {
+                rocket::fairing::Info {
+                    name: $name,
+                    kind: rocket::fairing::Kind::Ignite,
+                }
+            }
+
+            async fn on_ignite(&self, rocket: rocket::Rocket<rocket::Build>) -> rocket::fairing::Result {
+                Ok(rocket.mount(self.base.path(), $routes))
+            }
+        }
+    };
+}
+
+/// Macro for controllers that need admin functionality
+#[macro_export]
+macro_rules! impl_admin_controller {
+    ($controller:ty, $name:expr, $routes:expr) => {
+        impl_controller!($controller, $name, $routes);
+        impl $crate::controllers::AdminController for $controller {}
+    };
+}
+
+/// Macro to create a controller registry from a list of controllers
+#[macro_export]
+macro_rules! create_controller_registry {
+    ($registry_name:ident, [ $( ($controller:ty, $path:expr) ),* $(,)? ]) => {
+        pub struct $registry_name;
+        
+        impl $registry_name {
+            pub fn attach_all_controllers(rocket: rocket::Rocket<rocket::Build>) -> rocket::Rocket<rocket::Build> {
+                log::info!("Registering {} controllers...", stringify!($registry_name));
+                
+                rocket$(
+                    .attach(<$controller>::new($path.to_owned()))
+                )*
+            }
+            
+            pub fn fairing() -> rocket::fairing::AdHoc {
+                rocket::fairing::AdHoc::on_ignite(stringify!($registry_name), |rocket| async {
+                    Self::attach_all_controllers(rocket)
+                })
+            }
+        }
+    };
+}
+
+/// Macro for common auth-required endpoint patterns
+#[macro_export]
+macro_rules! auth_required {
+    ($jar:expr) => {
+        match $crate::controllers::ControllerHelpers::require_auth($jar) {
+            Ok(token) => token,
+            Err(status) => return Err(status),
+        }
+    };
+}
+
+/// Macro for admin-required endpoint patterns  
+#[macro_export]
+macro_rules! admin_required {
+    ($conn:expr, $coordinator:expr, $jar:expr) => {
+        if let Err(status) = $crate::controllers::AdminController::require_admin_auth($conn, $coordinator, $jar).await {
+            return Err(status);
         }
     };
 }

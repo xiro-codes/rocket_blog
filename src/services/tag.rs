@@ -5,18 +5,15 @@ use slug::slugify;
 use uuid::Uuid;
 
 use crate::services::base::BaseService;
+use crate::{impl_service_with_base, services::base::ServiceHelpers};
 
 pub struct TagService {
     base: BaseService,
 }
 
-impl TagService {
-    pub fn new() -> Self {
-        Self {
-            base: BaseService::new(),
-        }
-    }
+impl_service_with_base!(TagService);
 
+impl TagService {
     pub async fn create_tag(
         &self,
         db: &DbConn,
@@ -26,7 +23,7 @@ impl TagService {
         let slug = slugify(name);
 
         tag::ActiveModel {
-            id: Set(BaseService::generate_id()),
+            id: Set(<Self as ServiceHelpers>::generate_id()),
             name: Set(name.to_owned()),
             slug: Set(slug),
             color: Set(Some(color.unwrap_or("#007bff".to_string()))),

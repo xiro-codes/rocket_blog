@@ -17,6 +17,9 @@ pub mod types;
 #[cfg(test)]
 pub mod tests;
 
+#[cfg(test)]
+pub mod examples;
+
 use config::AppConfig;
 use features::Features;
 use migrations::MigratorTrait;
