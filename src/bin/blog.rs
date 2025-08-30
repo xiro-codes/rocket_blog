@@ -18,10 +18,10 @@ use app::{
         CoordinatorService, YoutubeDownloadService, BackgroundJobService
     },
     middleware,
+    template_config,
     create_base_rocket_with_database
 };
 use rocket::{fs::FileServer, response::Redirect, Build, Rocket, catchers, catch, launch};
-use rocket_dyn_templates::Template;
 
 #[catch(default)]
 pub fn catch_default() -> Redirect {
@@ -94,7 +94,7 @@ async fn rocket() -> Rocket<Build> {
     log::info!("Building Blog Rocket instance and configuring database...");
     let mut rocket = create_base_rocket_with_database(db_config).await
         .register("/", catchers![catch_default])
-        .attach(Template::fairing());
+        .attach(template_config::create_template_fairing());
     
     // Attach blog-specific services
     rocket = BlogServiceRegistry::attach_all_services(rocket);
