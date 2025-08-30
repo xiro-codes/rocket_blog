@@ -77,7 +77,7 @@ async fn worktime_login(
         cookies.add_private(Cookie::new("token", token.to_string()));
         log::info!("Worktime authentication successful - Redirecting to worktime dashboard");
         Flash::success(
-            Redirect::to("/worktime"),
+            Redirect::to("/"),
             "Login successful! Welcome to your work time tracker.",
         )
     } else {

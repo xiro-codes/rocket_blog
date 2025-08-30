@@ -350,15 +350,15 @@ async fn stop_tracking(
         Ok((entry, is_tipped)) => {
             if is_tipped {
                 // For tipped roles, redirect to a tips entry page
-                Flash::success(Redirect::to(format!("/worktime/entries/{}/tips", entry.id)), 
+                Flash::success(Redirect::to(format!("/entries/{}/tips", entry.id)), 
                               "Shift ended! Please enter your tips.")
             } else {
-                Flash::success(Redirect::to("/worktime"), "Time tracking stopped")
+                Flash::success(Redirect::to("/"), "Time tracking stopped")
             }
         },
         Err(e) => {
             log::error!("Failed to stop time tracking: {}", e);
-            Flash::error(Redirect::to("/worktime"), "Failed to stop tracking")
+            Flash::error(Redirect::to("/"), "Failed to stop tracking")
         }
     }
 }
@@ -822,11 +822,11 @@ async fn tips_entry_view(
             let role = user_role::Entity::find_by_id(entry.user_role_id)
                 .one(db)
                 .await
-                .map_err(|_| Flash::error(Redirect::to("/worktime"), "Failed to load role"))?
-                .ok_or(Flash::error(Redirect::to("/worktime"), "Role not found"))?;
+                .map_err(|_| Flash::error(Redirect::to("/"), "Failed to load role"))?
+                .ok_or(Flash::error(Redirect::to("/"), "Role not found"))?;
                 
             if !role.is_tipped {
-                return Err(Flash::error(Redirect::to("/worktime"), "This role is not configured for tips"));
+                return Err(Flash::error(Redirect::to("/"), "This role is not configured for tips"));
             }
             
             // Calculate base earnings
@@ -845,10 +845,10 @@ async fn tips_entry_view(
                 }
             ))
         }
-        Ok(None) => Err(Flash::error(Redirect::to("/worktime"), "Entry not found")),
+        Ok(None) => Err(Flash::error(Redirect::to("/"), "Entry not found")),
         Err(e) => {
             log::error!("Failed to load work entry: {}", e);
-            Err(Flash::error(Redirect::to("/worktime"), "Failed to load entry"))
+            Err(Flash::error(Redirect::to("/"), "Failed to load entry"))
         }
     }
 }
@@ -865,10 +865,10 @@ async fn submit_tips(
     let db = conn.into_inner();
     
     match service.add_tips_to_entry(db, entry_id, user.account_id, form.into_inner()).await {
-        Ok(_) => Flash::success(Redirect::to("/worktime"), "Tips added successfully!"),
+        Ok(_) => Flash::success(Redirect::to("/"), "Tips added successfully!"),
         Err(e) => {
             log::error!("Failed to add tips: {}", e);
-            Flash::error(Redirect::to(format!("/worktime/entries/{}/tips", entry_id)), "Failed to add tips")
+            Flash::error(Redirect::to(format!("/entries/{}/tips", entry_id)), "Failed to add tips")
         }
     }
 }

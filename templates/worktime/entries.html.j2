@@ -98,16 +98,16 @@
                         </td>
                         <td>
                             {% if not entry.is_active %}
-                                <a href="/worktime/entries/{{ entry.id }}/edit" class="btn btn-sm btn-outline-primary" title="Edit Entry">
+                                <a href="/entries/{{ entry.id }}/edit" class="btn btn-sm btn-outline-primary" title="Edit Entry">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 {% if entry.can_add_tips %}
-                                    <a href="/worktime/entries/{{ entry.id }}/tips" class="btn btn-sm btn-outline-success" title="Add Tips">
+                                    <a href="/entries/{{ entry.id }}/tips" class="btn btn-sm btn-outline-success" title="Add Tips">
                                         <i class="fas fa-coins"></i>
                                     </a>
                                 {% endif %}
                             {% else %}
-                                <form method="post" action="/worktime/stop" class="d-inline">
+                                <form method="post" action="/stop" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Stop Timer">
                                         <i class="fas fa-stop"></i>
                                     </button>
@@ -123,7 +123,7 @@
         <div class="text-center">
             <i class="fas fa-list text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
             <p class="text-muted mt-3">No entries found. Start tracking your work time!</p>
-            <a href="/worktime" class="btn btn-primary">
+            <a href="/" class="btn btn-primary">
                 <i class="fas fa-play me-2"></i>Start Timer
             </a>
         </div>
@@ -139,7 +139,7 @@
 {% call wt.worktime_card(title="Add Manual Entry", icon="fas fa-plus") %}
     <p class="text-muted mb-4">Add a work session that wasn't tracked with the timer.</p>
     
-    <form method="post" action="/worktime/entries" class="row g-3">
+    <form method="post" action="/entries" class="row g-3">
         <div class="col-md-6">
             <label for="user_role_id" class="form-label">
                 <i class="fas fa-user-tag me-1"></i>Role

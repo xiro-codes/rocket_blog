@@ -5,7 +5,7 @@
     <h1 class="worktime-title mb-0">
         <i class="fas fa-hand-holding-usd me-2"></i>Enter Tips
     </h1>
-    <a href="/worktime" class="btn btn-secondary">
+    <a href="/" class="btn btn-secondary">
         <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
     </a>
 </div>
@@ -45,7 +45,7 @@
         </h3>
     </div>
     
-    <form method="post" action="/worktime/entries/{{ entry.id }}/tips" class="row g-3">
+    <form method="post" action="/entries/{{ entry.id }}/tips" class="row g-3">
         <div class="col-md-6">
             <label for="tip_amount" class="form-label">
                 <i class="fas fa-hand-holding-usd me-1"></i>Tip Amount
@@ -62,7 +62,7 @@
                 <button type="submit" class="btn btn-success btn-lg">
                     <i class="fas fa-save me-2"></i>Save Tips
                 </button>
-                <a href="/worktime" class="btn btn-outline-secondary btn-lg">
+                <a href="/" class="btn btn-outline-secondary btn-lg">
                     <i class="fas fa-times me-2"></i>Skip Tips
                 </a>
             </div>
