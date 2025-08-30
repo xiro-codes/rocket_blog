@@ -45,7 +45,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(BackgroundJob::JobData)
-                            .json()
+                            .text() // Use text for SQLite compatibility, JSON will be stored as text
                             .null(),
                     )
                     .col(
