@@ -44,7 +44,7 @@
 
 	<!-- Render child comments recursively -->
 	{% for reply in thread.replies %}
-		{{ self::render_comment_thread(thread=reply, post_id=post_id, level=level + 1) }}
+		{{ self.render_comment_thread(thread=reply, post_id=post_id, level=level + 1) }}
 	{% endfor %}
 </div>
 {% endmacro %}
@@ -176,7 +176,7 @@
 	<h3 class="terminal-prompt">Comments</h3>
 	<div id="comments-container">
 		{% for thread in comments %}
-			{{ self::render_comment_thread(thread=thread, post_id=post.id, level=0) }}
+			{{ self.render_comment_thread(thread=thread, post_id=post.id, level=0) }}
 		{% endfor %}
 	</div>
 </div>
@@ -204,8 +204,8 @@
 </div>
 {% endif %}
 {% if flash %}
-<small class="field-{{ flash.0 }}-flash">
-	{{ flash.1 }}
+<small class="field-{{ flash[0] }}-flash">
+	{{ flash[1] }}
 </small>
 {% endif %}
 
