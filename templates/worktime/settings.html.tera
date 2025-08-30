@@ -1,0 +1,158 @@
+{% extends "worktime_base" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="worktime-title mb-0">
+        <i class="fas fa-cog me-2"></i>Settings
+    </h1>
+    <a href="/" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+
+<!-- Timezone Settings -->
+<div class="worktime-card mb-4">
+    <div class="worktime-card-header">
+        <h3 class="mb-0">
+            <i class="fas fa-globe me-2"></i>Timezone Settings
+        </h3>
+    </div>
+    
+    <div class="mb-3">
+        <p class="text-muted">Configure your preferred timezone for time display throughout the work time tracker.</p>
+    </div>
+    
+    <!-- Current Timezone Display -->
+    <div class="alert alert-info">
+        <h5 class="mb-2">Current Settings</h5>
+        <p class="mb-1"><strong>Timezone:</strong> {{ current_timezone }}</p>
+        <p class="mb-0 text-sm">Current time: <span id="current-time" class="font-monospace"></span></p>
+    </div>
+    
+    <form method="post" action="/settings/timezone" class="row g-3">
+        <div class="col-12">
+            <label for="timezone" class="form-label">
+                <i class="fas fa-clock me-1"></i>Select Your Timezone
+            </label>
+            <select name="timezone" id="timezone" class="form-control" required>
+                {% for timezone in timezones %}
+                    <option value="{{ timezone.0 }}" {% if timezone.0 == current_timezone %}selected{% endif %}>
+                        {{ timezone.1 }}
+                    </option>
+                {% endfor %}
+            </select>
+            <small class="form-text text-muted">Choose the timezone that matches your location for accurate time display.</small>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-2"></i>Update Timezone
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Pay Period Settings -->
+<div class="worktime-card">
+    <div class="worktime-card-header">
+        <h3 class="mb-0">
+            <i class="fas fa-calendar-alt me-2"></i>Pay Period Settings
+        </h3>
+    </div>
+    
+    <div class="mb-3">
+        <p class="text-muted">Configure how your pay periods are automatically generated.</p>
+    </div>
+    
+    <form method="post" action="/settings/payperiod" class="row g-3">
+        <div class="col-md-6">
+            <label for="start_day" class="form-label">
+                <i class="fas fa-calendar-day me-1"></i>Pay Period Start Day
+            </label>
+            <select name="start_day" id="start_day" class="form-control" required>
+                <option value="monday" {% if pay_period_settings.start_day == "monday" %}selected{% endif %}>Monday</option>
+                <option value="tuesday" {% if pay_period_settings.start_day == "tuesday" %}selected{% endif %}>Tuesday</option>
+                <option value="wednesday" {% if pay_period_settings.start_day == "wednesday" %}selected{% endif %}>Wednesday</option>
+                <option value="thursday" {% if pay_period_settings.start_day == "thursday" %}selected{% endif %}>Thursday</option>
+                <option value="friday" {% if pay_period_settings.start_day == "friday" %}selected{% endif %}>Friday</option>
+                <option value="saturday" {% if pay_period_settings.start_day == "saturday" %}selected{% endif %}>Saturday</option>
+                <option value="sunday" {% if pay_period_settings.start_day == "sunday" %}selected{% endif %}>Sunday</option>
+            </select>
+            <small class="form-text text-muted">Day of the week when pay periods start</small>
+        </div>
+        <div class="col-md-6">
+            <label for="period_length" class="form-label">
+                <i class="fas fa-clock me-1"></i>Pay Period Length
+            </label>
+            <select name="period_length" id="period_length" class="form-control" required>
+                <option value="1" {% if pay_period_settings.period_length == 1 %}selected{% endif %}>1 week</option>
+                <option value="2" {% if pay_period_settings.period_length == 2 %}selected{% endif %}>2 weeks</option>
+                <option value="4" {% if pay_period_settings.period_length == 4 %}selected{% endif %}>4 weeks (monthly)</option>
+            </select>
+            <small class="form-text text-muted">How many weeks each pay period lasts</small>
+        </div>
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <h6 class="mb-2">Current Configuration</h6>
+                <p class="mb-0">
+                    Pay periods start every <strong>{{ pay_period_settings.start_day | title }}</strong> 
+                    and last for <strong>{{ pay_period_settings.period_length }} week{{ pay_period_settings.period_length != 1 ? "s" : "" }}</strong>.
+                </p>
+            </div>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-2"></i>Update Pay Period Settings
+            </button>
+        </div>
+    </form>
+</div>
+
+{% if flash %}
+<div class="alert alert-{{ flash.0 }} mt-4">
+    {{ flash.1 }}
+</div>
+{% endif %}
+
+<script>
+// Update current time display
+function updateCurrentTime() {
+    const now = new Date();
+    const timeString = now.toLocaleString('en-US', {
+        timeZone: '{{ current_timezone }}',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+    document.getElementById('current-time').textContent = timeString;
+}
+
+// Update time immediately and then every second
+updateCurrentTime();
+setInterval(updateCurrentTime, 1000);
+
+// Update preview when timezone selection changes
+document.getElementById('timezone').addEventListener('change', function() {
+    const selectedTimezone = this.value;
+    const now = new Date();
+    try {
+        const timeString = now.toLocaleString('en-US', {
+            timeZone: selectedTimezone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+        document.getElementById('current-time').textContent = timeString + ' (Preview)';
+    } catch (e) {
+        document.getElementById('current-time').textContent = 'Invalid timezone';
+    }
+});
+</script>
+{% endblock %}

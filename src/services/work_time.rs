@@ -361,12 +361,82 @@ impl WorkTimeService {
             }
         }
 
+        // Get current shift earnings (active entry if any)
+        let current_shift_earnings = self.get_current_shift_earnings(db, account_id).await.unwrap_or(0.0);
+        
+        // Get pay period hours (current pay period)
+        let pay_period_hours = self.get_current_pay_period_hours(db, account_id).await.unwrap_or(0.0);
+
         Ok(WorkTimeSummaryDTO {
             total_hours,
             total_earnings,
             currency,
             entries_count,
+            current_shift_earnings,
+            pay_period_hours,
         })
+    }
+
+    /// Get current shift earnings (for active timer)
+    pub async fn get_current_shift_earnings(&self, db: &DbConn, account_id: Uuid) -> Result<f64, DbErr> {
+        if let Some(active_entry) = self.get_active_entry(db, account_id).await? {
+            // Calculate earnings based on elapsed time and hourly rate
+            let now = Utc::now();
+            let elapsed_minutes = (now - active_entry.start_time).num_minutes() as f64;
+            let elapsed_hours = elapsed_minutes / 60.0;
+            
+            // Get the role for hourly wage
+            if let Some(role) = user_role::Entity::find_by_id(active_entry.user_role_id)
+                .one(db)
+                .await? {
+                return Ok(elapsed_hours * role.hourly_wage);
+            }
+        }
+        Ok(0.0)
+    }
+
+    /// Get total hours worked in current pay period
+    pub async fn get_current_pay_period_hours(&self, db: &DbConn, account_id: Uuid) -> Result<f64, DbErr> {
+        use chrono::{Datelike, Duration, Weekday};
+        
+        let now = Utc::now().date_naive();
+        
+        // For now, assume pay periods start on Monday and last 2 weeks
+        // This could be made configurable using the settings
+        let days_since_monday = match now.weekday() {
+            Weekday::Mon => 0,
+            Weekday::Tue => 1,
+            Weekday::Wed => 2,
+            Weekday::Thu => 3,
+            Weekday::Fri => 4,
+            Weekday::Sat => 5,
+            Weekday::Sun => 6,
+        };
+        
+        let current_monday = now - Duration::days(days_since_monday);
+        
+        // Calculate current pay period start (could be current Monday or previous Monday depending on bi-weekly cycle)
+        // For simplicity, let's use the current Monday as the start for now
+        let pay_period_start = current_monday.and_hms_opt(0, 0, 0).unwrap();
+        let pay_period_start_utc = pay_period_start.and_utc();
+        
+        // Get all completed entries in this pay period
+        let entries = work_time_entry::Entity::find()
+            .find_also_related(user_role::Entity)
+            .filter(work_time_entry::Column::AccountId.eq(account_id))
+            .filter(work_time_entry::Column::IsActive.eq(false))
+            .filter(work_time_entry::Column::StartTime.gte(pay_period_start_utc))
+            .all(db)
+            .await?;
+
+        let mut total_hours = 0.0;
+        for (entry, _) in entries {
+            if let Some(duration) = entry.duration {
+                total_hours += duration as f64 / 60.0;
+            }
+        }
+
+        Ok(total_hours)
     }
 
     pub async fn delete_work_entry(&self, db: &DbConn, entry_id: Uuid, account_id: Uuid) -> Result<(), DbErr> {

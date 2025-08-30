@@ -10,7 +10,7 @@
 use app::{
     features::Features,
     controllers,
-    services::{AuthService, WorkTimeService, PayPeriodService},
+    services::{AuthService, WorkTimeService, PayPeriodService, SettingsService},
     create_base_rocket
 };
 use rocket::{fs::FileServer, response::Redirect, Build, Rocket, Request, Response, catchers, catch, launch, get};
@@ -56,12 +56,13 @@ impl WorkTimeServiceRegistry {
     pub fn attach_all_services(rocket: Rocket<Build>) -> Rocket<Build> {
         log::info!("Registering work time application services...");
         
-        log::debug!("Attaching work time services: Auth, WorkTime, PayPeriod");
+        log::debug!("Attaching work time services: Auth, WorkTime, PayPeriod, Settings");
         
         rocket
             .manage(AuthService::new())
             .manage(WorkTimeService::new())
             .manage(PayPeriodService::new())
+            .manage(SettingsService::new())
     }
 }
 
