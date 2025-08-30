@@ -72,8 +72,8 @@
 
 {% if flash %}
 <div class="auth-container mt-3">
-    <div class="alert alert-{{ flash.0 }}">
-        <i class="fas fa-info-circle me-2"></i>{{ flash.1 }}
+    <div class="alert alert-{{ flash[0] }}">
+        <i class="fas fa-info-circle me-2"></i>{{ flash[1] }}
     </div>
 </div>
 {% endif %}
