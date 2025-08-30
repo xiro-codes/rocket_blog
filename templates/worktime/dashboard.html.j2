@@ -2,25 +2,25 @@
 {% import "worktime_macros" as wt %}
 
 {% block content %}
-{{ wt::quick_nav(current_page="dashboard") }}
+{{ wt.quick_nav(current_page="dashboard") }}
 
-{{ wt::worktime_hero(
+{{ wt.worktime_hero(
     title="Work Time Dashboard", 
     subtitle="Welcome back! Track your productive hours with ease", 
     username=username
 ) }}
 
 <!-- Active Timer Section -->
-{% call wt::worktime_card(title="Active Timer", icon="fas fa-play-circle") %}
-    {{ wt::timer_display(active_entry=active_entry, roles=roles) }}
+{% call wt.worktime_card(title="Active Timer", icon="fas fa-play-circle") %}
+    {{ wt.timer_display(active_entry=active_entry, roles=roles) }}
 {% endcall %}
 
 <!-- Summary Stats -->
-{{ wt::stats_grid(stats=summary) }}
+{{ wt.stats_grid(stats=summary) }}
 
 <!-- Recent Entries -->
-{% call wt::worktime_card(title="Recent Entries", icon="fas fa-history") %}
-    {{ wt::entries_table(entries=recent_entries) }}
+{% call wt.worktime_card(title="Recent Entries", icon="fas fa-history") %}
+    {{ wt.entries_table(entries=recent_entries) }}
     {% if recent_entries %}
         <div class="text-center">
             <a href="/worktime/entries" class="btn btn-primary">

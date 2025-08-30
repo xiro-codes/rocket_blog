@@ -11,7 +11,7 @@
     </a>
 </div>
 
-{{ wt::quick_nav(current_page="entries", show_mobile_menu=false) }}
+{{ wt.quick_nav(current_page="entries", show_mobile_menu=false) }}
 
 <!-- Summary Stats -->
 <div class="stats-grid">
@@ -36,7 +36,7 @@
 </div>
 
 <!-- Entries Table -->
-{% call wt::worktime_card(title="All Entries", icon="fas fa-history") %}
+{% call wt.worktime_card(title="All Entries", icon="fas fa-history") %}
     {% if entries %}
         <div class="table-responsive">
             <table class="table">
@@ -62,7 +62,7 @@
                         </td>
                         <td>
                             {% if entry.duration and not entry.is_active %}
-                                <strong>{{ wt::format_duration(entry.duration) }}</strong>
+                                <strong>{{ wt.format_duration(entry.duration) }}</strong>
                             {% elif entry.is_active %}
                                 <span class="status-badge status-active">
                                     <i class="fas fa-circle"></i>Active
@@ -76,7 +76,7 @@
                         </td>
                         <td>
                             {% if entry.earnings %}
-                                <strong class="text-success">{{ wt::format_currency(entry.earnings) }}</strong>
+                                <strong class="text-success">{{ wt.format_currency(entry.earnings) }}</strong>
                             {% else %}
                                 <span class="text-muted">—</span>
                             {% endif %}
@@ -136,7 +136,7 @@
 {% endif %}
 
 <!-- Add Manual Entry Form -->
-{% call wt::worktime_card(title="Add Manual Entry", icon="fas fa-plus") %}
+{% call wt.worktime_card(title="Add Manual Entry", icon="fas fa-plus") %}
     <p class="text-muted mb-4">Add a work session that wasn't tracked with the timer.</p>
     
     <form method="post" action="/worktime/entries" class="row g-3">

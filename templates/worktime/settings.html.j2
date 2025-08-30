@@ -11,10 +11,10 @@
     </a>
 </div>
 
-{{ wt::quick_nav(current_page="settings", show_mobile_menu=false) }}
+{{ wt.quick_nav(current_page="settings", show_mobile_menu=false) }}
 
 <!-- Timezone Settings -->
-{% call wt::worktime_card(title="Timezone Settings", icon="fas fa-globe") %}
+{% call wt.worktime_card(title="Timezone Settings", icon="fas fa-globe") %}
     
     <div class="mb-3">
         <p class="text-muted">Configure your preferred timezone for time display throughout the work time tracker.</p>
@@ -50,7 +50,7 @@
 {% endcall %}
 
 <!-- Pay Period Settings -->
-{% call wt::worktime_card(title="Pay Period Settings", icon="fas fa-calendar-alt") %}
+{% call wt.worktime_card(title="Pay Period Settings", icon="fas fa-calendar-alt") %}
     <div class="mb-3">
         <p class="text-muted">Configure how your pay periods are automatically generated.</p>
     </div>
