@@ -12,13 +12,13 @@
 		<meta name="author" content="Work Time Tracker">
 		
 		<!-- Canonical URL -->
-		<link rel="canonical" href="{% if canonical_url %}{{ canonical_url }}{% else %}/worktime{% endif %}">
+		<link rel="canonical" href="{% if canonical_url %}{{ canonical_url }}{% else %}/{% endif %}">
 		
 		<!-- Open Graph Meta Tags -->
 		<meta property="og:title" content="{% if page_title %}{{ page_title }}{% else %}Work Time Tracker{% endif %}">
 		<meta property="og:description" content="{% if page_description %}{{ page_description }}{% else %}Professional work time tracking application{% endif %}">
 		<meta property="og:type" content="website">
-		<meta property="og:url" content="{% if canonical_url %}{{ canonical_url }}{% else %}/worktime{% endif %}">
+		<meta property="og:url" content="{% if canonical_url %}{{ canonical_url }}{% else %}/{% endif %}">
 		<meta property="og:site_name" content="Work Time Tracker">
 		<meta property="og:locale" content="en_US">
 		
