@@ -234,19 +234,31 @@ impl WorkTimeService {
             .await?
             .ok_or(DbErr::Custom("User role not found or inactive".to_string()))?;
 
-        // Parse dates if provided
+        // Parse dates if provided (datetime-local format: "YYYY-MM-DDTHH:MM")
         let start_time = if let Some(start_str) = data.start_time {
-            chrono::DateTime::parse_from_rfc3339(&start_str)
-                .map(|dt| dt.with_timezone(&Utc))
-                .map_err(|_| DbErr::Custom("Invalid start time format".to_string()))?
+            // Try parsing as RFC3339 first, then as datetime-local format
+            if let Ok(dt) = chrono::DateTime::parse_from_rfc3339(&start_str) {
+                dt.with_timezone(&Utc)
+            } else if let Ok(naive_dt) = chrono::NaiveDateTime::parse_from_str(&start_str, "%Y-%m-%dT%H:%M") {
+                // Assume the datetime is in UTC for now (could be improved to use user's timezone)
+                naive_dt.and_utc()
+            } else {
+                return Err(DbErr::Custom("Invalid start time format".to_string()));
+            }
         } else {
             Utc::now()
         };
 
         let end_time = if let Some(end_str) = data.end_time {
-            Some(chrono::DateTime::parse_from_rfc3339(&end_str)
-                .map(|dt| dt.with_timezone(&Utc))
-                .map_err(|_| DbErr::Custom("Invalid end time format".to_string()))?)
+            // Try parsing as RFC3339 first, then as datetime-local format
+            if let Ok(dt) = chrono::DateTime::parse_from_rfc3339(&end_str) {
+                Some(dt.with_timezone(&Utc))
+            } else if let Ok(naive_dt) = chrono::NaiveDateTime::parse_from_str(&end_str, "%Y-%m-%dT%H:%M") {
+                // Assume the datetime is in UTC for now (could be improved to use user's timezone)
+                Some(naive_dt.and_utc())
+            } else {
+                return Err(DbErr::Custom("Invalid end time format".to_string()));
+            }
         } else {
             None
         };

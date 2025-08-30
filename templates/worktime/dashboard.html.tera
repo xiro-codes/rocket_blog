@@ -196,12 +196,14 @@
                         <td>{{ entry.start_time_display | truncate(length=16) }}</td>
                         <td>{{ entry.role_name }}</td>
                         <td>
-                            {% if entry.duration %}
+                            {% if entry.duration and not entry.is_active %}
                                 {{ (entry.duration / 60) | round(precision=1) }}h
-                            {% else %}
+                            {% elif entry.is_active %}
                                 <span class="status-badge status-active">
                                     <i class="fas fa-circle"></i>Active
                                 </span>
+                            {% else %}
+                                —
                             {% endif %}
                         </td>
                         <td class="d-none d-sm-table-cell">{{ entry.description | default(value="—") | truncate(length=20) }}</td>

@@ -95,12 +95,14 @@
                             </span>
                         </td>
                         <td>
-                            {% if entry.duration %}
+                            {% if entry.duration and not entry.is_active %}
                                 <strong>{{ (entry.duration / 60) | round(precision=2) }}h</strong>
-                            {% else %}
+                            {% elif entry.is_active %}
                                 <span class="status-badge status-active">
                                     <i class="fas fa-circle"></i>Active
                                 </span>
+                            {% else %}
+                                <span class="text-muted">—</span>
                             {% endif %}
                         </td>
                         <td class="d-none d-md-table-cell text-muted">
@@ -114,13 +116,17 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if entry.end_time %}
+                            {% if entry.end_time and not entry.is_active %}
                                 <span class="status-badge" style="background-color: var(--success); color: var(--text-primary);">
                                     <i class="fas fa-check"></i>Complete
                                 </span>
-                            {% else %}
+                            {% elif entry.is_active %}
                                 <span class="status-badge status-active">
                                     <i class="fas fa-circle"></i>Running
+                                </span>
+                            {% else %}
+                                <span class="status-badge" style="background-color: var(--success); color: var(--text-primary);">
+                                    <i class="fas fa-check"></i>Complete
                                 </span>
                             {% endif %}
                         </td>
