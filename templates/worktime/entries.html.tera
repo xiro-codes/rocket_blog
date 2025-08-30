@@ -1,4 +1,5 @@
 {% extends "worktime_base" %}
+{% import "worktime_macros" as wt %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -10,44 +11,14 @@
     </a>
 </div>
 
-<!-- Quick Actions -->
-<div class="worktime-nav" style="margin: 1rem 0;">
-    <div class="text-center mb-3">
-        <h4 class="worktime-subtitle">
-            <i class="fas fa-compass me-2"></i>Quick Actions
-        </h4>
-    </div>
-    <div class="row g-2">
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime" class="btn btn-outline-primary w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-home me-2"></i>Dashboard
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime/roles" class="btn btn-outline-primary w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-user-tag me-2"></i>Manage Roles
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime/settings" class="btn btn-outline-success w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-cog me-2"></i>Settings
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime/notifications" class="btn btn-outline-warning w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-bell me-2"></i>Notifications
-            </a>
-        </div>
-    </div>
-</div>
+{{ wt::quick_nav(current_page="entries", show_mobile_menu=false) }}
 
 <!-- Summary Stats -->
-<div class="stats-grid mb-4">
-    <div class="stat-card">
-        <span class="stat-value">{{ total_entries }}</span>
-        <span class="stat-label">
-            <i class="fas fa-briefcase me-1"></i>Shifts Worked This Period
-        </span>
+{{ wt::stats_grid(stats={
+    total_entries: total_entries,
+    total_hours: total_hours, 
+    total_earnings: total_earnings
+}) }}
     </div>
     <div class="stat-card">
         <span class="stat-value">{{ total_hours | round(precision=1) }}h</span>
@@ -64,13 +35,7 @@
 </div>
 
 <!-- Entries Table -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-history me-2"></i>All Entries
-        </h3>
-    </div>
-    
+{% call wt::worktime_card(title="All Entries", icon="fas fa-history") %}
     {% if entries %}
         <div class="table-responsive">
             <table class="table">
@@ -96,15 +61,7 @@
                         </td>
                         <td>
                             {% if entry.duration and not entry.is_active %}
-                                {% set hours = entry.duration // 60 %}
-                                {% set minutes = entry.duration % 60 %}
-                                {% if hours > 0 and minutes > 0 %}
-                                    <strong>{{ hours }}h {{ minutes }}m</strong>
-                                {% elif hours > 0 %}
-                                    <strong>{{ hours }}h</strong>
-                                {% else %}
-                                    <strong>{{ minutes }}m</strong>
-                                {% endif %}
+                                <strong>{{ wt::format_duration(entry.duration) }}</strong>
                             {% elif entry.is_active %}
                                 <span class="status-badge status-active">
                                     <i class="fas fa-circle"></i>Active
@@ -118,7 +75,7 @@
                         </td>
                         <td>
                             {% if entry.earnings %}
-                                <strong class="text-success">${{ entry.earnings | round(precision=2) }}</strong>
+                                <strong class="text-success">{{ wt::format_currency(entry.earnings) }}</strong>
                             {% else %}
                                 <span class="text-muted">—</span>
                             {% endif %}
@@ -130,50 +87,47 @@
                                 </span>
                             {% elif entry.is_active %}
                                 <span class="status-badge status-active">
-                                    <i class="fas fa-circle"></i>Running
+                                    <i class="fas fa-play"></i>Running
                                 </span>
                             {% else %}
-                                <span class="status-badge" style="background-color: var(--success); color: var(--text-primary);">
-                                    <i class="fas fa-check"></i>Complete
+                                <span class="status-badge" style="background-color: var(--warning); color: var(--text-primary);">
+                                    <i class="fas fa-clock"></i>Pending
                                 </span>
                             {% endif %}
                         </td>
                         <td>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <a href="/worktime/entries/{{ entry.id }}/edit" class="btn btn-outline-warning btn-sm" title="Edit Entry">
+                            {% if not entry.is_active %}
+                                <a href="/worktime/entries/{{ entry.id }}/edit" class="btn btn-sm btn-outline-primary" title="Edit Entry">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form method="post" action="/worktime/entries/{{ entry.id }}/delete" style="display: inline;">
-                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Entry" 
-                                            onclick="return confirm('Are you sure you want to delete this entry?')">
-                                        <i class="fas fa-trash"></i>
+                                {% if entry.can_add_tips %}
+                                    <a href="/worktime/entries/{{ entry.id }}/tips" class="btn btn-sm btn-outline-success" title="Add Tips">
+                                        <i class="fas fa-coins"></i>
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <form method="post" action="/worktime/stop" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Stop Timer">
+                                        <i class="fas fa-stop"></i>
                                     </button>
                                 </form>
-                            </div>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        
-        <!-- Pagination if needed -->
-        {% if entries | length >= 20 %}
-        <div class="text-center">
-            <p class="text-muted">Showing {{ entries | length }} entries</p>
-        </div>
-        {% endif %}
     {% else %}
         <div class="text-center">
-            <i class="fas fa-clock text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-            <p class="text-muted mt-3">No time entries yet. Start your first timer to see entries here!</p>
+            <i class="fas fa-list text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+            <p class="text-muted mt-3">No entries found. Start tracking your work time!</p>
             <a href="/worktime" class="btn btn-primary">
-                <i class="fas fa-play me-2"></i>Start First Timer
+                <i class="fas fa-play me-2"></i>Start Timer
             </a>
         </div>
     {% endif %}
-</div>
-
+{% endcall %}
 {% if flash %}
 <div class="alert alert-{{ flash.0 }} mt-3">
     <i class="fas fa-info-circle me-2"></i>{{ flash.1 }}
@@ -181,13 +135,7 @@
 {% endif %}
 
 <!-- Add Manual Entry Form -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-plus me-2"></i>Add Manual Entry
-        </h3>
-    </div>
-    
+{% call wt::worktime_card(title="Add Manual Entry", icon="fas fa-plus") %}
     <p class="text-muted mb-4">Add a work session that wasn't tracked with the timer.</p>
     
     <form method="post" action="/worktime/entries" class="row g-3">
@@ -202,6 +150,7 @@
                 {% endfor %}
             </select>
         </div>
+        
         <div class="col-md-6">
             <label for="start_time" class="form-label">
                 <i class="fas fa-play me-1"></i>Start Time
@@ -220,11 +169,13 @@
             </button>
         </div>
     </form>
-</div>
+{% endcall %}
 
 {% endblock %}
 
 {% block script %}
+<!-- Include Work Time utilities -->
+<script src="/static/worktime-utils.js"></script>
 <script>
 // Auto-fill current time for start time
 document.addEventListener('DOMContentLoaded', function() {

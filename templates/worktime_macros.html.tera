@@ -1,0 +1,396 @@
+{# 
+   Work Time Template Macros
+   
+   This file contains reusable macros for work time templates to reduce duplication
+   and improve maintainability.
+#}
+
+{# Navigation component with quick actions #}
+{% macro quick_nav(current_page="", show_mobile_menu=true) %}
+    {% if show_mobile_menu %}
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Side Menu Overlay -->
+    <div class="side-menu-overlay" id="side-menu-overlay"></div>
+
+    <!-- Side Menu -->
+    <div class="side-menu" id="side-menu">
+        <div class="side-menu-header">
+            <h4 class="side-menu-title">
+                <i class="fas fa-compass me-2"></i>Quick Actions
+            </h4>
+            <button class="close-menu" id="close-menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {{ self::nav_buttons(current_page=current_page, class="w-100 mb-2") }}
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions Navigation -->
+    <div class="worktime-nav" style="margin: 1rem 0;">
+        <div class="text-center mb-3">
+            <h4 class="worktime-subtitle">
+                <i class="fas fa-compass me-2"></i>Quick Actions
+            </h4>
+        </div>
+        <div class="row g-2">
+            {{ self::nav_buttons(current_page=current_page, class="btn-outline-primary w-100", wrapper_class="col-sm-6 col-lg-3") }}
+        </div>
+    </div>
+{% endmacro %}
+
+{# Navigation buttons helper macro #}
+{% macro nav_buttons(current_page="", class="btn btn-primary", wrapper_class="") %}
+    {% set nav_items = [
+        {url: "/worktime", icon: "fas fa-home", text: "Dashboard", key: "dashboard"},
+        {url: "/worktime/entries", icon: "fas fa-list-ul", text: "View Entries", key: "entries"},
+        {url: "/worktime/roles", icon: "fas fa-user-tag", text: "Manage Roles", key: "roles"},
+        {url: "/worktime/settings", icon: "fas fa-cog", text: "Settings", key: "settings"},
+        {url: "/worktime/notifications", icon: "fas fa-bell", text: "Notifications", key: "notifications"}
+    ] %}
+    
+    {% for item in nav_items %}
+        {% if wrapper_class %}
+        <div class="{{ wrapper_class }}">
+        {% endif %}
+            <a href="{{ item.url }}" 
+               class="{{ class }}{% if current_page == item.key %} active{% endif %}" 
+               style="margin: 0.25rem 0;">
+                <i class="{{ item.icon }} me-2"></i>{{ item.text }}
+            </a>
+        {% if wrapper_class %}
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
+{# Stats grid display component #}
+{% macro stats_grid(stats) %}
+    <div class="stats-grid">
+        {% if stats.pay_period_hours is defined %}
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.pay_period_hours | round(precision=2) }}</span>
+            <span class="stat-label">
+                <i class="fas fa-calendar-week me-1"></i>Pay Period Hours
+            </span>
+        </div>
+        {% endif %}
+        
+        {% if stats.total_hours is defined %}
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.total_hours | round(precision=2) }}</span>
+            <span class="stat-label">
+                <i class="fas fa-clock me-1"></i>Total Hours
+            </span>
+        </div>
+        {% endif %}
+        
+        {% if stats.total_earnings is defined %}
+        <div class="stat-card">
+            <span class="stat-value">${{ stats.total_earnings | round(precision=2) }}</span>
+            <span class="stat-label">
+                <i class="fas fa-dollar-sign me-1"></i>Total Earnings
+            </span>
+        </div>
+        {% endif %}
+        
+        {% if stats.current_shift_earnings is defined %}
+        <div class="stat-card">
+            <span class="stat-value">${{ stats.current_shift_earnings | round(precision=2) }}</span>
+            <span class="stat-label">
+                <i class="fas fa-coins me-1"></i>Current Shift
+            </span>
+        </div>
+        {% endif %}
+        
+        {% if stats.entries_count is defined %}
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.entries_count }}</span>
+            <span class="stat-label">
+                <i class="fas fa-briefcase me-1"></i>Total Entries
+            </span>
+        </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{# Timer display component #}
+{% macro timer_display(active_entry) %}
+    {% if active_entry %}
+        <div class="alert alert-success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1">
+                        <span class="status-badge status-active">
+                            <i class="fas fa-circle"></i>Timer Running
+                        </span>
+                    </h5>
+                    <p class="mb-1"><strong>Started:</strong> {{ active_entry.start_time | date(format='%B %d, %Y at %I:%M %p') }}</p>
+                    {% if active_entry.description %}
+                    <p class="mb-1"><strong>Description:</strong> {{ active_entry.description }}</p>
+                    {% endif %}
+                    {% if active_entry.project %}
+                    <p class="mb-1"><strong>Project:</strong> {{ active_entry.project }}</p>
+                    {% endif %}
+                    {% if active_entry.role_name %}
+                    <p class="mb-1"><strong>Role:</strong> {{ active_entry.role_name }} ({{ active_entry.hourly_wage }} {{ active_entry.currency }}/hr)</p>
+                    {% endif %}
+                </div>
+                <div class="timer-display" id="live-timer" data-start-time="{{ active_entry.start_time }}">
+                    00:00:00
+                </div>
+            </div>
+            <div class="mt-3">
+                <form method="post" action="/worktime/stop" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-stop me-2"></i>Stop Timer
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center mb-4">
+            <p class="text-muted">No active timer. Start tracking your productive work time.</p>
+        </div>
+        
+        {{ self::timer_start_form(roles=roles) }}
+    {% endif %}
+{% endmacro %}
+
+{# Timer start form component #}
+{% macro timer_start_form(roles) %}
+    <form method="post" action="/worktime/start" class="row g-2">
+        <div class="col-12">
+            <label for="user_role_id" class="form-label">
+                <i class="fas fa-user-tag me-1"></i>Role
+            </label>
+            <select class="form-control" id="user_role_id" name="user_role_id" required>
+                <option value="">Select a role...</option>
+                {% for role in roles %}
+                    <option value="{{ role.id }}">{{ role.role_name }} (${{ role.hourly_wage }}/hr)</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12">
+            <label for="description" class="form-label">
+                <i class="fas fa-clipboard-list me-1"></i>Description (optional)
+            </label>
+            <input type="text" class="form-control" id="description" name="description" placeholder="What are you working on?">
+        </div>
+        <div class="col-12">
+            <label for="project" class="form-label">
+                <i class="fas fa-folder me-1"></i>Project (optional)
+            </label>
+            <input type="text" class="form-control" id="project" name="project" placeholder="Project name">
+        </div>
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="fas fa-play me-2"></i>Start Timer
+            </button>
+        </div>
+    </form>
+{% endmacro %}
+
+{# Entries table component #}
+{% macro entries_table(entries, show_actions=false) %}
+    {% if entries %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Role</th>
+                        <th>Duration</th>
+                        <th class="d-none d-sm-table-cell">Description</th>
+                        <th>Earnings</th>
+                        {% if show_actions %}
+                        <th>Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                    <tr>
+                        <td>{{ entry.start_time_display }}</td>
+                        <td>{{ entry.role_name }}</td>
+                        <td>
+                            {% if entry.duration and not entry.is_active %}
+                                {{ self::format_duration(entry.duration) }}
+                            {% elif entry.is_active %}
+                                <span class="status-badge status-active">
+                                    <i class="fas fa-circle"></i>Active
+                                </span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="d-none d-sm-table-cell">{{ entry.description | default(value="—") | truncate(length=20) }}</td>
+                        <td>
+                            {% if entry.earnings %}
+                                {{ self::format_currency(entry.earnings) }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        {% if show_actions %}
+                        <td>
+                            <a href="/worktime/entries/{{ entry.id }}/edit" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% if entry.can_add_tips %}
+                            <a href="/worktime/entries/{{ entry.id }}/tips" class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-coins"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center">
+            <i class="fas fa-clock text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+            <p class="text-muted mt-3">No entries found.</p>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+{# Format duration helper macro #}
+{% macro format_duration(minutes) %}
+    {% set hours = minutes // 60 %}
+    {% set mins = minutes % 60 %}
+    {% if hours > 0 and mins > 0 %}
+        {{ hours }}h {{ mins }}m
+    {% elif hours > 0 %}
+        {{ hours }}h
+    {% else %}
+        {{ mins }}m
+    {% endif %}
+{% endmacro %}
+
+{# Format currency helper macro #}
+{% macro format_currency(amount, currency="USD") %}
+    {%- if currency == "USD" -%}
+        ${{ amount | round(precision=2) }}
+    {%- elif currency == "EUR" -%}
+        €{{ amount | round(precision=2) }}
+    {%- elif currency == "GBP" -%}
+        £{{ amount | round(precision=2) }}
+    {%- elif currency == "CAD" or currency == "AUD" -%}
+        ${{ amount | round(precision=2) }} {{ currency }}
+    {%- else -%}
+        {{ amount | round(precision=2) }} {{ currency }}
+    {%- endif -%}
+{% endmacro %}
+
+{# Format duration helper macro with better logic #}
+{% macro format_duration(minutes) %}
+    {%- set hours = minutes // 60 -%}
+    {%- set mins = minutes % 60 -%}
+    {%- if hours > 0 and mins > 0 -%}
+        {{ hours }}h {{ mins }}m
+    {%- elif hours > 0 -%}
+        {{ hours }}h
+    {%- elif mins > 0 -%}
+        {{ mins }}m
+    {%- else -%}
+        0m
+    {%- endif -%}
+{% endmacro %}
+
+{# Format time display helper #}
+{% macro format_time_display(datetime_str, timezone=null) %}
+    {%- if timezone -%}
+        {{ datetime_str | date(format='%B %d, %Y at %I:%M %p %Z', timezone=timezone) }}
+    {%- else -%}
+        {{ datetime_str | date(format='%B %d, %Y at %I:%M %p') }}
+    {%- endif -%}
+{% endmacro %}
+
+{# Status badge helper #}
+{% macro status_badge(status, text=null) %}
+    {%- set badge_text = text or status -%}
+    {%- if status == "active" -%}
+        <span class="status-badge status-active">
+            <i class="fas fa-circle"></i>{{ badge_text }}
+        </span>
+    {%- elif status == "complete" -%}
+        <span class="status-badge" style="background-color: var(--success); color: var(--text-primary);">
+            <i class="fas fa-check"></i>{{ badge_text }}
+        </span>
+    {%- elif status == "running" -%}
+        <span class="status-badge status-active">
+            <i class="fas fa-play"></i>{{ badge_text }}
+        </span>
+    {%- elif status == "pending" -%}
+        <span class="status-badge" style="background-color: var(--warning); color: var(--text-primary);">
+            <i class="fas fa-clock"></i>{{ badge_text }}
+        </span>
+    {%- else -%}
+        <span class="status-badge">
+            <i class="fas fa-info"></i>{{ badge_text }}
+        </span>
+    {%- endif -%}
+{% endmacro %}
+
+{# Card wrapper component #}
+{% macro worktime_card(title, icon="fas fa-clock") %}
+    <div class="worktime-card">
+        <div class="worktime-card-header">
+            <h3 class="mb-0">
+                <i class="{{ icon }} me-2"></i>{{ title }}
+            </h3>
+        </div>
+        {{ caller() }}
+    </div>
+{% endmacro %}
+
+{# Hero section component #}
+{% macro worktime_hero(title, subtitle, username, show_install=true) %}
+    <div class="worktime-hero">
+        <h1 class="worktime-title mb-3">
+            <i class="fas fa-clock me-2"></i>{{ title }}
+        </h1>
+        <p class="mb-0">{{ subtitle }}{% if username %}, <strong>{{ username }}</strong>{% endif %}!</p>
+        {% if show_install %}
+        <button id="install-btn" class="btn btn-light mt-3" style="display: none;">
+            <i class="fas fa-download me-2"></i>Install App
+        </button>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{# Form field component - simplified #}
+{% macro form_field_simple(type, name, label, icon="", placeholder="", required=false) %}
+    <div class="col-12">
+        <label for="{{ name }}" class="form-label">
+            {% if icon %}<i class="{{ icon }} me-1"></i>{% endif %}{{ label }}
+        </label>
+        <input type="{{ type }}" class="form-control" id="{{ name }}" name="{{ name }}"
+               {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+               {% if required %}required{% endif %}>
+    </div>
+{% endmacro %}
+
+{# Select field component #}
+{% macro select_field(name, label, options, icon="", placeholder="", required=false) %}
+    <div class="col-12">
+        <label for="{{ name }}" class="form-label">
+            {% if icon %}<i class="{{ icon }} me-1"></i>{% endif %}{{ label }}
+        </label>
+        <select class="form-control" id="{{ name }}" name="{{ name }}"{% if required %} required{% endif %}>
+            {% if placeholder %}
+            <option value="">{{ placeholder }}</option>
+            {% endif %}
+            {% for option in options %}
+                <option value="{{ option.value }}">{{ option.text }}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endmacro %}

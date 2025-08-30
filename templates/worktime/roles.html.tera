@@ -1,79 +1,51 @@
 {% extends "worktime_base" %}
+{% import "worktime_macros" as wt %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="worktime-title mb-0">
         <i class="fas fa-user-tag me-2"></i>Manage Roles
     </h1>
-    <a href="/" class="btn btn-secondary">
+    <a href="/worktime" class="btn btn-secondary">
         <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
     </a>
 </div>
 
-<!-- Quick Actions -->
-<div class="worktime-nav" style="margin: 1rem 0;">
-    <div class="text-center mb-3">
-        <h4 class="worktime-subtitle">
-            <i class="fas fa-compass me-2"></i>Quick Actions
-        </h4>
-    </div>
-    <div class="row g-2">
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime" class="btn btn-outline-primary w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-home me-2"></i>Dashboard
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime/entries" class="btn btn-outline-info w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-list-ul me-2"></i>View Entries
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime/settings" class="btn btn-outline-success w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-cog me-2"></i>Settings
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime/notifications" class="btn btn-outline-warning w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-bell me-2"></i>Notifications
-            </a>
-        </div>
-    </div>
-</div>
+{{ wt::quick_nav(current_page="roles", show_mobile_menu=false) }}
 
 <!-- Add New Role -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-plus me-2"></i>Add New Role
-        </h3>
-    </div>
-    
-    <form method="post" action="/roles" class="row g-3">
-        <div class="col-md-3">
-            <label for="role_name" class="form-label">
-                <i class="fas fa-briefcase me-1"></i>Role Name
-            </label>
-            <input type="text" class="form-control" id="role_name" name="role_name" placeholder="e.g., Developer, Designer" required>
-        </div>
+{% call wt::worktime_card(title="Add New Role", icon="fas fa-plus") %}
+    <form method="post" action="/worktime/roles" class="row g-3">
+        {{ wt::form_field_simple(
+            type="text", 
+            name="role_name", 
+            label="Role Name", 
+            icon="fas fa-briefcase",
+            placeholder="e.g., Developer, Designer",
+            required=true
+        ) }}
+        
         <div class="col-md-3">
             <label for="hourly_wage" class="form-label">
                 <i class="fas fa-dollar-sign me-1"></i>Hourly Wage
             </label>
             <input type="number" step="0.01" class="form-control" id="hourly_wage" name="hourly_wage" placeholder="25.00" required>
         </div>
-        <div class="col-md-3">
-            <label for="currency" class="form-label">
-                <i class="fas fa-coins me-1"></i>Currency
-            </label>
-            <select class="form-control" id="currency" name="currency" required>
-                <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="GBP">GBP (£)</option>
-                <option value="CAD">CAD ($)</option>
-                <option value="AUD">AUD ($)</option>
-            </select>
-        </div>
+        
+        {{ wt::select_field(
+            name="currency",
+            label="Currency",
+            icon="fas fa-coins",
+            required=true,
+            options=[
+                {value: "USD", text: "USD ($)"},
+                {value: "EUR", text: "EUR (€)"},
+                {value: "GBP", text: "GBP (£)"},
+                {value: "CAD", text: "CAD ($)"},
+                {value: "AUD", text: "AUD ($)"}
+            ]
+        ) }}
+        
         <div class="col-md-3">
             <div class="form-check mt-4">
                 <input class="form-check-input" type="checkbox" id="is_tipped" name="is_tipped" value="true">
@@ -88,16 +60,10 @@
             </button>
         </div>
     </form>
-</div>
+{% endcall %}
 
 <!-- Existing Roles -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-list me-2"></i>Your Roles
-        </h3>
-    </div>
-    
+{% call wt::worktime_card(title="Your Roles", icon="fas fa-list") %}
     {% if roles %}
         <div class="table-responsive">
             <table class="table">
@@ -119,7 +85,7 @@
                         </td>
                         <td>
                             <span class="badge" style="background-color: var(--success); color: var(--text-primary);">
-                                ${{ role.hourly_wage }}/hr
+                                {{ wt::format_currency(role.hourly_wage, role.currency) }}/hr
                             </span>
                         </td>
                         <td class="d-none d-sm-table-cell">
@@ -141,7 +107,7 @@
                                 <button class="btn btn-warning btn-sm" onclick="editRole('{{ role.id }}', '{{ role.role_name }}', {{ role.hourly_wage }}, '{{ role.currency }}', {{ role.is_tipped | lower }})">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <form method="post" action="/roles/delete/{{ role.id }}" class="d-inline" 
+                                <form method="post" action="/worktime/roles/delete/{{ role.id }}" class="d-inline" 
                                       onsubmit="return confirm('Are you sure you want to delete this role?')">
                                     <button type="submit" class="btn btn-danger btn-sm">
                                         <i class="fas fa-trash"></i>
@@ -160,7 +126,7 @@
             <p class="text-muted mt-3">No roles created yet. Add your first role to start tracking work time!</p>
         </div>
     {% endif %}
-</div>
+{% endcall %}
 
 <!-- Edit Role Modal (if needed) -->
 <div class="modal fade" id="editRoleModal" tabindex="-1">
