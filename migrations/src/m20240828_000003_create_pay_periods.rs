@@ -1,4 +1,5 @@
 use sea_orm_migration::prelude::*;
+use sea_orm::DatabaseBackend;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -42,24 +43,37 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
-        // Add foreign key constraint for pay_period_id
-        manager
-            .alter_table(
-                Table::alter()
-                    .table(WorkTimeEntry::Table)
-                    .add_foreign_key(
-                        TableForeignKey::new()
-                            .name("FK_work_time_entry_pay_period")
-                            .from_tbl(WorkTimeEntry::Table)
-                            .from_col(WorkTimeEntry::PayPeriodId)
-                            .to_tbl(PayPeriod::Table)
-                            .to_col(PayPeriod::Id)
-                            .on_delete(ForeignKeyAction::SetNull)
-                            .on_update(ForeignKeyAction::Cascade),
+        // Handle foreign key constraints differently based on database backend
+        let db_backend = manager.get_database_backend();
+        match db_backend {
+            DatabaseBackend::Postgres => {
+                // PostgreSQL supports adding foreign keys to existing tables
+                manager
+                    .alter_table(
+                        Table::alter()
+                            .table(WorkTimeEntry::Table)
+                            .add_foreign_key(
+                                TableForeignKey::new()
+                                    .name("FK_work_time_entry_pay_period")
+                                    .from_tbl(WorkTimeEntry::Table)
+                                    .from_col(WorkTimeEntry::PayPeriodId)
+                                    .to_tbl(PayPeriod::Table)
+                                    .to_col(PayPeriod::Id)
+                                    .on_delete(ForeignKeyAction::SetNull)
+                                    .on_update(ForeignKeyAction::Cascade),
+                            )
+                            .to_owned(),
                     )
-                    .to_owned(),
-            )
-            .await?;
+                    .await?;
+            },
+            DatabaseBackend::Sqlite => {
+                // SQLite doesn't support adding foreign keys to existing tables
+                // Foreign key constraint will be enforced at application level
+            },
+            _ => {
+                return Err(DbErr::Custom("Unsupported database backend".to_string()));
+            }
+        }
 
         // Create indexes for better performance
         manager
@@ -97,15 +111,27 @@ impl MigrationTrait for Migration {
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        // Remove foreign key constraint first
-        manager
-            .alter_table(
-                Table::alter()
-                    .table(WorkTimeEntry::Table)
-                    .drop_foreign_key(Alias::new("FK_work_time_entry_pay_period"))
-                    .to_owned(),
-            )
-            .await?;
+        // Handle foreign key removal based on database backend
+        let db_backend = manager.get_database_backend();
+        match db_backend {
+            DatabaseBackend::Postgres => {
+                // Remove foreign key constraint first (PostgreSQL)
+                manager
+                    .alter_table(
+                        Table::alter()
+                            .table(WorkTimeEntry::Table)
+                            .drop_foreign_key(Alias::new("FK_work_time_entry_pay_period"))
+                            .to_owned(),
+                    )
+                    .await?;
+            },
+            DatabaseBackend::Sqlite => {
+                // SQLite: No foreign key to remove as it wasn't added
+            },
+            _ => {
+                return Err(DbErr::Custom("Unsupported database backend".to_string()));
+            }
+        }
 
         // Remove pay_period_id column from work_time_entry
         manager
