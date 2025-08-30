@@ -5,6 +5,7 @@ use rocket::{
     response::{Flash, Redirect},
     routes, Build, Rocket, State,
     http::{Cookie, CookieJar},
+    serde::json::Json,
 };
 use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
@@ -773,6 +774,28 @@ async fn update_pay_period_settings(
     }
 }
 
+#[get("/api/stats")]
+async fn api_stats(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    service: &State<WorkTimeService>,
+) -> Json<WorkTimeSummaryDTO> {
+    let db = conn.into_inner();
+    
+    let summary = service.get_work_time_summary(db, user.account_id, None, None).await.unwrap_or_else(|_| {
+        WorkTimeSummaryDTO {
+            total_hours: 0.0,
+            total_earnings: 0.0,
+            currency: "USD".to_string(),
+            entries_count: 0,
+            current_shift_earnings: 0.0,
+            pay_period_hours: 0.0,
+        }
+    });
+    
+    Json(summary)
+}
+
 fn routes() -> Vec<rocket::Route> {
     routes![
         home,
@@ -781,6 +804,7 @@ fn routes() -> Vec<rocket::Route> {
         register_view,
         register,
         dashboard,
+        api_stats,
         roles_view,
         create_role,
         edit_role,

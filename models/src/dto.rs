@@ -102,6 +102,7 @@ pub struct UserRoleFormDTO {
     pub role_name: String,
     pub hourly_wage: String, // Use String to handle form input, convert to f64 in service
     pub currency: String,
+    pub is_tipped: Option<bool>, // Optional for form handling
 }
 
 /// Form DTO for creating work time entries
@@ -130,6 +131,15 @@ pub struct WorkTimeSummaryDTO {
     pub entries_count: i32,
     pub current_shift_earnings: f64,
     pub pay_period_hours: f64,
+}
+
+/// Internal struct for pay period summary data
+#[derive(Clone, Debug, PartialEq)]
+pub struct PayPeriodSummaryData {
+    pub hours: f64,
+    pub earnings: f64,
+    pub currency: String,
+    pub entries_count: i32,
 }
 
 /// Result struct for work time entry with role information and timezone formatting

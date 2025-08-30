@@ -14,6 +14,7 @@ mod m20241207_000001_add_comment_replies;
 mod m20241210_000001_add_youtube_downloads;
 mod m20241212_000001_add_background_jobs;
 mod m20241215_000001_fix_work_time_timezone;
+mod m20250130_000001_add_tipped_role;
 
 pub struct Migrator;
 
@@ -35,6 +36,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20241210_000001_add_youtube_downloads::Migration),
             Box::new(m20241212_000001_add_background_jobs::Migration),
             Box::new(m20241215_000001_fix_work_time_timezone::Migration),
+            Box::new(m20250130_000001_add_tipped_role::Migration),
         ]
     }
 }

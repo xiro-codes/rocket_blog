@@ -10,6 +10,37 @@
     </a>
 </div>
 
+<!-- Quick Actions -->
+<div class="worktime-nav" style="margin: 1rem 0;">
+    <div class="text-center mb-3">
+        <h4 class="worktime-subtitle">
+            <i class="fas fa-compass me-2"></i>Quick Actions
+        </h4>
+    </div>
+    <div class="row g-2">
+        <div class="col-sm-6 col-lg-3">
+            <a href="/worktime" class="btn btn-outline-primary w-100" style="margin: 0.25rem 0;">
+                <i class="fas fa-home me-2"></i>Dashboard
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a href="/worktime/entries" class="btn btn-outline-info w-100" style="margin: 0.25rem 0;">
+                <i class="fas fa-list-ul me-2"></i>View Entries
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a href="/worktime/settings" class="btn btn-outline-success w-100" style="margin: 0.25rem 0;">
+                <i class="fas fa-cog me-2"></i>Settings
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a href="/worktime/notifications" class="btn btn-outline-warning w-100" style="margin: 0.25rem 0;">
+                <i class="fas fa-bell me-2"></i>Notifications
+            </a>
+        </div>
+    </div>
+</div>
+
 <!-- Add New Role -->
 <div class="worktime-card">
     <div class="worktime-card-header">
@@ -19,19 +50,19 @@
     </div>
     
     <form method="post" action="/roles" class="row g-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="role_name" class="form-label">
                 <i class="fas fa-briefcase me-1"></i>Role Name
             </label>
             <input type="text" class="form-control" id="role_name" name="role_name" placeholder="e.g., Developer, Designer" required>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="hourly_wage" class="form-label">
                 <i class="fas fa-dollar-sign me-1"></i>Hourly Wage
             </label>
             <input type="number" step="0.01" class="form-control" id="hourly_wage" name="hourly_wage" placeholder="25.00" required>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="currency" class="form-label">
                 <i class="fas fa-coins me-1"></i>Currency
             </label>
@@ -42,6 +73,14 @@
                 <option value="CAD">CAD ($)</option>
                 <option value="AUD">AUD ($)</option>
             </select>
+        </div>
+        <div class="col-md-3">
+            <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" id="is_tipped" name="is_tipped" value="true">
+                <label class="form-check-label" for="is_tipped">
+                    <i class="fas fa-hand-holding-usd me-1"></i>Tipped Role
+                </label>
+            </div>
         </div>
         <div class="col-12 text-center">
             <button type="submit" class="btn btn-success">
@@ -66,6 +105,7 @@
                     <tr>
                         <th>Role Name</th>
                         <th>Hourly Wage</th>
+                        <th class="d-none d-sm-table-cell">Type</th>
                         <th class="d-none d-md-table-cell">Created</th>
                         <th>Actions</th>
                     </tr>
@@ -82,12 +122,23 @@
                                 ${{ role.hourly_wage }}/hr
                             </span>
                         </td>
+                        <td class="d-none d-sm-table-cell">
+                            {% if role.is_tipped %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-hand-holding-usd me-1"></i>Tipped
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-clock me-1"></i>Hourly
+                                </span>
+                            {% endif %}
+                        </td>
                         <td class="d-none d-md-table-cell text-muted">
                             {{ role.created_at | date(format='%m/%d/%Y') }}
                         </td>
                         <td>
                             <div class="d-flex gap-2">
-                                <button class="btn btn-warning btn-sm" onclick="editRole('{{ role.id }}', '{{ role.role_name }}', {{ role.hourly_wage }}, '{{ role.currency }}')">
+                                <button class="btn btn-warning btn-sm" onclick="editRole('{{ role.id }}', '{{ role.role_name }}', {{ role.hourly_wage }}, '{{ role.currency }}', {{ role.is_tipped | lower }})">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <form method="post" action="/roles/delete/{{ role.id }}" class="d-inline" 
@@ -141,6 +192,14 @@
                             <option value="AUD">AUD ($)</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="edit_is_tipped" name="is_tipped" value="true">
+                            <label class="form-check-label" for="edit_is_tipped">
+                                <i class="fas fa-hand-holding-usd me-1"></i>Tipped Role
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -179,7 +238,7 @@
 
 {% block script %}
 <script>
-function editRole(id, name, wage, currency) {
+function editRole(id, name, wage, currency, isTipped) {
     const modal = new bootstrap.Modal(document.getElementById('editRoleModal'));
     const form = document.getElementById('editRoleForm');
     
@@ -187,6 +246,7 @@ function editRole(id, name, wage, currency) {
     document.getElementById('edit_role_name').value = name;
     document.getElementById('edit_hourly_wage').value = wage;
     document.getElementById('edit_currency').value = currency;
+    document.getElementById('edit_is_tipped').checked = isTipped;
     
     modal.show();
 }

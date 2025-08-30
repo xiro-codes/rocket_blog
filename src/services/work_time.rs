@@ -1,6 +1,6 @@
 use chrono::Utc;
 use models::{
-    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, WorkTimeEntryDisplayDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO},
+    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, WorkTimeEntryDisplayDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO, PayPeriodSummaryData},
     user_role, work_time_entry, notification_settings, pay_period,
 };
 use sea_orm::*;
@@ -38,6 +38,7 @@ impl WorkTimeService {
             role_name: Set(data.role_name.clone()),
             hourly_wage: Set(hourly_wage),
             currency: Set(data.currency.clone()),
+            is_tipped: Set(data.is_tipped.unwrap_or(false)),
             is_active: Set(true),
             created_at: Set(now.naive_utc()),
             updated_at: Set(now.naive_utc()),
@@ -79,6 +80,7 @@ impl WorkTimeService {
         role.role_name = Set(data.role_name);
         role.hourly_wage = Set(hourly_wage);
         role.currency = Set(data.currency);
+        role.is_tipped = Set(data.is_tipped.unwrap_or(false));
         role.updated_at = Set(Utc::now().naive_utc());
 
         role.update(db).await
@@ -333,19 +335,50 @@ impl WorkTimeService {
         start_date: Option<chrono::DateTime<Utc>>,
         end_date: Option<chrono::DateTime<Utc>>,
     ) -> Result<WorkTimeSummaryDTO, DbErr> {
-        let mut query = work_time_entry::Entity::find()
+        // Get pay period data instead of total data
+        let pay_period_data = self.get_pay_period_summary(db, account_id).await?;
+        
+        // Get current shift earnings (active entry if any)
+        let current_shift_earnings = self.get_current_shift_earnings(db, account_id).await.unwrap_or(0.0);
+        
+        Ok(WorkTimeSummaryDTO {
+            total_hours: pay_period_data.hours, // Now shows pay period hours instead of total
+            total_earnings: pay_period_data.earnings, // Now shows pay period earnings instead of total  
+            currency: pay_period_data.currency,
+            entries_count: pay_period_data.entries_count,
+            current_shift_earnings,
+            pay_period_hours: pay_period_data.hours, // This is now the same as total_hours
+        })
+    }
+
+    /// Get pay period summary data  
+    pub async fn get_pay_period_summary(&self, db: &DbConn, account_id: Uuid) -> Result<PayPeriodSummaryData, DbErr> {
+        use chrono::{Datelike, Duration, Weekday};
+        
+        let now = Utc::now().date_naive();
+        
+        // Calculate pay period start (Monday of current or previous week depending on bi-weekly cycle)
+        let days_since_monday = match now.weekday() {
+            Weekday::Mon => 0,
+            Weekday::Tue => 1,
+            Weekday::Wed => 2,
+            Weekday::Thu => 3,
+            Weekday::Fri => 4,
+            Weekday::Sat => 5,
+            Weekday::Sun => 6,
+        };
+        
+        let current_monday = now - Duration::days(days_since_monday);
+        let pay_period_start = current_monday.and_hms_opt(0, 0, 0).unwrap().and_utc();
+        
+        // Get all completed entries in this pay period
+        let entries = work_time_entry::Entity::find()
             .find_also_related(user_role::Entity)
             .filter(work_time_entry::Column::AccountId.eq(account_id))
-            .filter(work_time_entry::Column::IsActive.eq(false)); // Only completed entries
-
-        if let Some(start) = start_date {
-            query = query.filter(work_time_entry::Column::StartTime.gte(start));
-        }
-        if let Some(end) = end_date {
-            query = query.filter(work_time_entry::Column::StartTime.lte(end));
-        }
-
-        let entries = query.all(db).await?;
+            .filter(work_time_entry::Column::IsActive.eq(false))
+            .filter(work_time_entry::Column::StartTime.gte(pay_period_start))
+            .all(db)
+            .await?;
 
         let mut total_hours = 0.0;
         let mut total_earnings = 0.0;
@@ -361,19 +394,11 @@ impl WorkTimeService {
             }
         }
 
-        // Get current shift earnings (active entry if any)
-        let current_shift_earnings = self.get_current_shift_earnings(db, account_id).await.unwrap_or(0.0);
-        
-        // Get pay period hours (current pay period)
-        let pay_period_hours = self.get_current_pay_period_hours(db, account_id).await.unwrap_or(0.0);
-
-        Ok(WorkTimeSummaryDTO {
-            total_hours,
-            total_earnings,
+        Ok(PayPeriodSummaryData {
+            hours: total_hours,
+            earnings: total_earnings,
             currency,
             entries_count,
-            current_shift_earnings,
-            pay_period_hours,
         })
     }
 

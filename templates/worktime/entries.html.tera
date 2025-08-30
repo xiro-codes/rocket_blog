@@ -10,6 +10,37 @@
     </a>
 </div>
 
+<!-- Quick Actions -->
+<div class="worktime-nav" style="margin: 1rem 0;">
+    <div class="text-center mb-3">
+        <h4 class="worktime-subtitle">
+            <i class="fas fa-compass me-2"></i>Quick Actions
+        </h4>
+    </div>
+    <div class="row g-2">
+        <div class="col-sm-6 col-lg-3">
+            <a href="/worktime" class="btn btn-outline-primary w-100" style="margin: 0.25rem 0;">
+                <i class="fas fa-home me-2"></i>Dashboard
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a href="/worktime/roles" class="btn btn-outline-primary w-100" style="margin: 0.25rem 0;">
+                <i class="fas fa-user-tag me-2"></i>Manage Roles
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a href="/worktime/settings" class="btn btn-outline-success w-100" style="margin: 0.25rem 0;">
+                <i class="fas fa-cog me-2"></i>Settings
+            </a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <a href="/worktime/notifications" class="btn btn-outline-warning w-100" style="margin: 0.25rem 0;">
+                <i class="fas fa-bell me-2"></i>Notifications
+            </a>
+        </div>
+    </div>
+</div>
+
 <!-- Summary Stats -->
 <div class="stats-grid mb-4">
     <div class="stat-card">
