@@ -261,19 +261,6 @@
     {% endif %}
 {% endmacro %}
 
-{# Format duration helper macro #}
-{% macro format_duration(minutes) %}
-    {% set hours = minutes // 60 %}
-    {% set mins = minutes % 60 %}
-    {% if hours > 0 and mins > 0 %}
-        {{ hours }}h {{ mins }}m
-    {% elif hours > 0 %}
-        {{ hours }}h
-    {% else %}
-        {{ mins }}m
-    {% endif %}
-{% endmacro %}
-
 {# Format currency helper macro #}
 {% macro format_currency(amount, currency="USD") %}
     {%- if currency == "USD" -%}
@@ -289,7 +276,7 @@
     {%- endif -%}
 {% endmacro %}
 
-{# Format duration helper macro with better logic #}
+{# Format duration helper macro #}
 {% macro format_duration(minutes) %}
     {%- set hours = minutes // 60 -%}
     {%- set mins = minutes % 60 -%}
