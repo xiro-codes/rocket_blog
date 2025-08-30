@@ -36,6 +36,7 @@ async fn home(
     user: OptionalUser,
     service: &State<WorkTimeService>,
     auth_service: &State<AuthService>,
+    settings_service: &State<SettingsService>,
 ) -> Result<Template, Flash<Redirect>> {
     log::info!("Route accessed: GET / - Work time home page");
     let db = conn.into_inner();
@@ -46,8 +47,13 @@ async fn home(
             // User is authenticated, show dashboard
             match service.get_user_roles(db, account.id).await {
                 Ok(roles) => {
+                    // Get user timezone preference
+                    let user_timezone = settings_service.get_user_timezone(db, account.id).await
+                        .unwrap_or_else(|_| None)
+                        .unwrap_or_else(|| "UTC".to_string());
+                    
                     let active_entry = service.get_active_entry(db, account.id).await.unwrap_or(None);
-                    let recent_entries = service.get_work_entries_with_roles(db, account.id, Some(10), None).await.unwrap_or_default();
+                    let recent_entries = service.get_work_entries_for_display(db, account.id, &user_timezone, Some(10), None).await.unwrap_or_default();
                     let summary = service.get_work_time_summary(db, account.id, None, None).await.unwrap_or_else(|_| {
                         WorkTimeSummaryDTO {
                             total_hours: 0.0,
@@ -66,6 +72,7 @@ async fn home(
                             recent_entries: recent_entries,
                             summary: summary,
                             username: account.username,
+                            user_timezone: user_timezone,
                         }
                     ));
                 }
@@ -178,14 +185,20 @@ async fn dashboard(
     conn: Connection<'_, Db>,
     user: AuthenticatedUser,
     service: &State<WorkTimeService>,
+    settings_service: &State<SettingsService>,
 ) -> Result<Template, Flash<Redirect>> {
     log::info!("Route accessed: GET /dashboard - Work time dashboard");
     let db = conn.into_inner();
     
     match service.get_user_roles(db, user.account_id).await {
         Ok(roles) => {
+            // Get user timezone preference
+            let user_timezone = settings_service.get_user_timezone(db, user.account_id).await
+                .unwrap_or_else(|_| None)
+                .unwrap_or_else(|| "UTC".to_string());
+            
             let active_entry = service.get_active_entry(db, user.account_id).await.unwrap_or(None);
-            let recent_entries = service.get_work_entries_with_roles(db, user.account_id, Some(10), None).await.unwrap_or_default();
+            let recent_entries = service.get_work_entries_for_display(db, user.account_id, &user_timezone, Some(10), None).await.unwrap_or_default();
             let summary = service.get_work_time_summary(db, user.account_id, None, None).await.unwrap_or_else(|_| {
                 WorkTimeSummaryDTO {
                     total_hours: 0.0,
@@ -204,6 +217,7 @@ async fn dashboard(
                     recent_entries: recent_entries,
                     summary: summary,
                     username: user.username,
+                    user_timezone: user_timezone,
                 }
             ))
         }
@@ -339,12 +353,21 @@ async fn entries_view(
     conn: Connection<'_, Db>,
     user: AuthenticatedUser,
     service: &State<WorkTimeService>,
+    settings_service: &State<SettingsService>,
 ) -> Result<Template, Flash<Redirect>> {
     log::info!("Route accessed: GET /entries - Work time entries view");
     let db = conn.into_inner();
     
     match service.get_work_entries_with_roles(db, user.account_id, Some(50), None).await {
-        Ok(entries) => {
+        Ok(raw_entries) => {
+            // Get user timezone preference
+            let user_timezone = settings_service.get_user_timezone(db, user.account_id).await
+                .unwrap_or_else(|_| None)
+                .unwrap_or_else(|| "UTC".to_string());
+            
+            // Convert to display format
+            let entries = WorkTimeService::format_entries_for_display(raw_entries, &user_timezone);
+            
             let roles = service.get_user_roles(db, user.account_id).await.unwrap_or_default();
             let summary = service.get_work_time_summary(db, user.account_id, None, None).await.unwrap_or_else(|_| {
                 WorkTimeSummaryDTO {
@@ -365,6 +388,7 @@ async fn entries_view(
                     total_entries: summary.entries_count,
                     total_hours: summary.total_hours,
                     total_earnings: summary.total_earnings,
+                    user_timezone: user_timezone,
                 }
             ))
         }
