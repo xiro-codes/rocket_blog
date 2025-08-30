@@ -76,6 +76,9 @@ pub use settings::SettingsService;
 
 mod tag;
 pub use tag::TagService;
+mod timezone;
+/// Timezone conversion and user preference service
+pub use timezone::TimezoneService;
 mod work_time;
 pub use work_time::WorkTimeService;
 mod pay_period;

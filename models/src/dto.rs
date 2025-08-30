@@ -134,13 +134,32 @@ pub struct WorkTimeSummaryDTO {
     pub entries_count: i32,
 }
 
-/// Result struct for work time entry with role information
+/// Result struct for work time entry with role information and timezone formatting
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct WorkTimeEntryWithRoleDTO {
     pub id: Uuid,
     pub start_time: DateTime<Utc>,
     pub end_time: Option<DateTime<Utc>>,
+    pub duration: Option<i32>,
+    pub description: Option<String>,
+    pub project: Option<String>,
+    pub is_active: bool,
+    pub role_name: String,
+    pub hourly_wage: f64,
+    pub currency: String,
+    pub earnings: Option<f64>,
+}
+
+/// Extended work time entry with timezone-aware display fields
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct WorkTimeEntryDisplayDTO {
+    pub id: Uuid,
+    pub start_time: DateTime<Utc>,
+    pub end_time: Option<DateTime<Utc>>,
+    pub start_time_display: String,
+    pub end_time_display: Option<String>,
     pub duration: Option<i32>,
     pub description: Option<String>,
     pub project: Option<String>,
@@ -188,6 +207,13 @@ pub struct PayPeriodWithSummaryDTO {
     pub currency: String,
     pub entries_count: i32,
     pub is_current: bool, // Whether this pay period includes today's date
+}
+
+/// Form DTO for timezone settings
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct TimezoneSettingsFormDTO {
+    pub timezone: String,
 }
 
 /// Enhanced work time summary with pay period information

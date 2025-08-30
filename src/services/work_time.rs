@@ -1,12 +1,12 @@
 use chrono::Utc;
 use models::{
-    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO},
+    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, WorkTimeEntryDisplayDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO},
     user_role, work_time_entry, notification_settings, pay_period,
 };
 use sea_orm::*;
 use uuid::Uuid;
 
-use crate::{services::{BaseService, PayPeriodService}, impl_service_with_base};
+use crate::{services::{BaseService, PayPeriodService, TimezoneService}, impl_service_with_base};
 
 type DbConn = DatabaseConnection;
 
@@ -578,6 +578,51 @@ impl WorkTimeService {
             currency,
             entries_count,
         })
+    }
+
+    /// Convert WorkTimeEntryWithRoleDTO to WorkTimeEntryDisplayDTO with timezone formatting
+    pub fn format_entries_for_display(
+        entries: Vec<WorkTimeEntryWithRoleDTO>,
+        user_timezone: &str,
+    ) -> Vec<WorkTimeEntryDisplayDTO> {
+        entries.into_iter().map(|entry| {
+            let start_time_display = TimezoneService::format_with_timezone(entry.start_time, user_timezone)
+                .unwrap_or_else(|_| entry.start_time.format("%Y-%m-%d %H:%M:%S UTC").to_string());
+            
+            let end_time_display = entry.end_time.map(|end_time| {
+                TimezoneService::format_with_timezone(end_time, user_timezone)
+                    .unwrap_or_else(|_| end_time.format("%Y-%m-%d %H:%M:%S UTC").to_string())
+            });
+            
+            WorkTimeEntryDisplayDTO {
+                id: entry.id,
+                start_time: entry.start_time,
+                end_time: entry.end_time,
+                start_time_display,
+                end_time_display,
+                duration: entry.duration,
+                description: entry.description,
+                project: entry.project,
+                is_active: entry.is_active,
+                role_name: entry.role_name,
+                hourly_wage: entry.hourly_wage,
+                currency: entry.currency,
+                earnings: entry.earnings,
+            }
+        }).collect()
+    }
+
+    /// Get work entries with timezone-aware display formatting
+    pub async fn get_work_entries_for_display(
+        &self,
+        db: &DbConn,
+        account_id: Uuid,
+        user_timezone: &str,
+        limit: Option<u64>,
+        offset: Option<u64>,
+    ) -> Result<Vec<WorkTimeEntryDisplayDTO>, DbErr> {
+        let entries = self.get_work_entries_with_roles(db, account_id, limit, offset).await?;
+        Ok(Self::format_entries_for_display(entries, user_timezone))
     }
 }
 

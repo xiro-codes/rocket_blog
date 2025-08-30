@@ -243,6 +243,18 @@ impl SettingsService {
         self.set_setting(db, "ollama_enabled", value, false).await
     }
 
+    /// Get user timezone preference by account ID
+    pub async fn get_user_timezone(&self, db: &DatabaseConnection, account_id: Uuid) -> Result<Option<String>, String> {
+        let key = format!("user_timezone_{}", account_id);
+        self.get_setting(db, &key).await
+    }
+
+    /// Set user timezone preference by account ID
+    pub async fn set_user_timezone(&self, db: &DatabaseConnection, account_id: Uuid, timezone: &str) -> Result<(), String> {
+        let key = format!("user_timezone_{}", account_id);
+        self.set_setting(db, &key, timezone, false).await
+    }
+
     /// Test Ollama connection
     pub async fn test_ollama_connection(&self, url: &str) -> Result<bool, String> {
         use reqwest::Client;
