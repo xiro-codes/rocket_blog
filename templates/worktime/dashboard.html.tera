@@ -193,11 +193,19 @@
                 <tbody>
                     {% for entry in recent_entries %}
                     <tr>
-                        <td>{{ entry.start_time_display | truncate(length=16) }}</td>
+                        <td>{{ entry.start_time_display }}</td>
                         <td>{{ entry.role_name }}</td>
                         <td>
                             {% if entry.duration and not entry.is_active %}
-                                {{ (entry.duration / 60) | round(precision=1) }}h
+                                {% set hours = entry.duration // 60 %}
+                                {% set minutes = entry.duration % 60 %}
+                                {% if hours > 0 and minutes > 0 %}
+                                    {{ hours }}h {{ minutes }}m
+                                {% elif hours > 0 %}
+                                    {{ hours }}h
+                                {% else %}
+                                    {{ minutes }}m
+                                {% endif %}
                             {% elif entry.is_active %}
                                 <span class="status-badge status-active">
                                     <i class="fas fa-circle"></i>Active

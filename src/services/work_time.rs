@@ -804,18 +804,35 @@ impl WorkTimeService {
         })
     }
 
+    /// Format duration in minutes to readable format (e.g., "2h 15m")
+    pub fn format_duration(duration_minutes: Option<i64>) -> String {
+        match duration_minutes {
+            Some(minutes) if minutes > 0 => {
+                let hours = minutes / 60;
+                let remaining_minutes = minutes % 60;
+                
+                match (hours, remaining_minutes) {
+                    (0, m) => format!("{}m", m),
+                    (h, 0) => format!("{}h", h),
+                    (h, m) => format!("{}h {}m", h, m),
+                }
+            },
+            _ => "—".to_string()
+        }
+    }
+
     /// Convert WorkTimeEntryWithRoleDTO to WorkTimeEntryDisplayDTO with timezone formatting
     pub fn format_entries_for_display(
         entries: Vec<WorkTimeEntryWithRoleDTO>,
         user_timezone: &str,
     ) -> Vec<WorkTimeEntryDisplayDTO> {
         entries.into_iter().map(|entry| {
-            let start_time_display = TimezoneService::format_with_timezone(entry.start_time, user_timezone)
-                .unwrap_or_else(|_| entry.start_time.format("%Y-%m-%d %H:%M:%S UTC").to_string());
+            let start_time_display = TimezoneService::format_compact(entry.start_time, user_timezone)
+                .unwrap_or_else(|_| entry.start_time.format("%m/%d %H:%M").to_string());
             
             let end_time_display = entry.end_time.map(|end_time| {
-                TimezoneService::format_with_timezone(end_time, user_timezone)
-                    .unwrap_or_else(|_| end_time.format("%Y-%m-%d %H:%M:%S UTC").to_string())
+                TimezoneService::format_compact(end_time, user_timezone)
+                    .unwrap_or_else(|_| end_time.format("%m/%d %H:%M").to_string())
             });
             
             WorkTimeEntryDisplayDTO {

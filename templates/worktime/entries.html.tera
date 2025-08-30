@@ -46,7 +46,7 @@
     <div class="stat-card">
         <span class="stat-value">{{ total_entries }}</span>
         <span class="stat-label">
-            <i class="fas fa-list me-1"></i>Total Entries
+            <i class="fas fa-briefcase me-1"></i>Shifts Worked This Period
         </span>
     </div>
     <div class="stat-card">
@@ -79,7 +79,7 @@
                         <th>Date</th>
                         <th>Role</th>
                         <th>Duration</th>
-                        <th class="d-none d-md-table-cell">Start Time</th>
+                        <th class="d-none d-md-table-cell">Time</th>
                         <th>Earnings</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -96,7 +96,15 @@
                         </td>
                         <td>
                             {% if entry.duration and not entry.is_active %}
-                                <strong>{{ (entry.duration / 60) | round(precision=2) }}h</strong>
+                                {% set hours = entry.duration // 60 %}
+                                {% set minutes = entry.duration % 60 %}
+                                {% if hours > 0 and minutes > 0 %}
+                                    <strong>{{ hours }}h {{ minutes }}m</strong>
+                                {% elif hours > 0 %}
+                                    <strong>{{ hours }}h</strong>
+                                {% else %}
+                                    <strong>{{ minutes }}m</strong>
+                                {% endif %}
                             {% elif entry.is_active %}
                                 <span class="status-badge status-active">
                                     <i class="fas fa-circle"></i>Active
@@ -106,7 +114,7 @@
                             {% endif %}
                         </td>
                         <td class="d-none d-md-table-cell text-muted">
-                            {{ entry.start_time_display | split(pat=" ") | nth(n=1) }}
+                            {{ entry.start_time_display | split(pat=" ") | last }}
                         </td>
                         <td>
                             {% if entry.earnings %}
