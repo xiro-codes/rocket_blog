@@ -15,6 +15,14 @@ path = "src/bin/blog.rs"
 name = "worktime"
 path = "src/bin/worktime.rs"
 
+[[bin]]
+name = "test_cli"
+path = "src/bin/test_cli.rs"
+
+[[bin]]
+name = "test_help"
+path = "src/bin/test_help.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -22,6 +30,7 @@ aes-gcm = "0.10.3"
 async-openai = "0.20.0"
 async-trait = "0.1.74"
 base64 = "0.22.1"
+clap = { version = "4.0", features = ["derive"] }
 fern = "0.7.1"
 humantime = "2.2.0"
 lipsum = "0.9.1"
@@ -51,7 +60,7 @@ features = ["minijinja"]
 
 [dependencies.sea-orm]
 version = "1.1.1"
-features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros", "mock"]
+features = [ "sqlx-postgres", "sqlx-sqlite", "runtime-tokio-rustls", "macros", "mock"]
 
 [dependencies.chrono]
 version = "0.4.31"
