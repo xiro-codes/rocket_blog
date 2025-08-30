@@ -443,6 +443,83 @@ async fn delete_entry(
     }
 }
 
+#[post("/entries/<entry_id>/delete")]
+async fn delete_entry_post(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    service: &State<WorkTimeService>,
+    entry_id: Uuid,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /entries/{}/delete - Deleting entry", entry_id);
+    let db = conn.into_inner();
+    
+    match service.delete_work_entry(db, entry_id, user.account_id).await {
+        Ok(_) => Flash::success(Redirect::to("/entries"), "Entry deleted successfully"),
+        Err(e) => {
+            log::error!("Failed to delete work entry: {}", e);
+            Flash::error(Redirect::to("/entries"), "Failed to delete entry")
+        }
+    }
+}
+
+#[get("/entries/<entry_id>/edit")]
+async fn edit_entry_view(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    service: &State<WorkTimeService>,
+    entry_id: Uuid,
+) -> Result<Template, Flash<Redirect>> {
+    log::info!("Route accessed: GET /entries/{}/edit - Edit entry view", entry_id);
+    let db = conn.into_inner();
+    
+    match service.get_work_entry_by_id(db, entry_id, user.account_id).await {
+        Ok(Some(entry)) => {
+            let roles = service.get_user_roles(db, user.account_id).await.unwrap_or_default();
+            
+            // Format times for HTML datetime-local input
+            let start_time_str = entry.start_time.format("%Y-%m-%dT%H:%M").to_string();
+            let end_time_str = entry.end_time.map(|t| t.format("%Y-%m-%dT%H:%M").to_string());
+            
+            Ok(Template::render(
+                "worktime/edit_entry",
+                context! {
+                    page_title: "Edit Work Time Entry",
+                    entry: entry,
+                    roles: roles,
+                    username: user.username,
+                    start_time_str: start_time_str,
+                    end_time_str: end_time_str,
+                }
+            ))
+        }
+        Ok(None) => Err(Flash::error(Redirect::to("/entries"), "Entry not found")),
+        Err(e) => {
+            log::error!("Failed to load work entry: {}", e);
+            Err(Flash::error(Redirect::to("/entries"), "Failed to load entry"))
+        }
+    }
+}
+
+#[post("/entries/<entry_id>/edit", data = "<form>")]
+async fn edit_entry(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    service: &State<WorkTimeService>,
+    entry_id: Uuid,
+    form: Form<WorkTimeEntryFormDTO>,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /entries/{}/edit - Update entry", entry_id);
+    let db = conn.into_inner();
+    
+    match service.update_work_entry(db, entry_id, user.account_id, form.into_inner()).await {
+        Ok(_) => Flash::success(Redirect::to("/entries"), "Entry updated successfully"),
+        Err(e) => {
+            log::error!("Failed to update work entry: {}", e);
+            Flash::error(Redirect::to(format!("/entries/{}/edit", entry_id)), "Failed to update entry")
+        }
+    }
+}
+
 #[get("/notifications")]
 async fn notifications_view(
     conn: Connection<'_, Db>,
@@ -712,7 +789,10 @@ fn routes() -> Vec<rocket::Route> {
         stop_tracking,
         entries_view,
         create_manual_entry,
+        edit_entry_view,
+        edit_entry,
         delete_entry,
+        delete_entry_post,
         notifications_view,
         update_notifications,
         payperiods_view,

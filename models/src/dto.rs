@@ -111,8 +111,6 @@ pub struct WorkTimeEntryFormDTO {
     pub user_role_id: Uuid,
     pub start_time: Option<String>, // Use String for form handling
     pub end_time: Option<String>,
-    pub description: Option<String>,
-    pub project: Option<String>,
 }
 
 /// Form DTO for time tracking controls (start/stop)
@@ -120,8 +118,6 @@ pub struct WorkTimeEntryFormDTO {
 #[serde(crate = "rocket::serde")]
 pub struct TimeTrackingControlDTO {
     pub user_role_id: Uuid,
-    pub description: Option<String>,
-    pub project: Option<String>,
 }
 
 /// Result struct for work time summary queries

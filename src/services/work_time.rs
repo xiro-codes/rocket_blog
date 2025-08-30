@@ -133,8 +133,8 @@ impl WorkTimeService {
             start_time: Set(now),
             end_time: Set(None),
             duration: Set(None),
-            description: Set(data.description.clone()),
-            project: Set(data.project.clone()),
+            description: Set(None),
+            project: Set(None),
             is_active: Set(true),
             created_at: Set(now),
             updated_at: Set(now),
@@ -258,8 +258,8 @@ impl WorkTimeService {
             start_time: Set(start_time),
             end_time: Set(end_time),
             duration: Set(duration),
-            description: Set(data.description.clone()),
-            project: Set(data.project.clone()),
+            description: Set(None),
+            project: Set(None),
             is_active: Set(false),
             created_at: Set(now),
             updated_at: Set(now),
@@ -447,6 +447,72 @@ impl WorkTimeService {
         
         log::info!("Work time entry deleted: {}", entry_id);
         Ok(())
+    }
+
+    pub async fn get_work_entry_by_id(&self, db: &DbConn, entry_id: Uuid, account_id: Uuid) -> Result<Option<work_time_entry::Model>, DbErr> {
+        work_time_entry::Entity::find_by_id(entry_id)
+            .filter(work_time_entry::Column::AccountId.eq(account_id))
+            .one(db)
+            .await
+    }
+
+    pub async fn update_work_entry(
+        &self,
+        db: &DbConn,
+        entry_id: Uuid,
+        account_id: Uuid,
+        data: WorkTimeEntryFormDTO,
+    ) -> Result<work_time_entry::Model, DbErr> {
+        log::info!("Updating work time entry {} for account {}", entry_id, account_id);
+        
+        // Get the existing entry
+        let entry = self.get_work_entry_by_id(db, entry_id, account_id).await?
+            .ok_or(DbErr::RecordNotFound("Work time entry not found".to_string()))?;
+
+        // Verify the new role belongs to the user
+        let _role = user_role::Entity::find_by_id(data.user_role_id)
+            .filter(user_role::Column::AccountId.eq(account_id))
+            .filter(user_role::Column::IsActive.eq(true))
+            .one(db)
+            .await?
+            .ok_or(DbErr::Custom("User role not found or inactive".to_string()))?;
+
+        // Parse the datetime strings
+        let start_time = if let Some(start_str) = data.start_time {
+            chrono::NaiveDateTime::parse_from_str(&start_str, "%Y-%m-%dT%H:%M")
+                .map_err(|_| DbErr::Custom("Invalid start time format".to_string()))?
+                .and_utc()
+        } else {
+            entry.start_time
+        };
+
+        let end_time = if let Some(end_str) = data.end_time {
+            Some(chrono::NaiveDateTime::parse_from_str(&end_str, "%Y-%m-%dT%H:%M")
+                .map_err(|_| DbErr::Custom("Invalid end time format".to_string()))?
+                .and_utc())
+        } else {
+            entry.end_time
+        };
+
+        // Calculate duration if both times are provided
+        let duration = if let Some(end) = end_time {
+            Some((end - start_time).num_minutes() as i32)
+        } else {
+            None
+        };
+
+        // Update the entry
+        let mut active_entry: work_time_entry::ActiveModel = entry.into();
+        active_entry.user_role_id = Set(data.user_role_id);
+        active_entry.start_time = Set(start_time);
+        active_entry.end_time = Set(end_time);
+        active_entry.duration = Set(duration);
+        active_entry.is_active = Set(end_time.is_none()); // Active if no end time
+        active_entry.updated_at = Set(Utc::now());
+
+        let updated_entry = active_entry.update(db).await?;
+        log::info!("Work time entry updated: {}", entry_id);
+        Ok(updated_entry)
     }
 
     // Notification Settings Management
