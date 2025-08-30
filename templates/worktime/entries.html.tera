@@ -14,11 +14,12 @@
 {{ wt::quick_nav(current_page="entries", show_mobile_menu=false) }}
 
 <!-- Summary Stats -->
-{{ wt::stats_grid(stats={
-    total_entries: total_entries,
-    total_hours: total_hours, 
-    total_earnings: total_earnings
-}) }}
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-value">{{ total_entries }}</span>
+        <span class="stat-label">
+            <i class="fas fa-briefcase me-1"></i>Total Entries
+        </span>
     </div>
     <div class="stat-card">
         <span class="stat-value">{{ total_hours | round(precision=1) }}h</span>
