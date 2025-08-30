@@ -1,12 +1,12 @@
 use chrono::Utc;
 use models::{
-    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO},
+    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, WorkTimeEntryDisplayDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO},
     user_role, work_time_entry, notification_settings, pay_period,
 };
 use sea_orm::*;
 use uuid::Uuid;
 
-use crate::{services::{BaseService, PayPeriodService}, impl_service_with_base};
+use crate::{services::{BaseService, PayPeriodService, TimezoneService}, impl_service_with_base};
 
 type DbConn = DatabaseConnection;
 
@@ -130,14 +130,14 @@ impl WorkTimeService {
             account_id: Set(account_id),
             user_role_id: Set(data.user_role_id),
             pay_period_id: Set(None), // Will be set when the entry is completed
-            start_time: Set(now.naive_utc()),
+            start_time: Set(now),
             end_time: Set(None),
             duration: Set(None),
             description: Set(data.description.clone()),
             project: Set(data.project.clone()),
             is_active: Set(true),
-            created_at: Set(now.naive_utc()),
-            updated_at: Set(now.naive_utc()),
+            created_at: Set(now),
+            updated_at: Set(now),
         }
         .insert(db)
         .await?;
@@ -157,10 +157,10 @@ impl WorkTimeService {
             .ok_or(DbErr::Custom("No active time entry found".to_string()))?;
 
         let end_time = Utc::now();
-        let duration = (end_time - active_entry.start_time.and_utc()).num_minutes() as i32;
+        let duration = (end_time - active_entry.start_time).num_minutes() as i32;
 
         // Find the appropriate pay period for this entry
-        let entry_date = active_entry.start_time.date();
+        let entry_date = active_entry.start_time.date_naive();
         let pay_period = pay_period::Entity::find()
             .filter(pay_period::Column::AccountId.eq(account_id))
             .filter(pay_period::Column::IsActive.eq(true))
@@ -170,11 +170,11 @@ impl WorkTimeService {
             .await?;
 
         let mut entry: work_time_entry::ActiveModel = active_entry.into();
-        entry.end_time = Set(Some(end_time.naive_utc()));
+        entry.end_time = Set(Some(end_time));
         entry.duration = Set(Some(duration));
         entry.pay_period_id = Set(pay_period.as_ref().map(|p| p.id));
         entry.is_active = Set(false);
-        entry.updated_at = Set(end_time.naive_utc());
+        entry.updated_at = Set(end_time);
 
         let stopped_entry = entry.update(db).await?;
         log::info!("Time tracking stopped. Duration: {} minutes", duration);
@@ -255,14 +255,14 @@ impl WorkTimeService {
             account_id: Set(account_id),
             user_role_id: Set(data.user_role_id),
             pay_period_id: Set(pay_period.as_ref().map(|p| p.id)),
-            start_time: Set(start_time.naive_utc()),
-            end_time: Set(end_time.map(|t| t.naive_utc())),
+            start_time: Set(start_time),
+            end_time: Set(end_time),
             duration: Set(duration),
             description: Set(data.description.clone()),
             project: Set(data.project.clone()),
             is_active: Set(false),
-            created_at: Set(now.naive_utc()),
-            updated_at: Set(now.naive_utc()),
+            created_at: Set(now),
+            updated_at: Set(now),
         }
         .insert(db)
         .await?;
@@ -309,8 +309,8 @@ impl WorkTimeService {
 
                 result.push(WorkTimeEntryWithRoleDTO {
                     id: entry.id,
-                    start_time: entry.start_time.and_utc(),
-                    end_time: entry.end_time.map(|t| t.and_utc()),
+                    start_time: entry.start_time,
+                    end_time: entry.end_time,
                     duration: entry.duration,
                     description: entry.description,
                     project: entry.project,
@@ -578,6 +578,51 @@ impl WorkTimeService {
             currency,
             entries_count,
         })
+    }
+
+    /// Convert WorkTimeEntryWithRoleDTO to WorkTimeEntryDisplayDTO with timezone formatting
+    pub fn format_entries_for_display(
+        entries: Vec<WorkTimeEntryWithRoleDTO>,
+        user_timezone: &str,
+    ) -> Vec<WorkTimeEntryDisplayDTO> {
+        entries.into_iter().map(|entry| {
+            let start_time_display = TimezoneService::format_with_timezone(entry.start_time, user_timezone)
+                .unwrap_or_else(|_| entry.start_time.format("%Y-%m-%d %H:%M:%S UTC").to_string());
+            
+            let end_time_display = entry.end_time.map(|end_time| {
+                TimezoneService::format_with_timezone(end_time, user_timezone)
+                    .unwrap_or_else(|_| end_time.format("%Y-%m-%d %H:%M:%S UTC").to_string())
+            });
+            
+            WorkTimeEntryDisplayDTO {
+                id: entry.id,
+                start_time: entry.start_time,
+                end_time: entry.end_time,
+                start_time_display,
+                end_time_display,
+                duration: entry.duration,
+                description: entry.description,
+                project: entry.project,
+                is_active: entry.is_active,
+                role_name: entry.role_name,
+                hourly_wage: entry.hourly_wage,
+                currency: entry.currency,
+                earnings: entry.earnings,
+            }
+        }).collect()
+    }
+
+    /// Get work entries with timezone-aware display formatting
+    pub async fn get_work_entries_for_display(
+        &self,
+        db: &DbConn,
+        account_id: Uuid,
+        user_timezone: &str,
+        limit: Option<u64>,
+        offset: Option<u64>,
+    ) -> Result<Vec<WorkTimeEntryDisplayDTO>, DbErr> {
+        let entries = self.get_work_entries_with_roles(db, account_id, limit, offset).await?;
+        Ok(Self::format_entries_for_display(entries, user_timezone))
     }
 }
 

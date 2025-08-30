@@ -21,6 +21,7 @@ pub mod dto_tests;
 pub mod types_tests;
 pub mod registry_tests;
 pub mod edge_case_tests;
+pub mod timezone_tests;
 
 // Test fairings and rocket testing utilities
 pub mod fairings;

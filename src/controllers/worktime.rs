@@ -1,4 +1,4 @@
-use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO, PayPeriodFormDTO, AccountFormDTO};
+use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO, PayPeriodFormDTO, AccountFormDTO, TimezoneSettingsFormDTO};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -14,7 +14,7 @@ use crate::{
     controllers::base::ControllerBase,
     guards::{AuthenticatedUser, OptionalUser},
     pool::Db,
-    services::{WorkTimeService, PayPeriodService, AuthService},
+    services::{WorkTimeService, PayPeriodService, AuthService, SettingsService, TimezoneService},
 };
 
 /// Controller for work time tracking functionality
@@ -36,6 +36,7 @@ async fn home(
     user: OptionalUser,
     service: &State<WorkTimeService>,
     auth_service: &State<AuthService>,
+    settings_service: &State<SettingsService>,
 ) -> Result<Template, Flash<Redirect>> {
     log::info!("Route accessed: GET / - Work time home page");
     let db = conn.into_inner();
@@ -46,8 +47,13 @@ async fn home(
             // User is authenticated, show dashboard
             match service.get_user_roles(db, account.id).await {
                 Ok(roles) => {
+                    // Get user timezone preference
+                    let user_timezone = settings_service.get_user_timezone(db, account.id).await
+                        .unwrap_or_else(|_| None)
+                        .unwrap_or_else(|| "UTC".to_string());
+                    
                     let active_entry = service.get_active_entry(db, account.id).await.unwrap_or(None);
-                    let recent_entries = service.get_work_entries_with_roles(db, account.id, Some(10), None).await.unwrap_or_default();
+                    let recent_entries = service.get_work_entries_for_display(db, account.id, &user_timezone, Some(10), None).await.unwrap_or_default();
                     let summary = service.get_work_time_summary(db, account.id, None, None).await.unwrap_or_else(|_| {
                         WorkTimeSummaryDTO {
                             total_hours: 0.0,
@@ -66,6 +72,7 @@ async fn home(
                             recent_entries: recent_entries,
                             summary: summary,
                             username: account.username,
+                            user_timezone: user_timezone,
                         }
                     ));
                 }
@@ -178,14 +185,20 @@ async fn dashboard(
     conn: Connection<'_, Db>,
     user: AuthenticatedUser,
     service: &State<WorkTimeService>,
+    settings_service: &State<SettingsService>,
 ) -> Result<Template, Flash<Redirect>> {
     log::info!("Route accessed: GET /dashboard - Work time dashboard");
     let db = conn.into_inner();
     
     match service.get_user_roles(db, user.account_id).await {
         Ok(roles) => {
+            // Get user timezone preference
+            let user_timezone = settings_service.get_user_timezone(db, user.account_id).await
+                .unwrap_or_else(|_| None)
+                .unwrap_or_else(|| "UTC".to_string());
+            
             let active_entry = service.get_active_entry(db, user.account_id).await.unwrap_or(None);
-            let recent_entries = service.get_work_entries_with_roles(db, user.account_id, Some(10), None).await.unwrap_or_default();
+            let recent_entries = service.get_work_entries_for_display(db, user.account_id, &user_timezone, Some(10), None).await.unwrap_or_default();
             let summary = service.get_work_time_summary(db, user.account_id, None, None).await.unwrap_or_else(|_| {
                 WorkTimeSummaryDTO {
                     total_hours: 0.0,
@@ -204,6 +217,7 @@ async fn dashboard(
                     recent_entries: recent_entries,
                     summary: summary,
                     username: user.username,
+                    user_timezone: user_timezone,
                 }
             ))
         }
@@ -339,12 +353,21 @@ async fn entries_view(
     conn: Connection<'_, Db>,
     user: AuthenticatedUser,
     service: &State<WorkTimeService>,
+    settings_service: &State<SettingsService>,
 ) -> Result<Template, Flash<Redirect>> {
     log::info!("Route accessed: GET /entries - Work time entries view");
     let db = conn.into_inner();
     
     match service.get_work_entries_with_roles(db, user.account_id, Some(50), None).await {
-        Ok(entries) => {
+        Ok(raw_entries) => {
+            // Get user timezone preference
+            let user_timezone = settings_service.get_user_timezone(db, user.account_id).await
+                .unwrap_or_else(|_| None)
+                .unwrap_or_else(|| "UTC".to_string());
+            
+            // Convert to display format
+            let entries = WorkTimeService::format_entries_for_display(raw_entries, &user_timezone);
+            
             let roles = service.get_user_roles(db, user.account_id).await.unwrap_or_default();
             let summary = service.get_work_time_summary(db, user.account_id, None, None).await.unwrap_or_else(|_| {
                 WorkTimeSummaryDTO {
@@ -365,6 +388,7 @@ async fn entries_view(
                     total_entries: summary.entries_count,
                     total_hours: summary.total_hours,
                     total_earnings: summary.total_earnings,
+                    user_timezone: user_timezone,
                 }
             ))
         }
@@ -549,6 +573,66 @@ async fn delete_pay_period(
     }
 }
 
+#[get("/timezone")]
+async fn timezone_settings_view(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    settings_service: &State<SettingsService>,
+) -> Result<Template, Flash<Redirect>> {
+    log::info!("Route accessed: GET /timezone - Timezone settings view");
+    let db = conn.into_inner();
+    
+    match settings_service.get_user_timezone(db, user.account_id).await {
+        Ok(current_timezone) => {
+            let timezones = TimezoneService::get_common_timezones();
+            let user_timezone = current_timezone.unwrap_or_else(|| "UTC".to_string());
+            
+            Ok(Template::render(
+                "worktime/timezone",
+                context! {
+                    page_title: "Timezone Settings",
+                    username: user.username,
+                    current_timezone: user_timezone,
+                    timezones: timezones,
+                }
+            ))
+        },
+        Err(e) => {
+            log::error!("Failed to load timezone settings: {}", e);
+            Err(Flash::error(Redirect::to("/"), "Failed to load timezone settings"))
+        }
+    }
+}
+
+#[post("/timezone", data = "<form>")]
+async fn update_timezone_settings(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    settings_service: &State<SettingsService>,
+    form: Form<TimezoneSettingsFormDTO>,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /timezone - Updating timezone settings");
+    let db = conn.into_inner();
+    let form_data = form.into_inner();
+    
+    // Validate timezone
+    if !TimezoneService::is_valid_timezone(&form_data.timezone) {
+        log::warn!("Invalid timezone submitted: {}", form_data.timezone);
+        return Flash::error(Redirect::to("/timezone"), "Invalid timezone selection");
+    }
+    
+    match settings_service.set_user_timezone(db, user.account_id, &form_data.timezone).await {
+        Ok(_) => {
+            log::info!("Timezone updated successfully for user {} to {}", user.username, form_data.timezone);
+            Flash::success(Redirect::to("/timezone"), "Timezone settings updated successfully")
+        },
+        Err(e) => {
+            log::error!("Failed to update timezone settings: {}", e);
+            Flash::error(Redirect::to("/timezone"), "Failed to update timezone settings")
+        }
+    }
+}
+
 fn routes() -> Vec<rocket::Route> {
     routes![
         home,
@@ -572,6 +656,8 @@ fn routes() -> Vec<rocket::Route> {
         create_pay_period,
         auto_assign_entries,
         delete_pay_period,
+        timezone_settings_view,
+        update_timezone_settings,
     ]
 }
 

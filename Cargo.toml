@@ -57,6 +57,10 @@ features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros", "mock"]
 version = "0.4.31"
 features = ["serde"]
 
+[dependencies.chrono-tz]
+version = "0.10.0"
+features = ["serde"]
+
 [dependencies.uuid]
 version = "1.4.1"
 features = ["v4", "serde"]

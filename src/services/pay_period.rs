@@ -287,7 +287,7 @@ impl PayPeriodService {
         let mut assigned_count = 0;
 
         for entry in unassigned_entries {
-            let entry_date = entry.start_time.date();
+            let entry_date = entry.start_time.date_naive();
             
             // Find the pay period that contains this entry's date
             if let Some(pay_period) = pay_period::Entity::find()
@@ -301,7 +301,7 @@ impl PayPeriodService {
                 // Update the entry with the pay period
                 let mut active_entry: work_time_entry::ActiveModel = entry.into();
                 active_entry.pay_period_id = Set(Some(pay_period.id));
-                active_entry.updated_at = Set(Utc::now().naive_utc());
+                active_entry.updated_at = Set(Utc::now());
                 
                 active_entry.update(db).await?;
                 assigned_count += 1;

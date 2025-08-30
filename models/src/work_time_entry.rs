@@ -1,5 +1,6 @@
 //! `SeaORM` Entity for work time entries
 
+use chrono::{DateTime, Utc};
 use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
 
@@ -12,14 +13,14 @@ pub struct Model {
     pub account_id: Uuid,
     pub user_role_id: Uuid,
     pub pay_period_id: Option<Uuid>,
-    pub start_time: DateTime,
-    pub end_time: Option<DateTime>,
+    pub start_time: DateTime<Utc>,
+    pub end_time: Option<DateTime<Utc>>,
     pub duration: Option<i32>, // Duration in minutes
     pub description: Option<String>,
     pub project: Option<String>,
     pub is_active: bool, // For active time tracking
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
