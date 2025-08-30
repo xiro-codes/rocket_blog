@@ -1,6 +1,6 @@
 use chrono::Utc;
 use models::{
-    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, WorkTimeEntryDisplayDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO, PayPeriodSummaryData},
+    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, WorkTimeEntryDisplayDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO, PayPeriodSummaryData, TipEntryFormDTO},
     user_role, work_time_entry, notification_settings, pay_period,
 };
 use sea_orm::*;
@@ -137,6 +137,7 @@ impl WorkTimeService {
             duration: Set(None),
             description: Set(None),
             project: Set(None),
+            tips: Set(None), // Tips can be added later for tipped roles
             is_active: Set(true),
             created_at: Set(now),
             updated_at: Set(now),
@@ -148,15 +149,23 @@ impl WorkTimeService {
         Ok(entry)
     }
 
-    pub async fn stop_time_tracking(
+    pub async fn stop_time_tracking_with_role_info(
         &self,
         db: &DbConn,
         account_id: Uuid,
-    ) -> Result<work_time_entry::Model, DbErr> {
+    ) -> Result<(work_time_entry::Model, bool), DbErr> {
         log::info!("Stopping time tracking for account {}", account_id);
         
         let active_entry = self.get_active_entry(db, account_id).await?
             .ok_or(DbErr::Custom("No active time entry found".to_string()))?;
+
+        // Get role info to check if it's tipped
+        let role = user_role::Entity::find_by_id(active_entry.user_role_id)
+            .one(db)
+            .await?
+            .ok_or(DbErr::Custom("Role not found".to_string()))?;
+            
+        let is_tipped = role.is_tipped;
 
         let end_time = Utc::now();
         let duration = (end_time - active_entry.start_time).num_minutes() as i32;
@@ -185,7 +194,16 @@ impl WorkTimeService {
             log::info!("Assigned entry to pay period: {}", pay_period.period_name);
         }
         
-        Ok(stopped_entry)
+        Ok((stopped_entry, is_tipped))
+    }
+
+    pub async fn stop_time_tracking(
+        &self,
+        db: &DbConn,
+        account_id: Uuid,
+    ) -> Result<work_time_entry::Model, DbErr> {
+        let (entry, _) = self.stop_time_tracking_with_role_info(db, account_id).await?;
+        Ok(entry)
     }
 
     pub async fn get_active_entry(
@@ -262,6 +280,7 @@ impl WorkTimeService {
             duration: Set(duration),
             description: Set(None),
             project: Set(None),
+            tips: Set(None), // Tips can be added later for tipped roles
             is_active: Set(false),
             created_at: Set(now),
             updated_at: Set(now),
@@ -400,6 +419,38 @@ impl WorkTimeService {
             currency,
             entries_count,
         })
+    }
+
+    /// Add tips to a work time entry
+    pub async fn add_tips_to_entry(
+        &self,
+        db: &DbConn,
+        entry_id: Uuid,
+        account_id: Uuid,
+        tip_data: TipEntryFormDTO,
+    ) -> Result<work_time_entry::Model, DbErr> {
+        // Parse tip amount from string
+        let tip_amount = tip_data.tip_amount.parse::<f64>()
+            .map_err(|_| DbErr::Custom("Invalid tip amount format".to_string()))?;
+        
+        if tip_amount < 0.0 {
+            return Err(DbErr::Custom("Tip amount cannot be negative".to_string()));
+        }
+        
+        let entry = work_time_entry::Entity::find_by_id(entry_id)
+            .filter(work_time_entry::Column::AccountId.eq(account_id))
+            .one(db)
+            .await?
+            .ok_or(DbErr::RecordNotFound("Work time entry not found".to_string()))?;
+
+        let mut entry: work_time_entry::ActiveModel = entry.into();
+        entry.tips = Set(Some(tip_amount));
+        entry.updated_at = Set(Utc::now());
+
+        let updated_entry = entry.update(db).await?;
+        log::info!("Tips added to entry {}: ${:.2}", entry_id, tip_amount);
+        
+        Ok(updated_entry)
     }
 
     /// Get current shift earnings (for active timer)

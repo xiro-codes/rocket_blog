@@ -1,0 +1,137 @@
+{% extends "worktime_base" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="worktime-title mb-0">
+        <i class="fas fa-hand-holding-usd me-2"></i>Enter Tips
+    </h1>
+    <a href="/worktime" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+
+<!-- Shift Summary -->
+<div class="worktime-card mb-4">
+    <div class="worktime-card-header">
+        <h3 class="mb-0">
+            <i class="fas fa-receipt me-2"></i>Shift Summary
+        </h3>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Shift Details</h5>
+            <p><strong>Role:</strong> {{ role.role_name }}</p>
+            <p><strong>Duration:</strong> {{ duration_hours | round(precision=2) }} hours</p>
+            <p><strong>Start Time:</strong> {{ entry.start_time | date(format='%B %d, %Y at %I:%M %p') }}</p>
+            {% if entry.end_time %}<p><strong>End Time:</strong> {{ entry.end_time | date(format='%B %d, %Y at %I:%M %p') }}</p>{% endif %}
+        </div>
+        <div class="col-md-6">
+            <h5>Earnings Breakdown</h5>
+            <p><strong>Base Rate:</strong> ${{ role.hourly_wage }}/hour</p>
+            <p><strong>Base Earnings:</strong> ${{ base_earnings | round(precision=2) }}</p>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>This role is configured for tips. Please enter any tips you received during this shift.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tips Entry Form -->
+<div class="worktime-card">
+    <div class="worktime-card-header">
+        <h3 class="mb-0">
+            <i class="fas fa-dollar-sign me-2"></i>Add Tips
+        </h3>
+    </div>
+    
+    <form method="post" action="/worktime/entries/{{ entry.id }}/tips" class="row g-3">
+        <div class="col-md-6">
+            <label for="tip_amount" class="form-label">
+                <i class="fas fa-hand-holding-usd me-1"></i>Tip Amount
+            </label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="number" step="0.01" min="0" class="form-control" id="tip_amount" name="tip_amount" placeholder="0.00" required>
+            </div>
+            <small class="form-text text-muted">Enter the total amount of tips received during this shift</small>
+        </div>
+        
+        <div class="col-12">
+            <div class="d-flex gap-3 justify-content-center">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-save me-2"></i>Save Tips
+                </button>
+                <a href="/worktime" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-times me-2"></i>Skip Tips
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Tips Info -->
+<div class="worktime-card mt-4">
+    <div class="worktime-card-header">
+        <h4 class="mb-0">
+            <i class="fas fa-lightbulb me-2"></i>Tips Tracking
+        </h4>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h6>Why track tips?</h6>
+            <ul>
+                <li>Complete earnings record</li>
+                <li>Tax reporting accuracy</li>
+                <li>Performance insights</li>
+                <li>Shift comparison</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h6>Tips Guidelines</h6>
+            <ul>
+                <li>Enter cash and card tips</li>
+                <li>Round to nearest cent</li>
+                <li>Include tip pooling amounts</li>
+                <li>Update immediately after shift</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% if flash %}
+<div class="alert alert-{{ flash.0 }} mt-3">
+    <i class="fas fa-info-circle me-2"></i>{{ flash.1 }}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block script %}
+<script>
+// Auto-focus tip amount field
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('tip_amount').focus();
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const tipAmount = parseFloat(document.getElementById('tip_amount').value);
+    
+    if (isNaN(tipAmount) || tipAmount < 0) {
+        e.preventDefault();
+        alert('Please enter a valid tip amount (0 or greater)');
+        return false;
+    }
+    
+    // Confirm large tip amounts
+    if (tipAmount > 500) {
+        if (!confirm(`Are you sure you want to enter $${tipAmount.toFixed(2)} in tips? This seems unusually high.`)) {
+            e.preventDefault();
+            return false;
+        }
+    }
+});
+</script>
+{% endblock %}

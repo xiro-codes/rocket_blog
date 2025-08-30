@@ -121,6 +121,13 @@ pub struct TimeTrackingControlDTO {
     pub user_role_id: Uuid,
 }
 
+/// Form DTO for tip entry
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct TipEntryFormDTO {
+    pub tip_amount: String, // Use String for form handling, convert to f64 in service
+}
+
 /// Result struct for work time summary queries
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]

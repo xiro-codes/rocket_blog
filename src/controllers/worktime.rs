@@ -1,4 +1,6 @@
-use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO, PayPeriodFormDTO, AccountFormDTO, TimezoneSettingsFormDTO, PayPeriodSettingsFormDTO};
+use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO, PayPeriodFormDTO, AccountFormDTO, TimezoneSettingsFormDTO, PayPeriodSettingsFormDTO, TipEntryFormDTO};
+use models::user_role;
+use sea_orm::EntityTrait;
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -344,11 +346,19 @@ async fn stop_tracking(
     log::info!("Route accessed: POST /stop - Stopping time tracking");
     let db = conn.into_inner();
     
-    match service.stop_time_tracking(db, user.account_id).await {
-        Ok(_) => Flash::success(Redirect::to("/"), "Time tracking stopped"),
+    match service.stop_time_tracking_with_role_info(db, user.account_id).await {
+        Ok((entry, is_tipped)) => {
+            if is_tipped {
+                // For tipped roles, redirect to a tips entry page
+                Flash::success(Redirect::to(format!("/worktime/entries/{}/tips", entry.id)), 
+                              "Shift ended! Please enter your tips.")
+            } else {
+                Flash::success(Redirect::to("/worktime"), "Time tracking stopped")
+            }
+        },
         Err(e) => {
             log::error!("Failed to stop time tracking: {}", e);
-            Flash::error(Redirect::to("/"), "Failed to stop tracking")
+            Flash::error(Redirect::to("/worktime"), "Failed to stop tracking")
         }
     }
 }
@@ -796,6 +806,73 @@ async fn api_stats(
     Json(summary)
 }
 
+#[get("/entries/<entry_id>/tips")]
+async fn tips_entry_view(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    service: &State<WorkTimeService>,
+    entry_id: Uuid,
+) -> Result<Template, Flash<Redirect>> {
+    log::info!("Route accessed: GET /entries/{}/tips - Tips entry view", entry_id);
+    let db = conn.into_inner();
+    
+    match service.get_work_entry_by_id(db, entry_id, user.account_id).await {
+        Ok(Some(entry)) => {
+            // Get role info to verify it's a tipped role
+            let role = user_role::Entity::find_by_id(entry.user_role_id)
+                .one(db)
+                .await
+                .map_err(|_| Flash::error(Redirect::to("/worktime"), "Failed to load role"))?
+                .ok_or(Flash::error(Redirect::to("/worktime"), "Role not found"))?;
+                
+            if !role.is_tipped {
+                return Err(Flash::error(Redirect::to("/worktime"), "This role is not configured for tips"));
+            }
+            
+            // Calculate base earnings
+            let duration_hours = entry.duration.unwrap_or(0) as f64 / 60.0;
+            let base_earnings = duration_hours * role.hourly_wage;
+            
+            Ok(Template::render(
+                "worktime/tips_entry",
+                context! {
+                    page_title: "Enter Tips",
+                    entry: entry,
+                    role: role,
+                    username: user.username,
+                    duration_hours: duration_hours,
+                    base_earnings: base_earnings,
+                }
+            ))
+        }
+        Ok(None) => Err(Flash::error(Redirect::to("/worktime"), "Entry not found")),
+        Err(e) => {
+            log::error!("Failed to load work entry: {}", e);
+            Err(Flash::error(Redirect::to("/worktime"), "Failed to load entry"))
+        }
+    }
+}
+
+#[post("/entries/<entry_id>/tips", data = "<form>")]
+async fn submit_tips(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    service: &State<WorkTimeService>,
+    entry_id: Uuid,
+    form: Form<TipEntryFormDTO>,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /entries/{}/tips - Submit tips", entry_id);
+    let db = conn.into_inner();
+    
+    match service.add_tips_to_entry(db, entry_id, user.account_id, form.into_inner()).await {
+        Ok(_) => Flash::success(Redirect::to("/worktime"), "Tips added successfully!"),
+        Err(e) => {
+            log::error!("Failed to add tips: {}", e);
+            Flash::error(Redirect::to(format!("/worktime/entries/{}/tips", entry_id)), "Failed to add tips")
+        }
+    }
+}
+
 fn routes() -> Vec<rocket::Route> {
     routes![
         home,
@@ -817,6 +894,8 @@ fn routes() -> Vec<rocket::Route> {
         edit_entry,
         delete_entry,
         delete_entry_post,
+        tips_entry_view,
+        submit_tips,
         notifications_view,
         update_notifications,
         payperiods_view,
