@@ -2,6 +2,28 @@
 //! 
 //! This module provides custom template configuration for the rocket_dyn_templates
 //! system, specifically adding the truncate filter that is missing in minijinja.
+//!
+//! ## Problem Solved
+//! 
+//! The project was using Jinja2-style `truncate` filters in templates like:
+//! - `{{ entry.description | truncate(length=20) }}` in worktime_macros.html.j2
+//! - `{{ post.text | truncate(length=160) }}` in blog/detail.html.j2
+//! 
+//! However, minijinja (the template engine used by rocket_dyn_templates) doesn't
+//! include a built-in `truncate` filter, causing template rendering errors.
+//!
+//! ## Solution
+//! 
+//! This module implements a custom `truncate` filter that:
+//! 1. Truncates text to a specified length
+//! 2. Breaks at word boundaries when possible
+//! 3. Adds "..." when text is truncated
+//! 4. Preserves text unchanged when it's shorter than the limit
+//!
+//! ## Usage
+//! 
+//! The filter is automatically configured when using `create_template_fairing()`
+//! instead of the default `Template::fairing()` in the Rocket application setup.
 
 use rocket_dyn_templates::{Template, Engines, minijinja};
 
