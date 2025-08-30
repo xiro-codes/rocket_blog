@@ -1,4 +1,5 @@
 use sea_orm_migration::prelude::*;
+use sea_orm::DatabaseBackend;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -45,7 +46,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(BackgroundJob::JobData)
-                            .json()
+                            .text() // Use text for SQLite compatibility, JSON will be stored as text
                             .null(),
                     )
                     .col(
@@ -87,16 +88,54 @@ impl MigrationTrait for Migration {
             .await?;
 
         // Remove YouTube-specific columns from post table
-        manager
-            .alter_table(
-                Table::alter()
-                    .table(Post::Table)
-                    .drop_column(Post::YoutubeUrl)
-                    .drop_column(Post::DownloadStatus)
-                    .drop_column(Post::DownloadError)
-                    .to_owned(),
-            )
-            .await
+        let db_backend = manager.get_database_backend();
+        match db_backend {
+            DatabaseBackend::Postgres => {
+                // PostgreSQL supports multiple operations in one statement
+                manager
+                    .alter_table(
+                        Table::alter()
+                            .table(Post::Table)
+                            .drop_column(Post::YoutubeUrl)
+                            .drop_column(Post::DownloadStatus)
+                            .drop_column(Post::DownloadError)
+                            .to_owned(),
+                    )
+                    .await
+            },
+            DatabaseBackend::Sqlite => {
+                // SQLite requires separate statements
+                manager
+                    .alter_table(
+                        Table::alter()
+                            .table(Post::Table)
+                            .drop_column(Post::YoutubeUrl)
+                            .to_owned(),
+                    )
+                    .await?;
+                    
+                manager
+                    .alter_table(
+                        Table::alter()
+                            .table(Post::Table)
+                            .drop_column(Post::DownloadStatus)
+                            .to_owned(),
+                    )
+                    .await?;
+                    
+                manager
+                    .alter_table(
+                        Table::alter()
+                            .table(Post::Table)
+                            .drop_column(Post::DownloadError)
+                            .to_owned(),
+                    )
+                    .await
+            },
+            _ => {
+                Err(DbErr::Custom("Unsupported database backend".to_string()))
+            }
+        }
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
@@ -106,16 +145,54 @@ impl MigrationTrait for Migration {
             .await?;
 
         // Re-add YouTube columns to post table
-        manager
-            .alter_table(
-                Table::alter()
-                    .table(Post::Table)
-                    .add_column(ColumnDef::new(Post::YoutubeUrl).string().null())
-                    .add_column(ColumnDef::new(Post::DownloadStatus).string().null())
-                    .add_column(ColumnDef::new(Post::DownloadError).text().null())
-                    .to_owned(),
-            )
-            .await
+        let db_backend = manager.get_database_backend();
+        match db_backend {
+            DatabaseBackend::Postgres => {
+                // PostgreSQL supports multiple operations in one statement
+                manager
+                    .alter_table(
+                        Table::alter()
+                            .table(Post::Table)
+                            .add_column(ColumnDef::new(Post::YoutubeUrl).string().null())
+                            .add_column(ColumnDef::new(Post::DownloadStatus).string().null())
+                            .add_column(ColumnDef::new(Post::DownloadError).text().null())
+                            .to_owned(),
+                    )
+                    .await
+            },
+            DatabaseBackend::Sqlite => {
+                // SQLite requires separate statements
+                manager
+                    .alter_table(
+                        Table::alter()
+                            .table(Post::Table)
+                            .add_column(ColumnDef::new(Post::YoutubeUrl).string().null())
+                            .to_owned(),
+                    )
+                    .await?;
+                    
+                manager
+                    .alter_table(
+                        Table::alter()
+                            .table(Post::Table)
+                            .add_column(ColumnDef::new(Post::DownloadStatus).string().null())
+                            .to_owned(),
+                    )
+                    .await?;
+                    
+                manager
+                    .alter_table(
+                        Table::alter()
+                            .table(Post::Table)
+                            .add_column(ColumnDef::new(Post::DownloadError).text().null())
+                            .to_owned(),
+                    )
+                    .await
+            },
+            _ => {
+                Err(DbErr::Custom("Unsupported database backend".to_string()))
+            }
+        }
     }
 }
 
