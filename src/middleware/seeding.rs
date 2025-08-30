@@ -1,9 +1,9 @@
 use crate::pool::Db;
-use chrono::Local;
+use chrono::{Local, Datelike};
 use lipsum::lipsum_words_with_rng;
 use models::{
-    account, comment, post, post_tag,
-    prelude::{Account, Comment, Post, PostTag, Tag},
+    account, comment, post, post_tag, user_role, work_time_entry, pay_period,
+    prelude::{Account, Comment, Post, PostTag, WorkTimeEntry},
     tag,
 };
 use pwhash::bcrypt;
@@ -79,6 +79,150 @@ impl Fairing for Seeding {
         .expect("Failed to seed account.");
         
         log::debug!("Admin account created: {} ({})", ac.username, ac.id);
+
+        // Create sample user roles for worktime tracking
+        log::debug!("Creating sample user roles");
+        let sample_roles = vec![
+            ("Software Developer", 25.0, "USD", false),
+            ("Freelance Consultant", 50.0, "USD", false),
+            ("Restaurant Server", 15.0, "USD", true), // Tipped role
+        ];
+
+        let mut created_roles = Vec::new();
+        for (role_name, hourly_wage, currency, is_tipped) in sample_roles {
+            let role = user_role::ActiveModel {
+                id: Set(uuid::Uuid::new_v4()),
+                account_id: Set(ac.id),
+                role_name: Set(role_name.to_owned()),
+                hourly_wage: Set(hourly_wage),
+                currency: Set(currency.to_owned()),
+                is_tipped: Set(is_tipped),
+                is_active: Set(true),
+                created_at: Set(Local::now().naive_local()),
+                updated_at: Set(Local::now().naive_local()),
+            }
+            .insert(conn)
+            .await
+            .map_err(|e| {
+                log::error!("Failed to seed user role '{}': {}", role_name, e);
+                e
+            })
+            .expect("Failed to seed user role.");
+            created_roles.push(role);
+        }
+        
+        log::debug!("Created {} user roles", created_roles.len());
+
+        // Create sample pay periods
+        log::debug!("Creating sample pay periods");
+        let current_date = Local::now().naive_local().date();
+        
+        // Create current pay period (2 weeks)
+        let current_period_start = current_date - chrono::Duration::days(current_date.weekday().num_days_from_monday() as i64);
+        let current_period_end = current_period_start + chrono::Duration::days(13);
+        
+        // Create previous pay period
+        let previous_period_start = current_period_start - chrono::Duration::days(14);
+        let previous_period_end = current_period_start - chrono::Duration::days(1);
+
+        let sample_periods = vec![
+            ("Previous Pay Period", previous_period_start, previous_period_end, false),
+            ("Current Pay Period", current_period_start, current_period_end, true),
+        ];
+
+        let mut created_periods = Vec::new();
+        for (period_name, start_date, end_date, is_active) in sample_periods {
+            let period = pay_period::ActiveModel {
+                id: Set(uuid::Uuid::new_v4()),
+                account_id: Set(ac.id),
+                period_name: Set(period_name.to_owned()),
+                start_date: Set(start_date),
+                end_date: Set(end_date),
+                is_active: Set(is_active),
+                created_at: Set(Local::now().naive_local()),
+                updated_at: Set(Local::now().naive_local()),
+            }
+            .insert(conn)
+            .await
+            .map_err(|e| {
+                log::error!("Failed to seed pay period '{}': {}", period_name, e);
+                e
+            })
+            .expect("Failed to seed pay period.");
+            created_periods.push(period);
+        }
+        
+        log::debug!("Created {} pay periods", created_periods.len());
+
+        // Create sample work time entries
+        log::debug!("Creating sample work time entries");
+        let now = chrono::Utc::now();
+        let mut work_entries = Vec::new();
+
+        // Create some completed entries for the previous pay period
+        for i in 0..5 {
+            let days_ago = 20 - (i * 2); // Work entries from 20, 18, 16, 14, 12 days ago
+            let start_time = now - chrono::Duration::days(days_ago);
+            let end_time = start_time + chrono::Duration::hours(8); // 8-hour work days
+            let duration = 8 * 60; // 8 hours in minutes
+
+            let role_index = (i as usize) % created_roles.len();
+            let role = &created_roles[role_index];
+
+            let entry = work_time_entry::ActiveModel {
+                id: Set(uuid::Uuid::new_v4()),
+                account_id: Set(ac.id),
+                user_role_id: Set(role.id),
+                pay_period_id: Set(Some(created_periods[0].id)), // Previous period
+                start_time: Set(start_time),
+                end_time: Set(Some(end_time)),
+                duration: Set(Some(duration)),
+                description: Set(Some(format!("Sample work day {} - {}", i + 1, role.role_name))),
+                project: Set(if i % 2 == 0 { Some("Project Alpha".to_string()) } else { Some("Project Beta".to_string()) }),
+                tips: Set(if role.is_tipped { Some(25.0 + (i as f64 * 5.0)) } else { None }),
+                is_active: Set(false),
+                created_at: Set(start_time),
+                updated_at: Set(end_time),
+            };
+            work_entries.push(entry);
+        }
+
+        // Create some entries for the current pay period
+        for i in 0..3 {
+            let days_ago = 5 - (i * 2); // Work entries from 5, 3, 1 days ago
+            let start_time = now - chrono::Duration::days(days_ago);
+            let end_time = start_time + chrono::Duration::hours(6); // 6-hour work days
+            let duration = 6 * 60; // 6 hours in minutes
+
+            let role_index = (i as usize) % created_roles.len();
+            let role = &created_roles[role_index];
+
+            let entry = work_time_entry::ActiveModel {
+                id: Set(uuid::Uuid::new_v4()),
+                account_id: Set(ac.id),
+                user_role_id: Set(role.id),
+                pay_period_id: Set(Some(created_periods[1].id)), // Current period
+                start_time: Set(start_time),
+                end_time: Set(Some(end_time)),
+                duration: Set(Some(duration)),
+                description: Set(Some(format!("Current period work {} - {}", i + 1, role.role_name))),
+                project: Set(if i % 2 == 0 { Some("Project Gamma".to_string()) } else { None }),
+                tips: Set(if role.is_tipped { Some(15.0 + (i as f64 * 3.0)) } else { None }),
+                is_active: Set(false),
+                created_at: Set(start_time),
+                updated_at: Set(end_time),
+            };
+            work_entries.push(entry);
+        }
+
+        log::debug!("Inserting {} work time entries into database", work_entries.len());
+        WorkTimeEntry::insert_many(work_entries).exec(conn).await.map_err(|e| {
+            log::error!("Failed to insert work time entries: {}", e);
+            e
+        }).unwrap();
+
+        log::debug!("Worktime seeding completed - {} roles, {} pay periods, {} work entries created", 
+                   created_roles.len(), created_periods.len(), 8);
 
         // Create sample tags
         log::debug!("Creating sample tags");
