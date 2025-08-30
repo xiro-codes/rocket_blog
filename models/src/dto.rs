@@ -132,6 +132,8 @@ pub struct WorkTimeSummaryDTO {
     pub total_earnings: f64,
     pub currency: String,
     pub entries_count: i32,
+    pub current_shift_earnings: f64,
+    pub pay_period_hours: f64,
 }
 
 /// Result struct for work time entry with role information and timezone formatting
@@ -228,4 +230,20 @@ pub struct PayPeriodSummaryDTO {
     pub total_earnings: f64,
     pub currency: String,
     pub entries_count: i32,
+}
+
+/// Form DTO for pay period settings
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, FromForm)]
+#[serde(crate = "rocket::serde")]
+pub struct PayPeriodSettingsFormDTO {
+    pub start_day: String,  // monday, tuesday, etc.
+    pub period_length: i32, // 1, 2, or 4 weeks
+}
+
+/// DTO for current pay period settings display
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct PayPeriodSettingsDTO {
+    pub start_day: String,
+    pub period_length: i32,
 }

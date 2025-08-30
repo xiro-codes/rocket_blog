@@ -1,4 +1,4 @@
-use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO, PayPeriodFormDTO, AccountFormDTO, TimezoneSettingsFormDTO};
+use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, NotificationSettingsFormDTO, PayPeriodFormDTO, AccountFormDTO, TimezoneSettingsFormDTO, PayPeriodSettingsFormDTO};
 use rocket::{
     fairing::{self, Fairing, Kind},
     form::Form,
@@ -60,6 +60,8 @@ async fn home(
                             total_earnings: 0.0,
                             currency: "USD".to_string(),
                             entries_count: 0,
+                            current_shift_earnings: 0.0,
+                            pay_period_hours: 0.0,
                         }
                     });
                     
@@ -205,6 +207,8 @@ async fn dashboard(
                     total_earnings: 0.0,
                     currency: "USD".to_string(),
                     entries_count: 0,
+                    current_shift_earnings: 0.0,
+                    pay_period_hours: 0.0,
                 }
             });
             
@@ -375,6 +379,8 @@ async fn entries_view(
                     total_earnings: 0.0,
                     currency: "USD".to_string(),
                     entries_count: 0,
+                    current_shift_earnings: 0.0,
+                    pay_period_hours: 0.0,
                 }
             });
             
@@ -633,6 +639,107 @@ async fn update_timezone_settings(
     }
 }
 
+#[get("/settings")]
+async fn settings_view(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    settings_service: &State<SettingsService>,
+) -> Result<Template, Flash<Redirect>> {
+    log::info!("Route accessed: GET /settings - Settings page");
+    let db = conn.into_inner();
+    
+    // Get user timezone preference
+    let user_timezone = settings_service.get_user_timezone(db, user.account_id).await
+        .unwrap_or_else(|_| None)
+        .unwrap_or_else(|| "UTC".to_string());
+    
+    // Get pay period settings
+    let pay_period_settings = settings_service.get_user_pay_period_settings(db, user.account_id).await
+        .unwrap_or_else(|_| None)
+        .unwrap_or_else(|| models::dto::PayPeriodSettingsDTO {
+            start_day: "monday".to_string(),
+            period_length: 2,
+        });
+    
+    // Get available timezones
+    let timezones = TimezoneService::get_common_timezones();
+    
+    Ok(Template::render(
+        "worktime/settings",
+        context! {
+            page_title: "Settings",
+            username: user.username,
+            current_timezone: user_timezone,
+            timezones: timezones,
+            pay_period_settings: pay_period_settings,
+        }
+    ))
+}
+
+#[post("/settings/timezone", data = "<form>")]
+async fn update_timezone_settings_from_settings(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    settings_service: &State<SettingsService>,
+    form: Form<TimezoneSettingsFormDTO>,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /settings/timezone - Updating timezone settings");
+    let db = conn.into_inner();
+    let form_data = form.into_inner();
+    
+    // Validate timezone
+    if !TimezoneService::is_valid_timezone(&form_data.timezone) {
+        log::warn!("Invalid timezone submitted: {}", form_data.timezone);
+        return Flash::error(Redirect::to("/settings"), "Invalid timezone selection");
+    }
+    
+    match settings_service.set_user_timezone(db, user.account_id, &form_data.timezone).await {
+        Ok(_) => {
+            log::info!("Timezone updated successfully for user {} to {}", user.username, form_data.timezone);
+            Flash::success(Redirect::to("/settings"), "Timezone settings updated successfully")
+        },
+        Err(e) => {
+            log::error!("Failed to update timezone settings: {}", e);
+            Flash::error(Redirect::to("/settings"), "Failed to update timezone settings")
+        }
+    }
+}
+
+#[post("/settings/payperiod", data = "<form>")]
+async fn update_pay_period_settings(
+    conn: Connection<'_, Db>,
+    user: AuthenticatedUser,
+    settings_service: &State<SettingsService>,
+    form: Form<PayPeriodSettingsFormDTO>,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: POST /settings/payperiod - Updating pay period settings");
+    let db = conn.into_inner();
+    let form_data = form.into_inner();
+    
+    // Validate inputs
+    let valid_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    if !valid_days.contains(&form_data.start_day.as_str()) {
+        log::warn!("Invalid start day submitted: {}", form_data.start_day);
+        return Flash::error(Redirect::to("/settings"), "Invalid start day selection");
+    }
+    
+    if ![1, 2, 4].contains(&form_data.period_length) {
+        log::warn!("Invalid period length submitted: {}", form_data.period_length);
+        return Flash::error(Redirect::to("/settings"), "Invalid period length selection");
+    }
+    
+    match settings_service.set_user_pay_period_settings(db, user.account_id, &form_data).await {
+        Ok(_) => {
+            log::info!("Pay period settings updated successfully for user {}", user.username);
+            Flash::success(Redirect::to("/settings"), "Pay period settings updated successfully")
+        },
+        Err(e) => {
+            log::error!("Failed to update pay period settings: {}", e);
+            Flash::error(Redirect::to("/settings"), "Failed to update pay period settings")
+        }
+    }
+}
+
 fn routes() -> Vec<rocket::Route> {
     routes![
         home,
@@ -658,6 +765,9 @@ fn routes() -> Vec<rocket::Route> {
         delete_pay_period,
         timezone_settings_view,
         update_timezone_settings,
+        settings_view,
+        update_timezone_settings_from_settings,
+        update_pay_period_settings,
     ]
 }
 

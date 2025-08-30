@@ -295,7 +295,7 @@
                     <a href="/worktime/roles" class="btn btn-outline-secondary">⚙️ Manage Roles</a>
                     <a href="/worktime/entries" class="btn btn-outline-secondary">📊 View All Entries</a>
                     <a href="/worktime/notifications" class="btn btn-outline-secondary">🔔 Notifications</a>
-                    <a href="/blog" class="btn btn-outline-success">📝 Back to Blog</a>
+                    <a href="/settings" class="btn btn-outline-success">⚙️ Settings</a>
                 </div>
             </div>
         </div>

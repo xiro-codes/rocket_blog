@@ -34,8 +34,8 @@
     <a href="/timezone" class="btn btn-secondary">
         <i class="fas fa-globe me-2"></i>Timezone Settings
     </a>
-    <a href="/blog" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-2"></i>Back to Blog
+    <a href="/settings" class="btn btn-secondary">
+        <i class="fas fa-cog me-2"></i>Settings
     </a>
 </div>
 
@@ -137,15 +137,15 @@
         </span>
     </div>
     <div class="stat-card">
-        <span class="stat-value">{{ summary.entries_count }}</span>
+        <span class="stat-value">${{ summary.current_shift_earnings | round(precision=2) }}</span>
         <span class="stat-label">
-            <i class="fas fa-list me-1"></i>Total Entries
+            <i class="fas fa-coins me-1"></i>Current Shift
         </span>
     </div>
     <div class="stat-card">
-        <span class="stat-value">{{ roles | length }}</span>
+        <span class="stat-value">{{ summary.pay_period_hours | round(precision=2) }}</span>
         <span class="stat-label">
-            <i class="fas fa-user-tag me-1"></i>Active Roles
+            <i class="fas fa-calendar-week me-1"></i>Pay Period Hours
         </span>
     </div>
 </div>
@@ -181,7 +181,7 @@
     </div>
     <div class="text-center mt-3">
         <a href="/blog" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Blog
+            <i class="fas fa-cog me-2"></i>Settings
         </a>
     </div>
 </div>

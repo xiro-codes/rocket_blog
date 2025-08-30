@@ -255,6 +255,33 @@ impl SettingsService {
         self.set_setting(db, &key, timezone, false).await
     }
 
+    /// Get user pay period settings by account ID
+    pub async fn get_user_pay_period_settings(&self, db: &DatabaseConnection, account_id: Uuid) -> Result<Option<models::dto::PayPeriodSettingsDTO>, String> {
+        let start_day_key = format!("user_pay_period_start_day_{}", account_id);
+        let period_length_key = format!("user_pay_period_length_{}", account_id);
+        
+        let start_day = self.get_setting(db, &start_day_key).await?.unwrap_or_else(|| "monday".to_string());
+        let period_length = self.get_setting(db, &period_length_key).await?
+            .and_then(|s| s.parse::<i32>().ok())
+            .unwrap_or(2); // Default to 2 weeks
+            
+        Ok(Some(models::dto::PayPeriodSettingsDTO {
+            start_day,
+            period_length,
+        }))
+    }
+
+    /// Set user pay period settings by account ID
+    pub async fn set_user_pay_period_settings(&self, db: &DatabaseConnection, account_id: Uuid, settings: &models::dto::PayPeriodSettingsFormDTO) -> Result<(), String> {
+        let start_day_key = format!("user_pay_period_start_day_{}", account_id);
+        let period_length_key = format!("user_pay_period_length_{}", account_id);
+        
+        self.set_setting(db, &start_day_key, &settings.start_day, false).await?;
+        self.set_setting(db, &period_length_key, &settings.period_length.to_string(), false).await?;
+        
+        Ok(())
+    }
+
     /// Test Ollama connection
     pub async fn test_ollama_connection(&self, url: &str) -> Result<bool, String> {
         use reqwest::Client;
