@@ -139,15 +139,17 @@
     <p class="text-muted mb-4">Add a work session that wasn't tracked with the timer.</p>
     
     <form method="post" action="/worktime/entries" class="row g-3">
-        {{ wt::form_field(
-            type="select", 
-            name="user_role_id", 
-            label="Role", 
-            icon="fas fa-user-tag",
-            placeholder="Select a role...",
-            required=true,
-            options=roles | map(attribute="id,role_name,hourly_wage") | map(split=",") | map(join=" ($") | map(concat=")/hr)")
-        ) }}
+        <div class="col-md-6">
+            <label for="user_role_id" class="form-label">
+                <i class="fas fa-user-tag me-1"></i>Role
+            </label>
+            <select class="form-control" id="user_role_id" name="user_role_id" required>
+                <option value="">Select a role...</option>
+                {% for role in roles %}
+                    <option value="{{ role.id }}">{{ role.role_name }} (${{ role.hourly_wage }}/hr)</option>
+                {% endfor %}
+            </select>
+        </div>
         
         <div class="col-md-6">
             <label for="start_time" class="form-label">

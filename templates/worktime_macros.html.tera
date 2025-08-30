@@ -366,25 +366,31 @@
     </div>
 {% endmacro %}
 
-{# Form field component #}
-{% macro form_field(type, name, label, icon="", placeholder="", required=false, options=[]) %}
+{# Form field component - simplified #}
+{% macro form_field_simple(type, name, label, icon="", placeholder="", required=false) %}
     <div class="col-12">
         <label for="{{ name }}" class="form-label">
             {% if icon %}<i class="{{ icon }} me-1"></i>{% endif %}{{ label }}
         </label>
-        {% if type == "select" %}
-            <select class="form-control" id="{{ name }}" name="{{ name }}"{% if required %} required{% endif %}>
-                {% if placeholder %}
-                <option value="">{{ placeholder }}</option>
-                {% endif %}
-                {% for option in options %}
-                    <option value="{{ option.value }}">{{ option.text }}</option>
-                {% endfor %}
-            </select>
-        {% else %}
-            <input type="{{ type }}" class="form-control" id="{{ name }}" name="{{ name }}"
-                   {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
-                   {% if required %}required{% endif %}>
-        {% endif %}
+        <input type="{{ type }}" class="form-control" id="{{ name }}" name="{{ name }}"
+               {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+               {% if required %}required{% endif %}>
+    </div>
+{% endmacro %}
+
+{# Select field component #}
+{% macro select_field(name, label, options, icon="", placeholder="", required=false) %}
+    <div class="col-12">
+        <label for="{{ name }}" class="form-label">
+            {% if icon %}<i class="{{ icon }} me-1"></i>{% endif %}{{ label }}
+        </label>
+        <select class="form-control" id="{{ name }}" name="{{ name }}"{% if required %} required{% endif %}>
+            {% if placeholder %}
+            <option value="">{{ placeholder }}</option>
+            {% endif %}
+            {% for option in options %}
+                <option value="{{ option.value }}">{{ option.text }}</option>
+            {% endfor %}
+        </select>
     </div>
 {% endmacro %}

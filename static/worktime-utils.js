@@ -273,6 +273,40 @@ const PWAUtils = {
                 console.log('Notification permission:', permission);
             });
         }
+    },
+
+    /**
+     * Show a notification (if permission granted)
+     */
+    showNotification(title, options = {}) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            const defaultOptions = {
+                icon: '/static/icon-192x192.png',
+                badge: '/static/icon-96x96.png',
+                tag: 'worktime-notification'
+            };
+            
+            new Notification(title, { ...defaultOptions, ...options });
+        }
+    },
+
+    /**
+     * Show a work time reminder notification
+     */
+    showWorkTimeReminder(message = 'Time to check your work timer!') {
+        this.showNotification('Work Time Tracker', {
+            body: message,
+            actions: [
+                {
+                    action: 'start-timer',
+                    title: 'Start Timer'
+                },
+                {
+                    action: 'view-dashboard',
+                    title: 'View Dashboard'
+                }
+            ]
+        });
     }
 };
 

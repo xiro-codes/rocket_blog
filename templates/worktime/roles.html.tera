@@ -16,7 +16,7 @@
 <!-- Add New Role -->
 {% call wt::worktime_card(title="Add New Role", icon="fas fa-plus") %}
     <form method="post" action="/worktime/roles" class="row g-3">
-        {{ wt::form_field(
+        {{ wt::form_field_simple(
             type="text", 
             name="role_name", 
             label="Role Name", 
@@ -32,8 +32,7 @@
             <input type="number" step="0.01" class="form-control" id="hourly_wage" name="hourly_wage" placeholder="25.00" required>
         </div>
         
-        {{ wt::form_field(
-            type="select",
+        {{ wt::select_field(
             name="currency",
             label="Currency",
             icon="fas fa-coins",

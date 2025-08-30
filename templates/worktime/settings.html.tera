@@ -1,53 +1,20 @@
 {% extends "worktime_base" %}
+{% import "worktime_macros" as wt %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="worktime-title mb-0">
         <i class="fas fa-cog me-2"></i>Settings
     </h1>
-    <a href="/" class="btn btn-secondary">
+    <a href="/worktime" class="btn btn-secondary">
         <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
     </a>
 </div>
 
-<!-- Quick Actions -->
-<div class="worktime-nav" style="margin: 1rem 0;">
-    <div class="text-center mb-3">
-        <h4 class="worktime-subtitle">
-            <i class="fas fa-compass me-2"></i>Quick Actions
-        </h4>
-    </div>
-    <div class="row g-2">
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime" class="btn btn-outline-primary w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-home me-2"></i>Dashboard
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime/roles" class="btn btn-outline-primary w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-user-tag me-2"></i>Manage Roles
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime/entries" class="btn btn-outline-info w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-list-ul me-2"></i>View Entries
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worktime/notifications" class="btn btn-outline-warning w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-bell me-2"></i>Notifications
-            </a>
-        </div>
-    </div>
-</div>
+{{ wt::quick_nav(current_page="settings", show_mobile_menu=false) }}
 
 <!-- Timezone Settings -->
-<div class="worktime-card mb-4">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-globe me-2"></i>Timezone Settings
-        </h3>
-    </div>
+{% call wt::worktime_card(title="Timezone Settings", icon="fas fa-globe") %}
     
     <div class="mb-3">
         <p class="text-muted">Configure your preferred timezone for time display throughout the work time tracker.</p>
@@ -80,21 +47,15 @@
             </button>
         </div>
     </form>
-</div>
+{% endcall %}
 
 <!-- Pay Period Settings -->
-<div class="worktime-card">
-    <div class="worktime-card-header">
-        <h3 class="mb-0">
-            <i class="fas fa-calendar-alt me-2"></i>Pay Period Settings
-        </h3>
-    </div>
-    
+{% call wt::worktime_card(title="Pay Period Settings", icon="fas fa-calendar-alt") %}
     <div class="mb-3">
         <p class="text-muted">Configure how your pay periods are automatically generated.</p>
     </div>
     
-    <form method="post" action="/settings/payperiod" class="row g-3">
+    <form method="post" action="/worktime/settings/payperiod" class="row g-3">
         <div class="col-md-6">
             <label for="start_day" class="form-label">
                 <i class="fas fa-calendar-day me-1"></i>Pay Period Start Day
@@ -122,7 +83,7 @@
             <small class="form-text text-muted">How many weeks each pay period lasts</small>
         </div>
         <div class="col-12">
-            <div class="alert alert-warning">
+            <div class="alert alert-info">
                 <h6 class="mb-2">Current Configuration</h6>
                 <p class="mb-0">
                     Pay periods start every <strong>{{ pay_period_settings.start_day | title }}</strong> 
@@ -136,7 +97,7 @@
             </button>
         </div>
     </form>
-</div>
+{% endcall %}
 
 {% if flash %}
 <div class="alert alert-{{ flash.0 }} mt-4">
@@ -144,6 +105,11 @@
 </div>
 {% endif %}
 
+{% endblock %}
+
+{% block script %}
+<!-- Include Work Time utilities -->
+<script src="/static/worktime-utils.js"></script>
 <script>
 // Update current time display
 function updateCurrentTime() {
@@ -158,31 +124,45 @@ function updateCurrentTime() {
         second: '2-digit',
         hour12: false
     });
-    document.getElementById('current-time').textContent = timeString;
+    const element = document.getElementById('current-time');
+    if (element) {
+        element.textContent = timeString;
+    }
 }
 
 // Update time immediately and then every second
-updateCurrentTime();
-setInterval(updateCurrentTime, 1000);
+document.addEventListener('DOMContentLoaded', function() {
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
 
-// Update preview when timezone selection changes
-document.getElementById('timezone').addEventListener('change', function() {
-    const selectedTimezone = this.value;
-    const now = new Date();
-    try {
-        const timeString = now.toLocaleString('en-US', {
-            timeZone: selectedTimezone,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
+    // Update preview when timezone selection changes
+    const timezoneSelect = document.getElementById('timezone');
+    if (timezoneSelect) {
+        timezoneSelect.addEventListener('change', function() {
+            const selectedTimezone = this.value;
+            const now = new Date();
+            try {
+                const timeString = now.toLocaleString('en-US', {
+                    timeZone: selectedTimezone,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+                const element = document.getElementById('current-time');
+                if (element) {
+                    element.textContent = timeString + ' (Preview)';
+                }
+            } catch (e) {
+                const element = document.getElementById('current-time');
+                if (element) {
+                    element.textContent = 'Invalid timezone';
+                }
+            }
         });
-        document.getElementById('current-time').textContent = timeString + ' (Preview)';
-    } catch (e) {
-        document.getElementById('current-time').textContent = 'Invalid timezone';
     }
 });
 </script>
