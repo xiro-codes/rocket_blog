@@ -490,53 +490,19 @@ async fn update_notifications(
 // Pay period management routes
 #[get("/payperiods")]
 async fn payperiods_view(
-    conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
-    pay_period_service: &State<PayPeriodService>,
-) -> Result<Template, Flash<Redirect>> {
-    log::info!("Route accessed: GET /payperiods - Pay periods management");
-    let db = conn.into_inner();
-    
-    match pay_period_service.get_pay_periods_with_summary(db, user.account_id).await {
-        Ok(pay_periods) => {
-            // Get unassigned entries count
-            let unassigned_count = pay_period_service.get_unassigned_entries_count(db, user.account_id).await
-                .unwrap_or(0);
-            
-            Ok(Template::render(
-                "worktime/payperiods",
-                context! {
-                    page_title: "Manage Pay Periods",
-                    pay_periods: pay_periods,
-                    username: user.username,
-                    unassigned_count: unassigned_count,
-                }
-            ))
-        },
-        Err(e) => {
-            log::error!("Failed to load pay periods: {}", e);
-            Err(Flash::error(Redirect::to("/"), "Failed to load pay periods"))
-        }
-    }
+    _user: AuthenticatedUser,
+) -> Flash<Redirect> {
+    log::info!("Route accessed: GET /payperiods - Redirecting to settings page");
+    Flash::success(Redirect::to("/settings"), "Pay period settings are now available in the Settings page")
 }
 
-#[post("/payperiods", data = "<form>")]
+#[post("/payperiods", data = "<_form>")]
 async fn create_pay_period(
-    conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
-    pay_period_service: &State<PayPeriodService>,
-    form: Form<PayPeriodFormDTO>,
+    _user: AuthenticatedUser,
+    _form: Form<PayPeriodFormDTO>,
 ) -> Flash<Redirect> {
-    log::info!("Route accessed: POST /payperiods - Creating pay period");
-    let db = conn.into_inner();
-    
-    match pay_period_service.create_pay_period(db, user.account_id, form.into_inner()).await {
-        Ok(_) => Flash::success(Redirect::to("/payperiods"), "Pay period created successfully"),
-        Err(e) => {
-            log::error!("Failed to create pay period: {}", e);
-            Flash::error(Redirect::to("/payperiods"), &format!("Failed to create pay period: {}", e))
-        }
-    }
+    log::info!("Route accessed: POST /payperiods - Redirecting to settings page");
+    Flash::success(Redirect::to("/settings"), "Pay period configuration is now available in the Settings page")
 }
 
 #[post("/payperiods/assign")]
@@ -560,23 +526,13 @@ async fn auto_assign_entries(
     }
 }
 
-#[post("/payperiods/<period_id>/delete")]
+#[post("/payperiods/<_period_id>/delete")]
 async fn delete_pay_period(
-    conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
-    pay_period_service: &State<PayPeriodService>,
-    period_id: Uuid,
+    _user: AuthenticatedUser,
+    _period_id: Uuid,
 ) -> Flash<Redirect> {
-    log::info!("Route accessed: POST /payperiods/{}/delete - Deleting pay period", period_id);
-    let db = conn.into_inner();
-    
-    match pay_period_service.delete_pay_period(db, period_id, user.account_id).await {
-        Ok(_) => Flash::success(Redirect::to("/payperiods"), "Pay period deleted successfully"),
-        Err(e) => {
-            log::error!("Failed to delete pay period: {}", e);
-            Flash::error(Redirect::to("/payperiods"), "Failed to delete pay period")
-        }
-    }
+    log::info!("Route accessed: POST /payperiods/delete - Redirecting to settings page");
+    Flash::success(Redirect::to("/settings"), "Pay period management is now available in the Settings page")
 }
 
 #[get("/timezone")]
@@ -760,8 +716,8 @@ fn routes() -> Vec<rocket::Route> {
         notifications_view,
         update_notifications,
         payperiods_view,
-        create_pay_period,
         auto_assign_entries,
+        create_pay_period,
         delete_pay_period,
         timezone_settings_view,
         update_timezone_settings,
