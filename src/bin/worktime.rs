@@ -12,10 +12,10 @@ use app::{
     database::parse_database_args_with_fallback,
     controllers,
     services::{AuthService, WorkTimeService, PayPeriodService, SettingsService},
+    template_config,
     create_base_rocket_with_database
 };
 use rocket::{fs::FileServer, response::Redirect, Build, Rocket, Request, Response, catchers, catch, launch, get};
-use rocket_dyn_templates::Template;
 use rocket::{http::Header, fairing::{Fairing, Info, Kind}};
 
 #[catch(default)]
@@ -159,7 +159,7 @@ async fn rocket() -> Rocket<Build> {
     log::info!("Building Work Time Tracker Rocket instance and configuring database...");
     let mut rocket = create_base_rocket_with_database(db_config).await
         .register("/", catchers![catch_default, catch_unauthorized])
-        .attach(Template::fairing())
+        .attach(template_config::create_template_fairing())
         .attach(CORS);
     
     // Attach work time-specific services

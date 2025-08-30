@@ -91,6 +91,9 @@ pub mod services;
 /// Type definitions and custom data structures
 pub mod types;
 
+/// Template configuration with custom filters
+pub mod template_config;
+
 #[cfg(test)]
 pub mod tests;
 
