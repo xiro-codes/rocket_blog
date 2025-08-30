@@ -2,8 +2,6 @@
 const CACHE_NAME = 'rocket-blog-pwa-v1';
 const urlsToCache = [
   '/',
-  '/blog',
-  '/worktime',
   '/static/style.css',
   '/static/worktime.css',
   '/static/manifest.json',
@@ -76,8 +74,10 @@ self.addEventListener('fetch', event => {
           // Clone the response for caching
           const responseToCache = response.clone();
 
-          // Cache the response for future use (for worktime-related URLs)
-          if (event.request.url.includes('/worktime') || 
+          // Cache the response for future use (for worktime app URLs)
+          if (event.request.url.includes('/entries') || 
+              event.request.url.includes('/roles') ||
+              event.request.url.includes('/settings') ||
               event.request.url.includes('/static/')) {
             caches.open(CACHE_NAME)
               .then(cache => {
@@ -157,16 +157,16 @@ self.addEventListener('notificationclick', event => {
   
   if (action === 'start-timer') {
     event.waitUntil(
-      clients.openWindow('/worktime?action=start')
+      clients.openWindow('/?action=start')
     );
   } else if (action === 'view-dashboard') {
     event.waitUntil(
-      clients.openWindow('/worktime')
+      clients.openWindow('/')
     );
   } else {
     // Default action - open the app
     event.waitUntil(
-      clients.openWindow('/worktime')
+      clients.openWindow('/')
     );
   }
 });
