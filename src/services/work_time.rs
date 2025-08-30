@@ -1,6 +1,6 @@
 use chrono::Utc;
 use models::{
-    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, WorkTimeEntryDisplayDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO},
+    dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, WorkTimeEntryWithRoleDTO, WorkTimeEntryDisplayDTO, NotificationSettingsFormDTO, PayPeriodSummaryDTO, PayPeriodSummaryData, TipEntryFormDTO},
     user_role, work_time_entry, notification_settings, pay_period,
 };
 use sea_orm::*;
@@ -38,6 +38,7 @@ impl WorkTimeService {
             role_name: Set(data.role_name.clone()),
             hourly_wage: Set(hourly_wage),
             currency: Set(data.currency.clone()),
+            is_tipped: Set(data.is_tipped.unwrap_or(false)),
             is_active: Set(true),
             created_at: Set(now.naive_utc()),
             updated_at: Set(now.naive_utc()),
@@ -79,6 +80,7 @@ impl WorkTimeService {
         role.role_name = Set(data.role_name);
         role.hourly_wage = Set(hourly_wage);
         role.currency = Set(data.currency);
+        role.is_tipped = Set(data.is_tipped.unwrap_or(false));
         role.updated_at = Set(Utc::now().naive_utc());
 
         role.update(db).await
@@ -133,8 +135,9 @@ impl WorkTimeService {
             start_time: Set(now),
             end_time: Set(None),
             duration: Set(None),
-            description: Set(data.description.clone()),
-            project: Set(data.project.clone()),
+            description: Set(None),
+            project: Set(None),
+            tips: Set(None), // Tips can be added later for tipped roles
             is_active: Set(true),
             created_at: Set(now),
             updated_at: Set(now),
@@ -146,15 +149,23 @@ impl WorkTimeService {
         Ok(entry)
     }
 
-    pub async fn stop_time_tracking(
+    pub async fn stop_time_tracking_with_role_info(
         &self,
         db: &DbConn,
         account_id: Uuid,
-    ) -> Result<work_time_entry::Model, DbErr> {
+    ) -> Result<(work_time_entry::Model, bool), DbErr> {
         log::info!("Stopping time tracking for account {}", account_id);
         
         let active_entry = self.get_active_entry(db, account_id).await?
             .ok_or(DbErr::Custom("No active time entry found".to_string()))?;
+
+        // Get role info to check if it's tipped
+        let role = user_role::Entity::find_by_id(active_entry.user_role_id)
+            .one(db)
+            .await?
+            .ok_or(DbErr::Custom("Role not found".to_string()))?;
+            
+        let is_tipped = role.is_tipped;
 
         let end_time = Utc::now();
         let duration = (end_time - active_entry.start_time).num_minutes() as i32;
@@ -183,7 +194,16 @@ impl WorkTimeService {
             log::info!("Assigned entry to pay period: {}", pay_period.period_name);
         }
         
-        Ok(stopped_entry)
+        Ok((stopped_entry, is_tipped))
+    }
+
+    pub async fn stop_time_tracking(
+        &self,
+        db: &DbConn,
+        account_id: Uuid,
+    ) -> Result<work_time_entry::Model, DbErr> {
+        let (entry, _) = self.stop_time_tracking_with_role_info(db, account_id).await?;
+        Ok(entry)
     }
 
     pub async fn get_active_entry(
@@ -214,19 +234,31 @@ impl WorkTimeService {
             .await?
             .ok_or(DbErr::Custom("User role not found or inactive".to_string()))?;
 
-        // Parse dates if provided
+        // Parse dates if provided (datetime-local format: "YYYY-MM-DDTHH:MM")
         let start_time = if let Some(start_str) = data.start_time {
-            chrono::DateTime::parse_from_rfc3339(&start_str)
-                .map(|dt| dt.with_timezone(&Utc))
-                .map_err(|_| DbErr::Custom("Invalid start time format".to_string()))?
+            // Try parsing as RFC3339 first, then as datetime-local format
+            if let Ok(dt) = chrono::DateTime::parse_from_rfc3339(&start_str) {
+                dt.with_timezone(&Utc)
+            } else if let Ok(naive_dt) = chrono::NaiveDateTime::parse_from_str(&start_str, "%Y-%m-%dT%H:%M") {
+                // Assume the datetime is in UTC for now (could be improved to use user's timezone)
+                naive_dt.and_utc()
+            } else {
+                return Err(DbErr::Custom("Invalid start time format".to_string()));
+            }
         } else {
             Utc::now()
         };
 
         let end_time = if let Some(end_str) = data.end_time {
-            Some(chrono::DateTime::parse_from_rfc3339(&end_str)
-                .map(|dt| dt.with_timezone(&Utc))
-                .map_err(|_| DbErr::Custom("Invalid end time format".to_string()))?)
+            // Try parsing as RFC3339 first, then as datetime-local format
+            if let Ok(dt) = chrono::DateTime::parse_from_rfc3339(&end_str) {
+                Some(dt.with_timezone(&Utc))
+            } else if let Ok(naive_dt) = chrono::NaiveDateTime::parse_from_str(&end_str, "%Y-%m-%dT%H:%M") {
+                // Assume the datetime is in UTC for now (could be improved to use user's timezone)
+                Some(naive_dt.and_utc())
+            } else {
+                return Err(DbErr::Custom("Invalid end time format".to_string()));
+            }
         } else {
             None
         };
@@ -258,8 +290,9 @@ impl WorkTimeService {
             start_time: Set(start_time),
             end_time: Set(end_time),
             duration: Set(duration),
-            description: Set(data.description.clone()),
-            project: Set(data.project.clone()),
+            description: Set(None),
+            project: Set(None),
+            tips: Set(None), // Tips can be added later for tipped roles
             is_active: Set(false),
             created_at: Set(now),
             updated_at: Set(now),
@@ -333,19 +366,50 @@ impl WorkTimeService {
         start_date: Option<chrono::DateTime<Utc>>,
         end_date: Option<chrono::DateTime<Utc>>,
     ) -> Result<WorkTimeSummaryDTO, DbErr> {
-        let mut query = work_time_entry::Entity::find()
+        // Get pay period data instead of total data
+        let pay_period_data = self.get_pay_period_summary(db, account_id).await?;
+        
+        // Get current shift earnings (active entry if any)
+        let current_shift_earnings = self.get_current_shift_earnings(db, account_id).await.unwrap_or(0.0);
+        
+        Ok(WorkTimeSummaryDTO {
+            total_hours: pay_period_data.hours, // Now shows pay period hours instead of total
+            total_earnings: pay_period_data.earnings, // Now shows pay period earnings instead of total  
+            currency: pay_period_data.currency,
+            entries_count: pay_period_data.entries_count,
+            current_shift_earnings,
+            pay_period_hours: pay_period_data.hours, // This is now the same as total_hours
+        })
+    }
+
+    /// Get pay period summary data  
+    pub async fn get_pay_period_summary(&self, db: &DbConn, account_id: Uuid) -> Result<PayPeriodSummaryData, DbErr> {
+        use chrono::{Datelike, Duration, Weekday};
+        
+        let now = Utc::now().date_naive();
+        
+        // Calculate pay period start (Monday of current or previous week depending on bi-weekly cycle)
+        let days_since_monday = match now.weekday() {
+            Weekday::Mon => 0,
+            Weekday::Tue => 1,
+            Weekday::Wed => 2,
+            Weekday::Thu => 3,
+            Weekday::Fri => 4,
+            Weekday::Sat => 5,
+            Weekday::Sun => 6,
+        };
+        
+        let current_monday = now - Duration::days(days_since_monday);
+        let pay_period_start = current_monday.and_hms_opt(0, 0, 0).unwrap().and_utc();
+        
+        // Get all completed entries in this pay period
+        let entries = work_time_entry::Entity::find()
             .find_also_related(user_role::Entity)
             .filter(work_time_entry::Column::AccountId.eq(account_id))
-            .filter(work_time_entry::Column::IsActive.eq(false)); // Only completed entries
-
-        if let Some(start) = start_date {
-            query = query.filter(work_time_entry::Column::StartTime.gte(start));
-        }
-        if let Some(end) = end_date {
-            query = query.filter(work_time_entry::Column::StartTime.lte(end));
-        }
-
-        let entries = query.all(db).await?;
+            .filter(work_time_entry::Column::IsActive.eq(false))
+            .filter(work_time_entry::Column::StartTime.gte(pay_period_start))
+            .all(db)
+            .await?;
 
         let mut total_hours = 0.0;
         let mut total_earnings = 0.0;
@@ -361,20 +425,44 @@ impl WorkTimeService {
             }
         }
 
-        // Get current shift earnings (active entry if any)
-        let current_shift_earnings = self.get_current_shift_earnings(db, account_id).await.unwrap_or(0.0);
-        
-        // Get pay period hours (current pay period)
-        let pay_period_hours = self.get_current_pay_period_hours(db, account_id).await.unwrap_or(0.0);
-
-        Ok(WorkTimeSummaryDTO {
-            total_hours,
-            total_earnings,
+        Ok(PayPeriodSummaryData {
+            hours: total_hours,
+            earnings: total_earnings,
             currency,
             entries_count,
-            current_shift_earnings,
-            pay_period_hours,
         })
+    }
+
+    /// Add tips to a work time entry
+    pub async fn add_tips_to_entry(
+        &self,
+        db: &DbConn,
+        entry_id: Uuid,
+        account_id: Uuid,
+        tip_data: TipEntryFormDTO,
+    ) -> Result<work_time_entry::Model, DbErr> {
+        // Parse tip amount from string
+        let tip_amount = tip_data.tip_amount.parse::<f64>()
+            .map_err(|_| DbErr::Custom("Invalid tip amount format".to_string()))?;
+        
+        if tip_amount < 0.0 {
+            return Err(DbErr::Custom("Tip amount cannot be negative".to_string()));
+        }
+        
+        let entry = work_time_entry::Entity::find_by_id(entry_id)
+            .filter(work_time_entry::Column::AccountId.eq(account_id))
+            .one(db)
+            .await?
+            .ok_or(DbErr::RecordNotFound("Work time entry not found".to_string()))?;
+
+        let mut entry: work_time_entry::ActiveModel = entry.into();
+        entry.tips = Set(Some(tip_amount));
+        entry.updated_at = Set(Utc::now());
+
+        let updated_entry = entry.update(db).await?;
+        log::info!("Tips added to entry {}: ${:.2}", entry_id, tip_amount);
+        
+        Ok(updated_entry)
     }
 
     /// Get current shift earnings (for active timer)
@@ -447,6 +535,72 @@ impl WorkTimeService {
         
         log::info!("Work time entry deleted: {}", entry_id);
         Ok(())
+    }
+
+    pub async fn get_work_entry_by_id(&self, db: &DbConn, entry_id: Uuid, account_id: Uuid) -> Result<Option<work_time_entry::Model>, DbErr> {
+        work_time_entry::Entity::find_by_id(entry_id)
+            .filter(work_time_entry::Column::AccountId.eq(account_id))
+            .one(db)
+            .await
+    }
+
+    pub async fn update_work_entry(
+        &self,
+        db: &DbConn,
+        entry_id: Uuid,
+        account_id: Uuid,
+        data: WorkTimeEntryFormDTO,
+    ) -> Result<work_time_entry::Model, DbErr> {
+        log::info!("Updating work time entry {} for account {}", entry_id, account_id);
+        
+        // Get the existing entry
+        let entry = self.get_work_entry_by_id(db, entry_id, account_id).await?
+            .ok_or(DbErr::RecordNotFound("Work time entry not found".to_string()))?;
+
+        // Verify the new role belongs to the user
+        let _role = user_role::Entity::find_by_id(data.user_role_id)
+            .filter(user_role::Column::AccountId.eq(account_id))
+            .filter(user_role::Column::IsActive.eq(true))
+            .one(db)
+            .await?
+            .ok_or(DbErr::Custom("User role not found or inactive".to_string()))?;
+
+        // Parse the datetime strings
+        let start_time = if let Some(start_str) = data.start_time {
+            chrono::NaiveDateTime::parse_from_str(&start_str, "%Y-%m-%dT%H:%M")
+                .map_err(|_| DbErr::Custom("Invalid start time format".to_string()))?
+                .and_utc()
+        } else {
+            entry.start_time
+        };
+
+        let end_time = if let Some(end_str) = data.end_time {
+            Some(chrono::NaiveDateTime::parse_from_str(&end_str, "%Y-%m-%dT%H:%M")
+                .map_err(|_| DbErr::Custom("Invalid end time format".to_string()))?
+                .and_utc())
+        } else {
+            entry.end_time
+        };
+
+        // Calculate duration if both times are provided
+        let duration = if let Some(end) = end_time {
+            Some((end - start_time).num_minutes() as i32)
+        } else {
+            None
+        };
+
+        // Update the entry
+        let mut active_entry: work_time_entry::ActiveModel = entry.into();
+        active_entry.user_role_id = Set(data.user_role_id);
+        active_entry.start_time = Set(start_time);
+        active_entry.end_time = Set(end_time);
+        active_entry.duration = Set(duration);
+        active_entry.is_active = Set(end_time.is_none()); // Active if no end time
+        active_entry.updated_at = Set(Utc::now());
+
+        let updated_entry = active_entry.update(db).await?;
+        log::info!("Work time entry updated: {}", entry_id);
+        Ok(updated_entry)
     }
 
     // Notification Settings Management
@@ -650,18 +804,35 @@ impl WorkTimeService {
         })
     }
 
+    /// Format duration in minutes to readable format (e.g., "2h 15m")
+    pub fn format_duration(duration_minutes: Option<i64>) -> String {
+        match duration_minutes {
+            Some(minutes) if minutes > 0 => {
+                let hours = minutes / 60;
+                let remaining_minutes = minutes % 60;
+                
+                match (hours, remaining_minutes) {
+                    (0, m) => format!("{}m", m),
+                    (h, 0) => format!("{}h", h),
+                    (h, m) => format!("{}h {}m", h, m),
+                }
+            },
+            _ => "—".to_string()
+        }
+    }
+
     /// Convert WorkTimeEntryWithRoleDTO to WorkTimeEntryDisplayDTO with timezone formatting
     pub fn format_entries_for_display(
         entries: Vec<WorkTimeEntryWithRoleDTO>,
         user_timezone: &str,
     ) -> Vec<WorkTimeEntryDisplayDTO> {
         entries.into_iter().map(|entry| {
-            let start_time_display = TimezoneService::format_with_timezone(entry.start_time, user_timezone)
-                .unwrap_or_else(|_| entry.start_time.format("%Y-%m-%d %H:%M:%S UTC").to_string());
+            let start_time_display = TimezoneService::format_compact(entry.start_time, user_timezone)
+                .unwrap_or_else(|_| entry.start_time.format("%m/%d %H:%M").to_string());
             
             let end_time_display = entry.end_time.map(|end_time| {
-                TimezoneService::format_with_timezone(end_time, user_timezone)
-                    .unwrap_or_else(|_| end_time.format("%Y-%m-%d %H:%M:%S UTC").to_string())
+                TimezoneService::format_compact(end_time, user_timezone)
+                    .unwrap_or_else(|_| end_time.format("%m/%d %H:%M").to_string())
             });
             
             WorkTimeEntryDisplayDTO {

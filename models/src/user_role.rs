@@ -13,6 +13,7 @@ pub struct Model {
     pub role_name: String,
     pub hourly_wage: f64,
     pub currency: String,
+    pub is_tipped: bool,
     pub is_active: bool,
     pub created_at: DateTime,
     pub updated_at: DateTime,

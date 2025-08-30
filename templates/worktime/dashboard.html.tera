@@ -121,13 +121,13 @@
     <div class="stat-card">
         <span class="stat-value">{{ summary.total_hours | round(precision=2) }}</span>
         <span class="stat-label">
-            <i class="fas fa-clock me-1"></i>Total Hours
+            <i class="fas fa-calendar-week me-1"></i>Pay Period Hours
         </span>
     </div>
     <div class="stat-card">
         <span class="stat-value">${{ summary.total_earnings | round(precision=2) }}</span>
         <span class="stat-label">
-            <i class="fas fa-dollar-sign me-1"></i>Total Earnings
+            <i class="fas fa-dollar-sign me-1"></i>Pay Period Earnings
         </span>
     </div>
     <div class="stat-card">
@@ -136,16 +136,10 @@
             <i class="fas fa-coins me-1"></i>Current Shift
         </span>
     </div>
-    <div class="stat-card">
-        <span class="stat-value">{{ summary.pay_period_hours | round(precision=2) }}</span>
-        <span class="stat-label">
-            <i class="fas fa-calendar-week me-1"></i>Pay Period Hours
-        </span>
-    </div>
 </div>
 
 <!-- Navigation -->
-<div class="worktime-nav">
+<div class="worktime-nav" style="margin: 2rem 0;">
     <div class="text-center mb-3">
         <h3 class="worktime-subtitle">
             <i class="fas fa-compass me-2"></i>Quick Actions
@@ -153,22 +147,22 @@
     </div>
     <div class="row g-3">
         <div class="col-sm-6 col-lg-3">
-            <a href="/roles" class="btn btn-primary w-100">
+            <a href="/roles" class="btn btn-primary w-100" style="margin: 0.5rem 0;">
                 <i class="fas fa-user-tag me-2"></i>Manage Roles
             </a>
         </div>
         <div class="col-sm-6 col-lg-3">
-            <a href="/settings" class="btn btn-success w-100">
+            <a href="/settings" class="btn btn-success w-100" style="margin: 0.5rem 0;">
                 <i class="fas fa-cog me-2"></i>Settings
             </a>
         </div>
         <div class="col-sm-6 col-lg-3">
-            <a href="/entries" class="btn btn-info w-100">
+            <a href="/entries" class="btn btn-info w-100" style="margin: 0.5rem 0;">
                 <i class="fas fa-list-ul me-2"></i>View Entries
             </a>
         </div>
         <div class="col-sm-6 col-lg-3">
-            <a href="/notifications" class="btn btn-warning w-100">
+            <a href="/notifications" class="btn btn-warning w-100" style="margin: 0.5rem 0;">
                 <i class="fas fa-bell me-2"></i>Notifications
             </a>
         </div>
@@ -199,15 +193,25 @@
                 <tbody>
                     {% for entry in recent_entries %}
                     <tr>
-                        <td>{{ entry.start_time_display | truncate(length=16) }}</td>
+                        <td>{{ entry.start_time_display }}</td>
                         <td>{{ entry.role_name }}</td>
                         <td>
-                            {% if entry.duration %}
-                                {{ (entry.duration / 60) | round(precision=1) }}h
-                            {% else %}
+                            {% if entry.duration and not entry.is_active %}
+                                {% set hours = entry.duration // 60 %}
+                                {% set minutes = entry.duration % 60 %}
+                                {% if hours > 0 and minutes > 0 %}
+                                    {{ hours }}h {{ minutes }}m
+                                {% elif hours > 0 %}
+                                    {{ hours }}h
+                                {% else %}
+                                    {{ minutes }}m
+                                {% endif %}
+                            {% elif entry.is_active %}
                                 <span class="status-badge status-active">
                                     <i class="fas fa-circle"></i>Active
                                 </span>
+                            {% else %}
+                                —
                             {% endif %}
                         </td>
                         <td class="d-none d-sm-table-cell">{{ entry.description | default(value="—") | truncate(length=20) }}</td>
@@ -236,4 +240,49 @@
     {% endif %}
 </div>
 
+{% endblock %}
+
+{% block script %}
+<script>
+// Auto-refresh stats every 5 seconds
+setInterval(function() {
+    // Update stats via AJAX
+    fetch('/worktime/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            // Update the stats values
+            document.querySelector('.stats-grid .stat-card:nth-child(1) .stat-value').textContent = data.total_hours.toFixed(2);
+            document.querySelector('.stats-grid .stat-card:nth-child(2) .stat-value').textContent = '$' + data.total_earnings.toFixed(2);
+            document.querySelector('.stats-grid .stat-card:nth-child(3) .stat-value').textContent = '$' + data.current_shift_earnings.toFixed(2);
+        })
+        .catch(error => {
+            console.log('Stats refresh failed:', error);
+        });
+}, 5000);
+
+// Update live timer if active
+{% if active_entry %}
+function updateLiveTimer() {
+    const timerElement = document.getElementById('live-timer');
+    if (timerElement) {
+        const startTime = new Date(timerElement.dataset.startTime);
+        const now = new Date();
+        const elapsed = Math.floor((now - startTime) / 1000);
+        
+        const hours = Math.floor(elapsed / 3600);
+        const minutes = Math.floor((elapsed % 3600) / 60);
+        const seconds = elapsed % 60;
+        
+        timerElement.textContent = 
+            String(hours).padStart(2, '0') + ':' +
+            String(minutes).padStart(2, '0') + ':' +
+            String(seconds).padStart(2, '0');
+    }
+}
+
+// Update timer every second
+setInterval(updateLiveTimer, 1000);
+updateLiveTimer(); // Initial call
+{% endif %}
+</script>
 {% endblock %}

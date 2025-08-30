@@ -85,6 +85,20 @@ impl TimezoneService {
         Self::format_for_display(utc_time, user_timezone, "%Y-%m-%dT%H:%M")
     }
 
+    /// Format datetime for short table display (date and time separated)
+    pub fn format_short_datetime(utc_time: DateTime<Utc>, user_timezone: &str) -> Result<(String, String), String> {
+        let user_time = Self::convert_to_user_timezone(utc_time, user_timezone)?;
+        let date = user_time.format("%m/%d").to_string();
+        let time = user_time.format("%H:%M").to_string();
+        Ok((date, time))
+    }
+
+    /// Format datetime for compact display (one line, shorter)
+    pub fn format_compact(utc_time: DateTime<Utc>, user_timezone: &str) -> Result<String, String> {
+        let user_time = Self::convert_to_user_timezone(utc_time, user_timezone)?;
+        Ok(user_time.format("%m/%d %H:%M").to_string())
+    }
+
     /// Validate if a timezone string is valid
     pub fn is_valid_timezone(timezone: &str) -> bool {
         Tz::from_str(timezone).is_ok()

@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "work_time_entry")]
 #[serde(crate = "rocket::serde")]
 pub struct Model {
@@ -18,6 +18,7 @@ pub struct Model {
     pub duration: Option<i32>, // Duration in minutes
     pub description: Option<String>,
     pub project: Option<String>,
+    pub tips: Option<f64>, // Tips amount for tipped roles
     pub is_active: bool, // For active time tracking
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
