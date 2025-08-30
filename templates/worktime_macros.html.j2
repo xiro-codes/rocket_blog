@@ -26,7 +26,7 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        {{ self.nav_buttons(current_page=current_page, class="w-100 mb-2") }}
+        {{ nav_buttons(current_page=current_page, class="w-100 mb-2") }}
     </div>
     {% endif %}
 
@@ -38,7 +38,7 @@
             </h4>
         </div>
         <div class="row g-2">
-            {{ self.nav_buttons(current_page=current_page, class="btn-outline-primary w-100", wrapper_class="col-sm-6 col-lg-3") }}
+            {{ nav_buttons(current_page=current_page, class="btn-outline-primary w-100", wrapper_class="col-sm-6 col-lg-3") }}
         </div>
     </div>
 {% endmacro %}
@@ -73,7 +73,7 @@
     <div class="stats-grid">
         {% if stats.pay_period_hours is defined %}
         <div class="stat-card">
-            <span class="stat-value">{{ stats.pay_period_hours | round(precision=2) }}</span>
+            <span class="stat-value">{{ stats.pay_period_hours | round(2)}}</span>
             <span class="stat-label">
                 <i class="fas fa-calendar-week me-1"></i>Pay Period Hours
             </span>
@@ -82,7 +82,7 @@
         
         {% if stats.total_hours is defined %}
         <div class="stat-card">
-            <span class="stat-value">{{ stats.total_hours | round(precision=2) }}</span>
+            <span class="stat-value">{{ stats.total_hours | round(2) }}</span>
             <span class="stat-label">
                 <i class="fas fa-clock me-1"></i>Total Hours
             </span>
@@ -91,7 +91,7 @@
         
         {% if stats.total_earnings is defined %}
         <div class="stat-card">
-            <span class="stat-value">${{ stats.total_earnings | round(precision=2) }}</span>
+            <span class="stat-value">${{ stats.total_earnings | round(2) }}</span>
             <span class="stat-label">
                 <i class="fas fa-dollar-sign me-1"></i>Total Earnings
             </span>
@@ -100,7 +100,7 @@
         
         {% if stats.current_shift_earnings is defined %}
         <div class="stat-card">
-            <span class="stat-value">${{ stats.current_shift_earnings | round(precision=2) }}</span>
+            <span class="stat-value">${{ stats.current_shift_earnings | round(2) }}</span>
             <span class="stat-label">
                 <i class="fas fa-coins me-1"></i>Current Shift
             </span>
@@ -119,7 +119,7 @@
 {% endmacro %}
 
 {# Timer display component #}
-{% macro timer_display(active_entry) %}
+{% macro timer_display(active_entry, roles) %}
     {% if active_entry %}
         <div class="alert alert-success">
             <div class="d-flex justify-content-between align-items-center">
@@ -157,7 +157,7 @@
             <p class="text-muted">No active timer. Start tracking your productive work time.</p>
         </div>
         
-        {{ self.timer_start_form(roles=roles) }}
+        {{ timer_start_form(roles=roles) }}
     {% endif %}
 {% endmacro %}
 
@@ -219,7 +219,7 @@
                         <td>{{ entry.role_name }}</td>
                         <td>
                             {% if entry.duration and not entry.is_active %}
-                                {{ self.format_duration(entry.duration) }}
+                                {{ format_duration(entry.duration) }}
                             {% elif entry.is_active %}
                                 <span class="status-badge status-active">
                                     <i class="fas fa-circle"></i>Active
@@ -228,10 +228,10 @@
                                 —
                             {% endif %}
                         </td>
-                        <td class="d-none d-sm-table-cell">{{ entry.description | default(value="—") | truncate(length=20) }}</td>
+                        <td class="d-none d-sm-table-cell">{{ entry.description | default(value="—") | truncate(20) }}</td>
                         <td>
                             {% if entry.earnings %}
-                                {{ self.format_currency(entry.earnings) }}
+                                {{ format_currency(entry.earnings) }}
                             {% else %}
                                 —
                             {% endif %}
