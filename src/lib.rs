@@ -55,6 +55,9 @@ extern crate rocket;
 /// Application configuration and settings management
 pub mod config;
 
+/// Database configuration and auto-fallback functionality
+pub mod database;
+
 /// HTTP route handlers and request/response processing
 pub mod controllers;
 
@@ -95,6 +98,7 @@ pub mod tests;
 pub mod examples;
 
 use config::AppConfig;
+use database::DatabaseConfig;
 use features::Features;
 use migrations::MigratorTrait;
 use pool::Db;
@@ -246,7 +250,6 @@ pub fn create_base_rocket() -> Rocket<Build> {
     let app_config = AppConfig::from_figment(&figment);
     
     // Setup logging - ignore errors if already initialized
-
     // let _ = setup_logger();
     
     // Build the base rocket instance with common components
@@ -254,6 +257,61 @@ pub fn create_base_rocket() -> Rocket<Build> {
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
         .manage(app_config);
+    
+    rocket
+}
+
+/// Creates a base Rocket instance with dynamic database configuration.
+///
+/// This function provides the same pre-configured Rocket instance as `create_base_rocket`,
+/// but allows for dynamic database configuration including auto-fallback functionality.
+///
+/// # Arguments
+///
+/// * `db_config` - Database configuration including fallback options
+///
+/// # Returns
+///
+/// Returns a configured `Rocket<Build>` instance ready for route attachment
+/// and launching, or panics if database connection fails.
+///
+/// # Examples
+///
+/// ```rust,no_run
+/// use app::{create_base_rocket_with_database, database::DatabaseConfig};
+///
+/// let db_config = DatabaseConfig::default_with_fallback();
+/// let rocket = create_base_rocket_with_database(db_config);
+/// ```
+pub async fn create_base_rocket_with_database(mut db_config: DatabaseConfig) -> Rocket<Build> {
+    let figment = rocket::Config::figment();
+    let app_config = AppConfig::from_figment(&figment);
+    
+    // Test database connection and handle fallback
+    match db_config.test_and_select_database().await {
+        Ok(_backend) => {
+            log::info!("Using {} database", db_config.db_type.display_name());
+            if db_config.is_memory_database() {
+                log::warn!("⚠️  Using in-memory database - data will not persist between restarts!");
+            }
+        }
+        Err(e) => {
+            log::error!("Database configuration failed: {}", e);
+            panic!("Failed to establish database connection: {}", e);
+        }
+    }
+    
+    // Create a custom Rocket configuration with the selected database URL
+    let db_url = db_config.get_url().to_string();
+    let figment = rocket::Config::figment()
+        .merge(("databases.sea_orm.url", db_url));
+    
+    // Build the rocket instance with custom database configuration
+    let rocket = rocket::custom(figment)
+        .attach(Db::init())
+        .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
+        .manage(app_config)
+        .manage(db_config);
     
     rocket
 }

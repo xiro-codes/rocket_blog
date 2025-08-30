@@ -22,6 +22,7 @@ aes-gcm = "0.10.3"
 async-openai = "0.20.0"
 async-trait = "0.1.74"
 base64 = "0.22.1"
+clap = { version = "4.0", features = ["derive"] }
 fern = "0.7.1"
 humantime = "2.2.0"
 lipsum = "0.9.1"

@@ -10,6 +10,7 @@
 
 use app::{
     features::Features,
+    database::parse_database_args_with_fallback,
     controllers,
     services::{
         AuthService, BlogService, CommentService, OpenAIService, OllamaService, 
@@ -17,7 +18,7 @@ use app::{
         CoordinatorService, YoutubeDownloadService, BackgroundJobService
     },
     middleware,
-    create_base_rocket
+    create_base_rocket_with_database
 };
 use rocket::{fs::FileServer, response::Redirect, Build, Rocket, catchers, catch, launch};
 use rocket_dyn_templates::Template;
@@ -85,9 +86,13 @@ async fn rocket() -> Rocket<Build> {
     log::debug!("Seeding enabled: {}", Features::enable_seeding());
     log::debug!("Log level: {:?}", Features::log_level());
     
-    // Build the base rocket instance
-    log::info!("Building Blog Rocket instance and attaching services...");
-    let mut rocket = create_base_rocket()
+    // Parse command line arguments for database configuration
+    let db_config = parse_database_args_with_fallback();
+    log::info!("Database configuration: {:?}", db_config);
+    
+    // Build the base rocket instance with database auto-detection
+    log::info!("Building Blog Rocket instance and configuring database...");
+    let mut rocket = create_base_rocket_with_database(db_config).await
         .register("/", catchers![catch_default])
         .attach(Template::fairing());
     
