@@ -46,11 +46,11 @@
 {# Navigation buttons helper macro #}
 {% macro nav_buttons(current_page="", class="btn btn-primary", wrapper_class="") %}
     {% set nav_items = [
-        {url: "/", icon: "fas fa-home", text: "Dashboard", key: "dashboard"},
-        {url: "/entries", icon: "fas fa-list-ul", text: "View Entries", key: "entries"},
-        {url: "/roles", icon: "fas fa-user-tag", text: "Manage Roles", key: "roles"},
-        {url: "/settings", icon: "fas fa-cog", text: "Settings", key: "settings"},
-        {url: "/notifications", icon: "fas fa-bell", text: "Notifications", key: "notifications"}
+        {"url": "/", "icon": "fas fa-home", "text": "Dashboard", "key": "dashboard"},
+        {"url": "/entries", "icon": "fas fa-list-ul", "text": "View Entries", "key": "entries"},
+        {"url": "/roles", "icon": "fas fa-user-tag", "text": "Manage Roles", "key": "roles"},
+        {"url": "/settings", "icon": "fas fa-cog", "text": "Settings", "key": "settings"},
+        {"url": "/notifications", "icon": "fas fa-bell", "text": "Notifications", "key": "notifications"}
     ] %}
     
     {% for item in nav_items %}
