@@ -10,19 +10,19 @@
 	</h3>
 	{% endif %}
 
-	{%if token %}
+	{% if token %}
 	<div class="btn-group mb-3 flex-wrap">
-		{%if is_admin %}
+		{% if is_admin %}
 		<a class="btn btn-primary" href="/blog/create">[CREATE POST]</a>
-		{%endif%}
+		{% endif %}
 		<a class="btn btn-success" href="/blog/search">[SEARCH]</a>
-		{%if is_admin %}
+		{% if is_admin %}
 		<a class="btn btn-secondary" href="/settings">[SETTINGS]</a>
-		{%endif%}
+		{% endif %}
 		<a class="btn btn-primary" href="/auth/logout">[LOGOUT]</a>
 		<button id="install-btn" class="btn btn-info" onclick="installPWA()" style="display: none;">[INSTALL APP]</button>
 	</div>
-	{%else%}
+	{% else %}
 	<div class="mb-3">
 		<a class="btn btn-success" href="/blog/search">[SEARCH POSTS]</a>
 		{% if not has_accounts %}
@@ -38,7 +38,7 @@
 		<p>No admin account exists yet. Click the "CREATE ADMIN ACCOUNT" button above to get started.</p>
 	</div>
 	{% endif %}
-	{%endif%}
+	{% endif %}
 </div>
 
 <hr class="terminal-divider">
@@ -121,15 +121,15 @@
 		<button class="btn btn-secondary" disabled>[PREV]</button>
 		{% else %}
 		<a class="btn btn-primary" href="?page={{page -1}}&page_size={{page_size}}">[PREV]</a>
-		{%endif%}
+		{% endif %}
 		<button class="btn btn-secondary" disabled>
 			PAGE {{page}}
 		</button>
 		{% if page == num_pages %}
 		<button class="btn btn-secondary" disabled>[NEXT]</button>
-		{%else%}
+		{% else %}
 		<a class="btn btn-primary" href="?page={{page +1}}&page_size={{page_size}}">[NEXT]</a>
-		{%endif%}
+		{% endif %}
 	</footer>
 </div>
 {% endblock %}

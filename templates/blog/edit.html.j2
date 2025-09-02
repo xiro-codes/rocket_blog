@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="terminal-header"></div>
-{%if post%}
+{% if post %}
 <center>
 	<h1 class="terminal-cursor">Edit Article</h1>
 </center>
@@ -103,7 +103,7 @@
 {% endblock %}
 
 {% block script %}
-{%if post%}
+{% if post %}
 <script>
 // Simple HTML to Markdown converter for basic tags
 function htmlToMarkdown(html) {

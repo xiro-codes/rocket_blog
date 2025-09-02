@@ -100,7 +100,7 @@
 		<a class="btn btn-info" href="/blog">[← BACK TO POSTS]</a>
 		<a class="btn btn-success" href="/blog/search">[SEARCH]</a>
 	</div>
-	{%if is_admin %}
+	{% if is_admin %}
 	<header class="btn-group flex-wrap">
 		{% if post.draft %}
 		<a class="btn btn-success" href="{{post.seq_id}}/publish">[PUBLISH]</a>
@@ -108,13 +108,13 @@
 		<a class="btn btn-warning" href="{{post.seq_id}}/edit">[EDIT]</a>
 		<a class="btn btn-danger" href="{{post.seq_id}}/delete">[DELETE]</a>
 	</header>
-	{%endif%}
+	{% endif %}
 </center>
-{%if post.path%}
+{% if post.path %}
 <div class="d-flex align-items-center justify-content-center">
 	<video class="object-fit-scale" src="{{post.seq_id}}/video" height="300" controls autoplay></video>
 </div>
-{%endif%}
+{% endif %}
 
 <hr class="terminal-divider">
 
@@ -185,21 +185,21 @@
 
 <div class="d-flex justify-content-center m-2">
 	<footer class="btn-group align-items-center flex-wrap">
-		{%if token%}
+		{% if token %}
 		{% if post.seq_id == min_post %}
 		<button class="btn btn-secondary" disabled>[PREV POST]</button>
 		{% else %}
 		<a href="{{post.seq_id - 1}}" class="btn btn-primary">[PREV POST]</a>
-		{%endif%}
+		{% endif %}
 		<a href="/" class="btn btn-info">[BACK TO TERMINAL]</a>
 		{% if post.seq_id == max_post %}
 		<button class="btn btn-secondary" disabled>[NEXT POST]</button>
-		{%else%}
+		{% else %}
 		<a href="{{post.seq_id + 1}}" class="btn btn-primary">[NEXT POST]</a>
-		{%endif%}
-		{%else%}
+		{% endif %}
+		{% else %}
 		<a href="/" class="btn btn-primary">[BACK TO TERMINAL]</a>
-		{%endif%}
+		{% endif %}
 	</footer>
 </div>
 {% endif %}

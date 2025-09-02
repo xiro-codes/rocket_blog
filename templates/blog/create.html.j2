@@ -160,23 +160,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			promptSection.style.display = 'none';
 		}
 	});
-	const titleInput = document.getElementById('title');
-	const promptInput = document.getElementById('ai-prompt');
-	const promptSection = document.getElementById('ai-prompt-section');
-	const generateContentBtn = document.getElementById('generate-content-btn');
-	const generateExcerptBtn = document.getElementById('generate-excerpt-btn');
-	const generateTagsBtn = document.getElementById('generate-tags-btn');
-	const excerptTextarea = document.getElementById('excerpt');
-	const tagsInput = document.getElementById('tags');
-
-	// Show/hide AI prompt section when title is entered
-	titleInput.addEventListener('input', function() {
-		if (this.value.trim()) {
-			promptSection.style.display = 'block';
-		} else {
-			promptSection.style.display = 'none';
-		}
-	});
 
 	// Generate content with AI
 	generateContentBtn.addEventListener('click', async function() {
