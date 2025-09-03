@@ -22,13 +22,13 @@
         </span>
     </div>
     <div class="stat-card">
-        <span class="stat-value">{{ total_hours | round(precision=1) }}h</span>
+        <span class="stat-value">{{ total_hours | round(1) }}h</span>
         <span class="stat-label">
             <i class="fas fa-clock me-1"></i>Total Hours
         </span>
     </div>
     <div class="stat-card">
-        <span class="stat-value">${{ total_earnings | round(precision=2) }}</span>
+        <span class="stat-value">${{ total_earnings | round(2) }}</span>
         <span class="stat-label">
             <i class="fas fa-dollar-sign me-1"></i>Total Earnings
         </span>
@@ -54,7 +54,7 @@
                 <tbody>
                     {% for entry in entries %}
                     <tr>
-                        <td>{{ entry.start_time_display | split(pat=" ") | first }}</td>
+                        <td>{{ entry.start_time_display | split(" ") | first }}</td>
                         <td>
                             <span class="badge" style="background-color: var(--primary); color: var(--text-white);">
                                 {{ entry.role_name }}
@@ -72,7 +72,7 @@
                             {% endif %}
                         </td>
                         <td class="d-none d-md-table-cell text-muted">
-                            {{ entry.start_time_display | split(pat=" ") | last }}
+                            {{ entry.start_time_display | split(" ") | last }}
                         </td>
                         <td>
                             {% if entry.earnings %}

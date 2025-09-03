@@ -315,7 +315,7 @@ fn last_filter(
 pub fn configure_template_engine(engines: &mut Engines) {
     engines.minijinja.add_filter("truncate", truncate_filter);
     engines.minijinja.add_filter("date", date_filter);
-    engines.minijinja.add_filter("round", round_filter);
+    // engines.minijinja.add_filter("round", round_filter);
     engines.minijinja.add_filter("default", default_filter);
     engines.minijinja.add_filter("lower", lower_filter);
     engines.minijinja.add_filter("title", title_filter);

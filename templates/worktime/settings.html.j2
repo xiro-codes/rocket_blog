@@ -34,8 +34,8 @@
             </label>
             <select name="timezone" id="timezone" class="form-control" required>
                 {% for timezone in timezones %}
-                    <option value="{{ timezone.0 }}" {% if timezone.0 == current_timezone %}selected{% endif %}>
-                        {{ timezone.1 }}
+                    <option value="{{ timezone[0] }}" {% if timezone[0]== current_timezone %}selected{% endif %}>
+                        {{ timezone[1] }}
                     </option>
                 {% endfor %}
             </select>
@@ -87,7 +87,8 @@
                 <h6 class="mb-2">Current Configuration</h6>
                 <p class="mb-0">
                     Pay periods start every <strong>{{ pay_period_settings.start_day | title }}</strong> 
-                    and last for <strong>{{ pay_period_settings.period_length }} week{{ pay_period_settings.period_length != 1 ? "s" : "" }}</strong>.
+                    and last for <strong>{{ pay_period_settings.period_length }} week
+			{%if pay_period_settings.period_length != 1%} s {%endif%}
                 </p>
             </div>
         </div>

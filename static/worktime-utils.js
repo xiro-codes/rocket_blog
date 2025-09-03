@@ -12,7 +12,7 @@ const WorkTimeAPI = {
      */
     async fetchStats() {
         try {
-            const response = await fetch('/worktime/api/stats');
+            const response = await fetch('/api/stats');
             if (!response.ok) throw new Error('Failed to fetch stats');
             return await response.json();
         } catch (error) {

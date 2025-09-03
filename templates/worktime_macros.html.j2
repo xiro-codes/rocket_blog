@@ -129,7 +129,7 @@
                             <i class="fas fa-circle"></i>Timer Running
                         </span>
                     </h5>
-                    <p class="mb-1"><strong>Started:</strong> {{ active_entry.start_time | date(format='%B %d, %Y at %I:%M %p') }}</p>
+                    <p class="mb-1"><strong>Started:</strong> {{ active_entry.start_time | date('%B %d, %Y at %I:%M %p') }}</p>
                     {% if active_entry.description %}
                     <p class="mb-1"><strong>Description:</strong> {{ active_entry.description }}</p>
                     {% endif %}
@@ -228,7 +228,7 @@
                                 —
                             {% endif %}
                         </td>
-                        <td class="d-none d-sm-table-cell">{{ entry.description | default(value="—") | truncate(20) }}</td>
+                        <td class="d-none d-sm-table-cell">{{ entry.description | default("—") | truncate(20) }}</td>
                         <td>
                             {% if entry.earnings %}
                                 {{ format_currency(entry.earnings) }}
@@ -264,15 +264,15 @@
 {# Format currency helper macro #}
 {% macro format_currency(amount, currency="USD") %}
     {%- if currency == "USD" -%}
-        ${{ amount | round(precision=2) }}
+        ${{ amount | round(2) }}
     {%- elif currency == "EUR" -%}
-        €{{ amount | round(precision=2) }}
+        €{{ amount | round(2) }}
     {%- elif currency == "GBP" -%}
-        £{{ amount | round(precision=2) }}
+        £{{ amount | round(2) }}
     {%- elif currency == "CAD" or currency == "AUD" -%}
-        ${{ amount | round(precision=2) }} {{ currency }}
+        ${{ amount | round(2) }} {{ currency }}
     {%- else -%}
-        {{ amount | round(precision=2) }} {{ currency }}
+        {{ amount | round(2) }} {{ currency }}
     {%- endif -%}
 {% endmacro %}
 
