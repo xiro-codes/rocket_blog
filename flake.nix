@@ -1,42 +1,84 @@
 {
-  description = "Rocket Template";
+  description = "Rocket Blog & Work Time Tracker";
+
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
-    fenix.url = "github:nix-community/fenix/monthly";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    flake-utils.url = "github:numtide/flake-utils";
   };
-  outputs = {
-    self,
-    nixpkgs,
-    fenix,
-  }: let
-    pname = "rocket-template";
-    system = "x86_64-linux";
-    pkgs = import nixpkgs {inherit system;};
-  in {
-    packages.${system}.default = pkgs.rustPlatform.buildRustPackage {
-      inherit pname;
-      version = "0.1.0";
-      src = [./.];
-      cargoSha256 = nixpkgs.lib.fakeSha256;
-      postInstall = "";
+
+  outputs = { self, nixpkgs, rust-overlay, flake-utils, ... }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        overlays = [ (import rust-overlay) ];
+        pkgs = import nixpkgs { inherit system overlays; };
+        
+        rustToolchain = pkgs.rust-bin.stable.latest.default.override {
+          extensions = [ "rust-src" "rust-analyzer" ];
+        };
+        
+        rustPlatform = pkgs.makeRustPlatform {
+          cargo = rustToolchain;
+          rustc = rustToolchain;
+        };
+
+        nativeBuildInputs = with pkgs; [
+          pkg-config
+        ];
+
+        buildInputs = with pkgs; [
+          openssl
+        ];
+
+        app = rustPlatform.buildRustPackage {
+          pname = "rocket-blog";
+          version = "0.1.0";
+          src = ./.;
+          cargoLock = { lockFile = ./Cargo.lock; };
+          nativeBuildInputs = [ pkgs.pkg-config ];
+          buildInputs = [ pkgs.openssl ];
+          doCheck = false;
+          OPENSSL_NO_VENDOR = 1;
+          
+          postInstall = ''
+            mkdir -p $out/share/rocket-blog
+            cp -r templates $out/share/rocket-blog/
+            cp -r static $out/share/rocket-blog/
+          '';
+        };
+
+      in
+      {
+        packages = {
+          default = app;
+          rocket-blog = app;
+        };
+
+        devShells.default = pkgs.mkShell {
+          nativeBuildInputs = nativeBuildInputs ++ [ rustToolchain ];
+          inherit buildInputs;
+          packages = with pkgs; [ sea-orm-cli cargo-watch just ];
+          shellHook = ''
+            echo "🦀 Rust Dev Environment Loaded"
+            echo "Rust version: $(rustc --version)"
+          '';
+        };
+      }) // {
+      nixosModules.default = import ./nix/module.nix { inherit self; };
+      nixosConfigurations.rocket-container = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ({ config, pkgs, ... }: {
+            boot.isContainer = true;
+            imports = [ self.nixosModules.default ];
+            system.stateVersion = "23.11";
+            services.rocket-blog = {
+              enable = true;
+              domain = "blog.localhost";
+              manageDatabase = true;
+            };
+          })
+        ];
+      };
     };
-    devShells.${system}.default = pkgs.mkShell {
-      name = "${pname}";
-      packages = with pkgs; [
-        lunarvim
-        ffmpeg
-        just
-        glow
-        sea-orm-cli
-        cargo-watch
-        fenix.packages.x86_64-linux.complete.toolchain
-        gcc
-        rustfmt
-        clippy
-      ];
-      nativeBuildInputs = with pkgs; [pkg-config openssl];
-      RUST_SRC_PATH = "${fenix.packages.${system}.complete.rust-src}/lib/rustlib/src/rust/library";
-      DATABASE_URL = "postgres://master:password@localhost/tdavis_dev";
-    };
-  };
 }
