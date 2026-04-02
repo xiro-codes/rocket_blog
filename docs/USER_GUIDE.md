@@ -150,7 +150,7 @@ Tags are labels that help organize and categorize your blog posts. They make it 
    - Support for unlimited nesting levels (like Reddit)
    - Easy-to-follow conversation threads
 
-3. **Interactive Reply Forms**
+3. **Inminijinjactive Reply Forms**
    - Reply forms appear inline when clicking "Reply"
    - Only one reply form is shown at a time
    - Cancel button to close reply forms
@@ -273,7 +273,7 @@ Your blog supports both video file uploads and YouTube video downloads:
 Future versions will include:
 - **View Counts**: Track how many people read each post
 - **Popular Posts**: See which content performs best
-- **Reader Engagement**: Monitor comments and interactions
+- **Reader Engagement**: Monitor comments and inminijinjactions
 - **Search Insights**: Understand what readers are looking for
 
 ## 🔍 Search Features (Coming Soon)

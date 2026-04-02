@@ -21,14 +21,10 @@ Thank you for your interest in contributing to Rocket Blog! This guide will help
 
 2. **Database Setup**
    ```bash
-   # Option 1: Docker Development Environment (Recommended)
-   just docker-dev            # Standard development environment
-   just docker-dev-live       # Development with live template/static reloading
+   # Option 1: Nix Development Environment (Recommended)
+   nix develop
    
-   # Option 2: Docker Database Only
-   docker-compose -f scripts/docker/docker-compose.yml up postgres -d
-   
-   # Option 3: Local PostgreSQL
+   # Option 2: Local PostgreSQL
    createdb tdavis_dev
    psql tdavis_dev -c "CREATE USER master WITH PASSWORD 'password';"
    psql tdavis_dev -c "GRANT ALL PRIVILEGES ON DATABASE tdavis_dev TO master;"
@@ -57,87 +53,6 @@ Thank you for your interest in contributing to Rocket Blog! This guide will help
    - You should see the blog interface
    - Try creating a test post (login as admin)
 
-### Docker Development with Just
-
-The project includes comprehensive Docker support accessible through just commands:
-
-**Development Environments:**
-```bash
-# Standard development environment
-just docker-dev              # App: http://localhost:8000, pgAdmin: http://localhost:5050
-
-# Live development with template/static file reloading  
-just docker-dev-live          # Perfect for frontend development and template editing
-
-# Production environment (with SSL)
-just docker-prod              # Requires SSL setup
-```
-
-**Docker Management:**
-```bash
-# Check status
-just docker-status            # Show running services
-
-# View logs
-just docker-logs              # All services
-just docker-logs app          # Specific service (app, postgres, pgadmin, nginx)
-
-# Stop and cleanup
-just docker-stop              # Stop all services
-just docker-clean             # Stop and remove containers/volumes (WARNING: deletes data)
-
-# SSL management (for production)
-just docker-setup-ssl         # Initial SSL certificate setup
-just docker-renew-ssl         # Force SSL certificate renewal
-
-# Help
-just docker-help              # Show Docker command help
-```
-
-**Benefits of Docker Development:**
-- **Consistent environment** across different machines and operating systems
-- **No local dependencies** - PostgreSQL, pgAdmin, and SSL certificates handled automatically
-- **Live reloading** for templates and static files (with `docker-dev-live`)
-- **Production parity** - same environment as production deployment
-- **Quick teardown** and fresh starts for testing
-
-## 📋 Development Workflow
-
-### Typical Development Process
-
-1. **Create a Feature Branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   # OR for bug fixes:
-   git checkout -b fix/issue-description
-   ```
-
-2. **Make Changes**
-   - Write your code following our guidelines (see below)
-   - Add tests for new functionality
-   - Update documentation if needed
-
-3. **Test Your Changes**
-   ```bash
-   # Run all tests
-   just test
-   # OR: cargo test
-   
-   # Check code formatting
-   just fmt-check
-   # OR: cargo fmt --check
-   
-   # Run linter (if available)
-   just clippy
-   # OR: cargo clippy
-   
-   # Test the application manually
-   just run
-   # OR: cargo run
-   
-   # OR test in Docker environment
-   just docker-dev              # Test with production-like build
-   just docker-dev-live          # Test with live template reloading
    ```
 
 4. **Commit Your Changes**
@@ -398,7 +313,7 @@ git commit -m "docs: update installation instructions"
 - **Services** (`src/services/`) - Business logic and database operations
 - **Models** (`models/src/`) - Database entity definitions
 - **Migrations** (`migrations/`) - Database schema changes
-- **Templates** (`templates/`) - HTML templates with Tera
+- **Templates** (`templates/`) - HTML templates with MiniJinja
 - **Static Assets** (`static/`) - CSS, JavaScript, images
 
 ### Adding New Features

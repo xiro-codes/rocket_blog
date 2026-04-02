@@ -38,7 +38,7 @@ This document outlines potential new features for the Rocket Blog application, o
 - **Video file streaming** with range requests
 - **Pagination support** for efficient content browsing
 - **Draft/published post states** with enhanced workflow
-- **Template-based UI** with Tera and responsive Bootstrap design
+- **Template-based UI** with MiniJinja and responsive Bootstrap design
 - **Post excerpt system** with auto-generation and custom excerpts
 - **RSS feed generation** with full metadata support
 - **Tag system** (backend complete, UI integration pending)
@@ -96,8 +96,8 @@ This document outlines potential new features for the Rocket Blog application, o
 **Files to modify**:
 - `src/controllers/blog.rs` - Search endpoint
 - `src/services/blog.rs` - Search methods
-- `templates/base.html.tera` - Search form
-- New `templates/blog/search.html.tera`
+- `templates/base.html.minijinja` - Search form
+- New `templates/blog/search.html.minijinja`
 
 **Benefits**: Improved content discoverability, enhanced user experience
 
@@ -113,8 +113,8 @@ This document outlines potential new features for the Rocket Blog application, o
 - Include share analytics tracking
 
 **Files to modify**:
-- `templates/blog/detail.html.tera` - Share buttons
-- `templates/base.html.tera` - Meta tag generation
+- `templates/blog/detail.html.minijinja` - Share buttons
+- `templates/base.html.minijinja` - Meta tag generation
 - `src/controllers/blog.rs` - Social meta data
 - `static/js/` - Social sharing functionality
 
@@ -194,7 +194,7 @@ This document outlines potential new features for the Rocket Blog application, o
 - `migrations/` - New reactions table
 - `models/src/` - New reaction model
 - `src/controllers/blog.rs` - Reaction endpoints
-- `templates/blog/detail.html.tera` - Reaction UI
+- `templates/blog/detail.html.minijinja` - Reaction UI
 
 **Benefits**: Increased engagement, user feedback, social proof, content analytics
 
@@ -332,7 +332,7 @@ This document outlines potential new features for the Rocket Blog application, o
 
 ### Short-term Goals (Next Month)
 1. **SEO Optimization** - Enhance search engine visibility and organic traffic
-2. **User Engagement Features** - Add reactions, notifications, and interactive elements
+2. **User Engagement Features** - Add reactions, notifications, and inminijinjactive elements
 3. **Performance Improvements** - Optimize loading times and user experience
 
 ### Long-term Vision (Next Quarter)

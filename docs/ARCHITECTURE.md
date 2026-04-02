@@ -8,9 +8,9 @@ This document provides a comprehensive overview of the Rocket Blog application a
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Web Browser   │    │     Nginx       │    │  Rocket Blog    │
+│   Web Browser   │    │ NixOS Nginx     │    │  Rocket Blog    │
 │                 │◄──►│  Reverse Proxy  │◄──►│   Application   │
-│   (Frontend)    │    │   Load Balancer │    │   (Backend)     │
+│   (Frontend)    │    │                 │    │   (Backend)     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                                         │
                                                         ▼
@@ -27,7 +27,7 @@ This document provides a comprehensive overview of the Rocket Blog application a
 | **Backend Framework** | Rust + Rocket | High-performance web server |
 | **Database** | PostgreSQL + SeaORM | Reliable data persistence with type safety |
 | **Frontend** | Server-side rendered HTML + Bootstrap | Fast, SEO-friendly user interface |
-| **Templating** | Tera | Dynamic HTML generation |
+| **Templating** | MiniJinja | Dynamic HTML generation |
 | **Authentication** | Cookie-based tokens | Secure user sessions |
 | **Build System** | Cargo + Just | Rust build tooling |
 
@@ -65,7 +65,7 @@ rocket_blog/
 │       └── dto.rs               # Form data structures
 ├── migrations/                   # Database schema evolution
 ├── templates/                    # HTML templates
-│   ├── base.html.tera          # Base template layout
+│   ├── base.html.minijinja          # Base template layout
 │   ├── blog/                   # Blog-related templates
 │   └── error/                  # Error page templates
 ├── static/                      # Static assets (CSS, JS, images)
@@ -101,7 +101,7 @@ rocket_blog/
    │
    ▼
 6. Response Generation
-   ├── Template Rendering (Tera)
+   ├── Template Rendering (MiniJinja)
    └── JSON/Redirect Response
        │
        ▼
@@ -239,9 +239,9 @@ async fn login(jar: &CookieJar<'_>, data: Form<AccountFormDTO>) -> Flash<Redirec
 
 ### Templating System
 
-**Tera Template Engine:**
+**MiniJinja Template Engine:**
 ```html
-<!-- templates/blog/list.html.tera -->
+<!-- templates/blog/list.html.minijinja -->
 {% extends "base" %}
 {% block content %}
   {% for post in posts %}
@@ -378,7 +378,7 @@ impl Fairing for CustomFairing {
 | **Authentication** | Secure sessions | Encrypted cookies, bcrypt |
 | **Authorization** | Role-based access | Admin flags, route guards |
 | **Database** | SQL injection | SeaORM parameterized queries |
-| **XSS** | Output escaping | Tera automatic escaping |
+| **XSS** | Output escaping | MiniJinja automatic escaping |
 
 ## 🔧 Configuration Management
 
@@ -459,8 +459,8 @@ async fn test_blog_endpoint() {
 
 ```
 ┌─────────────────┐    ┌─────────────────┐
-│   Load Balancer │    │   App Instance  │
-│     (Nginx)     │◄──►│       #1        │
+│ NixOS Nginx     │    │   App Instance  │
+│                 │◄──►│       #1        │
 │                 │    └─────────────────┘
 │                 │    ┌─────────────────┐
 │                 │◄──►│   App Instance  │

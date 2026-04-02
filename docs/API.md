@@ -252,7 +252,7 @@ The RSS feed is also discoverable via the HTML `<link>` tag in the page header:
 ## 📊 Response Formats
 
 ### HTML Responses
-Most endpoints return HTML pages using Tera templates:
+Most endpoints return HTML pages using MiniJinja templates:
 
 ```html
 <!DOCTYPE html>

@@ -121,7 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🏗️ **Robust Architecture**
   - **Backend**: Rust with Rocket web framework
   - **Database**: PostgreSQL with SeaORM for type-safe queries
-  - **Templates**: Tera templating engine with inheritance
+  - **Templates**: MiniJinja templating engine with inheritance
   - **Migrations**: Automated database schema management
   - **Services**: Clean separation of business logic
 - 🔧 **Development Infrastructure**
@@ -168,7 +168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Connection pooling with SeaORM
 - Efficient pagination queries
 - HTTP range request support for media streaming
-- Template caching with Tera
+- Template caching with MiniJinja
 - Static file serving optimization
 - PostgreSQL full-text search with GIN indexing
 - Optimized search vector updates via database triggers
