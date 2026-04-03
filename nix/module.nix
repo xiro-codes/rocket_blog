@@ -57,6 +57,18 @@ in {
       default = null;
       description = "Path to a file containing ROCKET_SECRET_KEY=... for session encryption.";
     };
+
+    rocketProfile = mkOption {
+      type = types.str;
+      default = "release";
+      description = "The ROCKET_PROFILE to use (e.g. 'release' or 'debug').";
+    };
+
+    workingDirectory = mkOption {
+      type = types.str;
+      default = "${cfg.package}/share/rocket-blog";
+      description = "Working directory for the services. Override this for development to point to local templates/static.";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -90,7 +102,7 @@ in {
       after = [ "network.target" ] ++ (if cfg.manageDatabase then [ "postgresql.service" ] else []);
       
       environment = {
-        ROCKET_PROFILE = "release";
+        ROCKET_PROFILE = cfg.rocketProfile;
         ROCKET_PORT = toString cfg.blogPort;
         ROCKET_ADDRESS = "0.0.0.0";
         ROCKET_DATABASES__SEA_ORM__URL = cfg.databaseUrl;
@@ -98,7 +110,7 @@ in {
 
       serviceConfig = {
         ExecStart = "${cfg.package}/bin/blog";
-        WorkingDirectory = "${cfg.package}/share/rocket-blog";
+        WorkingDirectory = cfg.workingDirectory;
         EnvironmentFile = mkIf (cfg.secretKeyFile != null) cfg.secretKeyFile;
         Restart = "always";
         DynamicUser = true;
@@ -112,7 +124,7 @@ in {
       after = [ "network.target" ] ++ (if cfg.manageDatabase then [ "postgresql.service" ] else []);
       
       environment = {
-        ROCKET_PROFILE = "release";
+        ROCKET_PROFILE = cfg.rocketProfile;
         ROCKET_PORT = toString cfg.worktimePort;
         ROCKET_ADDRESS = "127.0.0.1";
         ROCKET_DATABASES__SEA_ORM__URL = cfg.databaseUrl;
@@ -120,7 +132,7 @@ in {
 
       serviceConfig = {
         ExecStart = "${cfg.package}/bin/worktime";
-        WorkingDirectory = "${cfg.package}/share/rocket-blog";
+        WorkingDirectory = cfg.workingDirectory;
         EnvironmentFile = mkIf (cfg.secretKeyFile != null) cfg.secretKeyFile;
         Restart = "always";
         DynamicUser = true;

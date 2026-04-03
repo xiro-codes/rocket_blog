@@ -48,11 +48,16 @@
             '';
           };
 
+          app-debug = app.overrideAttrs (old: {
+            buildType = "debug";
+          });
+
         in
         {
           packages = {
             default = app;
             rocket-blog = app;
+            rocket-blog-debug = app-debug;
           };
 
           devShells.default = pkgs.mkShell {
@@ -80,6 +85,30 @@
               manageDatabase = true;
               secretKeyFile = ./.rocket_secret_key;
             };
+            networking.firewall.allowedTCPPorts = [ 80 ];
+          })
+        ];
+      };
+      nixosConfigurations.rocket-dev-container = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ({ config, pkgs, ... }: {
+            boot.isContainer = true;
+            boot.isNspawnContainer = true;
+            imports = [ self.nixosModules.default ];
+            system.stateVersion = "23.11";
+            services.rocket-blog = {
+              enable = true;
+              domain = "_";
+              manageDatabase = true;
+              secretKeyFile = ./.rocket_secret_key;
+              workingDirectory = "/host";
+              package = self.packages.x86_64-linux.rocket-blog-debug;
+              rocketProfile = "debug";
+            };
+            # Allow the service to read files from the host mount
+            systemd.services.rocket-blog.serviceConfig.DynamicUser = pkgs.lib.mkForce false;
+            systemd.services.rocket-worktime.serviceConfig.DynamicUser = pkgs.lib.mkForce false;
             networking.firewall.allowedTCPPorts = [ 80 ];
           })
         ];
