@@ -37,8 +37,8 @@ doc-clean:
 	@echo "✅ Documentation artifacts cleaned"
 
 [group('Database')]
-migrate: 
-	sea-orm-cli migrate -d migrations 
+migrate:
+	sea-orm-cli migrate -d migrations
 
 [group('Database')]
 force-migrate:
@@ -152,7 +152,6 @@ container-logs:
 [group('Container')]
 container-dev:
 	sudo nixos-container create rocket-dev --flake .#rocket-dev-container || true
-	sudo bash -c "echo 'EXTRA_NSPAWN_FLAGS=\"--bind=$(pwd):/host\"' >> /etc/nixos-containers/rocket-dev.conf"
 	sudo nixos-container start rocket-dev
 	@echo "🚀 Dev container 'rocket-dev' started. Access at http://$(sudo nixos-container show-ip rocket-dev)"
 	@echo "Local directory mounted at /host inside the container."

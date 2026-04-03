@@ -101,8 +101,8 @@ async fn rocket() -> Rocket<Build> {
     // Only attach seeding in debug builds (development mode)
     if Features::enable_seeding() {
         log::info!("Attaching database seeding middleware");
+        rocket = rocket.attach(middleware::Seeding::new(Some(0), 50));
     }
-    rocket = rocket.attach(middleware::Seeding::new(Some(0), 50));
 
     log::info!("Attaching blog controllers and static file server");
     // Attach blog controllers

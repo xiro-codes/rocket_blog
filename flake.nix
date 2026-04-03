@@ -103,7 +103,6 @@
               domain = "_";
               manageDatabase = true;
               secretKeyFile = ./.rocket_secret_key;
-              workingDirectory = "/host";
               package = self.packages.x86_64-linux.rocket-blog-debug;
               rocketProfile = "debug";
             };
