@@ -18,8 +18,8 @@ in {
 
     domain = mkOption {
       type = types.str;
-      default = "localhost";
-      description = "The primary domain for the blog (e.g., blog.example.com).";
+      default = "_";
+      description = "The primary domain for the blog (e.g., blog.example.com). Use '_' for default host.";
     };
 
     worktimeDomain = mkOption {
@@ -92,7 +92,7 @@ in {
       environment = {
         ROCKET_PROFILE = "release";
         ROCKET_PORT = toString cfg.blogPort;
-        ROCKET_ADDRESS = "127.0.0.1";
+        ROCKET_ADDRESS = "0.0.0.0";
         ROCKET_DATABASES__SEA_ORM__URL = cfg.databaseUrl;
       };
 

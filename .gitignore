@@ -17,3 +17,4 @@ backups/
 
 # Test scripts (temporary)
 test-docker-backup.sh
+.tmp

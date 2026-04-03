@@ -97,3 +97,24 @@ run:
 # Alias for run command
 dev: run
 
+# NixOS Container commands
+# Build and run the app in a NixOS container
+container-run:
+	nixos-container create rocket-blog --flake .#rocket-container
+	nixos-container start rocket-blog
+	@echo "🚀 Container 'rocket-blog' started. Access at http://$(nixos-container show-ip rocket-blog)"
+	@echo "IP address: $(nixos-container show-ip rocket-blog)"
+
+# Stop and destroy the container
+container-clean:
+	nixos-container destroy rocket-blog
+
+# Update the container with latest changes
+container-update:
+	nixos-container update rocket-blog --flake .#rocket-container
+	nixos-container restart rocket-blog
+
+# View container logs
+container-logs:
+	nixos-container run rocket-blog -- journalctl -u rocket-blog -u rocket-worktime -f
+
