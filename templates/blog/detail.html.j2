@@ -12,15 +12,15 @@
 			<div class="comment-actions">
 				<small class="text-muted">{{ thread.comment.date_published }}</small>
 				<div class="mt-1">
-					<button class="btn btn-sm btn-outline-primary reply-btn" 
-					        data-comment-id="{{ thread.comment.id }}" 
+					<button class="btn btn-sm btn-outline-primary reply-btn"
+					        data-comment-id="{{ thread.comment.id }}"
 					        data-post-id="{{ post_id }}">
 						Reply
 					</button>
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- Reply form (initially hidden) -->
 		<div class="reply-form mt-3" id="reply-form-{{ thread.comment.id }}" style="display: none;">
 			<form action="/comment/reply/{{ post_id }}/{{ thread.comment.id }}" method="post" class="d-flex flex-column">
@@ -129,16 +129,16 @@
 	<div class="reaction-container" data-post-id="{{post.seq_id}}">
 		<div class="reaction-buttons d-flex gap-2 mb-3 flex-wrap">
 			{% for reaction_type in reaction_types %}
-			<button class="btn btn-sm reaction-btn {% if reaction_summary.user_reaction == reaction_type.type %}btn-primary{% else %}btn-outline-secondary{% endif %}" 
-			        data-reaction="{{reaction_type.type}}" 
+			<button class="btn btn-sm reaction-btn {% if reaction_summary.user_reaction == reaction_type.type %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+			        data-reaction="{{reaction_type.type}}"
 			        title="{{reaction_type.title}}">
-				{{reaction_type.emoji}} 
+				{{reaction_type.emoji}}
 				<span class="reaction-count-{{reaction_type.type}}">
-					{% set_global found_count = 0 %}
+					{% set found_count = 0 %}
 					{% for reaction in reaction_summary.reactions %}
 						{% if reaction.reaction_type == reaction_type.type %}
 							{{reaction.count}}
-							{% set_global found_count = reaction.count %}
+							{% set found_count = reaction.count %}
 						{% endif %}
 					{% endfor %}
 					{% if found_count == 0 %}0{% endif %}
@@ -214,26 +214,26 @@
 document.addEventListener('DOMContentLoaded', function() {
     const reactionContainer = document.querySelector('.reaction-container');
     if (!reactionContainer) return;
-    
+
     const postId = reactionContainer.getAttribute('data-post-id');
-    
+
     // Handle reaction button clicks
     reactionContainer.addEventListener('click', function(e) {
         if (e.target.classList.contains('reaction-btn') || e.target.closest('.reaction-btn')) {
             const btn = e.target.classList.contains('reaction-btn') ? e.target : e.target.closest('.reaction-btn');
             const reactionType = btn.getAttribute('data-reaction');
-            
+
             // Disable button temporarily
             btn.disabled = true;
-            
+
             // Check if this reaction is already active (user is removing it)
             const isActive = btn.classList.contains('btn-primary');
-            
-            const url = isActive 
-                ? `/blog/${postId}/react` 
+
+            const url = isActive
+                ? `/blog/${postId}/react`
                 : `/blog/${postId}/react/${reactionType}`;
             const method = isActive ? 'DELETE' : 'POST';
-            
+
             fetch(url, {
                 method: method,
                 headers: {
@@ -256,22 +256,22 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
-    
+
     function updateReactionUI(summary) {
         // Update total reactions count
         document.querySelector('.total-reactions').textContent = summary.total_reactions;
-        
+
         // Update individual reaction counts and button states
         document.querySelectorAll('.reaction-btn').forEach(btn => {
             const reactionType = btn.getAttribute('data-reaction');
             const countSpan = btn.querySelector(`.reaction-count-${reactionType}`);
-            
+
             // Find count for this reaction type
             const reactionData = summary.reactions.find(r => r.reaction_type === reactionType);
             const count = reactionData ? reactionData.count : 0;
-            
+
             countSpan.textContent = count;
-            
+
             // Update button state based on user's current reaction
             if (summary.user_reaction === reactionType) {
                 btn.classList.remove('btn-outline-secondary');
@@ -293,14 +293,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.classList.contains('reply-btn')) {
             const commentId = e.target.getAttribute('data-comment-id');
             const replyForm = document.getElementById(`reply-form-${commentId}`);
-            
+
             // Hide all other reply forms
             document.querySelectorAll('.reply-form').forEach(form => {
                 if (form.id !== `reply-form-${commentId}`) {
                     form.style.display = 'none';
                 }
             });
-            
+
             // Toggle current reply form
             if (replyForm.style.display === 'none') {
                 replyForm.style.display = 'block';
@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 replyForm.style.display = 'none';
             }
         }
-        
+
         // Handle cancel reply button
         if (e.target.classList.contains('cancel-reply')) {
             const replyForm = e.target.closest('.reply-form');

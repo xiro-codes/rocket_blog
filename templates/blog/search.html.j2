@@ -4,21 +4,21 @@
 <div class="row">
     <div class="col-12">
         <h1 class="text-center mb-4 terminal-text">{{ title }}</h1>
-        
+
         <!-- Search Form -->
         <div class="d-flex justify-content-center align-items-center" >
             <form action="/blog/search" method="post" class="terminal-form">
                 <h3 class="text-center mb-4">[ Search ]</h3>
                 <div class="">
-                    <input type="text" 
-                           class="form-control terminal-input" 
-                           name="query" 
+                    <input type="text"
+                           class="form-control terminal-input"
+                           name="query"
                            value="{{ search_query }}"
-                           placeholder="Search posts..." 
+                           placeholder="Search posts..."
                            style="background-color: #0c1116; border: 1px solid #00ff41; color: #00ff41;">
                 </div>
                 <div class="">
-                    <button type="submit" 
+                    <button type="submit"
                             class="btn btn-outline-success w-100"
                             style="border-color: #00ff41; color: #00ff41;">
                         Search
@@ -32,28 +32,28 @@
             {% if results %}
                 <div class="search-results">
                     <p class="mb-3 terminal-text">
-                        Found {{ results | length }} result(s) 
+                        Found {{ results | length }} result(s)
                         {% if num_pages > 1 %}(Page {{ page }} of {{ num_pages }}){% endif %}
                     </p>
-                    
+
                     {% for post in results %}
                     <div class="card mb-3" style="background-color: #0c1116; border: 1px solid #00ff41;">
                         <div class="card-body">
                             <h5 class="card-title">
-                                <a href="/blog/{{ post.seq_id }}" 
+                                <a href="/blog/{{ post.seq_id }}"
                                    class="text-decoration-none"
                                    style="color: #00ff41;">
                                     {{ post.title }}
                                 </a>
                             </h5>
-                            
+
                             <!-- Search ranking indicator -->
                             <small class="text-muted">
                                 <span class="badge" style="background-color: #00ff41; color: #0c1116;">
                                     Relevance: {{ (post.rank * 100) | round(precision=1) }}%
                                 </span>
                             </small>
-                            
+
                             <!-- Highlighted excerpt or generated headline -->
                             <div class="card-text mt-2">
                                 {% if post.headline %}
@@ -62,12 +62,12 @@
                                     <div class="terminal-text">{{ post.excerpt }}</div>
                                 {% endif %}
                             </div>
-                            
+
                             <!-- Reaction counts -->
                             {% set summary = false %}
                             {% for reaction_summary in reaction_summaries %}
                                 {% if reaction_summary.post_id == post.id %}
-                                    {% set_global summary = reaction_summary %}
+                                    {% set summary = reaction_summary %}
                                 {% endif %}
                             {% endfor %}
                             {% if summary %}
@@ -83,9 +83,9 @@
                                 </small>
                             </div>
                             {% endif %}
-                            
+
                             <div class="mt-2">
-                                <a href="/blog/{{ post.seq_id }}" 
+                                <a href="/blog/{{ post.seq_id }}"
                                    class="btn btn-sm btn-outline-success"
                                    style="border-color: #00ff41; color: #00ff41;">
                                     Read more →
@@ -94,32 +94,32 @@
                         </div>
                     </div>
                     {% endfor %}
-                    
+
                     <!-- Pagination -->
                     {% if num_pages > 1 %}
                     <nav aria-label="Search results pagination">
                         <ul class="pagination justify-content-center">
                             {% if page > 1 %}
                             <li class="page-item">
-                                <a class="page-link" 
+                                <a class="page-link"
                                    href="/blog/search?query={{ search_query }}&page={{ page - 1 }}&page_size={{ page_size }}"
                                    style="background-color: #0c1116; border-color: #00ff41; color: #00ff41;">
                                     Previous
                                 </a>
                             </li>
                             {% endif %}
-                            
+
                             {% for page_num in range(start=1, end=num_pages + 1) %}
                                 {% if page_num == page %}
                                 <li class="page-item active">
-                                    <span class="page-link" 
+                                    <span class="page-link"
                                           style="background-color: #00ff41; border-color: #00ff41; color: #0c1116;">
                                         {{ page_num }}
                                     </span>
                                 </li>
                                 {% else %}
                                 <li class="page-item">
-                                    <a class="page-link" 
+                                    <a class="page-link"
                                        href="/blog/search?query={{ search_query }}&page={{ page_num }}&page_size={{ page_size }}"
                                        style="background-color: #0c1116; border-color: #00ff41; color: #00ff41;">
                                         {{ page_num }}
@@ -127,10 +127,10 @@
                                 </li>
                                 {% endif %}
                             {% endfor %}
-                            
+
                             {% if page < num_pages %}
                             <li class="page-item">
-                                <a class="page-link" 
+                                <a class="page-link"
                                    href="/blog/search?query={{ search_query }}&page={{ page + 1 }}&page_size={{ page_size }}"
                                    style="background-color: #0c1116; border-color: #00ff41; color: #00ff41;">
                                     Next
@@ -142,14 +142,14 @@
                     {% endif %}
                 </div>
             {% else %}
-                <div class="alert alert-info" 
+                <div class="alert alert-info"
                      style="background-color: #0c1116; border: 1px solid #00ff41; color: #00ff41;">
                     <h4>No results found</h4>
                     <p>No posts match your search for "{{ search_query }}". Try different keywords or check your spelling.</p>
                 </div>
             {% endif %}
         {% else %}
-            <div class="alert alert-info" 
+            <div class="alert alert-info"
                  style="background-color: #0c1116; border: 1px solid #00ff41; color: #00ff41;">
                 <h4>Search Blog Posts</h4>
                 <p>Use the search form above to find posts by title, content, or excerpt. The search supports:</p>
@@ -170,7 +170,7 @@
             </div>
             <div class="card-body">
                 {% for tag in all_tags %}
-                <a href="/blog/tag/{{ tag.slug }}" 
+                <a href="/blog/tag/{{ tag.slug }}"
                    class="badge text-decoration-none me-2 mb-2"
                    style="background-color: {{ tag.color }}; color: white;">
                     {{ tag.name }}

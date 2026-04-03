@@ -65,12 +65,12 @@
 					{% if post.excerpt %}
 					<p class="card-text text-muted">{{post.excerpt}}</p>
 					{% endif %}
-					
+
 					<!-- Reaction counts -->
-					{% set_global summary = false %}
+					{% set summary = false %}
 					{% for reaction_summary in reaction_summaries %}
 						{% if reaction_summary.post_id == post.id %}
-							{% set_global summary = reaction_summary %}
+							{% set summary = reaction_summary %}
 						{% endif %}
 					{% endfor %}
 					{% if summary %}
@@ -86,7 +86,7 @@
 						</small>
 					</div>
 					{% endif %}
-					
+
 					<a href="/blog/{{post.seq_id}}" class="btn btn-outline-primary btn-sm">[READ MORE]</a>
 				</div>
 			</div>
@@ -101,7 +101,7 @@
 			</div>
 			<div class="card-body">
 				{% for tag in all_tags %}
-				<a href="/blog/tag/{{ tag.slug }}" 
+				<a href="/blog/tag/{{ tag.slug }}"
 				   class="badge text-decoration-none me-1 mb-1"
 				   style="background-color: {{ tag.color }};">
 					{{ tag.name }}
