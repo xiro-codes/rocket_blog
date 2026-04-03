@@ -1,16 +1,16 @@
 {% extends "base" %}
 
 {% block content %}
-<div class="terminal-header"></div>
+<div></div>
 <center>
-	<h1 class="terminal-cursor">Create Article</h1>
+	<h1>Create Article</h1>
 </center>
 
-<hr class="terminal-divider">
+<hr>
 
 <div class="d-flex justify-content-center align-items-center">
-	<form action="{{form_url}}" method="post" enctype="multipart/form-data" class="terminal-form">
-		<h3 class="text-center mb-4">[ NEW POST CONFIGURATION ]</h3>
+	<form action="{{form_url}}" method="post" enctype="multipart/form-data">
+		<h3 class="text-center mb-4">New Post Configuration</h3>
 		
 		<div>
 			<label for="title" class="form-label">Title:</label>
@@ -75,8 +75,8 @@
 		</div>
 		
 		<div class="justify-content-center d-flex m-1 flex-wrap gap-2">
-			<button type="submit" name="action" value="draft" class="btn btn-secondary">[SAVE AS DRAFT]</button>
-			<button type="submit" name="action" value="publish" class="btn btn-primary">[PUBLISH POST]</button>
+			<button type="submit" name="action" value="draft" class="btn btn-secondary">Save as Draft</button>
+			<button type="submit" name="action" value="publish" class="btn btn-primary">Publish Post</button>
 		</div>
 	</form>
 </div>

@@ -171,7 +171,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <h1 class="terminal-header">📅 Pay Period Management</h1>
+            <h1>📅 Pay Period Management</h1>
             <p class="text-muted">Manage your work time pay periods, {{ username }}!</p>
         </div>
     </div>
@@ -179,21 +179,21 @@
     <!-- Create New Pay Period Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="terminal-box">
+            <div class="card p-3 mb-4">
                 <h3>➕ Create New Pay Period</h3>
                 <form method="post" action="/payperiods" class="row g-3">
                     <div class="col-md-4">
                         <label for="period_name" class="form-label">Period Name</label>
-                        <input type="text" class="form-control terminal-input" id="period_name" name="period_name" 
+                        <input type="text" class="form-control" id="period_name" name="period_name" 
                                placeholder="e.g., December 2024, Week 1-2 Jan 2025" required>
                     </div>
                     <div class="col-md-4">
                         <label for="start_date" class="form-label">Start Date</label>
-                        <input type="date" class="form-control terminal-input" id="start_date" name="start_date" required>
+                        <input type="date" class="form-control" id="start_date" name="start_date" required>
                     </div>
                     <div class="col-md-4">
                         <label for="end_date" class="form-label">End Date</label>
-                        <input type="date" class="form-control terminal-input" id="end_date" name="end_date" required>
+                        <input type="date" class="form-control" id="end_date" name="end_date" required>
                     </div>
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">📅 Create Pay Period</button>
@@ -206,7 +206,7 @@
     <!-- Auto-Assign Unassigned Entries -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="terminal-box">
+            <div class="card p-3 mb-4">
                 <h3>🔄 Auto-Assign Entries</h3>
                 <p>Automatically assign unassigned work time entries to appropriate pay periods based on their dates.</p>
                 <form method="post" action="/payperiods/assign" class="d-inline">
@@ -219,7 +219,7 @@
     <!-- Existing Pay Periods -->
     <div class="row">
         <div class="col-12">
-            <div class="terminal-box">
+            <div class="card p-3 mb-4">
                 <h3>📋 Your Pay Periods</h3>
                 {% if pay_periods %}
                     <div class="table-responsive">
@@ -288,7 +288,7 @@
     <!-- Navigation -->
     <div class="row mt-4">
         <div class="col-12">
-            <div class="terminal-box">
+            <div class="card p-3 mb-4">
                 <h3>🚀 Quick Actions</h3>
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="/" class="btn btn-outline-primary">🏠 Dashboard</a>

@@ -19,7 +19,6 @@
 //! - [`BlogController`] - Blog post creation, editing, and viewing
 //! - [`CommentController`] - Comment creation and moderation
 //! - [`FeedController`] - RSS feed generation
-//! - [`SettingsController`] - Application settings management
 //! - [`SeoController`] - SEO and meta tag management
 //! - [`WorkTimeController`] - Work time tracking functionality
 
@@ -45,10 +44,6 @@ pub use comment::Controller as CommentController;
 mod feed;
 /// RSS feed generation and syndication controller
 pub use feed::Controller as FeedController;
-
-mod settings;
-/// Application settings and configuration controller
-pub use settings::Controller as SettingsController;
 
 mod seo;
 /// SEO optimization and meta tag management controller

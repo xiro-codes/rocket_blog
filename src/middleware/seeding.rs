@@ -22,7 +22,6 @@ pub struct Seeding {
     seed: Option<u32>,
 }
 
-const DATA_PATH: &str = "/home/tod/.local/share/blog";
 const SAMPLE_VIDEO_PATH: &str = "static/sample_video.webm";
 
 impl Seeding {

@@ -23,7 +23,7 @@
 		<meta property="og:site_name" content="Rocket Blog">
 		<meta property="og:locale" content="en_US">
 		{% if post %}
-		<meta property="article:published_time" content="{{ post.date_published | date(format='%Y-%m-%dT%H:%M:%S%z') }}">
+		<meta property="article:published_time" content="{{ post.date_published }}">
 		{% if tags %}
 		{% for tag in tags %}
 		<meta property="article:tag" content="{{ tag.name }}">
@@ -64,130 +64,123 @@
 		<!-- EasyMDE Markdown Editor -->
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
 		<style>
-body {
-	background-color: #0c1116;
-	width: 100vw;
-	height: 100vh;
-	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace;
-	color: #00ff41;
-}
+		/* Xe Iaso inspired styling */
+		:root {
+			--bg-0: #fdfdfc;
+			--bg-1: #f4f4f4;
+			--bg-2: #eaeaea;
+			--fg-0: #1c1c1c;
+			--fg-1: #3a3a3a;
+			--fg-3: #6b6b6b;
+			--link: #0056b3;
+			--link-hover: #003d82;
+			--font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+			--font-serif: "Georgia", "Times New Roman", serif;
+		}
 
-/* EasyMDE Terminal Theme Customization */
-.EasyMDEContainer {
-	border: 2px solid #333 !important;
-	background-color: #1a1f25 !important;
-}
+		@media (prefers-color-scheme: dark) {
+			:root {
+				--bg-0: #1a1a1a;
+				--bg-1: #242424;
+				--bg-2: #2a2a2a;
+				--fg-0: #e0e0e0;
+				--fg-1: #b0b0b0;
+				--fg-3: #8a8a8a;
+				--link: #66b3ff;
+				--link-hover: #99ccff;
+			}
+		}
 
-.EasyMDEContainer .editor-toolbar {
-	background-color: #0c1116 !important;
-	border-bottom: 1px solid #333 !important;
-	border-top: none !important;
-	border-left: none !important;
-	border-right: none !important;
-}
+		body {
+			background-color: var(--bg-0);
+			color: var(--fg-0);
+			font-family: var(--font-sans);
+			line-height: 1.6;
+			margin: 0;
+			padding: 0;
+		}
 
-.EasyMDEContainer .editor-toolbar button {
-	color: #00ff41 !important;
-	background-color: transparent !important;
-	border: none !important;
-	border-radius: 0 !important;
-	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
-}
+		a {
+			color: var(--link);
+			text-decoration: underline;
+		}
+		a:hover {
+			color: var(--link-hover);
+			text-decoration: none;
+		}
 
-.EasyMDEContainer .editor-toolbar button:hover {
-	background-color: #333 !important;
-	color: #40ff80 !important;
-}
+		h1, h2, h3, h4, h5, h6 {
+			font-family: var(--font-serif);
+			color: var(--fg-0);
+			margin-bottom: 1rem;
+		}
 
-.EasyMDEContainer .editor-toolbar button.active {
-	background-color: #00ff41 !important;
-	color: #0c1116 !important;
-}
+		.container-fluid {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 1rem;
+		}
 
-.EasyMDEContainer .CodeMirror {
-	background-color: #1a1f25 !important;
-	color: #00ff41 !important;
-	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
-	border: none !important;
-	line-height: 1.5 !important;
-}
+		.card {
+			background-color: var(--bg-1);
+			border: 1px solid var(--bg-2);
+			border-radius: 6px;
+			box-shadow: none;
+			margin-bottom: 1.5rem;
+		}
 
-.EasyMDEContainer .CodeMirror-cursor {
-	border-left: 1px solid #00ff41 !important;
-}
+		.card-body {
+			padding: 1.5rem;
+		}
 
-.EasyMDEContainer .CodeMirror-selected {
-	background-color: #333 !important;
-}
+		.btn, .btn-primary, .btn-success, .btn-secondary, .btn-info, .btn-warning {
+			background-color: var(--bg-2);
+			color: var(--fg-0);
+			border: 1px solid var(--bg-2);
+			border-radius: 4px;
+			padding: 0.5rem 1rem;
+			text-transform: none;
+			font-family: var(--font-sans);
+			text-decoration: none;
+			display: inline-block;
+			transition: background-color 0.2s;
+		}
 
-.EasyMDEContainer .CodeMirror-line {
-	color: #00ff41 !important;
-}
+		.btn:hover, .btn-primary:hover, .btn-success:hover, .btn-secondary:hover {
+			background-color: var(--bg-0);
+			color: var(--fg-0);
+			border-color: var(--fg-1);
+		}
 
-.EasyMDEContainer .cm-header {
-	color: #40ff80 !important;
-	font-weight: bold !important;
-}
+		/* EasyMDE Theme Fixes for Xe style */
+		.EasyMDEContainer .editor-toolbar, .EasyMDEContainer .CodeMirror, .EasyMDEContainer .editor-statusbar {
+			background-color: var(--bg-1) !important;
+			color: var(--fg-0) !important;
+			border-color: var(--bg-2) !important;
+		}
+		.EasyMDEContainer .editor-toolbar button { color: var(--fg-0) !important; }
+		.EasyMDEContainer .editor-toolbar button.active, .EasyMDEContainer .editor-toolbar button:hover {
+			background-color: var(--bg-2) !important;
+		}
+		.EasyMDEContainer .CodeMirror-cursor { border-left: 1px solid var(--fg-0) !important; }
+		.EasyMDEContainer .CodeMirror-line { color: var(--fg-0) !important; }
 
-.EasyMDEContainer .cm-quote {
-	color: #888 !important;
-	font-style: italic !important;
-}
 
-.EasyMDEContainer .cm-keyword {
-	color: #00ff41 !important;
-	font-weight: bold !important;
-}
-
-.EasyMDEContainer .cm-link {
-	color: #40ff80 !important;
-}
-
-.EasyMDEContainer .cm-url {
-	color: #40ff80 !important;
-}
-
-.EasyMDEContainer .editor-statusbar {
-	background-color: #0c1116 !important;
-	color: #888 !important;
-	border-top: 1px solid #333 !important;
-	border-bottom: none !important;
-	border-left: none !important;
-	border-right: none !important;
-	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
-}
-
-.EasyMDEContainer .editor-preview, .EasyMDEContainer .editor-preview-active-side {
-	background-color: #1a1f25 !important;
-	color: #ccc !important;
-	font-family: 'JetBrains Mono', 'Source Code Pro', 'Courier New', monospace !important;
-}
-
-.EasyMDEContainer .editor-preview h1, 
-.EasyMDEContainer .editor-preview h2, 
-.EasyMDEContainer .editor-preview h3, 
-.EasyMDEContainer .editor-preview h4, 
-.EasyMDEContainer .editor-preview h5, 
-.EasyMDEContainer .editor-preview h6 {
-	color: #00ff41 !important;
-	font-weight: 700 !important;
-}
-
-.EasyMDEContainer .editor-preview code {
-	background-color: #0c1116 !important;
-	color: #00ff41 !important;
-	border: 1px solid #333 !important;
-}
-
-.EasyMDEContainer .editor-preview pre {
-	background-color: #0c1116 !important;
-	border: 1px solid #333 !important;
-}
+		
+		.list-group-item {
+			background-color: var(--bg-0);
+			border-color: var(--bg-2);
+			color: var(--fg-0);
+		}
+		
+		.text-muted {
+			color: var(--fg-3) !important;
+		}
 		</style>
 	</head>
 
 	<body>
-		<div class="container-fluid terminal-container h-100">
+		<div class="container-fluid h-100">
 			{% block content %}
 			{% endblock %}
 		</div>

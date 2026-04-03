@@ -85,6 +85,7 @@
               manageDatabase = true;
               secretKeyFile = ./.rocket_secret_key;
             };
+            networking.nameservers = [ "10.0.0.65" ];
             networking.firewall.allowedTCPPorts = [ 80 ];
           })
         ];
@@ -109,6 +110,7 @@
             # Allow the service to read files from the host mount
             systemd.services.rocket-blog.serviceConfig.DynamicUser = pkgs.lib.mkForce false;
             systemd.services.rocket-worktime.serviceConfig.DynamicUser = pkgs.lib.mkForce false;
+            networking.nameservers = [ "10.0.0.65" ];
             networking.firewall.allowedTCPPorts = [ 80 ];
           })
         ];

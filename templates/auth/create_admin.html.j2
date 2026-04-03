@@ -1,17 +1,17 @@
 {% extends "base" %}
 
 {% block content %}
-<div class="terminal-header"></div>
+<div></div>
 <center>
-	<h1 class="terminal-cursor">Create Admin Account</h1>
+	<h1>Create Admin Account</h1>
 	<p class="text-muted">No admin account exists. Create the first admin account to manage the blog.</p>
 </center>
 
-<hr class="terminal-divider">
+<hr>
 
 <div class="d-flex justify-content-center align-items-center">
-	<form action="/auth/create-admin" method="post" class="terminal-form">
-		<h3 class="text-center mb-4">[ ADMIN ACCOUNT SETUP ]</h3>
+	<form action="/auth/create-admin" method="post">
+		<h3 class="text-center mb-4">Admin Account Setup</h3>
 		
 		<div>
 			<label for="username" class="form-label">Username:</label>
@@ -29,11 +29,11 @@
 		</div>
 		
 		<div class="justify-content-center d-flex m-1">
-			<button type="submit" class="btn btn-primary">[CREATE ADMIN ACCOUNT]</button>
+			<button type="submit" class="btn btn-primary">Create Admin Account</button>
 		</div>
 		
 		<div class="text-center mt-3">
-			<a href="/blog" class="btn btn-secondary btn-sm">[← BACK TO BLOG]</a>
+			<a href="/blog" class="btn btn-secondary btn-sm">Back to Blog</a>
 		</div>
 	</form>
 </div>

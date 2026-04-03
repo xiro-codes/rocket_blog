@@ -1,4 +1,4 @@
-use crate::{services::{ai_provider::AIProvider, base::BaseService, SettingsService}, impl_service_custom};
+use crate::{services::{ai_provider::AIProvider, base::BaseService}, impl_service_custom};
 use async_trait::async_trait;
 use reqwest::Client;
 use sea_orm::DatabaseConnection;
@@ -6,7 +6,6 @@ use rocket::serde::{Deserialize, Serialize};
 
 pub struct OllamaService {
     base: BaseService,
-    settings_service: SettingsService,
     http_client: Client,
 }
 
@@ -37,27 +36,21 @@ impl OllamaService {
     pub fn new() -> Self {
         Self {
             base: BaseService::new(),
-            settings_service: SettingsService::new(),
-            http_client: Client::new(),
+            http_client: Client::builder()
+                .danger_accept_invalid_certs(true)
+                .build()
+                .unwrap_or_else(|_| Client::new()),
         }
     }
 
     /// Get the configured Ollama URL from settings
     async fn get_ollama_url(&self, db: &DatabaseConnection) -> Result<String, String> {
-        self.settings_service
-            .get_ollama_url(db)
-            .await
-            .map_err(|e| format!("Failed to get Ollama URL from database: {}", e))?
-            .ok_or_else(|| "Ollama URL not configured".to_string())
+        Ok("https://ai.sapphire.home:11434".to_string())
     }
 
     /// Get the configured Ollama model from settings
     async fn get_ollama_model(&self, db: &DatabaseConnection) -> Result<String, String> {
-        Ok(self.settings_service
-            .get_ollama_model(db)
-            .await
-            .map_err(|e| format!("Failed to get Ollama model from database: {}", e))?
-            .unwrap_or_else(|| "llama2".to_string())) // Default model
+        Ok("llama2".to_string())
     }
 
     /// Test Ollama connection
@@ -114,16 +107,6 @@ impl OllamaService {
 #[async_trait]
 impl AIProvider for OllamaService {
     async fn is_available(&self, db: &DatabaseConnection) -> bool {
-        // Check if Ollama is enabled and can connect
-        let enabled = self.settings_service
-            .get_ollama_enabled(db)
-            .await
-            .unwrap_or(false);
-        
-        if !enabled {
-            return false;
-        }
-
         self.test_connection(db).await.unwrap_or(false)
     }
 

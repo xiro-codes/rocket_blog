@@ -1,9 +1,9 @@
 {% extends "base" %}
 
 {% block content %}
-<div class="terminal-header"></div>
+<div></div>
 <div class="d-flex flex-column align-items-center justify-content-center">
-	<h1 class="terminal-prompt">Articles</h1>
+	<h1>Articles</h1>
 	{% if flash %}
 	<h3 class="btn-{{ flash[0] }} btn disabled">
 		{{ flash[1] }}
@@ -13,24 +13,24 @@
 	{%if token %}
 	<div class="btn-group mb-3 flex-wrap">
 		{%if is_admin %}
-		<a class="btn btn-primary" href="/blog/create">[CREATE POST]</a>
+		<a class="btn btn-primary" href="/blog/create">Create Post</a>
 		{%endif%}
-		<a class="btn btn-success" href="/blog/search">[SEARCH]</a>
+		<a class="btn btn-success" href="/blog/search">Search</a>
 		{%if is_admin %}
-		<a class="btn btn-secondary" href="/settings">[SETTINGS]</a>
+		<a class="btn btn-secondary" href="/settings">Settings</a>
 		{%endif%}
-		<a class="btn btn-primary" href="/auth/logout">[LOGOUT]</a>
-		<button id="install-btn" class="btn btn-info" onclick="installPWA()" style="display: none;">[INSTALL APP]</button>
+		<a class="btn btn-primary" href="/auth/logout">Logout</a>
+		<button id="install-btn" class="btn btn-info" onclick="installPWA()" style="display: none;">Install App</button>
 	</div>
 	{%else%}
 	<div class="mb-3">
-		<a class="btn btn-success" href="/blog/search">[SEARCH POSTS]</a>
+		<a class="btn btn-success" href="/blog/search">Search Posts</a>
 		{% if not has_accounts %}
-		<a class="btn btn-warning" href="/auth/create-admin">[CREATE ADMIN ACCOUNT]</a>
+		<a class="btn btn-warning" href="/auth/create-admin">Create Admin Account</a>
 		{% else %}
-		<a class="btn btn-primary" href="/auth/">[LOGIN]</a>
+		<a class="btn btn-primary" href="/auth/">Login</a>
 		{% endif %}
-		<button id="install-btn" class="btn btn-info" onclick="installPWA()" style="display: none;">[INSTALL APP]</button>
+		<button id="install-btn" class="btn btn-info" onclick="installPWA()" style="display: none;">Install App</button>
 	</div>
 	{% if not has_accounts %}
 	<div class="alert alert-info text-center mx-5">
@@ -41,7 +41,7 @@
 	{%endif%}
 </div>
 
-<hr class="terminal-divider">
+<hr>
 
 <div class="row">
 	<div class="col-12 col-lg-8">
@@ -52,10 +52,10 @@
 				<span class="badge bg-warning text-dark ms-2">DRAFT</span>
 				{% endif %}
 			</li>
-			<div class="card mb-3 terminal-post">
+			<div class="card mb-3">
 				<div class="card-body">
 					<h5 class="card-title">
-						<span class="terminal-prompt"></span>
+						
 						<a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover text-decoration-none"
 						   href="/blog/{{post.seq_id}}">{{post.title}}</a>
 						{% if post.draft and token %}
@@ -87,7 +87,7 @@
 					</div>
 					{% endif %}
 
-					<a href="/blog/{{post.seq_id}}" class="btn btn-outline-primary btn-sm">[READ MORE]</a>
+					<a href="/blog/{{post.seq_id}}" class="btn btn-outline-primary btn-sm">Read More</a>
 				</div>
 			</div>
 			{% endfor %}
@@ -97,7 +97,7 @@
 		{% if all_tags %}
 		<div class="card">
 			<div class="card-header">
-				<h5>[ TAGS ]</h5>
+				<h5>Tags</h5>
 			</div>
 			<div class="card-body">
 				{% for tag in all_tags %}
@@ -113,22 +113,22 @@
 	</div>
 </div>
 
-<hr class="terminal-divider">
+<hr>
 
 <div class="d-flex justify-content-center m-2">
 	<footer class="btn-group align-items-center flex-wrap">
 		{% if page == 1 %}
-		<button class="btn btn-secondary" disabled>[PREV]</button>
+		<button class="btn btn-secondary" disabled>Prev</button>
 		{% else %}
-		<a class="btn btn-primary" href="?page={{page -1}}&page_size={{page_size}}">[PREV]</a>
+		<a class="btn btn-primary" href="?page={{page -1}}&page_size={{page_size}}">Prev</a>
 		{%endif%}
 		<button class="btn btn-secondary" disabled>
-			PAGE {{page}}
+			Page {{page}}
 		</button>
 		{% if page == num_pages %}
-		<button class="btn btn-secondary" disabled>[NEXT]</button>
+		<button class="btn btn-secondary" disabled>Next</button>
 		{%else%}
-		<a class="btn btn-primary" href="?page={{page +1}}&page_size={{page_size}}">[NEXT]</a>
+		<a class="btn btn-primary" href="?page={{page +1}}&page_size={{page_size}}">Next</a>
 		{%endif%}
 	</footer>
 </div>

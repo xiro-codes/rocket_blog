@@ -12,7 +12,7 @@ use crate::services::{
 };
 use crate::controllers::{
     AuthController, BlogController, CommentController, IndexController, 
-    FeedController, SettingsController, SeoController, WorkTimeController
+    FeedController, SeoController, WorkTimeController
 };
 
 // Auto-generated service registry using the new macro
@@ -44,7 +44,6 @@ create_controller_registry!(
         (BlogController, "/blog"),
         (CommentController, "/comment"),
         (FeedController, "/feed"),
-        (SettingsController, "/settings"),
         (SeoController, "/"),
     ]
 );

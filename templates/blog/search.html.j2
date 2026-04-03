@@ -3,24 +3,22 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <h1 class="text-center mb-4 terminal-text">{{ title }}</h1>
+        <h1 class="text-center mb-4">{{ title }}</h1>
 
         <!-- Search Form -->
         <div class="d-flex justify-content-center align-items-center" >
-            <form action="/blog/search" method="post" class="terminal-form">
-                <h3 class="text-center mb-4">[ Search ]</h3>
+            <form action="/blog/search" method="post">
+                <h3 class="text-center mb-4">Search</h3>
                 <div class="">
                     <input type="text"
-                           class="form-control terminal-input"
+                           class="form-control"
                            name="query"
                            value="{{ search_query }}"
-                           placeholder="Search posts..."
-                           style="background-color: #0c1116; border: 1px solid #00ff41; color: #00ff41;">
+                           placeholder="Search posts...">
                 </div>
                 <div class="">
                     <button type="submit"
-                            class="btn btn-outline-success w-100"
-                            style="border-color: #00ff41; color: #00ff41;">
+                            class="btn btn-outline-success w-100">
                         Search
                     </button>
                 </div>
@@ -31,25 +29,24 @@
         {% if search_query %}
             {% if results %}
                 <div class="search-results">
-                    <p class="mb-3 terminal-text">
+                    <p class="mb-3">
                         Found {{ results | length }} result(s)
                         {% if num_pages > 1 %}(Page {{ page }} of {{ num_pages }}){% endif %}
                     </p>
 
                     {% for post in results %}
-                    <div class="card mb-3" style="background-color: #0c1116; border: 1px solid #00ff41;">
+                    <div class="card mb-3">
                         <div class="card-body">
                             <h5 class="card-title">
                                 <a href="/blog/{{ post.seq_id }}"
-                                   class="text-decoration-none"
-                                   style="color: #00ff41;">
+                                   class="text-decoration-none">
                                     {{ post.title }}
                                 </a>
                             </h5>
 
                             <!-- Search ranking indicator -->
                             <small class="text-muted">
-                                <span class="badge" style="background-color: #00ff41; color: #0c1116;">
+                                <span class="badge bg-secondary">
                                     Relevance: {{ (post.rank * 100) | round(precision=1) }}%
                                 </span>
                             </small>
@@ -57,9 +54,9 @@
                             <!-- Highlighted excerpt or generated headline -->
                             <div class="card-text mt-2">
                                 {% if post.headline %}
-                                    <div class="search-headline terminal-text">{{ post.headline | safe }}</div>
+                                    <div class="search-headline">{{ post.headline | safe }}</div>
                                 {% elif post.excerpt %}
-                                    <div class="terminal-text">{{ post.excerpt }}</div>
+                                    <div>{{ post.excerpt }}</div>
                                 {% endif %}
                             </div>
 
@@ -86,8 +83,7 @@
 
                             <div class="mt-2">
                                 <a href="/blog/{{ post.seq_id }}"
-                                   class="btn btn-sm btn-outline-success"
-                                   style="border-color: #00ff41; color: #00ff41;">
+                                   class="btn btn-sm btn-outline-success">
                                     Read more →
                                 </a>
                             </div>
@@ -102,8 +98,7 @@
                             {% if page > 1 %}
                             <li class="page-item">
                                 <a class="page-link"
-                                   href="/blog/search?query={{ search_query }}&page={{ page - 1 }}&page_size={{ page_size }}"
-                                   style="background-color: #0c1116; border-color: #00ff41; color: #00ff41;">
+                                   href="/blog/search?query={{ search_query }}&page={{ page - 1 }}&page_size={{ page_size }}">
                                     Previous
                                 </a>
                             </li>
@@ -112,16 +107,14 @@
                             {% for page_num in range(start=1, end=num_pages + 1) %}
                                 {% if page_num == page %}
                                 <li class="page-item active">
-                                    <span class="page-link"
-                                          style="background-color: #00ff41; border-color: #00ff41; color: #0c1116;">
+                                    <span class="page-link active">
                                         {{ page_num }}
                                     </span>
                                 </li>
                                 {% else %}
                                 <li class="page-item">
                                     <a class="page-link"
-                                       href="/blog/search?query={{ search_query }}&page={{ page_num }}&page_size={{ page_size }}"
-                                       style="background-color: #0c1116; border-color: #00ff41; color: #00ff41;">
+                                       href="/blog/search?query={{ search_query }}&page={{ page_num }}&page_size={{ page_size }}">
                                         {{ page_num }}
                                     </a>
                                 </li>
@@ -131,8 +124,7 @@
                             {% if page < num_pages %}
                             <li class="page-item">
                                 <a class="page-link"
-                                   href="/blog/search?query={{ search_query }}&page={{ page + 1 }}&page_size={{ page_size }}"
-                                   style="background-color: #0c1116; border-color: #00ff41; color: #00ff41;">
+                                   href="/blog/search?query={{ search_query }}&page={{ page + 1 }}&page_size={{ page_size }}">
                                     Next
                                 </a>
                             </li>
@@ -142,15 +134,13 @@
                     {% endif %}
                 </div>
             {% else %}
-                <div class="alert alert-info"
-                     style="background-color: #0c1116; border: 1px solid #00ff41; color: #00ff41;">
+                <div class="alert alert-info">
                     <h4>No results found</h4>
                     <p>No posts match your search for "{{ search_query }}". Try different keywords or check your spelling.</p>
                 </div>
             {% endif %}
         {% else %}
-            <div class="alert alert-info"
-                 style="background-color: #0c1116; border: 1px solid #00ff41; color: #00ff41;">
+            <div class="alert alert-info">
                 <h4>Search Blog Posts</h4>
                 <p>Use the search form above to find posts by title, content, or excerpt. The search supports:</p>
                 <ul>
@@ -164,9 +154,9 @@
 
         <!-- Tag Cloud -->
         {% if all_tags %}
-        <div class="card mt-4" style="background-color: #0c1116; border: 1px solid #00ff41;">
+        <div class="card mt-4">
             <div class="card-header">
-                <h5 class="terminal-text mb-0">Browse by Tags</h5>
+                <h5 class="mb-0">Browse by Tags</h5>
             </div>
             <div class="card-body">
                 {% for tag in all_tags %}
@@ -184,31 +174,10 @@
 
 <style>
 .search-headline mark {
-    background-color: #00ff41;
-    color: #0c1116;
+    background-color: #fdfdfc;
+    color: #1c1c1c;
     padding: 2px 4px;
     font-weight: bold;
-}
-
-.terminal-text {
-    color: #00ff41;
-}
-
-.terminal-input::placeholder {
-    color: #00ff41 !important;
-    opacity: 0.7;
-}
-
-.terminal-input:focus {
-    border-color: #00ff41 !important;
-    box-shadow: 0 0 0 0.2rem rgba(0, 255, 65, 0.25) !important;
-    background-color: #0c1116 !important;
-    color: #00ff41 !important;
-}
-
-.btn-outline-success:hover {
-    background-color: #00ff41;
-    color: #0c1116;
 }
 </style>
 {% endblock %}
