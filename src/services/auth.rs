@@ -5,21 +5,25 @@ use pwhash::bcrypt;
 use rocket::futures::lock::Mutex;
 use sea_orm::*;
 use uuid::Uuid;
+use redis::AsyncCommands;
 
 use crate::{services::base::BaseService, impl_service_custom};
 
 pub struct Service {
     base: BaseService,
     token_map: Mutex<HashMap<Token, AccountId>>,
+    redis_client: Option<redis::Client>,
 }
 type Token = Uuid;
 type AccountId = Uuid;
 
 impl Service {
     pub fn new() -> Self {
+        let redis_client = redis::Client::open("redis://127.0.0.1/").ok();
         Self {
             base: BaseService::new(),
             token_map: Mutex::new(HashMap::new()),
+            redis_client,
         }
     }
 
@@ -44,6 +48,11 @@ impl Service {
                 let mut tm = self.token_map.lock().await;
                 let token = BaseService::generate_id();
                 tm.insert(token, ac.id);
+                if let Some(client) = &self.redis_client {
+                    if let Ok(mut con) = client.get_multiplexed_async_connection().await {
+                        let _: Result<(), _> = redis::AsyncCommands::set(&mut con, token.to_string(), ac.id.to_string()).await;
+                    }
+                }
                 log::info!("User successfully authenticated: {} (ID: {})", data.username, ac.id);
                 log::debug!("Generated token: {}", token);
                 token
@@ -58,10 +67,24 @@ impl Service {
     pub async fn check_token(&self, db: &DbConn, token: Token) -> Option<account::Model> {
         log::debug!("Checking token validity: {}", token);
         
-        let id = {
+        let mut id = {
             let tm = self.token_map.lock().await;
             tm.get(&token).cloned()
         };
+
+        if id.is_none() {
+            if let Some(client) = &self.redis_client {
+                if let Ok(mut con) = client.get_multiplexed_async_connection().await {
+                    if let Ok(account_str) = redis::AsyncCommands::get::<_, String>(&mut con, token.to_string()).await {
+                        if let Ok(account_uuid) = Uuid::parse_str(&account_str) {
+                            id = Some(account_uuid);
+                            let mut tm = self.token_map.lock().await;
+                            tm.insert(token, account_uuid);
+                        }
+                    }
+                }
+            }
+        }
         
         if let Some(id) = id {
             log::debug!("Token found in memory, fetching account: {}", id);

@@ -95,6 +95,9 @@ in {
       '';
     };
 
+    # Configure Redis for session store
+    services.redis.servers."".enable = true;
+
     # Systemd Service for Blog
     systemd.services.rocket-blog = {
       description = "Rocket Blog Service";
