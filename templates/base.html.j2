@@ -55,8 +55,8 @@
 		<link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192x192.png">
 		<link rel="icon" type="image/png" sizes="512x512" href="/static/icon-512x512.png">
 		
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-																							 integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
@@ -64,138 +64,33 @@
 		<!-- EasyMDE Markdown Editor -->
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
 		<style>
-		/* Xe Iaso inspired styling */
-		:root {
-			--bg-0: #fdfdfc;
-			--bg-1: #f4f4f4;
-			--bg-2: #eaeaea;
-			--fg-0: #1c1c1c;
-			--fg-1: #3a3a3a;
-			--fg-3: #6b6b6b;
-			--link: #0056b3;
-			--link-hover: #003d82;
-			--font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-			--font-serif: "Georgia", "Times New Roman", serif;
-		}
-
-		@media (prefers-color-scheme: dark) {
-			:root {
-				--bg-0: #1a1a1a;
-				--bg-1: #242424;
-				--bg-2: #2a2a2a;
-				--fg-0: #e0e0e0;
-				--fg-1: #b0b0b0;
-				--fg-3: #8a8a8a;
-				--link: #66b3ff;
-				--link-hover: #99ccff;
-			}
-		}
-
-		body {
-			background-color: var(--bg-0);
-			color: var(--fg-0);
-			font-family: var(--font-sans);
-			line-height: 1.6;
-			margin: 0;
-			padding: 0;
-		}
-
-		a {
-			color: var(--link);
-			text-decoration: underline;
-		}
-		a:hover {
-			color: var(--link-hover);
-			text-decoration: none;
-		}
-
-		h1, h2, h3, h4, h5, h6 {
-			font-family: var(--font-serif);
-			color: var(--fg-0);
-			margin-bottom: 1rem;
-		}
-
-		.container-fluid {
-			max-width: 800px;
-			margin: 0 auto;
-			padding: 1rem;
-		}
-
-		.card {
-			background-color: var(--bg-1);
-			border: 1px solid var(--bg-2);
-			border-radius: 6px;
-			box-shadow: none;
-			margin-bottom: 1.5rem;
-		}
-
-		.card-body {
-			padding: 1.5rem;
-		}
-
-		.btn, .btn-primary, .btn-success, .btn-secondary, .btn-info, .btn-warning {
-			background-color: var(--bg-2);
-			color: var(--fg-0);
-			border: 1px solid var(--bg-2);
-			border-radius: 4px;
-			padding: 0.5rem 1rem;
-			text-transform: none;
-			font-family: var(--font-sans);
-			text-decoration: none;
-			display: inline-block;
-			transition: background-color 0.2s;
-		}
-
-		.btn:hover, .btn-primary:hover, .btn-success:hover, .btn-secondary:hover {
-			background-color: var(--bg-0);
-			color: var(--fg-0);
-			border-color: var(--fg-1);
-		}
-
-		/* EasyMDE Theme Fixes for Xe style */
+		/* EasyMDE Theme Fixes for dark mode */
 		.EasyMDEContainer .editor-toolbar, .EasyMDEContainer .CodeMirror, .EasyMDEContainer .editor-statusbar {
-			background-color: var(--bg-1) !important;
-			color: var(--fg-0) !important;
-			border-color: var(--bg-2) !important;
+			background-color: transparent !important;
+			color: inherit !important;
+			border-color: #e5e7eb !important;
 		}
-		.EasyMDEContainer .editor-toolbar button { color: var(--fg-0) !important; }
-		.EasyMDEContainer .editor-toolbar button.active, .EasyMDEContainer .editor-toolbar button:hover {
-			background-color: var(--bg-2) !important;
-		}
-		.EasyMDEContainer .CodeMirror-cursor { border-left: 1px solid var(--fg-0) !important; }
-		.EasyMDEContainer .CodeMirror-line { color: var(--fg-0) !important; }
-
-
-		
-		.list-group-item {
-			background-color: var(--bg-0);
-			border-color: var(--bg-2);
-			color: var(--fg-0);
-		}
-		
-		.text-muted {
-			color: var(--fg-3) !important;
+		@media (prefers-color-scheme: dark) {
+			.EasyMDEContainer .editor-toolbar, .EasyMDEContainer .CodeMirror, .EasyMDEContainer .editor-statusbar {
+				border-color: #374151 !important;
+			}
+			.EasyMDEContainer .editor-toolbar button { color: #d1d5db !important; }
+			.EasyMDEContainer .editor-toolbar button.active, .EasyMDEContainer .editor-toolbar button:hover {
+				background-color: #374151 !important;
+			}
+			.EasyMDEContainer .CodeMirror-cursor { border-left: 1px solid #d1d5db !important; }
+			.EasyMDEContainer .CodeMirror-line { color: #d1d5db !important; }
 		}
 		</style>
 	</head>
 
-	<body>
-		<div class="container-fluid h-100">
+	<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 font-sans antialiased selection:bg-blue-200 selection:text-blue-900 leading-relaxed max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+		<div class="container mx-auto h-full px-4">
 			{% block content %}
 			{% endblock %}
 		</div>
-		<script>
-			const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-			const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
-		</script>
 		{% block script %}
 		{% endblock %}
-		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-				integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-				crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-				integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
-				crossorigin="anonymous"></script>
 		<!-- EasyMDE Markdown Editor -->
 		<script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
 		

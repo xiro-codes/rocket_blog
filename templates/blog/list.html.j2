@@ -1,69 +1,59 @@
 {% extends "base" %}
 
 {% block content %}
-<div></div>
-<div class="d-flex flex-column align-items-center justify-content-center">
-	<h1>Articles</h1>
-	{% if flash %}
-	<h3 class="btn-{{ flash[0] }} btn disabled">
-		{{ flash[1] }}
-	</h3>
-	{% endif %}
-
-	{%if token %}
-	<div class="btn-group mb-3 flex-wrap">
-		{%if is_admin %}
-		<a class="btn btn-primary" href="/blog/create">Create Post</a>
-		{%endif%}
-		<a class="btn btn-success" href="/blog/search">Search</a>
-		{%if is_admin %}
-		<a class="btn btn-secondary" href="/settings">Settings</a>
-		{%endif%}
-		<a class="btn btn-primary" href="/auth/logout">Logout</a>
-		<button id="install-btn" class="btn btn-info" onclick="installPWA()" style="display: none;">Install App</button>
-	</div>
-	{%else%}
-	<div class="mb-3">
-		<a class="btn btn-success" href="/blog/search">Search Posts</a>
-		{% if not has_accounts %}
-		<a class="btn btn-warning" href="/auth/create-admin">Create Admin Account</a>
-		{% else %}
-		<a class="btn btn-primary" href="/auth/">Login</a>
-		{% endif %}
-		<button id="install-btn" class="btn btn-info" onclick="installPWA()" style="display: none;">Install App</button>
-	</div>
-	{% if not has_accounts %}
-	<div class="alert alert-info text-center mx-5">
-		<h4>🚀 Welcome to your new blog!</h4>
-		<p>No admin account exists yet. Click the "CREATE ADMIN ACCOUNT" button above to get started.</p>
-	</div>
-	{% endif %}
-	{%endif%}
-</div>
-
-<hr>
-
-<div class="row">
-	<div class="col-12 col-lg-8">
-		<div class="mx-2 mx-md-5 my-2">
-			{% for post in posts %}
-			<li class="list-group-item">
-				{% if post.draft and token %}
-				<span class="badge bg-warning text-dark ms-2">DRAFT</span>
+<div class="max-w-4xl mx-auto py-8">
+	<div class="flex flex-col md:flex-row justify-between items-center mb-8">
+		<h1 class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">Articles</h1>
+		
+		<div class="flex flex-wrap gap-2 mt-4 md:mt-0">
+			{%if token %}
+				{%if is_admin %}
+				<a class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition" href="/blog/create">Create Post</a>
+				<a class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-2 px-4 rounded-md transition" href="/settings">Settings</a>
+				{%endif%}
+				<a class="bg-indigo-100 dark:bg-indigo-900/50 hover:bg-indigo-200 dark:hover:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300 font-medium py-2 px-4 rounded-md transition border border-indigo-200 dark:border-indigo-800" href="/blog/search">Search</a>
+				<a class="bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-800/30 text-red-600 dark:text-red-400 font-medium py-2 px-4 rounded-md transition border border-red-200 dark:border-red-800/50" href="/auth/logout">Logout</a>
+			{%else%}
+				<a class="bg-indigo-100 dark:bg-indigo-900/50 hover:bg-indigo-200 dark:hover:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300 font-medium py-2 px-4 rounded-md transition border border-indigo-200 dark:border-indigo-800" href="/blog/search">Search Posts</a>
+				{% if not has_accounts %}
+				<a class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-md transition" href="/auth/create-admin">Create Admin Account</a>
+				{% else %}
+				<a class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition" href="/auth/">Login</a>
 				{% endif %}
-			</li>
-			<div class="card mb-3">
-				<div class="card-body">
-					<h5 class="card-title">
-						
-						<a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover text-decoration-none"
-						   href="/blog/{{post.seq_id}}">{{post.title}}</a>
+			{%endif%}
+			<button id="install-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4 rounded-md transition" onclick="installPWA()" style="display: none;">Install App</button>
+		</div>
+	</div>
+
+	{% if flash %}
+	<div class="mb-6 p-4 rounded-md bg-{{ 'green' if flash[0] == 'success' else 'red' }}-50 text-{{ 'green' if flash[0] == 'success' else 'red' }}-800 border border-{{ 'green' if flash[0] == 'success' else 'red' }}-200">
+		{{ flash[1] }}
+	</div>
+	{% endif %}
+
+	{% if not has_accounts and not token %}
+	<div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-6 rounded-lg mb-8 text-center">
+		<h4 class="text-xl font-bold text-blue-800 dark:text-blue-300 mb-2">🚀 Welcome to your new blog!</h4>
+		<p class="text-blue-600 dark:text-blue-400">No admin account exists yet. Click the "Create Admin Account" button above to get started.</p>
+	</div>
+	{% endif %}
+
+	<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+		<div class="lg:col-span-2 space-y-6">
+			{% for post in posts %}
+			<article class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition">
+				<div class="p-6">
+					<div class="flex items-center gap-2 mb-2">
+						<h2 class="text-2xl font-bold">
+							<a class="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition" href="/blog/{{post.seq_id}}">{{post.title}}</a>
+						</h2>
 						{% if post.draft and token %}
-						<span class="badge bg-warning text-dark ms-2">[DRAFT]</span>
+						<span class="bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800">DRAFT</span>
 						{% endif %}
-					</h5>
+					</div>
+					
 					{% if post.excerpt %}
-					<p class="card-text text-muted">{{post.excerpt}}</p>
+					<p class="text-gray-600 dark:text-gray-400 mb-4">{{post.excerpt}}</p>
 					{% endif %}
 
 					<!-- Reaction counts -->
@@ -73,65 +63,70 @@
 							{% set summary = reaction_summary %}
 						{% endif %}
 					{% endfor %}
-					{% if summary %}
-					<div class="reaction-summary mb-2">
-						<small class="text-muted">
-							{% if summary.total_reactions > 0 %}
-							<span class="reactions-count">
-								👍 {{summary.total_reactions}} reaction{% if summary.total_reactions != 1 %}s{% endif %}
-							</span>
+					
+					<div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+						<div class="text-sm text-gray-500 dark:text-gray-400">
+							{% if summary and summary.total_reactions > 0 %}
+								<span class="flex items-center gap-1">
+									👍 {{summary.total_reactions}} reaction{% if summary.total_reactions != 1 %}s{% endif %}
+								</span>
 							{% else %}
-							<span class="reactions-count">No reactions yet</span>
+								<span>No reactions yet</span>
 							{% endif %}
-						</small>
+						</div>
+						<a href="/blog/{{post.seq_id}}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm flex items-center gap-1">
+							Read More <span aria-hidden="true">&rarr;</span>
+						</a>
 					</div>
-					{% endif %}
-
-					<a href="/blog/{{post.seq_id}}" class="btn btn-outline-primary btn-sm">Read More</a>
+				</div>
+			</article>
+			{% endfor %}
+			
+			{% if not posts %}
+			<div class="text-center py-12 text-gray-500 dark:text-gray-400">
+				<p>No posts found.</p>
+			</div>
+			{% endif %}
+		</div>
+		
+		<div class="lg:col-span-1">
+			{% if all_tags %}
+			<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden sticky top-6">
+				<div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+					<h3 class="font-bold text-gray-900 dark:text-white">Tags</h3>
+				</div>
+				<div class="p-6 flex flex-wrap gap-2">
+					{% for tag in all_tags %}
+					<a href="/blog/tag/{{ tag.slug }}"
+					   class="text-xs font-semibold px-2.5 py-1 rounded-full hover:opacity-80 transition text-white shadow-sm"
+					   style="background-color: {{ tag.color }};">
+						{{ tag.name }}
+					</a>
+					{% endfor %}
 				</div>
 			</div>
-			{% endfor %}
+			{% endif %}
 		</div>
 	</div>
-	<div class="col-12 col-lg-4">
-		{% if all_tags %}
-		<div class="card">
-			<div class="card-header">
-				<h5>Tags</h5>
-			</div>
-			<div class="card-body">
-				{% for tag in all_tags %}
-				<a href="/blog/tag/{{ tag.slug }}"
-				   class="badge text-decoration-none me-1 mb-1"
-				   style="background-color: {{ tag.color }};">
-					{{ tag.name }}
-				</a>
-				{% endfor %}
-			</div>
-		</div>
-		{% endif %}
+
+	<div class="mt-12 flex justify-center">
+		<nav class="flex items-center gap-2">
+			{% if page == 1 %}
+			<button class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-50 dark:bg-gray-800/50 dark:text-gray-600 border border-gray-200 dark:border-gray-700 rounded-l-md cursor-not-allowed" disabled>Previous</button>
+			{% else %}
+			<a class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-l-md hover:bg-gray-50 dark:hover:bg-gray-700 transition" href="?page={{page -1}}&page_size={{page_size}}">Previous</a>
+			{%endif%}
+			
+			<span class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800/50 border-y border-gray-200 dark:border-gray-700">
+				Page {{page}} {% if num_pages > 0 %}of {{num_pages}}{% endif %}
+			</span>
+			
+			{% if page == num_pages or num_pages == 0 %}
+			<button class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-50 dark:bg-gray-800/50 dark:text-gray-600 border border-gray-200 dark:border-gray-700 rounded-r-md cursor-not-allowed" disabled>Next</button>
+			{%else%}
+			<a class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-r-md hover:bg-gray-50 dark:hover:bg-gray-700 transition" href="?page={{page +1}}&page_size={{page_size}}">Next</a>
+			{%endif%}
+		</nav>
 	</div>
 </div>
-
-<hr>
-
-<div class="d-flex justify-content-center m-2">
-	<footer class="btn-group align-items-center flex-wrap">
-		{% if page == 1 %}
-		<button class="btn btn-secondary" disabled>Prev</button>
-		{% else %}
-		<a class="btn btn-primary" href="?page={{page -1}}&page_size={{page_size}}">Prev</a>
-		{%endif%}
-		<button class="btn btn-secondary" disabled>
-			Page {{page}}
-		</button>
-		{% if page == num_pages %}
-		<button class="btn btn-secondary" disabled>Next</button>
-		{%else%}
-		<a class="btn btn-primary" href="?page={{page +1}}&page_size={{page_size}}">Next</a>
-		{%endif%}
-	</footer>
-</div>
-{% endblock %}
-{% block script %}
 {% endblock %}

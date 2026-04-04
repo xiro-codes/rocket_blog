@@ -44,9 +44,9 @@
 		<link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192x192.png">
 		<link rel="icon" type="image/png" sizes="512x512" href="/static/icon-512x512.png">
 		
-		<!-- Bootstrap CSS -->
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-			integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+		<!-- Tailwind CSS and HTMX -->
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 		
 		<!-- Custom Worktime CSS -->
 		<link rel="stylesheet" href="/static/worktime.css" />
@@ -55,22 +55,14 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 	</head>
 
-	<body>
-		<div class="worktime-container">
-			<div class="worktime-content">
+	<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 font-sans antialiased selection:bg-green-200 selection:text-green-900 min-h-screen">
+		<div class="container mx-auto max-w-5xl">
+			<div class="p-4 sm:p-6 lg:p-8">
 				{% block content %}
 				{% endblock %}
 			</div>
 		</div>
 
-		<!-- Bootstrap JavaScript -->
-		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-				integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-				crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-				integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
-				crossorigin="anonymous"></script>
-		
 		<!-- PWA Service Worker Registration -->
 		<script>
 			// Register service worker for PWA functionality

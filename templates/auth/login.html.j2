@@ -1,81 +1,89 @@
 {% extends "worktime_base" %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="auth-logo">
-        <i class="fas fa-clock text-primary" style="font-size: 3rem;"></i>
+<div class="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="flex justify-center text-blue-600 mb-6">
+            <i class="fas fa-clock" style="font-size: 3.5rem;"></i>
+        </div>
+        
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">Welcome to Time Tracker</h2>
+        <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400 max-w">
+            Sign in to track your productive work hours and manage your time effectively.
+        </p>
     </div>
-    
-    <h1 class="auth-title">Welcome to Time Tracker</h1>
-    <p class="auth-subtitle">Sign in to track your productive work hours and manage your time effectively.</p>
 
-    <form action="/auth/" method="post">
-        <div class="mb-3">
-            <label for="username" class="form-label">
-                <i class="fas fa-user me-1"></i>Username
-            </label>
-            <input type="text" name="username" id="username" class="form-control" placeholder="Enter your username" required />
-        </div>
-        
-        <div class="mb-4">
-            <label for="password" class="form-label">
-                <i class="fas fa-lock me-1"></i>Password
-            </label>
-            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required />
-        </div>
-        
-        <div class="d-grid mb-4">
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-sign-in-alt me-2"></i>Sign In
-            </button>
-        </div>
-        
-        <div class="text-center">
-            <div class="d-flex flex-column gap-2">
-                <a href="/auth/register" class="btn btn-outline-primary">
-                    <i class="fas fa-user-plus me-2"></i>Create New Account
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200 dark:border-gray-700">
+            <form action="/auth/" method="post" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-user mr-1 text-gray-400"></i>Username
+                    </label>
+                    <div class="mt-1">
+                        <input id="username" name="username" type="text" required class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition" placeholder="Enter your username">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-lock mr-1 text-gray-400"></i>Password
+                    </label>
+                    <div class="mt-1">
+                        <input id="password" name="password" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition" placeholder="Enter your password">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                        <i class="fas fa-sign-in-alt mr-2 mt-0.5"></i>Sign In
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 space-y-3">
+                <a href="/auth/register" class="w-full flex justify-center py-2.5 px-4 border border-blue-600 rounded-md shadow-sm text-sm font-medium text-blue-600 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                    <i class="fas fa-user-plus mr-2 mt-0.5"></i>Create New Account
                 </a>
-                <a href="/blog" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Blog
+                <a href="/blog" class="w-full flex justify-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+                    <i class="fas fa-arrow-left mr-2 mt-0.5"></i>Back to Blog
                 </a>
             </div>
         </div>
-    </form>
-    
-    <!-- Features highlight -->
-    <div class="mt-5 text-center">
-        <h5 class="text-muted mb-3">Why use Time Tracker?</h5>
-        <div class="row text-start">
-            <div class="col-6">
-                <small class="text-muted">
-                    <i class="fas fa-clock text-primary me-2"></i>Track work hours
-                </small>
-            </div>
-            <div class="col-6">
-                <small class="text-muted">
-                    <i class="fas fa-dollar-sign text-success me-2"></i>Calculate earnings
-                </small>
-            </div>
-            <div class="col-6 mt-2">
-                <small class="text-muted">
-                    <i class="fas fa-bell text-warning me-2"></i>Smart notifications
-                </small>
-            </div>
-            <div class="col-6 mt-2">
-                <small class="text-muted">
-                    <i class="fas fa-chart-line text-info me-2"></i>Detailed reports
-                </small>
+
+        <!-- Features highlight -->
+        <div class="mt-8">
+            <h3 class="text-center text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Why use Time Tracker?</h3>
+            <div class="mt-5 grid grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <div class="flex items-center">
+                    <i class="fas fa-clock text-blue-500 mr-2"></i><span>Track work hours</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-dollar-sign text-emerald-500 mr-2"></i><span>Calculate earnings</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-bell text-amber-500 mr-2"></i><span>Smart notifications</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-chart-line text-cyan-500 mr-2"></i><span>Detailed reports</span>
+                </div>
             </div>
         </div>
+        
+        {% if flash %}
+        <div class="mt-8 rounded-md bg-{{ 'green' if flash[0] == 'success' else 'red' }}-50 p-4 border border-{{ 'green' if flash[0] == 'success' else 'red' }}-200">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-{{ 'green' if flash[0] == 'success' else 'red' }}-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-{{ 'green' if flash[0] == 'success' else 'red' }}-800">
+                        {{ flash[1] }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
-
-{% if flash %}
-<div class="auth-container mt-3">
-    <div class="alert alert-{{ flash[0] }}">
-        <i class="fas fa-info-circle me-2"></i>{{ flash[1] }}
-    </div>
-</div>
-{% endif %}
-
 {% endblock %}

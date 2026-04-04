@@ -31,9 +31,9 @@
     {% endif %}
 
     <!-- Quick Actions Navigation -->
-    <div class="worktime-nav" style="margin: 1rem 0;">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm flex flex-wrap p-2 gap-2 my-6" style="margin: 1rem 0;">
         <div class="text-center mb-3">
-            <h4 class="worktime-subtitle">
+            <h4 class="mt-2 text-lg text-gray-600 dark:text-gray-400">
                 <i class="fas fa-compass me-2"></i>Quick Actions
             </h4>
         </div>
@@ -328,8 +328,8 @@
 
 {# Card wrapper component #}
 {% macro worktime_card(title, icon="fas fa-clock") %}
-    <div class="worktime-card">
-        <div class="worktime-card-header">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
             <h3 class="mb-0">
                 <i class="{{ icon }} me-2"></i>{{ title }}
             </h3>
@@ -340,8 +340,8 @@
 
 {# Hero section component #}
 {% macro worktime_hero(title, subtitle, username, show_install=true) %}
-    <div class="worktime-hero">
-        <h1 class="worktime-title mb-3">
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-8 md:p-12 rounded-xl shadow-md mb-8 text-center">
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-3">
             <i class="fas fa-clock me-2"></i>{{ title }}
         </h1>
         <p class="mb-0">{{ subtitle }}{% if username %}, <strong>{{ username }}</strong>{% endif %}!</p>

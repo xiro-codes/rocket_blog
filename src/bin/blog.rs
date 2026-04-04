@@ -38,7 +38,7 @@ impl BlogServiceRegistry {
         // Create AI provider service and add providers
         log::debug!("Creating AI provider service with OpenAI and Ollama providers");
         let mut ai_service = AIProviderService::new();
-        ai_service.add_provider(Box::new(OpenAIService::new()));
+        // ai_service.add_provider(Box::new(OpenAIService::new()));
         ai_service.add_provider(Box::new(OllamaService::new()));
 
         log::debug!("Attaching blog services: Auth, Blog, Comment, OpenAI, Ollama, AIProvider, Reaction, Settings, Tag, Coordinator, YouTube, BackgroundJob");

@@ -1,17 +1,17 @@
 {% extends "worktime_base" %}
 
 {% block content %}
-<div class="worktime-container">
-	<div class="worktime-content">
+<div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+	<div class="flex-1 w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
 		<div class="text-center mb-4">
-			<h1 class="worktime-title">🚀 Create Account</h1>
-			<p class="worktime-subtitle">Create an account to start tracking your work time and manage your earnings.</p>
+			<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">🚀 Create Account</h1>
+			<p class="mt-2 text-lg text-gray-600 dark:text-gray-400">Create an account to start tracking your work time and manage your earnings.</p>
 		</div>
 
 		<div class="row justify-content-center">
 			<div class="col-md-6 col-lg-4">
-				<div class="worktime-card">
-					<div class="worktime-card-header">
+				<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+					<div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
 						<h3 class="text-center mb-0">Register for TimeTracker</h3>
 					</div>
 					<form action="/register" method="post">
@@ -49,7 +49,7 @@
 
 		<div class="row justify-content-center mt-4">
 			<div class="col-md-8 col-lg-6">
-				<div class="worktime-card">
+				<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
 					<h4 class="text-center mb-3">🎯 Get Started with Work Time Tracking</h4>
 					<p class="text-center mb-3"><strong>After registration, you'll be able to:</strong></p>
 					<div class="row">

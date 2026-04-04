@@ -3,8 +3,7 @@ use chrono::Local;
 use models::{
     account,
     dto::PostTitleResult,
-    post,
-    post_tag,
+    post, post_tag,
     prelude::{Account, Post, Tag},
     tag,
 };
@@ -12,8 +11,8 @@ use rocket::State;
 use sea_orm::{ColumnTrait, JoinType, *};
 use uuid::Uuid;
 
-use crate::{services::base::BaseService, impl_service_with_base};
-use crate::services::youtube::{YoutubeDownloadService, DownloadStatus};
+use crate::services::youtube::{DownloadStatus, YoutubeDownloadService};
+use crate::{impl_service_with_base, services::base::BaseService};
 
 pub struct Service {
     base: BaseService,
@@ -22,7 +21,6 @@ pub struct Service {
 const DEFAULT_PAGE_SIZE: u64 = 39;
 
 impl Service {
-
     /// Generate an excerpt from the text content if no excerpt is provided
     fn generate_excerpt(text: &str, provided_excerpt: Option<String>) -> Option<String> {
         if let Some(excerpt) = provided_excerpt {
@@ -30,7 +28,7 @@ impl Service {
                 return Some(excerpt.trim().to_string());
             }
         }
-        
+
         // Remove markdown formatting and HTML tags for a clean excerpt
         let clean_text = text
             .lines()
@@ -38,7 +36,7 @@ impl Service {
             .filter(|line| !line.is_empty() && !line.starts_with('#'))
             .collect::<Vec<&str>>()
             .join(" ");
-        
+
         // Take first 200 characters and try to end at a word boundary
         if clean_text.len() <= 200 {
             Some(clean_text)
@@ -59,29 +57,30 @@ impl Service {
         id: Uuid,
         data: &mut FormDTO<'_>,
     ) -> Result<post::Model, DbErr> {
-        log::info!("Creating new blog post: title='{}', author_id={}, action={:?}", 
-                   data.title, id, data.action);
-        
+        log::info!(
+            "Creating new blog post: title='{}', author_id={}, action={:?}",
+            data.title,
+            id,
+            data.action
+        );
+
         log::debug!("Converting markdown to HTML");
         let text = markdown::to_html(data.text.as_str());
         let excerpt = Self::generate_excerpt(&data.text, data.excerpt.clone());
         let post_id = BaseService::generate_id();
-        
+
         log::debug!("Generated post ID: {}", post_id);
-        
+
         // Handle file upload
         let fid = BaseService::generate_id().to_string();
         let path = if let Some(ref mut file) = data.file {
             if let Some(name) = file.name() {
                 let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
                 log::debug!("Uploading file to: {}", path);
-                file
-                    .copy_to(path.clone())
-                    .await
-                    .map_err(|e| {
-                        log::error!("File upload failed: {}", e);
-                        DbErr::Custom(e.to_string())
-                    })?;
+                file.copy_to(path.clone()).await.map_err(|e| {
+                    log::error!("File upload failed: {}", e);
+                    DbErr::Custom(e.to_string())
+                })?;
                 log::debug!("File uploaded successfully");
                 Some(path)
             } else {
@@ -112,7 +111,7 @@ impl Service {
             Some("publish") => {
                 log::debug!("Publishing post immediately");
                 Some(false)
-            },
+            }
             _ => {
                 log::debug!("Saving as draft");
                 Some(true)
@@ -140,15 +139,26 @@ impl Service {
 
         // Start YouTube download if URL was provided
         if let Some(ref url) = youtube_url {
-            log::info!("Starting YouTube download for post {} with URL: {}", result.id, url);
+            log::info!(
+                "Starting YouTube download for post {} with URL: {}",
+                result.id,
+                url
+            );
             let youtube_service = YoutubeDownloadService::new();
-            if let Err(e) = youtube_service.start_download(db, app_config, result.id, url.clone()).await {
+            if let Err(e) = youtube_service
+                .start_download(db, app_config, result.id, url.clone())
+                .await
+            {
                 log::error!("Failed to start YouTube download: {}", e);
                 // Note: Error handling is now managed by the background job system
             }
         }
-        
-        log::info!("Blog post created successfully: {} ({})", result.title, result.id);
+
+        log::info!(
+            "Blog post created successfully: {} ({})",
+            result.title,
+            result.id
+        );
         Ok(result)
     }
 
@@ -184,7 +194,7 @@ impl Service {
         let mut p: post::ActiveModel = BaseService::handle_not_found(result, "Post")?.into();
         let text = markdown::to_html(data.text.as_str());
         let excerpt = Self::generate_excerpt(&data.text, data.excerpt);
-        
+
         // Handle draft/publish action if provided
         if let Some(action) = &data.action {
             match action.as_str() {
@@ -193,22 +203,19 @@ impl Service {
                 _ => {} // Keep existing draft status
             }
         }
-        
+
         // Handle file upload
         if let Some(ref mut file) = data.file {
             if let Some(name) = file.name() {
                 let fid = BaseService::generate_id().to_string();
                 let path = format!("{}/{}_{}.webm", app_config.data_path, fid, name);
                 log::debug!("Uploading file to: {}", path);
-                file
-                    .copy_to(path.clone())
-                    .await
-                    .map_err(|e| {
-                        log::error!("File upload failed: {}", e);
-                        DbErr::Custom(e.to_string())
-                    })?;
+                file.copy_to(path.clone()).await.map_err(|e| {
+                    log::error!("File upload failed: {}", e);
+                    DbErr::Custom(e.to_string())
+                })?;
                 log::debug!("File uploaded successfully");
-                
+
                 // Set the file path and update the post
                 p.path = Set(Some(path));
                 p.title = Set(data.title.to_owned());
@@ -217,32 +224,35 @@ impl Service {
                 return p.update(db).await;
             }
         }
-        
+
         // Handle YouTube URL update
         if let Some(ref url) = data.youtube_url {
             if !url.trim().is_empty() && YoutubeDownloadService::is_valid_youtube_url(url) {
                 log::info!("YouTube URL updated for post {}: {}", id, url);
-                
+
                 // Update the post first
                 p.title = Set(data.title.to_owned());
                 p.text = Set(text);
                 p.excerpt = Set(excerpt);
                 let updated_post = p.update(db).await?;
-                
+
                 // Start YouTube download (this will create a new background job)
                 let youtube_service = YoutubeDownloadService::new();
-                if let Err(e) = youtube_service.start_download(db, app_config, updated_post.id, url.clone()).await {
+                if let Err(e) = youtube_service
+                    .start_download(db, app_config, updated_post.id, url.clone())
+                    .await
+                {
                     log::error!("Failed to start YouTube download: {}", e);
                     // Error handling is now managed by the background job system
                 }
-                
+
                 return Ok(updated_post);
             } else if !url.trim().is_empty() {
                 log::warn!("Invalid YouTube URL provided for post {}: {}", id, url);
                 return Err(DbErr::Custom("Invalid YouTube URL format".to_string()));
             }
         }
-        
+
         p.title = Set(data.title.to_owned());
         p.text = Set(text);
         p.excerpt = Set(excerpt);
@@ -265,7 +275,7 @@ impl Service {
             .first(db)
             .await?;
         let mut p: post::ActiveModel = BaseService::handle_not_found(result, "Post")?.into();
-        
+
         p.draft = Set(Some(false));
         p.date_published = Set(Local::now().naive_local());
         p.update(db).await
@@ -340,7 +350,8 @@ impl Service {
         page: Option<u64>,
         page_size: Option<u64>,
     ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
-        self.paginate_with_title_include_drafts(db, page, page_size, false).await
+        self.paginate_with_title_include_drafts(db, page, page_size, false)
+            .await
     }
 
     pub async fn paginate_with_title_include_drafts(
@@ -352,9 +363,14 @@ impl Service {
     ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
         let page = page.unwrap_or(1);
         let page_size = page_size.unwrap_or(DEFAULT_PAGE_SIZE);
-        
-        log::debug!("Paginating blog posts: page={}, page_size={}, include_drafts={}", page, page_size, include_drafts);
-        
+
+        log::debug!(
+            "Paginating blog posts: page={}, page_size={}, include_drafts={}",
+            page,
+            page_size,
+            include_drafts
+        );
+
         if page == 0 {
             log::error!("Invalid page number: 0");
             return Err(DbErr::Custom("Page number cannot be zero".to_owned()));
@@ -363,33 +379,33 @@ impl Service {
             log::error!("Invalid page size: 0");
             return Err(DbErr::Custom("Page size cannot be zero".to_owned()));
         }
-        
+
         let mut query = Post::find()
             .select_only()
             .column(post::Column::Id)
             .column(post::Column::Title)
             .column(post::Column::SeqId)
             .column(post::Column::Draft);
-        
+
         if !include_drafts {
             log::debug!("Filtering out draft posts");
             query = query.filter(post::Column::Draft.eq(false));
         }
-        
+
         let paginator = query
             .column(post::Column::Excerpt)
             .filter(post::Column::Draft.eq(false))
             .order_by_desc(post::Column::DatePublished)
             .into_partial_model()
             .paginate(db, page_size);
-            
+
         let num_pages = paginator.num_pages().await.map_err(|e| {
             log::error!("Failed to get page count: {}", e);
             e
         })?;
-        
+
         log::debug!("Fetching page {} of {} pages", page, num_pages);
-        
+
         paginator
             .fetch_page(page - 1)
             .await
@@ -402,7 +418,7 @@ impl Service {
                 (p, page, page_size, num_pages)
             })
     }
-    
+
     pub async fn paginate_posts_by_tag(
         &self,
         db: &DbConn,
@@ -410,9 +426,10 @@ impl Service {
         page: Option<u64>,
         page_size: Option<u64>,
     ) -> Result<(Vec<PostTitleResult>, u64, u64, u64), DbErr> {
-        self.paginate_posts_by_tag_include_drafts(db, tag_id, page, page_size, false).await
+        self.paginate_posts_by_tag_include_drafts(db, tag_id, page, page_size, false)
+            .await
     }
-    
+
     pub async fn paginate_posts_by_tag_include_drafts(
         &self,
         db: &DbConn,
@@ -429,7 +446,7 @@ impl Service {
         if page_size == 0 {
             return Err(DbErr::Custom("Page size cannot be zero".to_owned()));
         }
-        
+
         // Join posts with post_tag to filter by tag_id
         let mut query = Post::find()
             .select_only()
@@ -440,11 +457,11 @@ impl Service {
             .column(post::Column::Excerpt)
             .join(JoinType::InnerJoin, post::Relation::PostTag.def())
             .filter(post_tag::Column::TagId.eq(tag_id));
-            
+
         if !include_drafts {
             query = query.filter(post::Column::Draft.eq(false));
         }
-        
+
         let paginator = query
             .order_by_desc(post::Column::DatePublished)
             .into_partial_model()
@@ -463,7 +480,7 @@ impl Service {
         limit: Option<u64>,
     ) -> Result<Vec<post::Model>, DbErr> {
         let limit = limit.unwrap_or(20); // Default to 20 recent posts
-        
+
         post::Entity::query()
             .where_eq(post::Column::Draft, false)
             .order_desc(post::Column::DatePublished)
@@ -483,7 +500,7 @@ impl Service {
     ) -> Result<(Vec<models::dto::PostSearchResult>, u64, u64, u64), DbErr> {
         use models::dto::PostSearchResult;
         use sea_orm::Statement;
-        
+
         let page = page.unwrap_or(1);
         let page_size = page_size.unwrap_or(DEFAULT_PAGE_SIZE);
         if page == 0 {
@@ -492,23 +509,23 @@ impl Service {
         if page_size == 0 {
             return Err(DbErr::Custom("Page size cannot be zero".to_owned()));
         }
-        
+
         if query.trim().is_empty() {
             return Ok((vec![], 0, page_size, 0));
         }
 
         let offset = (page - 1) * page_size;
-        
+
         // Sanitize the query - escape special characters and prepare for tsquery
         let tsquery = Self::prepare_tsquery(query);
-        
+
         // Build the search SQL with ranking and headline generation
         let draft_filter = if include_drafts {
             ""
         } else {
             "AND (draft = false OR draft IS NULL)"
         };
-        
+
         let search_sql = format!(
             r#"
             SELECT 
@@ -530,7 +547,7 @@ impl Service {
             "#,
             draft_filter
         );
-        
+
         let count_sql = format!(
             r#"
             SELECT COUNT(*) as count
@@ -545,16 +562,16 @@ impl Service {
         let count_stmt = Statement::from_sql_and_values(
             sea_orm::DatabaseBackend::Postgres,
             &count_sql,
-            vec![tsquery.clone().into()]
+            vec![tsquery.clone().into()],
         );
-        
+
         let count_result: Option<sea_orm::QueryResult> = db.query_one(count_stmt).await?;
         let total_count = if let Some(row) = count_result {
             row.try_get::<i64>("", "count")? as u64
         } else {
             0
         };
-        
+
         let num_pages = (total_count + page_size - 1) / page_size;
 
         // Execute search query
@@ -564,12 +581,12 @@ impl Service {
             vec![
                 tsquery.into(),
                 (page_size as i64).into(),
-                (offset as i64).into()
-            ]
+                (offset as i64).into(),
+            ],
         );
-        
+
         let search_results = db.query_all(search_stmt).await?;
-        
+
         // Convert results to PostSearchResult structs
         let mut results = Vec::new();
         for row in search_results {
@@ -598,7 +615,7 @@ impl Service {
                     .chars()
                     .filter(|c| c.is_alphanumeric() || *c == '-' || *c == '_')
                     .collect::<String>();
-                
+
                 if cleaned.is_empty() {
                     String::new()
                 } else {
@@ -653,7 +670,7 @@ impl Service {
         limit: Option<u64>,
     ) -> Result<Vec<models::post::Model>, DbErr> {
         let limit = limit.unwrap_or(10);
-        
+
         models::post::Entity::query()
             .where_eq(models::post::Column::Draft, false)
             .order_desc(models::post::Column::DatePublished)
@@ -685,7 +702,7 @@ impl Service {
     /// let published_posts = blog_service
     ///     .find_posts_by_author_qb(&db, author_id, false)
     ///     .await?;
-    /// 
+    ///
     /// // Get all posts including drafts
     /// let all_posts = blog_service
     ///     .find_posts_by_author_qb(&db, author_id, true)
@@ -704,8 +721,8 @@ impl Service {
         author_id: Uuid,
         include_drafts: bool,
     ) -> Result<Vec<models::post::Model>, DbErr> {
-        let mut query = models::post::Entity::query()
-            .where_eq(models::post::Column::AccountId, author_id);
+        let mut query =
+            models::post::Entity::query().where_eq(models::post::Column::AccountId, author_id);
 
         if !include_drafts {
             query = query.where_eq(models::post::Column::Draft, false);
@@ -760,7 +777,7 @@ impl Service {
         limit: Option<u64>,
     ) -> Result<Vec<models::post::Model>, DbErr> {
         let limit = limit.unwrap_or(10);
-        
+
         models::post::Entity::query()
             .like(models::post::Column::Title, search_term)
             .where_eq(models::post::Column::Draft, false)
