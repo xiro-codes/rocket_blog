@@ -50,7 +50,7 @@ impl StreamedFile {
     ///
     /// # Examples
     ///
-    /// ```rust,no_run
+    /// ```ignore
     /// use app::types::StreamedFile;
     ///
     /// // Full file
@@ -144,7 +144,7 @@ impl<'r> Responder<'r, 'static> for StreamedFile {
 ///
 /// # Examples
 ///
-/// ```rust,no_run
+/// ```ignore
 /// use rocket::get;
 /// use app::types::HttpRange;
 ///

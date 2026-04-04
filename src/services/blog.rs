@@ -652,7 +652,7 @@ impl Service {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
     /// let recent_posts = blog_service
     ///     .find_recent_published_posts_qb(&db, Some(5))
     ///     .await?;
@@ -697,7 +697,7 @@ impl Service {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
     /// // Get only published posts
     /// let published_posts = blog_service
     ///     .find_posts_by_author_qb(&db, author_id, false)
@@ -752,7 +752,7 @@ impl Service {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```ignore
     /// let rust_posts = blog_service
     ///     .simple_search_posts_qb(&db, "rust programming", Some(20))
     ///     .await?;

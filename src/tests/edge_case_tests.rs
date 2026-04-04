@@ -192,9 +192,11 @@ mod edge_case_tests {
         let regular_uuid = Uuid::new_v4();
         
         // Test AuthenticatedUser with different UUIDs
-        let auth_zero = AuthenticatedUser { token: zero_uuid };
-        let auth_max = AuthenticatedUser { token: max_uuid };
-        let auth_regular = AuthenticatedUser { token: regular_uuid };
+        let account_id = Uuid::new_v4();
+        let username = "test".to_string();
+        let auth_zero = AuthenticatedUser { token: zero_uuid, account_id, username: username.clone() };
+        let auth_max = AuthenticatedUser { token: max_uuid, account_id, username: username.clone() };
+        let auth_regular = AuthenticatedUser { token: regular_uuid, account_id, username: username.clone() };
         
         assert_eq!(auth_zero.token, zero_uuid);
         assert_eq!(auth_max.token, max_uuid);

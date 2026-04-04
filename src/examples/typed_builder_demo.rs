@@ -47,7 +47,7 @@
 // of the CodeIgniter3-style query builder for Sea-ORM
 
 use models::{post, post::Column};
-use sea_orm::{DbConn, Order};
+use sea_orm::{DbConn, Order, EntityTrait, ColumnTrait, QueryFilter, QueryOrder, QuerySelect};
 use uuid::Uuid;
 
 /// This example shows how the query builder provides:
@@ -201,12 +201,12 @@ impl ModernBlogService {
     }
 }
 
-/// Key benefits demonstrated:
-/// 
-/// 1. **Type Safety**: All column references are checked at compile time
-/// 2. **Fluent Interface**: Method chaining creates readable query construction
-/// 3. **Familiar API**: Mirrors CodeIgniter 3's Active Record pattern
-/// 4. **Zero Runtime Cost**: All code is generated at compile time
-/// 5. **Sea-ORM Integration**: Works seamlessly with existing Sea-ORM code
-/// 6. **Automatic Generation**: Just add #[derive(QueryBuilder)] to your model
-/// 7. **Maintainable**: Changes to the entity automatically update the builder
+// Key benefits demonstrated:
+// 
+// 1. **Type Safety**: All column references are checked at compile time
+// 2. **Fluent Interface**: Method chaining creates readable query construction
+// 3. **Familiar API**: Mirrors CodeIgniter 3's Active Record pattern
+// 4. **Zero Runtime Cost**: All code is generated at compile time
+// 5. **Sea-ORM Integration**: Works seamlessly with existing Sea-ORM code
+// 6. **Automatic Generation**: Just add #[derive(QueryBuilder)] to your model
+// 7. **Maintainable**: Changes to the entity automatically update the builder

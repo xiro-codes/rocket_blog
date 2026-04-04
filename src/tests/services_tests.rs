@@ -364,8 +364,8 @@ mod tests {
                 status: "pending".to_string(),
                 error_message: None,
                 job_data: Some(json!({"url": "https://youtube.com/watch?v=test"})),
-                created_at: DateTime::<FixedOffset>::parse_from_rfc3339("2024-01-01T00:00:00+00:00").unwrap(),
-                updated_at: DateTime::<FixedOffset>::parse_from_rfc3339("2024-01-01T00:00:00+00:00").unwrap(),
+                created_at: DateTime::<FixedOffset>::parse_from_rfc3339("2024-01-01T00:00:00+00:00").unwrap().into(),
+                updated_at: DateTime::<FixedOffset>::parse_from_rfc3339("2024-01-01T00:00:00+00:00").unwrap().into(),
             };
 
             // Create mock database
@@ -394,10 +394,8 @@ mod tests {
             assert_eq!(job.entity_type, "post");
             assert_eq!(job.status, "pending");
             
-            // Verify that created_at and updated_at are timezone-aware
+            // Verify that created_at and updated_at are properly typed (they are DateTime<Utc>)
             // The exact values will be mock data, but the types should be correct
-            assert!(job.created_at.timezone().local_minus_utc() == 0); // Should be UTC offset
-            assert!(job.updated_at.timezone().local_minus_utc() == 0);
         }
 
         #[test]

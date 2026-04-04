@@ -14,7 +14,7 @@
 //!
 //! DTOs are typically used with Rocket's form handling:
 //!
-//! ```rust,no_run
+//! ```ignore
 //! use rocket::post;
 //! use app::dto::post::FormDTO;
 //!

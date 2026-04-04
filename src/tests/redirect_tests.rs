@@ -1,18 +1,6 @@
 #[cfg(test)]
 mod redirect_tests {
-    use crate::catch_default;
-    use rocket::response::Redirect;
 
-    #[test]
-    fn test_catch_default_redirects_to_root() {
-        let redirect = catch_default();
-        // Verify that catch_default redirects to "/"
-        // Note: We can't directly test the redirect URI without additional setup
-        // but we can verify the redirect is created
-        
-        // This test ensures catch_default is working
-        assert!(true); // Placeholder - actual testing would require rocket test client
-    }
 
     #[test]
     fn test_route_pattern_analysis() {

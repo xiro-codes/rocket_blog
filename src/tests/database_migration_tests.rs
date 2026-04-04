@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use sea_orm::{Database, DatabaseConnection, DatabaseBackend};
+    use sea_orm::{Database, DatabaseConnection, DatabaseBackend, ConnectionTrait};
     use migrations::{Migrator, MigratorTrait};
 
     async fn test_migrations_with_backend(url: &str, expected_backend: DatabaseBackend) -> Result<(), Box<dyn std::error::Error>> {
@@ -14,7 +14,7 @@ mod tests {
         Migrator::up(&db, None).await?;
         
         // Verify basic table creation by checking if we can query the account table
-        let result = db.execute_unprepared("SELECT COUNT(*) FROM account").await;
+        let result: Result<sea_orm::ExecResult, sea_orm::DbErr> = db.execute_unprepared("SELECT COUNT(*) FROM account").await;
         assert!(result.is_ok(), "Should be able to query account table after migrations");
         
         // Test migration rollback

@@ -30,6 +30,7 @@ mod timezone_tests {
             description: Some("Test work session".to_string()),
             project: Some("Test project".to_string()),
             is_active: false,
+            tips: None,
             created_at: utc_start_time,
             updated_at: utc_end_time,
         };

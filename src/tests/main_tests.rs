@@ -1,16 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use crate::{catch_default, should_filter_log, setup_logger};
+    use crate::{should_filter_log, setup_logger};
     use log::Metadata;
-    use rocket::response::Redirect;
-
-    #[test]
-    fn test_catch_default() {
-        let redirect = catch_default();
-        // Test that redirect is created successfully - we can't easily test the location
-        // without more complex setup since Redirect doesn't expose location() publicly
-        assert!(true); // Placeholder showing that redirect was created successfully
-    }
 
     #[test]
     fn test_unified_log_filter() {

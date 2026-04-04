@@ -253,7 +253,7 @@ macro_rules! create_controller_registry {
 #[macro_export]
 macro_rules! auth_required {
     ($jar:expr) => {
-        match $crate::controllers::ControllerHelpers::require_auth($jar) {
+        match <$crate::controllers::ControllerBase as $crate::controllers::ControllerHelpers>::require_auth($jar) {
             Ok(token) => token,
             Err(status) => return Err(status),
         }
@@ -264,7 +264,7 @@ macro_rules! auth_required {
 #[macro_export]
 macro_rules! admin_required {
     ($conn:expr, $coordinator:expr, $jar:expr) => {
-        if let Err(status) = $crate::controllers::AdminController::require_admin_auth($conn, $coordinator, $jar).await {
+        if let Err(status) = <$crate::controllers::ControllerBase as $crate::controllers::AdminController>::require_admin_auth($conn, $coordinator, $jar).await {
             return Err(status);
         }
     };

@@ -2,7 +2,7 @@
 mod tests {
     use crate::registry::{ServiceRegistry, ControllerRegistry};
     use crate::services::{AuthService, BlogService, CommentService, TagService, AIProviderService, OpenAIService, OllamaService, ReactionService, SettingsService, CoordinatorService};
-    use crate::controllers::{IndexController, AuthController, BlogController, CommentController, FeedController, SettingsController};
+    use crate::controllers::{IndexController, AuthController, BlogController, CommentController, FeedController};
     use rocket::{Build, Rocket, fairing::Fairing};
 
     #[test]
@@ -121,7 +121,6 @@ mod tests {
         let blog_controller = BlogController::new("/blog".to_owned());
         let comment_controller = CommentController::new("/comment".to_owned());
         let feed_controller = FeedController::new("/feed".to_owned());
-        let settings_controller = SettingsController::new("/settings".to_owned());
         
         // All controllers should be created successfully
         assert_eq!(std::mem::size_of_val(&index_controller), std::mem::size_of::<IndexController>());
@@ -129,7 +128,6 @@ mod tests {
         assert_eq!(std::mem::size_of_val(&blog_controller), std::mem::size_of::<BlogController>());
         assert_eq!(std::mem::size_of_val(&comment_controller), std::mem::size_of::<CommentController>());
         assert_eq!(std::mem::size_of_val(&feed_controller), std::mem::size_of::<FeedController>());
-        assert_eq!(std::mem::size_of_val(&settings_controller), std::mem::size_of::<SettingsController>());
     }
 
     #[test]

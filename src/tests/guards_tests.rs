@@ -12,9 +12,12 @@ mod tests {
     fn test_authenticated_user_struct_creation() {
         // Test AuthenticatedUser struct creation
         let token = Uuid::new_v4();
-        let auth_user = AuthenticatedUser { token };
+        let account_id = Uuid::new_v4();
+        let auth_user = AuthenticatedUser { token, account_id, username: "test".to_string() };
         
         assert_eq!(auth_user.token, token);
+        assert_eq!(auth_user.account_id, account_id);
+        assert_eq!(auth_user.username, "test");
     }
 
     #[test]
