@@ -998,4 +998,4 @@ fn routes() -> Vec<Route> {
     ]
 }
 
-crate::impl_controller_routes!(Controller, "Blog Controller", routes());
+crate::impl_controller_routes!(Controller, "Blog2 Controller", routes());

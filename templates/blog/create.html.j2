@@ -1,105 +1,106 @@
 {% extends "base" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-8">
-	<header class="mb-8 text-center">
-		<h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Create Article</h1>
+<div class="max-w-4xl mx-auto py-8 animate-fade-in-up">
+	<header class="mb-12 text-center">
+		<h1 class="text-5xl font-black text-white tracking-tighter">Initialize Sequence</h1>
+		<p class="text-hypr-cyan font-mono mt-4">>> Create New Article</p>
 	</header>
 
-	<hr class="border-gray-200 dark:border-gray-700 my-6">
+	<div class="glass-panel rounded-3xl border border-white/10 p-8 md:p-12 relative overflow-hidden shadow-2xl shadow-hypr-cyan/5">
+		<!-- Glow background -->
+		<div class="absolute top-0 right-0 w-64 h-64 bg-hypr-cyan/10 blur-[80px] -z-10 rounded-full"></div>
+		<div class="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 blur-[80px] -z-10 rounded-full"></div>
 
-	<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
-		<form action="{{form_url}}" method="post" enctype="multipart/form-data" class="space-y-6">
-			<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">New Post Configuration</h3>
+		<form action="{{form_url}}" method="post" enctype="multipart/form-data" class="space-y-8 relative z-10">
 			
-			<div class="space-y-2">
-				<label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title:</label>
-				<div class="flex gap-2">
-					<input type="text" name="title" id="title" class="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Enter post title..." />
+			<!-- Title -->
+			<div class="space-y-3">
+				<label for="title" class="block text-sm font-bold text-white tracking-widest uppercase">Post Title</label>
+				<div class="flex flex-col sm:flex-row gap-3">
+					<input type="text" name="title" id="title" class="flex-1 px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-600" placeholder="Enter sequence name..." />
 					{% if ai_available %}
-					<button type="button" id="generate-content-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-md font-medium transition shadow-sm whitespace-nowrap">✨ Generate</button>
+					<button type="button" id="generate-content-btn" class="glow-btn px-6 py-4 rounded-xl bg-hypr-dark border border-hypr-cyan/50 text-white font-medium transition-transform hover:scale-[1.02] whitespace-nowrap flex items-center gap-2">
+						<span class="text-hypr-cyan">✨</span> Generate
+					</button>
 					{% endif %}
 				</div>
 			</div>
 			
+			<!-- AI Prompt -->
 			{% if ai_available %}
-			<div id="ai-prompt-section" style="display: none;" class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg border border-indigo-100 dark:border-indigo-800">
-				<label for="ai-prompt" class="block text-sm font-medium text-indigo-900 dark:text-indigo-300 mb-1">AI Prompt (Optional):</label>
-				<input type="text" id="ai-prompt" class="w-full px-4 py-2 bg-white dark:bg-gray-900 border border-indigo-200 dark:border-indigo-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="Additional context for AI generation..." />
-				<p class="mt-1 text-xs text-indigo-600 dark:text-indigo-400">Provide additional context to guide AI content generation</p>
+			<div id="ai-prompt-section" style="display: none;" class="bg-hypr-cyan/5 border border-hypr-cyan/20 p-5 rounded-xl backdrop-blur-md">
+				<label for="ai-prompt" class="block text-xs font-mono text-hypr-cyan mb-2">>> AI Context Prompt (Optional)</label>
+				<input type="text" id="ai-prompt" class="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-hypr-cyan transition-all placeholder:text-slate-600" placeholder="Provide additional parameters..." />
 			</div>
 			{% endif %}
 			
-			<div class="space-y-2">
-				<label for="excerpt" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Excerpt:</label>
-				<div class="flex flex-col sm:flex-row gap-2">
-					<textarea name="excerpt" id="excerpt" rows="3" class="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-y" 
-				          placeholder="Brief summary of the post (optional - will be auto-generated if left empty)"></textarea>
+			<!-- Excerpt -->
+			<div class="space-y-3">
+				<label for="excerpt" class="block text-sm font-bold text-white tracking-widest uppercase">Excerpt</label>
+				<div class="flex flex-col gap-3">
+					<textarea name="excerpt" id="excerpt" rows="3" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-600 resize-y" placeholder="Brief summary (auto-generated if empty)"></textarea>
 					{% if ai_available %}
-					<button type="button" id="generate-excerpt-btn" class="sm:self-start bg-white dark:bg-gray-800 border border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-4 py-2 rounded-md font-medium transition shadow-sm whitespace-nowrap">✨ Generate Excerpt</button>
+					<button type="button" id="generate-excerpt-btn" class="self-start px-5 py-2 rounded-lg bg-white/5 border border-white/10 hover:border-hypr-cyan text-slate-300 hover:text-white transition-all text-sm font-medium flex items-center gap-2">
+						<span class="text-hypr-cyan">✨</span> Auto-Excerpt
+					</button>
 					{% endif %}
 				</div>
-				<p class="text-xs text-gray-500 dark:text-gray-400">Optional short summary that will appear in post listings. If left empty, it will be auto-generated from the content.</p>
 			</div>
 			
-			<div class="space-y-2">
-				<label for="text" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Content:</label>
-				<div class="rounded-md shadow-sm bg-white dark:bg-gray-900">
-					<textarea name="text" id="text" rows="12" class="w-full" placeholder="Write your post content here..."></textarea>
+			<!-- Content -->
+			<div class="space-y-3">
+				<label for="text" class="block text-sm font-bold text-white tracking-widest uppercase">Main Payload</label>
+				<div class="rounded-xl overflow-hidden border border-white/10 bg-black/50 focus-within:border-hypr-cyan focus-within:ring-1 focus-within:ring-hypr-cyan transition-all">
+					<textarea name="text" id="text" rows="12" class="w-full bg-transparent text-white" placeholder=""></textarea>
 				</div>
 			</div>
 			
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700 relative">
-				<div class="space-y-2">
-					<label for="file" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Media File:</label>
-					<input type="file" name="file" id="file" class="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm" accept="video/*" />
+			<!-- Media -->
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 rounded-2xl bg-white/5 border border-white/10 relative">
+				<div class="space-y-3">
+					<label for="file" class="block text-sm font-bold text-white tracking-widest uppercase">Upload Media</label>
+					<input type="file" name="file" id="file" class="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-slate-300 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 transition-all cursor-pointer" accept="video/*" />
 				</div>
 				
 				<div class="hidden md:flex absolute inset-y-0 left-1/2 items-center justify-center -translate-x-1/2">
-					<span class="bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs font-bold px-2 py-1 rounded-full uppercase">OR</span>
-				</div>
-				<div class="md:hidden flex justify-center py-2">
-					<span class="bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs font-bold px-2 py-1 rounded-full uppercase">OR</span>
+					<span class="bg-black text-hypr-cyan font-mono text-xs px-3 py-1 rounded-full border border-white/10">// OR //</span>
 				</div>
 				
-				<div class="space-y-2">
-					<label for="youtube_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">YouTube URL:</label>
-					<input type="url" name="youtube_url" id="youtube_url" class="w-full px-4 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
-					       placeholder="https://www.youtube.com/watch?v=..." />
-					<p class="text-xs text-gray-500 dark:text-gray-400">Provide a YouTube URL to download the video. The download will happen in the background.</p>
+				<div class="space-y-3">
+					<label for="youtube_url" class="block text-sm font-bold text-white tracking-widest uppercase">YouTube Link</label>
+					<input type="url" name="youtube_url" id="youtube_url" class="w-full px-5 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-600" placeholder="https://youtube.com/..." />
 				</div>
 			</div>
 			
-			<div class="space-y-2">
-				<label for="tags" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tags (comma-separated):</label>
-				<div class="flex flex-col sm:flex-row gap-2">
-					<input type="text" class="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" name="tags" id="tags" placeholder="e.g. rust, web development, tutorial">
+			<!-- Tags -->
+			<div class="space-y-3">
+				<label for="tags" class="block text-sm font-bold text-white tracking-widest uppercase">System Tags</label>
+				<div class="flex flex-col sm:flex-row gap-3">
+					<input type="text" name="tags" id="tags" class="flex-1 px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-600 font-mono text-sm" placeholder="rust, web, backend">
 					{% if ai_available %}
-					<button type="button" id="generate-tags-btn" class="sm:self-start bg-white dark:bg-gray-800 border border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-4 py-2 rounded-md font-medium transition shadow-sm whitespace-nowrap">✨ Generate Tags</button>
+					<button type="button" id="generate-tags-btn" class="glow-btn px-6 py-4 rounded-xl bg-hypr-dark border border-hypr-cyan/50 text-white font-medium transition-transform hover:scale-[1.02] whitespace-nowrap flex items-center gap-2">
+						<span class="text-hypr-cyan">✨</span> Gen Tags
+					</button>
 					{% endif %}
 				</div>
-				<p class="text-xs text-gray-500 dark:text-gray-400">Separate multiple tags with commas</p>
 			</div>
 			
-			<div class="flex flex-col sm:flex-row justify-center gap-4 pt-6 border-t border-gray-100 dark:border-gray-700 mt-8">
-				<button type="submit" name="action" value="draft" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-2.5 px-6 rounded-md transition shadow-sm">Save as Draft</button>
-				<button type="submit" name="action" value="publish" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-8 rounded-md transition shadow-sm shadow-blue-500/30">Publish Post</button>
+			<!-- Actions -->
+			<div class="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-white/10">
+				<button type="submit" name="action" value="draft" class="px-8 py-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium transition-all">Save Draft</button>
+				<button type="submit" name="action" value="publish" class="glow-btn px-10 py-3 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)]">Publish Sequence</button>
 			</div>
 		</form>
 	</div>
 </div>
 
 {% if flash %}
-<div class="fixed bottom-4 right-4 bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 rounded shadow-lg transition-opacity duration-300 z-50">
-	<div class="flex items-center">
-		<svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-			<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-		</svg>
-		<p class="font-medium">{{ flash[1] }}</p>
-	</div>
+<div class="fixed bottom-6 right-6 p-4 rounded-xl glass-panel border border-red-500/50 text-white shadow-[0_0_30px_rgba(239,68,68,0.2)] z-50 animate-fade-in-up">
+	<p class="font-mono text-sm text-red-400 mb-1">// SYSTEM NOTICE</p>
+	<p>{{ flash[1] }}</p>
 </div>
 {% endif %}
-
 {% endblock %}
 
 {% block script %}
@@ -109,29 +110,18 @@ document.addEventListener('DOMContentLoaded', function() {
 		element: document.getElementById('text'),
 		spellChecker: false,
 		autofocus: false,
-		placeholder: 'Write your post content here in Markdown...',
+		placeholder: 'Enter markdown payload...',
 		toolbar: [
 			'bold', 'italic', 'heading', '|',
 			'quote', 'unordered-list', 'ordered-list', '|',
 			'link', 'image', '|',
 			'code', 'table', '|',
-			'preview', 'side-by-side', 'fullscreen', '|',
-			'guide'
+			'preview', 'side-by-side', 'fullscreen'
 		],
-		status: ['autosave', 'lines', 'words', 'cursor'],
-		renderingConfig: {
-			singleLineBreaks: false,
-			codeSyntaxHighlighting: true,
-		},
-		insertTexts: {
-			horizontalRule: ["", "\n\n-----\n\n"],
-			image: ["![](http://", ")"],
-			link: ["[", "](http://)"],
-			table: ["", "\n\n| Column 1 | Column 2 | Column 3 |\n| -------- | -------- | -------- |\n| Text     | Text     | Text     |\n\n"],
-		}
+		status: ['lines', 'words', 'cursor'],
 	});
 
-	// Handle file upload vs YouTube URL mutual exclusion
+	// Handle file vs youtube mutual exclusion
 	const fileInput = document.getElementById('file');
 	const youtubeInput = document.getElementById('youtube_url');
 
@@ -140,12 +130,10 @@ document.addEventListener('DOMContentLoaded', function() {
 			if (this.files && this.files.length > 0) {
 				youtubeInput.disabled = true;
 				youtubeInput.value = '';
-				youtubeInput.placeholder = 'File upload selected - clear file to enable YouTube URL';
-				youtubeInput.classList.add('opacity-50', 'bg-gray-100');
+				youtubeInput.classList.add('opacity-50', 'cursor-not-allowed');
 			} else {
 				youtubeInput.disabled = false;
-				youtubeInput.placeholder = 'https://www.youtube.com/watch?v=...';
-				youtubeInput.classList.remove('opacity-50', 'bg-gray-100');
+				youtubeInput.classList.remove('opacity-50', 'cursor-not-allowed');
 			}
 		});
 
@@ -160,8 +148,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 
-	// AI Generation functionality (only if any AI service is available)
 	{% if ai_available %}
+	// AI Generation scripts...
 	const titleInput = document.getElementById('title');
 	const promptInput = document.getElementById('ai-prompt');
 	const promptSection = document.getElementById('ai-prompt-section');
@@ -171,144 +159,88 @@ document.addEventListener('DOMContentLoaded', function() {
 	const excerptTextarea = document.getElementById('excerpt');
 	const tagsInput = document.getElementById('tags');
 
-	// Show/hide AI prompt section when title is entered
 	if (titleInput && promptSection) {
 		titleInput.addEventListener('input', function() {
-			if (this.value.trim()) {
-				promptSection.style.display = 'block';
-			} else {
-				promptSection.style.display = 'none';
-			}
+			promptSection.style.display = this.value.trim() ? 'block' : 'none';
 		});
 	}
 
-	// Generate content with AI
 	if (generateContentBtn) {
 		generateContentBtn.addEventListener('click', async function() {
 			const title = titleInput.value.trim();
-			if (!title) {
-				alert('Please enter a title first');
-				return;
-			}
+			if (!title) return alert('Enter a title first');
 
 			const prompt = promptInput ? promptInput.value.trim() : null;
 			this.disabled = true;
-			this.textContent = '🤖 Generating...';
-			this.classList.add('opacity-75', 'cursor-wait');
+			this.innerHTML = '<span class="animate-spin inline-block">↻</span> Processing';
 
 			try {
 				const response = await fetch('/blog/generate-content', {
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						type: 'content',
-						title: title,
-						prompt: prompt
-					})
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ type: 'content', title: title, prompt: prompt })
 				});
-
 				const data = await response.json();
-				
-				if (data.success) {
-					easyMDE.value(data.content);
-				} else {
-					alert('Error generating content: ' + (data.error || 'Unknown error'));
-				}
-			} catch (error) {
-				alert('Error generating content: ' + error.message);
+				if (data.success) easyMDE.value(data.content);
+				else alert('Error: ' + (data.error || 'Unknown'));
+			} catch (e) {
+				alert('Error: ' + e.message);
 			} finally {
 				this.disabled = false;
-				this.textContent = '✨ Generate';
-				this.classList.remove('opacity-75', 'cursor-wait');
+				this.innerHTML = '<span class="text-hypr-cyan">✨</span> Generate';
 			}
 		});
 	}
 
-	// Generate excerpt with AI
 	if (generateExcerptBtn) {
 		generateExcerptBtn.addEventListener('click', async function() {
 			const content = easyMDE.value();
-			if (!content.trim()) {
-				alert('Please write some content first');
-				return;
-			}
+			if (!content.trim()) return alert('Enter content first');
 
 			this.disabled = true;
-			this.textContent = '🤖 Generating...';
-			this.classList.add('opacity-75', 'cursor-wait');
+			this.innerHTML = '<span class="animate-spin inline-block">↻</span> Processing';
 
 			try {
 				const response = await fetch('/blog/generate-content', {
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						type: 'excerpt',
-						content: content
-					})
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ type: 'excerpt', content: content })
 				});
-
 				const data = await response.json();
-				
-				if (data.success) {
-					excerptTextarea.value = data.excerpt;
-				} else {
-					alert('Error generating excerpt: ' + (data.error || 'Unknown error'));
-				}
-			} catch (error) {
-				alert('Error generating excerpt: ' + error.message);
+				if (data.success) excerptTextarea.value = data.excerpt;
+				else alert('Error: ' + (data.error || 'Unknown'));
+			} catch (e) {
+				alert('Error: ' + e.message);
 			} finally {
 				this.disabled = false;
-				this.textContent = '✨ Generate Excerpt';
-				this.classList.remove('opacity-75', 'cursor-wait');
+				this.innerHTML = '<span class="text-hypr-cyan">✨</span> Auto-Excerpt';
 			}
 		});
 	}
 
-	// Generate tags with AI
 	if (generateTagsBtn) {
 		generateTagsBtn.addEventListener('click', async function() {
 			const title = titleInput.value.trim();
 			const content = easyMDE.value();
-			
-			if (!title && !content.trim()) {
-				alert('Please enter a title or write some content first');
-				return;
-			}
+			if (!title && !content.trim()) return alert('Enter title or content');
 
 			this.disabled = true;
-			this.textContent = '🤖 Generating...';
-			this.classList.add('opacity-75', 'cursor-wait');
+			this.innerHTML = '<span class="animate-spin inline-block">↻</span> Processing';
 
 			try {
 				const response = await fetch('/blog/generate-content', {
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						type: 'tags',
-						title: title,
-						content: content
-					})
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ type: 'tags', title: title, content: content })
 				});
-
 				const data = await response.json();
-				
-				if (data.success) {
-					tagsInput.value = data.tags;
-				} else {
-					alert('Error generating tags: ' + (data.error || 'Unknown error'));
-				}
-			} catch (error) {
-				alert('Error generating tags: ' + error.message);
+				if (data.success) tagsInput.value = data.tags;
+				else alert('Error: ' + (data.error || 'Unknown'));
+			} catch (e) {
+				alert('Error: ' + e.message);
 			} finally {
 				this.disabled = false;
-				this.textContent = '✨ Generate Tags';
-				this.classList.remove('opacity-75', 'cursor-wait');
+				this.innerHTML = '<span class="text-hypr-cyan">✨</span> Gen Tags';
 			}
 		});
 	}

@@ -1,26 +1,28 @@
 {% extends "base" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-8">
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-center text-gray-900 dark:text-white tracking-tight mb-8">{{ title }}</h1>
+<div class="max-w-5xl mx-auto py-8 animate-fade-in-up">
+    <div class="mb-12">
+        <h1 class="text-5xl font-black text-center text-white tracking-tighter mb-8">{{ title }}</h1>
 
         <!-- Search Form -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
-            <form action="/blog/search" method="post" class="max-w-2xl mx-auto">
-                <h3 class="text-xl font-semibold text-center text-gray-900 dark:text-white mb-6">Search Posts</h3>
-                <div class="flex flex-col sm:flex-row gap-3">
+        <div class="glass-panel rounded-3xl border border-white/10 p-8 md:p-10 relative overflow-hidden shadow-2xl">
+            <!-- Glow background -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-hypr-cyan/5 blur-[80px] -z-10 rounded-full"></div>
+
+            <form action="/blog/search" method="post" class="max-w-3xl mx-auto relative z-10">
+                <div class="flex flex-col sm:flex-row gap-4">
                     <div class="flex-grow">
                         <input type="text"
-                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-lg"
+                               class="w-full px-6 py-4 bg-black/60 border border-white/10 rounded-2xl shadow-inner focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all text-lg text-white placeholder:text-slate-600"
                                name="query"
                                value="{{ search_query }}"
-                               placeholder="Search posts...">
+                               placeholder="Search parameters...">
                     </div>
                     <div>
                         <button type="submit"
-                                class="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm shadow-blue-500/30 transition text-lg">
-                            Search
+                                class="w-full sm:w-auto glow-btn px-10 py-4 bg-hypr-dark text-white font-bold rounded-2xl shadow-[0_0_20px_rgba(0,168,244,0.2)] hover:scale-105 transition-all text-lg border border-hypr-cyan/50">
+                            Query
                         </button>
                     </div>
                 </div>
@@ -31,34 +33,34 @@
     <!-- Search Results -->
     {% if search_query %}
         {% if results %}
-            <div class="space-y-6">
-                <div class="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <p class="text-gray-700 dark:text-gray-300 font-medium">
-                        Found <span class="text-blue-600 dark:text-blue-400 font-bold">{{ results | length }}</span> result(s)
+            <div class="space-y-8">
+                <div class="flex justify-between items-center glass-panel px-6 py-4 rounded-2xl border border-white/10 text-sm font-mono text-slate-400">
+                    <p>
+                        Discovered <span class="text-hypr-cyan font-bold text-lg">{{ results | length }}</span> artifact(s)
                     </p>
                     {% if num_pages > 1 %}
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Page {{ page }} of {{ num_pages }}
-                    </p>
+                    <p>Page {{ page }} / {{ num_pages }}</p>
                     {% endif %}
                 </div>
 
-                <div class="grid gap-6">
+                <div class="grid gap-8">
                     {% for post in results %}
-                    <article class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition p-6">
-                        <header class="mb-3">
-                            <h2 class="text-2xl font-bold mb-2">
-                                <a href="/blog/{{ post.seq_id }}" class="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition">
+                    <article class="group relative glass-panel rounded-3xl border border-white/5 hover:border-hypr-cyan/30 overflow-hidden hover:-translate-y-1 transition-all duration-500 p-8 shadow-xl">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-hypr-cyan to-hypr-teal opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500 rounded-3xl -z-10"></div>
+                        
+                        <header class="mb-4">
+                            <h2 class="text-3xl font-bold mb-3">
+                                <a href="/blog/{{ post.seq_id }}" class="text-white hover:text-hypr-cyan transition-colors focus:outline-none before:absolute before:inset-0">
                                     {{ post.title }}
                                 </a>
                             </h2>
-                            <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600">
-                                Relevance: {{ (post.rank * 100) | round(precision=1) }}%
+                            <div class="inline-flex items-center px-3 py-1 rounded-md text-xs font-mono bg-white/5 text-hypr-cyan border border-white/10">
+                                Match: {{ (post.rank * 100) | round(precision=1) }}%
                             </div>
                         </header>
 
-                        <!-- Highlighted excerpt or generated headline -->
-                        <div class="text-gray-600 dark:text-gray-400 mb-4 search-content">
+                        <!-- Highlighted excerpt -->
+                        <div class="text-slate-400 text-lg mb-6 leading-relaxed search-content line-clamp-3">
                             {% if post.headline %}
                                 <div class="search-headline">{{ post.headline | safe }}</div>
                             {% elif post.excerpt %}
@@ -66,8 +68,7 @@
                             {% endif %}
                         </div>
 
-                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                            <!-- Reaction counts -->
+                        <div class="flex items-center justify-between pt-6 border-t border-white/5">
                             {% set summary = false %}
                             {% for reaction_summary in reaction_summaries %}
                                 {% if reaction_summary.post_id == post.id %}
@@ -75,18 +76,18 @@
                                 {% endif %}
                             {% endfor %}
                             
-                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                            <div class="text-sm font-mono text-slate-500">
                                 {% if summary and summary.total_reactions > 0 %}
-                                    <span class="flex items-center gap-1">
-                                        👍 {{summary.total_reactions}} reaction{% if summary.total_reactions != 1 %}s{% endif %}
+                                    <span class="flex items-center gap-2">
+                                        <span class="text-hypr-cyan">~></span> {{summary.total_reactions}} Reaction{% if summary.total_reactions != 1 %}s{% endif %}
                                     </span>
                                 {% else %}
-                                    <span>No reactions yet</span>
+                                    <span class="flex items-center gap-2"><span class="text-slate-600">~></span> No reactions</span>
                                 {% endif %}
                             </div>
 
-                            <a href="/blog/{{ post.seq_id }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm flex items-center gap-1">
-                                Read more <span aria-hidden="true">&rarr;</span>
+                            <a href="/blog/{{ post.seq_id }}" class="text-hypr-cyan font-semibold text-sm tracking-wider uppercase flex items-center gap-2 group-hover:gap-3 transition-all">
+                                Access <span aria-hidden="true">&rarr;</span>
                             </a>
                         </div>
                     </article>
@@ -95,28 +96,28 @@
 
                 <!-- Pagination -->
                 {% if num_pages > 1 %}
-                <div class="mt-10 flex justify-center">
-                    <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <div class="mt-12 flex justify-center">
+                    <nav class="flex items-center gap-2 glass-panel rounded-full p-2 border-white/10">
                         {% if page > 1 %}
-                        <a href="/blog/search?query={{ search_query }}&page={{ page - 1 }}&page_size={{ page_size }}" class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                            Previous
+                        <a href="/blog/search?query={{ search_query }}&page={{ page - 1 }}&page_size={{ page_size }}" class="px-5 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+                            Prev
                         </a>
                         {% endif %}
 
                         {% for page_num in range(start=1, end=num_pages + 1) %}
                             {% if page_num == page %}
-                            <span class="relative inline-flex items-center px-4 py-2 border border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-sm font-medium text-blue-600 dark:text-blue-400 z-10">
+                            <span class="px-5 py-2 text-sm font-bold text-hypr-dark bg-hypr-cyan rounded-full shadow-[0_0_10px_rgba(0,168,244,0.5)]">
                                 {{ page_num }}
                             </span>
                             {% else %}
-                            <a href="/blog/search?query={{ search_query }}&page={{ page_num }}&page_size={{ page_size }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                            <a href="/blog/search?query={{ search_query }}&page={{ page_num }}&page_size={{ page_size }}" class="px-5 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors">
                                 {{ page_num }}
                             </a>
                             {% endif %}
                         {% endfor %}
 
                         {% if page < num_pages %}
-                        <a href="/blog/search?query={{ search_query }}&page={{ page + 1 }}&page_size={{ page_size }}" class="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                        <a href="/blog/search?query={{ search_query }}&page={{ page + 1 }}&page_size={{ page_size }}" class="px-5 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-colors">
                             Next
                         </a>
                         {% endif %}
@@ -125,36 +126,40 @@
                 {% endif %}
             </div>
         {% else %}
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
-                <h4 class="text-xl font-bold text-blue-800 dark:text-blue-300 mb-2">No results found</h4>
-                <p class="text-blue-600 dark:text-blue-400">No posts match your search for "<span class="font-bold">{{ search_query }}</span>". Try different keywords or check your spelling.</p>
+            <div class="glass-panel border-white/10 rounded-3xl p-16 text-center shadow-xl relative overflow-hidden">
+                <div class="absolute inset-0 bg-red-500/5 -z-10"></div>
+                <div class="text-hypr-cyan text-5xl mb-6 animate-pulse">!</div>
+                <h4 class="text-2xl font-black text-white mb-2 tracking-tighter">Null Result</h4>
+                <p class="text-slate-400 font-mono">No sequence found for parameter: <span class="text-hypr-cyan">"{{ search_query }}"</span></p>
             </div>
         {% endif %}
     {% else %}
-        <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-6">
-            <h4 class="text-xl font-bold text-indigo-900 dark:text-indigo-300 mb-3">Search Blog Posts</h4>
-            <p class="text-indigo-700 dark:text-indigo-400 mb-3">Use the search form above to find posts by title, content, or excerpt. The search supports:</p>
-            <ul class="list-disc list-inside text-indigo-700 dark:text-indigo-400 space-y-1">
-                <li>Full-text search across all post content</li>
-                <li>Relevance ranking</li>
-                <li>Highlighted search results</li>
-                <li>Multiple keywords</li>
+        <div class="glass-panel border-white/10 rounded-3xl p-10 md:p-12 relative overflow-hidden">
+            <div class="absolute -right-20 -top-20 w-64 h-64 bg-hypr-teal/10 blur-[80px] -z-10 rounded-full"></div>
+            <h4 class="text-2xl font-black text-white mb-4 tracking-tighter flex items-center gap-3">
+                <span class="text-hypr-cyan">#</span> Query Engine
+            </h4>
+            <p class="text-slate-300 text-lg mb-6 leading-relaxed max-w-2xl">Initialize search to scan through the central archive. Capabilities include:</p>
+            <ul class="space-y-3 font-mono text-sm text-slate-400">
+                <li class="flex items-center gap-3"><span class="text-hypr-cyan">>></span> Full-text pattern matching</li>
+                <li class="flex items-center gap-3"><span class="text-hypr-cyan">>></span> Heuristic relevance sorting</li>
+                <li class="flex items-center gap-3"><span class="text-hypr-cyan">>></span> Syntax highlighting</li>
             </ul>
         </div>
     {% endif %}
 
     <!-- Tag Cloud -->
     {% if all_tags %}
-    <div class="mt-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-            <h5 class="font-bold text-gray-900 dark:text-white mb-0">Browse by Tags</h5>
+    <div class="mt-16 glass-panel rounded-3xl border border-white/10 overflow-hidden">
+        <div class="px-8 py-5 border-b border-white/5 bg-white/[0.02]">
+            <h5 class="font-bold text-white tracking-widest uppercase text-sm">System Registry Tags</h5>
         </div>
-        <div class="p-6 flex flex-wrap gap-2">
+        <div class="p-8 flex flex-wrap gap-3">
             {% for tag in all_tags %}
             <a href="/blog/tag/{{ tag.slug }}"
-               class="text-sm font-semibold px-3 py-1.5 rounded-full hover:opacity-80 transition text-white shadow-sm"
-               style="background-color: {{ tag.color }};">
-                {{ tag.name }}
+               class="text-sm font-mono px-4 py-2 rounded-lg text-white border border-white/10 hover:border-white/40 transition-all backdrop-blur-md hover:scale-105"
+               style="background-color: {{ tag.color }}40;">
+                #{{ tag.name }}
             </a>
             {% endfor %}
         </div>
@@ -164,17 +169,12 @@
 
 <style>
 .search-headline mark {
-    background-color: #fef08a; /* Tailwind yellow-200 */
-    color: #854d0e; /* Tailwind yellow-800 */
-    padding: 0.125rem 0.25rem;
-    border-radius: 0.25rem;
-    font-weight: 600;
-}
-@media (prefers-color-scheme: dark) {
-    .search-headline mark {
-        background-color: #854d0e;
-        color: #fef08a;
-    }
+    background-color: rgba(0, 168, 244, 0.2);
+    color: #00e5d0;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.375rem;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(0, 168, 244, 0.3);
 }
 </style>
 {% endblock %}

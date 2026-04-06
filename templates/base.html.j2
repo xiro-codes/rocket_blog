@@ -3,146 +3,135 @@
 
 	<head>
 		<meta charset="utf-8" />
-		<!--link rel="stylesheet" href="/static/reset.css" /-->
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
-		<!-- SEO Meta Tags -->
-		<title>{% if page_title %}{{ page_title }}{% else %}Rocket Blog - A Modern Blog Platform{% endif %}</title>
-		<meta name="description" content="{% if page_description %}{{ page_description }}{% else %}A modern blog platform built with Rust and Rocket framework. Discover insightful articles, technical content, and more.{% endif %}">
+		<title>{% if page_title %}{{ page_title }}{% else %}Rocket Blog - Hyper Modern{% endif %}</title>
+		<meta name="description" content="{% if page_description %}{{ page_description }}{% else %}A hyper-modern blog platform built with Rust and Rocket framework.{% endif %}">
 		<meta name="keywords" content="{% if page_keywords %}{{ page_keywords }}{% else %}blog, rust, rocket, programming, technology, articles{% endif %}">
-		<meta name="author" content="Rocket Blog">
 		
-		<!-- Canonical URL -->
 		<link rel="canonical" href="{% if canonical_url %}{{ canonical_url }}{% else %}/{% endif %}">
-		
-		<!-- Open Graph Meta Tags -->
-		<meta property="og:title" content="{% if page_title %}{{ page_title }}{% else %}Rocket Blog{% endif %}">
-		<meta property="og:description" content="{% if page_description %}{{ page_description }}{% else %}A modern blog platform built with Rust and Rocket framework{% endif %}">
-		<meta property="og:type" content="{% if post %}article{% else %}website{% endif %}">
-		<meta property="og:url" content="{% if canonical_url %}{{ canonical_url }}{% else %}/{% endif %}">
-		<meta property="og:site_name" content="Rocket Blog">
-		<meta property="og:locale" content="en_US">
-		{% if post %}
-		<meta property="article:published_time" content="{{ post.date_published }}">
-		{% if tags %}
-		{% for tag in tags %}
-		<meta property="article:tag" content="{{ tag.name }}">
-		{% endfor %}
-		{% endif %}
-		{% endif %}
-		
-		<!-- Twitter Card Meta Tags -->
-		<meta name="twitter:card" content="summary">
-		<meta name="twitter:title" content="{% if page_title %}{{ page_title }}{% else %}Rocket Blog{% endif %}">
-		<meta name="twitter:description" content="{% if page_description %}{{ page_description }}{% else %}A modern blog platform built with Rust and Rocket framework{% endif %}">
-		
-		<!-- RSS Feed -->
-		<link rel="alternate" type="application/rss+xml" title="Rocket Blog RSS Feed" href="/feed/rss" />
-		
-		<!-- PWA Manifest -->
-		<link rel="manifest" href="/static/manifest.json">
-		
-		<!-- PWA Meta Tags -->
-		<meta name="mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-		<meta name="apple-mobile-web-app-title" content="TimeTracker">
-		<meta name="msapplication-TileColor" content="#0c1116">
-		<meta name="msapplication-tap-highlight" content="no">
-		
-		<!-- PWA Icons -->
-		<link rel="apple-touch-icon" href="/static/icon-192x192.png">
-		<link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192x192.png">
-		<link rel="icon" type="image/png" sizes="512x512" href="/static/icon-512x512.png">
 		
 		<script src="https://cdn.tailwindcss.com"></script>
 		<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="/static/style.css" />
-		<!-- EasyMDE Markdown Editor -->
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['Inter', 'sans-serif'],
+                            mono: ['JetBrains Mono', 'monospace'],
+                        },
+                        colors: {
+                            hypr: {
+                                cyan: '#00a8f4',
+                                teal: '#00e5d0',
+                                dark: '#0a0a0a',
+                                panel: 'rgba(255, 255, 255, 0.03)',
+                                border: 'rgba(255, 255, 255, 0.08)',
+                            }
+                        },
+                        animation: {
+                            'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        },
+                        keyframes: {
+                            fadeInUp: {
+                                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                                '100%': { opacity: '1', transform: 'translateY(0)' },
+                            }
+                        }
+                    }
+                }
+            }
+        </script>
 		<style>
-		/* EasyMDE Theme Fixes for dark mode */
-		.EasyMDEContainer .editor-toolbar, .EasyMDEContainer .CodeMirror, .EasyMDEContainer .editor-statusbar {
-			background-color: transparent !important;
-			color: inherit !important;
-			border-color: #e5e7eb !important;
-		}
-		@media (prefers-color-scheme: dark) {
-			.EasyMDEContainer .editor-toolbar, .EasyMDEContainer .CodeMirror, .EasyMDEContainer .editor-statusbar {
-				border-color: #374151 !important;
-			}
-			.EasyMDEContainer .editor-toolbar button { color: #d1d5db !important; }
-			.EasyMDEContainer .editor-toolbar button.active, .EasyMDEContainer .editor-toolbar button:hover {
-				background-color: #374151 !important;
-			}
-			.EasyMDEContainer .CodeMirror-cursor { border-left: 1px solid #d1d5db !important; }
-			.EasyMDEContainer .CodeMirror-line { color: #d1d5db !important; }
-		}
+		body {
+            background-color: #050505;
+        }
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #00e5d0, #00a8f4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .glow-btn {
+            position: relative;
+        }
+        .glow-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to right, #00e5d0, #00a8f4);
+            filter: blur(15px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+            border-radius: inherit;
+        }
+        .glow-btn:hover::before {
+            opacity: 0.7;
+        }
 		</style>
 	</head>
 
-	<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 font-sans antialiased selection:bg-blue-200 selection:text-blue-900 leading-relaxed max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-		<div class="container mx-auto h-full px-4">
+	<body class="text-slate-300 font-sans antialiased selection:bg-hypr-cyan/30 selection:text-white min-h-screen relative overflow-x-hidden flex flex-col">
+		
+        <!-- Background Elements -->
+        <div class="fixed top-[-20%] left-1/2 -translate-x-1/2 w-[80vw] h-[80vh] rounded-full bg-hypr-cyan/10 blur-[120px] pointer-events-none -z-20 animate-pulse-slow"></div>
+        <div class="fixed bottom-[-20%] right-[-10%] w-[60vw] h-[60vh] rounded-full bg-purple-600/10 blur-[120px] pointer-events-none -z-20 animate-pulse-slow" style="animation-delay: 2s;"></div>
+        
+        <!-- Grid Pattern -->
+        <div class="fixed inset-0 pointer-events-none -z-30 opacity-[0.03]" style="background-image: linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px); background-size: 50px 50px;"></div>
+
+        <!-- Navigation Bar -->
+        <nav class="fixed top-0 w-full z-50 glass-panel border-x-0 border-t-0 py-4 px-6 md:px-12 flex justify-between items-center transition-all duration-300">
+            <a href="/blog" class="text-2xl font-bold tracking-tight text-white flex items-center gap-2 group">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-hypr-teal to-hypr-cyan flex items-center justify-center shadow-[0_0_15px_rgba(0,168,244,0.5)] group-hover:shadow-[0_0_25px_rgba(0,168,244,0.8)] transition-all">
+                    <span class="text-black font-black text-lg">R</span>
+                </div>
+                <span class="opacity-90 group-hover:opacity-100 transition-opacity">Rocket<span class="text-hypr-cyan">Blog</span></span>
+            </a>
+            
+            <div class="flex items-center gap-4 text-sm font-medium">
+                {% if token %}
+                    {% if is_admin %}
+                    <a href="/blog/create" class="text-slate-300 hover:text-white transition-colors">Create</a>
+                    <a href="/settings" class="text-slate-300 hover:text-white transition-colors">Settings</a>
+                    {% endif %}
+                    <a href="/blog/search" class="text-slate-300 hover:text-white transition-colors">Search</a>
+                    <a href="/auth/logout" class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all">Logout</a>
+                {% else %}
+                    <a href="/blog/search" class="text-slate-300 hover:text-white transition-colors">Search</a>
+                    {% if not has_accounts %}
+                    <a href="/auth/create-admin" class="glow-btn px-5 py-2 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white transition-all hover:scale-105">Setup Admin</a>
+                    {% else %}
+                    <a href="/auth/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all backdrop-blur-md">Login</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </nav>
+
+		<div class="container mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 flex-grow relative z-10">
 			{% block content %}
 			{% endblock %}
 		</div>
+		
+        <footer class="mt-auto border-t border-white/5 py-8 text-center text-slate-500 text-sm glass-panel border-b-0 border-x-0 relative z-10">
+            <p>&copy; 2026 Rocket Blog. Hyper-modern theme.</p>
+        </footer>
+
 		{% block script %}
 		{% endblock %}
-		<!-- EasyMDE Markdown Editor -->
-		<script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
-		
-		<!-- PWA Service Worker Registration -->
-		<script>
-			// Register service worker for PWA functionality
-			if ('serviceWorker' in navigator) {
-				window.addEventListener('load', () => {
-					navigator.serviceWorker.register('/static/sw.js')
-						.then((registration) => {
-							console.log('SW registered: ', registration);
-							
-							// Check for updates
-							registration.addEventListener('updatefound', () => {
-								const newWorker = registration.installing;
-								newWorker.addEventListener('statechange', () => {
-									if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-										// New update available
-										console.log('New version available! Please refresh.');
-									}
-								});
-							});
-						})
-						.catch((registrationError) => {
-							console.log('SW registration failed: ', registrationError);
-						});
-				});
-			}
-
-			// PWA Install prompt
-			let deferredPrompt;
-			window.addEventListener('beforeinstallprompt', (e) => {
-				e.preventDefault();
-				deferredPrompt = e;
-				
-				// Show install button/banner if needed
-				console.log('PWA install prompt available');
-			});
-
-			// Handle PWA installation
-			function installPWA() {
-				if (deferredPrompt) {
-					deferredPrompt.prompt();
-					deferredPrompt.userChoice.then((choiceResult) => {
-						if (choiceResult.outcome === 'accepted') {
-							console.log('User accepted the install prompt');
-						}
-						deferredPrompt = null;
-					});
-				}
-			}
-		</script>
 	</body>
-
 </html>

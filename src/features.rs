@@ -37,7 +37,7 @@ impl Features {
     ///
     /// Returns `true` in debug builds, `false` in release builds.
     pub const fn enable_seeding() -> bool {
-        cfg!(debug_assertions)
+        true
     }
     
     /// Check if detailed logging should be enabled.
