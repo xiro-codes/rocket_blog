@@ -5,7 +5,7 @@
     <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-0">
         <i class="fas fa-edit me-2"></i>Edit Work Time Entry
     </h1>
-    <a href="/entries" class="btn btn-secondary">
+    <a href="/worklog/entries" class="btn btn-secondary">
         <i class="fas fa-arrow-left me-2"></i>Back to Entries
     </a>
 </div>
@@ -18,7 +18,7 @@
         </h3>
     </div>
     
-    <form method="post" action="/entries/{{ entry.id }}/edit" class="row g-3">
+    <form method="post" action="/worklog/entries/{{ entry.id }}/edit" class="row g-3">
         <div class="col-md-6">
             <label for="user_role_id" class="form-label">
                 <i class="fas fa-user-tag me-1"></i>Role
@@ -48,7 +48,7 @@
             <button type="submit" class="btn btn-success btn-lg me-2">
                 <i class="fas fa-save me-2"></i>Update Entry
             </button>
-            <a href="/entries" class="btn btn-secondary btn-lg">
+            <a href="/worklog/entries" class="btn btn-secondary btn-lg">
                 <i class="fas fa-times me-2"></i>Cancel
             </a>
         </div>

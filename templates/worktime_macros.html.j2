@@ -145,7 +145,7 @@
                 </div>
             </div>
             <div class="mt-3">
-                <form method="post" action="/stop" class="d-inline">
+                <form method="post" action="/worklog/stop" class="d-inline">
                     <button type="submit" class="btn btn-danger">
                         <i class="fas fa-stop me-2"></i>Stop Timer
                     </button>
@@ -163,7 +163,7 @@
 
 {# Timer start form component #}
 {% macro timer_start_form(roles) %}
-    <form method="post" action="/start" class="row g-2">
+    <form method="post" action="/worklog/start" class="row g-2">
         <div class="col-12">
             <label for="user_role_id" class="form-label">
                 <i class="fas fa-user-tag me-1"></i>Role
@@ -238,11 +238,11 @@
                         </td>
                         {% if show_actions %}
                         <td>
-                            <a href="/entries/{{ entry.id }}/edit" class="btn btn-sm btn-outline-primary">
+                            <a href="/worklog/entries/{{ entry.id }}/edit" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-edit"></i>
                             </a>
                             {% if entry.can_add_tips %}
-                            <a href="/entries/{{ entry.id }}/tips" class="btn btn-sm btn-outline-success">
+                            <a href="/worklog/entries/{{ entry.id }}/tips" class="btn btn-sm btn-outline-success">
                                 <i class="fas fa-coins"></i>
                             </a>
                             {% endif %}
