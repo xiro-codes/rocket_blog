@@ -202,6 +202,7 @@ in {
       serviceConfig = {
         ExecStart = "${cfg.package}/bin/portfolio";
         WorkingDirectory = cfg.workingDirectory;
+        EnvironmentFile = mkIf (cfg.secretKeyFile != null) cfg.secretKeyFile;
         Restart = "always";
         DynamicUser = true;
       };
