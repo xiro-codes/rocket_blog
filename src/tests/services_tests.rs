@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, AIProviderService, OpenAIService, OllamaService, AIProvider, BackgroundJobService};
+    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, BackgroundJobService};
     use crate::tests::mocks::test_data;
     use uuid::Uuid;
 
@@ -196,73 +196,6 @@ mod tests {
     }
 
     mod ai_provider_tests {
-        use super::*;
-        use crate::services::{AIProviderService, OpenAIService, OllamaService, AIProvider};
-
-        #[test]
-        fn test_ai_provider_service_new() {
-            let service = AIProviderService::new();
-            // Should create successfully without panicking
-            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AIProviderService>());
-        }
-
-        #[test]
-        fn test_openai_service_creation() {
-            let service = OpenAIService::new();
-            assert_eq!(service.provider_name(), "OpenAI");
-        }
-
-        #[test]
-        fn test_ollama_service_creation() {
-            let service = OllamaService::new();
-            assert_eq!(service.provider_name(), "Ollama");
-        }
-
-        #[test]
-        fn test_ai_provider_service_with_providers() {
-            let mut service = AIProviderService::new();
-            service.add_provider(Box::new(OpenAIService::new()));
-            service.add_provider(Box::new(OllamaService::new()));
-            
-            // Should have added providers without panicking
-            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AIProviderService>());
-        }
-
-        #[test]
-        fn test_openai_service_provider_name() {
-            let service = OpenAIService::new();
-            assert_eq!(service.provider_name(), "OpenAI");
-            assert!(!service.provider_name().is_empty());
-        }
-
-        #[test]
-        fn test_ollama_service_provider_name() {
-            let service = OllamaService::new();
-            assert_eq!(service.provider_name(), "Ollama");
-            assert!(!service.provider_name().is_empty());
-        }
-
-        #[test]
-        fn test_ai_provider_service_multiple_additions() {
-            let mut service = AIProviderService::new();
-            
-            // Add multiple providers
-            for _ in 0..3 {
-                service.add_provider(Box::new(OpenAIService::new()));
-                service.add_provider(Box::new(OllamaService::new()));
-            }
-            
-            // Should handle multiple additions without issues
-            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AIProviderService>());
-        }
-
-        #[test]
-        fn test_ai_provider_service_empty_state() {
-            let service = AIProviderService::new();
-            
-            // Service should be usable even without providers
-            assert_eq!(std::mem::size_of_val(&service), std::mem::size_of::<AIProviderService>());
-        }
     }
 
     mod coordinator_service_tests {

@@ -1,63 +1,71 @@
 {% extends "worktime_base" %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-0">
-        <i class="fas fa-edit me-2"></i>Edit Work Time Entry
+<div class="flex justify-between items-center mb-8 animate-fade-in-up">
+    <h1 class="text-3xl font-black text-white tracking-tighter">
+        <i class="fas fa-edit me-2 text-hypr-cyan"></i>Edit Entry
     </h1>
-    <a href="/worklog/entries" class="btn btn-secondary">
+    <a href="/worklog/entries" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
         <i class="fas fa-arrow-left me-2"></i>Back to Entries
     </a>
 </div>
 
 <!-- Edit Entry Form -->
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
-        <h3 class="mb-0">
-            <i class="fas fa-edit me-2"></i>Edit Entry Details
+<div class="glass-panel border-white/10 rounded-3xl p-8 mb-8 relative overflow-hidden shadow-2xl shadow-hypr-cyan/5">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-hypr-cyan/10 blur-[80px] -z-10 rounded-full"></div>
+    <div class="px-6 py-5 border-b border-white/10 flex items-center mb-6">
+        <h3 class="text-xl font-bold tracking-tight text-white flex items-center gap-3">
+            <i class="fas fa-edit text-hypr-cyan"></i>Edit Details
         </h3>
     </div>
     
-    <form method="post" action="/worklog/entries/{{ entry.id }}/edit" class="row g-3">
-        <div class="col-md-6">
-            <label for="user_role_id" class="form-label">
-                <i class="fas fa-user-tag me-1"></i>Role
-            </label>
-            <select class="form-control" id="user_role_id" name="user_role_id" required>
-                <option value="">Select a role...</option>
-                {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id == entry.user_role_id %}selected{% endif %}>
-                        {{ role.role_name }} (${{ role.hourly_wage }}/hr)
-                    </option>
-                {% endfor %}
-            </select>
+    <form method="post" action="/worklog/entries/{{ entry.id }}/edit" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3 w-full">
+                <label for="user_role_id" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-user-tag me-1 text-hypr-cyan"></i>Role
+                </label>
+                <select class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all" id="user_role_id" name="user_role_id" required>
+                    <option value="">Select a role...</option>
+                    {% for role in roles %}
+                        <option value="{{ role.id }}" {% if role.id == entry.user_role_id %}selected{% endif %}>
+                            {{ role.role_name }} (${{ role.hourly_wage }}/hr)
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="space-y-3 w-full">
+                <!-- Spacing -->
+            </div>
+            <div class="space-y-3 w-full">
+                <label for="start_time" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-play me-1 text-hypr-cyan"></i>Start Time
+                </label>
+                <input type="datetime-local" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all [color-scheme:dark]" id="start_time" name="start_time" value="{{ start_time_str }}" required>
+            </div>
+            <div class="space-y-3 w-full">
+                <label for="end_time" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-stop me-1 text-hypr-cyan"></i>End Time
+                </label>
+                <input type="datetime-local" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all [color-scheme:dark]" id="end_time" name="end_time" value="{{ end_time_str }}" required>
+            </div>
         </div>
-        <div class="col-md-6">
-            <label for="start_time" class="form-label">
-                <i class="fas fa-play me-1"></i>Start Time
-            </label>
-            <input type="datetime-local" class="form-control" id="start_time" name="start_time" value="{{ start_time_str }}" required>
-        </div>
-        <div class="col-md-6">
-            <label for="end_time" class="form-label">
-                <i class="fas fa-stop me-1"></i>End Time
-            </label>
-            <input type="datetime-local" class="form-control" id="end_time" name="end_time" value="{{ end_time_str }}" required>
-        </div>
-        <div class="col-12 text-center">
-            <button type="submit" class="btn btn-success btn-lg me-2">
-                <i class="fas fa-save me-2"></i>Update Entry
+        
+        <div class="flex justify-center gap-4 pt-6 border-t border-white/10">
+            <button type="submit" class="glow-btn px-8 py-3 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)] inline-flex items-center gap-2">
+                <i class="fas fa-save text-hypr-cyan"></i> Update Entry
             </button>
-            <a href="/worklog/entries" class="btn btn-secondary btn-lg">
-                <i class="fas fa-times me-2"></i>Cancel
+            <a href="/worklog/entries" class="px-8 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all font-medium inline-flex items-center gap-2">
+                <i class="fas fa-times text-slate-400"></i> Cancel
             </a>
         </div>
     </form>
 </div>
 
 {% if flash %}
-<div class="alert alert-{{ flash[0] }} mt-3">
-    <i class="fas fa-info-circle me-2"></i>{{ flash[1] }}
+<div class="mt-6 p-4 rounded-xl glass-panel {% if flash[0] == 'success' %}border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)]{% else %}border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]{% endif %} animate-fade-in-up">
+    <p class="font-mono text-sm {% if flash[0] == 'success' %}text-green-400{% else %}text-red-400{% endif %} mb-1">// SYSTEM NOTICE</p>
+    <p class="text-white">{{ flash[1] }}</p>
 </div>
 {% endif %}
 

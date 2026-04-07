@@ -6,7 +6,8 @@ with lib;
 let
   cfg = config.services.rocket-blog;
   pkg = self.packages.${pkgs.system}.rocket-blog;
-in {
+in
+{
   options.services.rocket-blog = {
     enable = mkEnableOption "Rocket Blog & Worktime Service";
 
@@ -69,7 +70,7 @@ in {
       default = false;
       description = "Whether to enable database seeding with sample data.";
     };
-    
+
     databaseDataDir = mkOption {
       type = types.nullOr types.path;
       default = null;
@@ -87,7 +88,7 @@ in {
       default = null;
       description = "Default admin password to create if the database is empty.";
     };
-    
+
     secretKeyFile = mkOption {
       type = types.nullOr types.path;
       default = null;
@@ -139,8 +140,8 @@ in {
     systemd.services.rocket-blog = {
       description = "Rocket Blog Service";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ] ++ (if cfg.manageDatabase then [ "postgresql.service" ] else []);
-      
+      after = [ "network.target" ] ++ (if cfg.manageDatabase then [ "postgresql.service" ] else [ ]);
+
       environment = {
         ROCKET_PROFILE = cfg.rocketProfile;
         ROCKET_PORT = toString cfg.blogPort;
@@ -165,8 +166,8 @@ in {
     systemd.services.rocket-worktime = {
       description = "Rocket Worktime Service";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ] ++ (if cfg.manageDatabase then [ "postgresql.service" ] else []);
-      
+      after = [ "network.target" ] ++ (if cfg.manageDatabase then [ "postgresql.service" ] else [ ]);
+
       environment = {
         ROCKET_PROFILE = cfg.rocketProfile;
         ROCKET_PORT = toString cfg.worktimePort;
@@ -192,7 +193,7 @@ in {
       description = "Rocket Portfolio Service";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
-      
+
       environment = {
         ROCKET_PROFILE = cfg.rocketProfile;
         ROCKET_PORT = toString cfg.portfolioPort;
@@ -211,7 +212,7 @@ in {
     # Nginx Configuration
     services.nginx = {
       enable = true;
-      
+
       virtualHosts.${cfg.domain} = {
         locations."/" = mkIf (cfg.portfolioDomain != null) {
           proxyPass = "http://127.0.0.1:${toString cfg.portfolioPort}";
@@ -260,7 +261,7 @@ in {
             proxy_set_header X-Forwarded-Proto $scheme;
           '';
         };
-        
+
         # Shared static folder (served by blog for simplicity)
         locations."/static" = {
           proxyPass = "http://127.0.0.1:${toString cfg.blogPort}";

@@ -117,7 +117,9 @@ async fn login(
     
     let db = conn.into_inner();
     if let Ok(token) = service.login(db, form_data).await {
-        cookies.add_private(Cookie::new("token", token.to_string()));
+        let mut cookie = Cookie::new("token", token.to_string());
+        cookie.set_path("/");
+        cookies.add_private(cookie);
         log::info!("Worktime authentication successful - Redirecting to worktime dashboard");
         Flash::success(
             Redirect::to("/worklog/"),
@@ -136,7 +138,9 @@ async fn login(
 async fn logout(cookies: &CookieJar<'_>) -> Flash<Redirect> {
     log::info!("Route accessed: GET /logout - Worktime user logout requested");
     
-    cookies.remove_private(Cookie::from("token"));
+    let mut cookie = Cookie::from("token");
+    cookie.set_path("/");
+    cookies.remove_private(cookie);
     
     log::debug!("Worktime user successfully logged out - Redirecting to worktime login");
     Flash::success(

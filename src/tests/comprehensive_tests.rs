@@ -4,7 +4,7 @@ mod comprehensive_tests {
     //! These tests focus on basic functionality and don't require database connections
 
     use crate::config::AppConfig;
-    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, CoordinatorService, ReactionService, AIProviderService, OpenAIService, OllamaService, SettingsService};
+    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, CoordinatorService, ReactionService, SettingsService};
     use crate::controllers::{AuthController, BlogController, CommentController, IndexController, FeedController, ControllerBase};
     use crate::middleware::Seeding;
     use crate::registry::{ServiceRegistry, ControllerRegistry};
@@ -272,13 +272,11 @@ mod comprehensive_tests {
         fn test_service_composition_patterns() {
             // Test various service composition patterns
             let coordinator = CoordinatorService::new();
-            let ai_provider = AIProviderService::new();
             let settings = SettingsService::new();
             let reaction = ReactionService::new();
             
             // All services should compose well together
             assert_eq!(std::mem::size_of_val(&coordinator), std::mem::size_of::<CoordinatorService>());
-            assert_eq!(std::mem::size_of_val(&ai_provider), std::mem::size_of::<AIProviderService>());
             assert_eq!(std::mem::size_of_val(&settings), std::mem::size_of::<SettingsService>());
             assert_eq!(std::mem::size_of_val(&reaction), std::mem::size_of::<ReactionService>());
         }
@@ -327,8 +325,6 @@ mod comprehensive_tests {
             assert!(rocket.state::<BlogService>().is_some());
             assert!(rocket.state::<CommentService>().is_some());
             assert!(rocket.state::<TagService>().is_some());
-            assert!(rocket.state::<AIProviderService>().is_some());
-            assert!(rocket.state::<OllamaService>().is_some());
             assert!(rocket.state::<ReactionService>().is_some());
             assert!(rocket.state::<SettingsService>().is_some());
             assert!(rocket.state::<CoordinatorService>().is_some());

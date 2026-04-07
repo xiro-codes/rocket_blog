@@ -2,12 +2,12 @@
 {% import "worktime_macros" as wt %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-0">
-        <i class="fas fa-user-tag me-2"></i>Manage Roles
+<div class="flex justify-between items-center mb-8 animate-fade-in-up">
+    <h1 class="text-3xl font-black text-white tracking-tighter">
+        <i class="fas fa-user-tag me-2 text-hypr-cyan"></i>Manage Roles
     </h1>
-    <a href="/worklog/" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    <a href="/worklog/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
+        <i class="fas fa-arrow-left me-2"></i>Dashboard
     </a>
 </div>
 
@@ -15,48 +15,49 @@
 
 <!-- Add New Role -->
 {% call wt.worktime_card(title="Add New Role", icon="fas fa-plus") %}
-    <form method="post" action="/worklog/roles" class="row g-3">
-        {{ wt.form_field_simple(
-            type="text", 
-            name="role_name", 
-            label="Role Name", 
-            icon="fas fa-briefcase",
-            placeholder="e.g., Developer, Designer",
-            required=true
-        ) }}
-        
-        <div class="col-md-3">
-            <label for="hourly_wage" class="form-label">
-                <i class="fas fa-dollar-sign me-1"></i>Hourly Wage
-            </label>
-            <input type="number" step="0.01" class="form-control" id="hourly_wage" name="hourly_wage" placeholder="25.00" required>
-        </div>
-        
-        {{ wt.select_field(
-            name="currency",
-            label="Currency",
-            icon="fas fa-coins",
-            required=true,
-            options=[
-                {value: "USD", text: "USD ($)"},
-                {value: "EUR", text: "EUR (€)"},
-                {value: "GBP", text: "GBP (£)"},
-                {value: "CAD", text: "CAD ($)"},
-                {value: "AUD", text: "AUD ($)"}
-            ]
-        ) }}
-        
-        <div class="col-md-3">
-            <div class="form-check mt-4">
-                <input class="form-check-input" type="checkbox" id="is_tipped" name="is_tipped" value="true">
-                <label class="form-check-label" for="is_tipped">
-                    <i class="fas fa-hand-holding-usd me-1"></i>Tipped Role
+    <form method="post" action="/worklog/roles" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {{ wt.form_field_simple(
+                type="text", 
+                name="role_name", 
+                label="Role Name", 
+                icon="fas fa-briefcase",
+                placeholder="e.g., Developer, Designer",
+                required=true
+            ) }}
+            
+            <div class="space-y-3 w-full">
+                <label for="hourly_wage" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-dollar-sign me-1 text-hypr-cyan"></i>Hourly Wage
                 </label>
+                <input type="number" step="0.01" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all" id="hourly_wage" name="hourly_wage" placeholder="25.00" required>
             </div>
+            
+            {{ wt.select_field(
+                name="currency",
+                label="Currency",
+                icon="fas fa-coins",
+                required=true,
+                options=[
+                    {value: "USD", text: "USD ($)"},
+                    {value: "EUR", text: "EUR (€)"},
+                    {value: "GBP", text: "GBP (£)"},
+                    {value: "CAD", text: "CAD ($)"},
+                    {value: "AUD", text: "AUD ($)"}
+                ]
+            ) }}
         </div>
-        <div class="col-12 text-center">
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-plus me-2"></i>Add Role
+        
+        <div class="flex items-center gap-3 pt-2">
+            <input class="w-5 h-5 rounded border-white/10 bg-black/50 text-hypr-cyan focus:ring-hypr-cyan/50 focus:ring-offset-0 transition-colors" type="checkbox" id="is_tipped" name="is_tipped" value="true">
+            <label class="text-sm font-bold text-white uppercase tracking-wider cursor-pointer" for="is_tipped">
+                <i class="fas fa-hand-holding-usd me-1 text-hypr-cyan"></i> Tipped Role
+            </label>
+        </div>
+        
+        <div class="text-center pt-4 border-t border-white/10">
+            <button type="submit" class="glow-btn px-10 py-4 mt-4 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)] inline-flex items-center gap-2">
+                <i class="fas fa-plus text-hypr-cyan"></i> Add Role
             </button>
         </div>
     </form>
@@ -65,55 +66,53 @@
 <!-- Existing Roles -->
 {% call wt.worktime_card(title="Your Roles", icon="fas fa-list") %}
     {% if roles %}
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
+        <div class="overflow-x-auto rounded-xl border border-white/5 bg-black/20">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead class="uppercase tracking-wider text-xs text-slate-400 bg-white/5 border-b border-white/10">
                     <tr>
-                        <th>Role Name</th>
-                        <th>Hourly Wage</th>
-                        <th class="d-none d-sm-table-cell">Type</th>
-                        <th class="d-none d-md-table-cell">Created</th>
-                        <th>Actions</th>
+                        <th class="px-6 py-4 font-semibold">Role Name</th>
+                        <th class="px-6 py-4 font-semibold">Hourly Wage</th>
+                        <th class="px-6 py-4 font-semibold hidden sm:table-cell">Type</th>
+                        <th class="px-6 py-4 font-semibold hidden md:table-cell">Created</th>
+                        <th class="px-6 py-4 font-semibold text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-white/5 text-slate-300">
                     {% for role in roles %}
-                    <tr>
-                        <td>
-                            <i class="fas fa-briefcase me-2 text-primary"></i>
-                            <strong>{{ role.role_name }}</strong>
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4 font-medium text-white">
+                            <i class="fas fa-briefcase me-2 text-hypr-cyan"></i>
+                            {{ role.role_name }}
                         </td>
-                        <td>
-                            <span class="badge" style="background-color: var(--success); color: var(--text-primary);">
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold uppercase tracking-widest border border-green-500/30">
                                 {{ wt.format_currency(role.hourly_wage, role.currency) }}/hr
                             </span>
                         </td>
-                        <td class="d-none d-sm-table-cell">
+                        <td class="px-6 py-4 hidden sm:table-cell">
                             {% if role.is_tipped %}
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-hand-holding-usd me-1"></i>Tipped
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-xs font-bold uppercase tracking-widest border border-yellow-500/30">
+                                    <i class="fas fa-hand-holding-usd me-1.5"></i>Tipped
                                 </span>
                             {% else %}
-                                <span class="badge bg-secondary">
-                                    <i class="fas fa-clock me-1"></i>Hourly
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-white/10 text-slate-300 text-xs font-bold uppercase tracking-widest border border-white/20">
+                                    <i class="fas fa-clock me-1.5"></i>Hourly
                                 </span>
                             {% endif %}
                         </td>
-                        <td class="d-none d-md-table-cell text-muted">
+                        <td class="px-6 py-4 hidden md:table-cell text-slate-400 font-mono text-xs">
                             {{ role.created_at | date('%m/%d/%Y') }}
                         </td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-warning btn-sm" onclick="editRole('{{ role.id }}', '{{ role.role_name }}', {{ role.hourly_wage }}, '{{ role.currency }}', {{ role.is_tipped | lower }})">
-                                    <i class="fas fa-edit"></i>
+                        <td class="px-6 py-4 text-right space-x-2">
+                            <button class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-yellow-500/10 border border-yellow-500/30 hover:bg-yellow-500/20 text-yellow-400 transition-all" onclick="editRole('{{ role.id }}', '{{ role.role_name }}', {{ role.hourly_wage }}, '{{ role.currency }}', {{ role.is_tipped | lower }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <form method="post" action="/worklog/roles/delete/{{ role.id }}" class="inline-block" 
+                                  onsubmit="return confirm('Are you sure you want to delete this role?')">
+                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 transition-all">
+                                    <i class="fas fa-trash"></i>
                                 </button>
-                                <form method="post" action="/worklog/roles/delete/{{ role.id }}" class="d-inline" 
-                                      onsubmit="return confirm('Are you sure you want to delete this role?')">
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
@@ -121,100 +120,113 @@
             </table>
         </div>
     {% else %}
-        <div class="text-center">
-            <i class="fas fa-user-tag text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-            <p class="text-muted mt-3">No roles created yet. Add your first role to start tracking work time!</p>
+        <div class="text-center py-12">
+            <i class="fas fa-user-tag text-slate-700 text-5xl mb-4"></i>
+            <p class="text-slate-400 font-mono text-sm">// No roles found. Initialize sequence.</p>
         </div>
     {% endif %}
 {% endcall %}
 
-<!-- Edit Role Modal (if needed) -->
-<div class="modal fade" id="editRoleModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-edit me-2"></i>Edit Role
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post" id="editRoleForm">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="edit_role_name" class="form-label">Role Name</label>
-                        <input type="text" class="form-control" id="edit_role_name" name="role_name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_hourly_wage" class="form-label">Hourly Wage</label>
-                        <input type="number" step="0.01" class="form-control" id="edit_hourly_wage" name="hourly_wage" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_currency" class="form-label">Currency</label>
-                        <select class="form-control" id="edit_currency" name="currency" required>
-                            <option value="USD">USD ($)</option>
-                            <option value="EUR">EUR (€)</option>
-                            <option value="GBP">GBP (£)</option>
-                            <option value="CAD">CAD ($)</option>
-                            <option value="AUD">AUD ($)</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="edit_is_tipped" name="is_tipped" value="true">
-                            <label class="form-check-label" for="edit_is_tipped">
-                                <i class="fas fa-hand-holding-usd me-1"></i>Tipped Role
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
+<!-- Edit Role Modal (Custom Implementation since Bootstrap is removed) -->
+<div id="editRoleModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center">
+    <div class="glass-panel border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-hypr-cyan/20 blur-[50px] -z-10 rounded-full"></div>
+        <div class="px-6 py-5 border-b border-white/10 flex justify-between items-center">
+            <h5 class="text-xl font-bold tracking-tight text-white flex items-center">
+                <i class="fas fa-edit me-2 text-hypr-cyan"></i>Edit Role
+            </h5>
+            <button type="button" class="text-slate-400 hover:text-white" onclick="document.getElementById('editRoleModal').classList.add('hidden')">
+                <i class="fas fa-times text-xl"></i>
+            </button>
         </div>
+        <form method="post" id="editRoleForm" class="space-y-6">
+            <div class="p-6 space-y-4">
+                <div class="space-y-2">
+                    <label for="edit_role_name" class="block text-sm font-bold text-white tracking-widest uppercase text-xs">Role Name</label>
+                    <input type="text" class="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all" id="edit_role_name" name="role_name" required>
+                </div>
+                <div class="space-y-2">
+                    <label for="edit_hourly_wage" class="block text-sm font-bold text-white tracking-widest uppercase text-xs">Hourly Wage</label>
+                    <input type="number" step="0.01" class="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all" id="edit_hourly_wage" name="hourly_wage" required>
+                </div>
+                <div class="space-y-2">
+                    <label for="edit_currency" class="block text-sm font-bold text-white tracking-widest uppercase text-xs">Currency</label>
+                    <select class="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all" id="edit_currency" name="currency" required>
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="CAD">CAD ($)</option>
+                        <option value="AUD">AUD ($)</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-3 pt-2">
+                    <input class="w-5 h-5 rounded border-white/10 bg-black/50 text-hypr-cyan focus:ring-hypr-cyan/50 focus:ring-offset-0 transition-colors" type="checkbox" id="edit_is_tipped" name="is_tipped" value="true">
+                    <label class="text-sm font-bold text-white uppercase tracking-wider cursor-pointer" for="edit_is_tipped">
+                        <i class="fas fa-hand-holding-usd me-1 text-hypr-cyan"></i>Tipped Role
+                    </label>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-white/10 bg-black/20 flex justify-end gap-3">
+                <button type="button" class="px-5 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium transition-all" onclick="document.getElementById('editRoleModal').classList.add('hidden')">Cancel</button>
+                <button type="submit" class="glow-btn px-6 py-2 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-all shadow-[0_0_15px_rgba(0,168,244,0.3)]">Save Changes</button>
+            </div>
+        </form>
     </div>
 </div>
 
 {% if flash %}
-<div class="alert alert-{{ flash[0] }} mt-3">
-    <i class="fas fa-info-circle me-2"></i>{{ flash[1] }}
+<div class="mt-6 p-4 rounded-xl glass-panel {% if flash[0] == 'success' %}border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)]{% else %}border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]{% endif %} animate-fade-in-up">
+    <p class="font-mono text-sm {% if flash[0] == 'success' %}text-green-400{% else %}text-red-400{% endif %} mb-1">// SYSTEM NOTICE</p>
+    <p class="text-white">{{ flash[1] }}</p>
 </div>
 {% endif %}
 
-
-
-<div class="container-fluid">
-    <!-- Tips -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card p-3 mb-4">
-                <h3>💡 Tips</h3>
-                <ul>
-                    <li><strong>Multiple Roles:</strong> Create different roles for different types of work or clients</li>
-                    <li><strong>Accurate Rates:</strong> Set realistic hourly rates based on your experience and market rates</li>
-                    <li><strong>Regular Updates:</strong> Update your rates as your skills and experience grow</li>
-                    <li><strong>Currency Consistency:</strong> Use the same currency for all roles to get accurate totals</li>
-                </ul>
-            </div>
-        </div>
-    </div>
+<div class="mt-12 glass-panel border border-white/10 rounded-2xl p-8 shadow-xl relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-hypr-teal to-hypr-cyan"></div>
+    <h3 class="text-xl font-bold tracking-tight text-white flex items-center gap-3 mb-6">
+        <i class="fas fa-lightbulb text-yellow-400"></i> Tips
+    </h3>
+    <ul class="space-y-4 text-slate-300 list-none">
+        <li class="flex items-start gap-3">
+            <i class="fas fa-caret-right text-hypr-cyan mt-1"></i>
+            <div><strong class="text-white">Multiple Roles:</strong> Create different roles for different types of work or clients</div>
+        </li>
+        <li class="flex items-start gap-3">
+            <i class="fas fa-caret-right text-hypr-cyan mt-1"></i>
+            <div><strong class="text-white">Accurate Rates:</strong> Set realistic hourly rates based on your experience and market rates</div>
+        </li>
+        <li class="flex items-start gap-3">
+            <i class="fas fa-caret-right text-hypr-cyan mt-1"></i>
+            <div><strong class="text-white">Regular Updates:</strong> Update your rates as your skills and experience grow</div>
+        </li>
+        <li class="flex items-start gap-3">
+            <i class="fas fa-caret-right text-hypr-cyan mt-1"></i>
+            <div><strong class="text-white">Currency Consistency:</strong> Use the same currency for all roles to get accurate totals</div>
+        </li>
+    </ul>
 </div>
 {% endblock %}
 
 {% block script %}
 <script>
 function editRole(id, name, wage, currency, isTipped) {
-    const modal = new bootstrap.Modal(document.getElementById('editRoleModal'));
+    const modal = document.getElementById('editRoleModal');
     const form = document.getElementById('editRoleForm');
     
-    form.action = `/roles/edit/${id}`;
+    form.action = `/worklog/roles/edit/${id}`;
     document.getElementById('edit_role_name').value = name;
     document.getElementById('edit_hourly_wage').value = wage;
     document.getElementById('edit_currency').value = currency;
     document.getElementById('edit_is_tipped').checked = isTipped;
     
-    modal.show();
+    modal.classList.remove('hidden');
 }
+
+// Close modal on click outside
+document.getElementById('editRoleModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.classList.add('hidden');
+    }
+});
 </script>
 {% endblock %}

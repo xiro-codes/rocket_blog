@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::registry::{ServiceRegistry, ControllerRegistry};
-    use crate::services::{AuthService, BlogService, CommentService, TagService, AIProviderService, OpenAIService, OllamaService, ReactionService, SettingsService, CoordinatorService};
+    use crate::services::{AuthService, BlogService, CommentService, TagService, ReactionService, SettingsService, CoordinatorService};
     use crate::controllers::{IndexController, AuthController, BlogController, CommentController, FeedController};
     use rocket::{Build, Rocket, fairing::Fairing};
 
@@ -75,25 +75,12 @@ mod tests {
     }
 
     #[test]
-    fn test_ai_provider_service_configuration() {
-        // Test that AI provider service is configured correctly
-        let mut ai_service = AIProviderService::new();
-        ai_service.add_provider(Box::new(OpenAIService::new()));
-        ai_service.add_provider(Box::new(OllamaService::new()));
-        
-        // AI service should be configured successfully
-        assert_eq!(std::mem::size_of_val(&ai_service), std::mem::size_of::<AIProviderService>());
-    }
-
-    #[test]
     fn test_service_instantiation() {
         // Test that all services can be instantiated without errors
         let auth_service = AuthService::new();
         let blog_service = BlogService::new();
         let comment_service = CommentService::new();
         let tag_service = TagService::new();
-        let ai_service = AIProviderService::new();
-        let ollama_service = OllamaService::new();
         let reaction_service = ReactionService::new();
         let settings_service = SettingsService::new();
         let coordinator_service = CoordinatorService::new();
@@ -103,8 +90,6 @@ mod tests {
         assert_eq!(std::mem::size_of_val(&blog_service), std::mem::size_of::<BlogService>());
         assert_eq!(std::mem::size_of_val(&comment_service), std::mem::size_of::<CommentService>());
         assert_eq!(std::mem::size_of_val(&tag_service), std::mem::size_of::<TagService>());
-        assert_eq!(std::mem::size_of_val(&ai_service), std::mem::size_of::<AIProviderService>());
-        assert_eq!(std::mem::size_of_val(&ollama_service), std::mem::size_of::<OllamaService>());
         assert_eq!(std::mem::size_of_val(&reaction_service), std::mem::size_of::<ReactionService>());
         assert_eq!(std::mem::size_of_val(&settings_service), std::mem::size_of::<SettingsService>());
         assert_eq!(std::mem::size_of_val(&coordinator_service), std::mem::size_of::<CoordinatorService>());
@@ -139,8 +124,6 @@ mod tests {
         assert!(rocket.state::<BlogService>().is_some());
         assert!(rocket.state::<CommentService>().is_some());
         assert!(rocket.state::<TagService>().is_some());
-        assert!(rocket.state::<AIProviderService>().is_some());
-        assert!(rocket.state::<OllamaService>().is_some());
         assert!(rocket.state::<ReactionService>().is_some());
         assert!(rocket.state::<SettingsService>().is_some());
         assert!(rocket.state::<CoordinatorService>().is_some());
@@ -188,14 +171,5 @@ mod tests {
         assert!(rocket1.state::<AuthService>().is_some());
         assert!(rocket2.state::<AuthService>().is_some());
         // Note: Can't easily test that they're different instances without more complex setup
-    }
-
-    #[test]
-    fn test_backward_compatibility() {
-        // Test backward compatibility
-        let rocket = ServiceRegistry::attach_all_services(rocket::build());
-        
-        // AIProviderService should be available
-        assert!(rocket.state::<AIProviderService>().is_some());
     }
 }

@@ -1,76 +1,60 @@
 {% extends "worktime_base" %}
 
 {% block content %}
-<div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
-	<div class="flex-1 w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
-		<div class="text-center mb-4">
-			<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">🕐 Work Time Tracker</h1>
-			<p class="mt-2 text-lg text-gray-600 dark:text-gray-400">Access your work time tracking dashboard and manage your sessions.</p>
-		</div>
+<div class="max-w-md mx-auto py-12 animate-fade-in-up">
+    <header class="mb-10 text-center">
+        <h1 class="text-4xl font-black text-white tracking-tighter flex items-center justify-center gap-3">
+            <i class="fas fa-clock text-hypr-cyan opacity-80"></i>Work Time Tracker
+        </h1>
+        <p class="text-hypr-cyan font-mono mt-3">>> Initialize Authentication Sequence</p>
+    </header>
 
-		<div class="row justify-content-center">
-			<div class="col-md-6 col-lg-4">
-				<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-					<div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
-						<h3 class="text-center mb-0">Login to TimeTracker</h3>
-					</div>
-					<form action="/worklog/login" method="post">
-						<div class="mb-3">
-							<label for="username" class="form-label">Username</label>
-							<input type="text" name="username" id="username" class="form-control" placeholder="Enter your username..." required />
-						</div>
-						
-						<div class="mb-3">
-							<label for="password" class="form-label">Password</label>
-							<input type="password" name="password" id="password" class="form-control" placeholder="Enter your password..." required />
-						</div>
-						
-						<div class="d-grid mb-3">
-							<button type="submit" class="btn btn-primary">Sign In</button>
-						</div>
-						
-						<div class="text-center">
-							<a href="/worklog/register" class="btn btn-secondary btn-sm">Create Account</a>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
+    <div class="glass-panel rounded-3xl border border-white/10 p-8 relative overflow-hidden shadow-2xl shadow-hypr-cyan/5">
+        <div class="absolute top-0 right-0 w-48 h-48 bg-hypr-cyan/10 blur-[60px] -z-10 rounded-full"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 blur-[60px] -z-10 rounded-full"></div>
 
-		{% if flash %}
-		<div class="row justify-content-center">
-			<div class="col-md-6 col-lg-4">
-				<div class="alert alert-{{ flash[0] }} text-center">
-					{{ flash[1] }}
-				</div>
-			</div>
-		</div>
-		{% endif %}
+        <form action="/worklog/login" method="post" class="space-y-6 relative z-10">
+            <div class="space-y-3">
+                <label for="username" class="block text-sm font-bold text-white tracking-widest uppercase">Username</label>
+                <input type="text" name="username" id="username" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-600" placeholder="Enter your username..." required />
+            </div>
+            
+            <div class="space-y-3">
+                <label for="password" class="block text-sm font-bold text-white tracking-widest uppercase">Password</label>
+                <input type="password" name="password" id="password" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-600" placeholder="Enter your password..." required />
+            </div>
+            
+            <div class="pt-4">
+                <button type="submit" class="glow-btn w-full px-8 py-4 rounded-xl bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-[1.02] shadow-[0_0_20px_rgba(0,168,244,0.3)]">Sign In</button>
+            </div>
+            
+            <div class="text-center pt-4 border-t border-white/10 mt-6">
+                <a href="/worklog/register" class="inline-block text-sm text-slate-400 hover:text-white transition-colors">Create Account</a>
+            </div>
+        </form>
+    </div>
 
-		<div class="row justify-content-center mt-4">
-			<div class="col-md-8 col-lg-6">
-				<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-					<h4 class="text-center mb-3">📊 Work Time Tracker Features</h4>
-					<div class="row">
-						<div class="col-md-6">
-							<ul class="list-unstyled">
-								<li class="mb-2">⏰ Track work time with role-based hourly wages</li>
-								<li class="mb-2">📊 Manage pay periods and view earnings</li>
-								<li class="mb-2">🔔 Configurable notifications for time and earnings</li>
-							</ul>
-						</div>
-						<div class="col-md-6">
-							<ul class="list-unstyled">
-								<li class="mb-2">📱 Progressive Web App with offline support</li>
-								<li class="mb-2">🎯 Set daily goals and productivity targets</li>
-								<li class="mb-2">💰 Comprehensive earnings reports</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    {% if flash %}
+    <div class="mt-6 p-4 rounded-xl glass-panel {% if flash[0] == 'success' %}border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)]{% else %}border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]{% endif %} animate-fade-in-up">
+        <p class="font-mono text-sm {% if flash[0] == 'success' %}text-green-400{% else %}text-red-400{% endif %} mb-1">// SYSTEM NOTICE</p>
+        <p class="text-white">{{ flash[1] }}</p>
+    </div>
+    {% endif %}
+
+    <div class="mt-12 glass-panel rounded-2xl border border-white/10 p-8">
+        <h4 class="text-center mb-6 text-xl font-bold tracking-tight text-white uppercase tracking-widest"><i class="fas fa-chart-pie me-2 text-hypr-cyan"></i>Features</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-slate-300">
+            <ul class="space-y-3 list-none">
+                <li class="flex items-start gap-2"><i class="fas fa-check text-hypr-cyan mt-1"></i> Track work time with role-based wages</li>
+                <li class="flex items-start gap-2"><i class="fas fa-check text-hypr-cyan mt-1"></i> Manage pay periods and view earnings</li>
+                <li class="flex items-start gap-2"><i class="fas fa-check text-hypr-cyan mt-1"></i> Configurable notifications for time</li>
+            </ul>
+            <ul class="space-y-3 list-none">
+                <li class="flex items-start gap-2"><i class="fas fa-check text-hypr-cyan mt-1"></i> PWA with offline support</li>
+                <li class="flex items-start gap-2"><i class="fas fa-check text-hypr-cyan mt-1"></i> Set daily goals & targets</li>
+                <li class="flex items-start gap-2"><i class="fas fa-check text-hypr-cyan mt-1"></i> Comprehensive reports</li>
+            </ul>
+        </div>
+    </div>
 </div>
-
 {% endblock %}

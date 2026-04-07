@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod edge_case_tests {
-    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, AIProviderService, OpenAIService, OllamaService, ReactionService, SettingsService, CoordinatorService, AIProvider};
+    use crate::services::{AuthService, BaseService, BlogService, CommentService, TagService, ReactionService, SettingsService, CoordinatorService};
     use crate::config::AppConfig;
     use crate::middleware::Seeding;
     use crate::controllers::{AuthController, BlogController, CommentController, IndexController, FeedController};
@@ -159,29 +159,6 @@ mod edge_case_tests {
         
         // Should complete without issues
         assert!(true);
-    }
-
-    #[test]
-    fn test_ai_provider_edge_cases() {
-        // Test AI provider edge cases
-        let mut ai_service = AIProviderService::new();
-        
-        // Add providers multiple times
-        for _ in 0..10 {
-            ai_service.add_provider(Box::new(OpenAIService::new()));
-            ai_service.add_provider(Box::new(OllamaService::new()));
-        }
-        
-        // Should handle multiple additions
-        assert_eq!(std::mem::size_of_val(&ai_service), std::mem::size_of::<AIProviderService>());
-        
-        // Test provider names
-        let openai = OpenAIService::new();
-        let ollama = OllamaService::new();
-        
-        assert_eq!(openai.provider_name(), "OpenAI");
-        assert_eq!(ollama.provider_name(), "Ollama");
-        assert_ne!(openai.provider_name(), ollama.provider_name());
     }
 
     #[test]

@@ -2,12 +2,12 @@
 {% import "worktime_macros" as wt %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-0">
-        <i class="fas fa-cog me-2"></i>Settings
+<div class="flex justify-between items-center mb-8 animate-fade-in-up">
+    <h1 class="text-3xl font-black text-white tracking-tighter">
+        <i class="fas fa-cog me-2 text-hypr-cyan"></i>Settings
     </h1>
-    <a href="/worklog/" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    <a href="/worklog/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
+        <i class="fas fa-arrow-left me-2"></i>Dashboard
     </a>
 </div>
 
@@ -16,34 +16,37 @@
 <!-- Timezone Settings -->
 {% call wt.worktime_card(title="Timezone Settings", icon="fas fa-globe") %}
     
-    <div class="mb-3">
-        <p class="text-muted">Configure your preferred timezone for time display throughout the work time tracker.</p>
+    <div class="mb-6">
+        <p class="text-slate-400 text-sm">Configure your preferred timezone for time display throughout the work time tracker.</p>
     </div>
     
     <!-- Current Timezone Display -->
-    <div class="alert alert-info">
-        <h5 class="mb-2">Current Settings</h5>
-        <p class="mb-1"><strong>Timezone:</strong> {{ current_timezone }}</p>
-        <p class="mb-0 text-sm">Current time: <span id="current-time" class="font-monospace"></span></p>
+    <div class="glass-panel border-hypr-cyan/30 bg-hypr-cyan/5 rounded-2xl p-6 mb-8 border border-white/10 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-hypr-cyan/10 blur-[40px] -z-10 rounded-full"></div>
+        <h5 class="text-lg font-bold text-white mb-4">Current Settings</h5>
+        <div class="space-y-2 text-slate-300">
+            <p><strong class="text-white tracking-wider uppercase text-xs">Timezone:</strong> <span class="text-hypr-cyan">{{ current_timezone }}</span></p>
+            <p class="text-sm"><strong class="text-white tracking-wider uppercase text-xs">Current time:</strong> <span id="current-time" class="font-mono text-hypr-cyan"></span></p>
+        </div>
     </div>
     
-    <form method="post" action="/worklog/settings/timezone" class="row g-3">
-        <div class="col-12">
-            <label for="timezone" class="form-label">
-                <i class="fas fa-clock me-1"></i>Select Your Timezone
+    <form method="post" action="/worklog/settings/timezone" class="space-y-6">
+        <div class="space-y-3 w-full">
+            <label for="timezone" class="block text-sm font-bold text-white tracking-widest uppercase">
+                <i class="fas fa-clock me-1 text-hypr-cyan"></i>Select Your Timezone
             </label>
-            <select name="timezone" id="timezone" class="form-control" required>
+            <select name="timezone" id="timezone" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all" required>
                 {% for timezone in timezones %}
-                    <option value="{{ timezone[0] }}" {% if timezone[0]== current_timezone %}selected{% endif %}>
+                    <option value="{{ timezone[0] }}" {% if timezone[0] == current_timezone %}selected{% endif %}>
                         {{ timezone[1] }}
                     </option>
                 {% endfor %}
             </select>
-            <small class="form-text text-muted">Choose the timezone that matches your location for accurate time display.</small>
+            <p class="text-xs text-slate-500 mt-2">Choose the timezone that matches your location for accurate time display.</p>
         </div>
-        <div class="col-12">
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-save me-2"></i>Update Timezone
+        <div class="pt-2 border-t border-white/10">
+            <button type="submit" class="glow-btn px-8 py-3 mt-4 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)] inline-flex items-center gap-2">
+                <i class="fas fa-save text-hypr-cyan"></i> Update Timezone
             </button>
         </div>
     </form>
@@ -51,68 +54,69 @@
 
 <!-- Pay Period Settings -->
 {% call wt.worktime_card(title="Pay Period Settings", icon="fas fa-calendar-alt") %}
-    <div class="mb-3">
-        <p class="text-muted">Configure how your pay periods are automatically generated.</p>
+    <div class="mb-6">
+        <p class="text-slate-400 text-sm">Configure how your pay periods are automatically generated.</p>
     </div>
     
-    <form method="post" action="/worklog/settings/payperiod" class="row g-3">
-        <div class="col-md-6">
-            <label for="start_day" class="form-label">
-                <i class="fas fa-calendar-day me-1"></i>Pay Period Start Day
-            </label>
-            <select name="start_day" id="start_day" class="form-control" required>
-                <option value="monday" {% if pay_period_settings.start_day == "monday" %}selected{% endif %}>Monday</option>
-                <option value="tuesday" {% if pay_period_settings.start_day == "tuesday" %}selected{% endif %}>Tuesday</option>
-                <option value="wednesday" {% if pay_period_settings.start_day == "wednesday" %}selected{% endif %}>Wednesday</option>
-                <option value="thursday" {% if pay_period_settings.start_day == "thursday" %}selected{% endif %}>Thursday</option>
-                <option value="friday" {% if pay_period_settings.start_day == "friday" %}selected{% endif %}>Friday</option>
-                <option value="saturday" {% if pay_period_settings.start_day == "saturday" %}selected{% endif %}>Saturday</option>
-                <option value="sunday" {% if pay_period_settings.start_day == "sunday" %}selected{% endif %}>Sunday</option>
-            </select>
-            <small class="form-text text-muted">Day of the week when pay periods start</small>
-        </div>
-        <div class="col-md-6">
-            <label for="period_length" class="form-label">
-                <i class="fas fa-clock me-1"></i>Pay Period Length
-            </label>
-            <select name="period_length" id="period_length" class="form-control" required>
-                <option value="1" {% if pay_period_settings.period_length == 1 %}selected{% endif %}>1 week</option>
-                <option value="2" {% if pay_period_settings.period_length == 2 %}selected{% endif %}>2 weeks</option>
-                <option value="4" {% if pay_period_settings.period_length == 4 %}selected{% endif %}>4 weeks (monthly)</option>
-            </select>
-            <small class="form-text text-muted">How many weeks each pay period lasts</small>
-        </div>
-        <div class="col-12">
-            <div class="alert alert-info">
-                <h6 class="mb-2">Current Configuration</h6>
-                <p class="mb-0">
-                    Pay periods start every <strong>{{ pay_period_settings.start_day | title }}</strong> 
-                    and last for <strong>{{ pay_period_settings.period_length }} week
-			{%if pay_period_settings.period_length != 1%} s {%endif%}
-                </p>
+    <form method="post" action="/worklog/settings/payperiod" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3 w-full">
+                <label for="start_day" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-calendar-day me-1 text-hypr-cyan"></i>Start Day
+                </label>
+                <select name="start_day" id="start_day" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all" required>
+                    <option value="monday" {% if pay_period_settings.start_day == "monday" %}selected{% endif %}>Monday</option>
+                    <option value="tuesday" {% if pay_period_settings.start_day == "tuesday" %}selected{% endif %}>Tuesday</option>
+                    <option value="wednesday" {% if pay_period_settings.start_day == "wednesday" %}selected{% endif %}>Wednesday</option>
+                    <option value="thursday" {% if pay_period_settings.start_day == "thursday" %}selected{% endif %}>Thursday</option>
+                    <option value="friday" {% if pay_period_settings.start_day == "friday" %}selected{% endif %}>Friday</option>
+                    <option value="saturday" {% if pay_period_settings.start_day == "saturday" %}selected{% endif %}>Saturday</option>
+                    <option value="sunday" {% if pay_period_settings.start_day == "sunday" %}selected{% endif %}>Sunday</option>
+                </select>
+                <p class="text-xs text-slate-500 mt-2">Day of the week when pay periods start</p>
+            </div>
+            
+            <div class="space-y-3 w-full">
+                <label for="period_length" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-clock me-1 text-hypr-cyan"></i>Period Length
+                </label>
+                <select name="period_length" id="period_length" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all" required>
+                    <option value="1" {% if pay_period_settings.period_length == 1 %}selected{% endif %}>1 week</option>
+                    <option value="2" {% if pay_period_settings.period_length == 2 %}selected{% endif %}>2 weeks</option>
+                    <option value="4" {% if pay_period_settings.period_length == 4 %}selected{% endif %}>4 weeks (monthly)</option>
+                </select>
+                <p class="text-xs text-slate-500 mt-2">How many weeks each pay period lasts</p>
             </div>
         </div>
-        <div class="col-12">
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-save me-2"></i>Update Pay Period Settings
+        
+        <div class="glass-panel border-hypr-cyan/30 bg-hypr-cyan/5 rounded-2xl p-6 border border-white/10 relative overflow-hidden my-6">
+            <h6 class="text-sm font-bold text-white mb-2 uppercase tracking-widest">Current Configuration</h6>
+            <p class="text-slate-300">
+                Pay periods start every <strong class="text-hypr-cyan">{{ pay_period_settings.start_day | title }}</strong> 
+                and last for <strong class="text-hypr-cyan">{{ pay_period_settings.period_length }} week{% if pay_period_settings.period_length != 1 %}s{% endif %}</strong>
+            </p>
+        </div>
+        
+        <div class="pt-2 border-t border-white/10">
+            <button type="submit" class="glow-btn px-8 py-3 mt-4 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)] inline-flex items-center gap-2">
+                <i class="fas fa-save text-hypr-cyan"></i> Update Pay Period
             </button>
         </div>
     </form>
 {% endcall %}
 
 {% if flash %}
-<div class="alert alert-{{ flash[0] }} mt-4">
-    {{ flash[1] }}
+<div class="mt-6 p-4 rounded-xl glass-panel {% if flash[0] == 'success' %}border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)]{% else %}border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]{% endif %} animate-fade-in-up">
+    <p class="font-mono text-sm {% if flash[0] == 'success' %}text-green-400{% else %}text-red-400{% endif %} mb-1">// SYSTEM NOTICE</p>
+    <p class="text-white">{{ flash[1] }}</p>
 </div>
 {% endif %}
 
 {% endblock %}
 
 {% block script %}
-<!-- Include Work Time utilities -->
 <script src="/static/worktime-utils.js"></script>
 <script>
-// Update current time display
 function updateCurrentTime() {
     const now = new Date();
     const timeString = now.toLocaleString('en-US', {
@@ -131,12 +135,10 @@ function updateCurrentTime() {
     }
 }
 
-// Update time immediately and then every second
 document.addEventListener('DOMContentLoaded', function() {
     updateCurrentTime();
     setInterval(updateCurrentTime, 1000);
 
-    // Update preview when timezone selection changes
     const timezoneSelect = document.getElementById('timezone');
     if (timezoneSelect) {
         timezoneSelect.addEventListener('change', function() {

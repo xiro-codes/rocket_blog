@@ -1,87 +1,80 @@
 {% extends "worktime_base" %}
 
-{% block worktime_content %}
-<div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Timezone Settings</h1>
-            <a href="/worklog/" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Back to Dashboard
+{% block content %}
+<div class="flex justify-between items-center mb-8 animate-fade-in-up">
+    <h1 class="text-3xl font-black text-white tracking-tighter">
+        <i class="fas fa-globe me-2 text-hypr-cyan"></i>Timezone Settings
+    </h1>
+    <a href="/worklog/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
+        <i class="fas fa-arrow-left me-2"></i>Dashboard
+    </a>
+</div>
+
+<div class="glass-panel border-white/10 rounded-3xl p-8 mb-8 relative overflow-hidden shadow-2xl">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-hypr-cyan/10 blur-[80px] -z-10 rounded-full"></div>
+    
+    <div class="mb-8">
+        <p class="text-slate-300 text-lg">
+            Configure your preferred timezone for time display throughout the work time tracker.
+            All times will be shown in your selected timezone while being stored accurately in UTC.
+        </p>
+    </div>
+
+    <!-- Current Timezone Display -->
+    <div class="glass-panel border-hypr-cyan/30 bg-hypr-cyan/5 rounded-2xl p-6 mb-8 border border-white/10 relative overflow-hidden">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-cogs text-hypr-cyan"></i> Current Settings</h3>
+        <div class="space-y-3">
+            <p class="text-slate-300">
+                <strong class="text-white uppercase tracking-widest text-xs">Timezone:</strong> <span class="text-hypr-cyan font-medium">{{ current_timezone }}</span>
+            </p>
+            <p class="text-slate-300">
+                <strong class="text-white uppercase tracking-widest text-xs">Current time:</strong> <span id="current-time" class="font-mono text-hypr-cyan bg-black/50 px-3 py-1 rounded-lg ml-2"></span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Timezone Selection Form -->
+    <form method="post" action="/worklog/timezone" class="space-y-6">
+        <div class="space-y-3 w-full">
+            <label for="timezone" class="block text-sm font-bold text-white tracking-widest uppercase">
+                <i class="fas fa-map-marker-alt me-1 text-hypr-cyan"></i> Select Your Timezone
+            </label>
+            <select name="timezone" id="timezone" required class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all">
+                {% for timezone in timezones %}
+                    <option value="{{ timezone.0 }}" {% if timezone.0 == current_timezone %}selected{% endif %}>
+                        {{ timezone.1 }}
+                    </option>
+                {% endfor %}
+            </select>
+            <p class="mt-2 text-xs text-slate-500">Choose the timezone that matches your location for accurate time display.</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-white/10">
+            <button type="submit" class="glow-btn px-8 py-3 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)] inline-flex items-center gap-2">
+                <i class="fas fa-save text-hypr-cyan"></i> Update Timezone
+            </button>
+            <a href="/worklog/" class="px-8 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all font-medium inline-flex items-center justify-center gap-2">
+                <i class="fas fa-times text-slate-400"></i> Cancel
             </a>
         </div>
+    </form>
 
-        <div class="mb-6">
-            <p class="text-gray-600 text-lg">
-                Configure your preferred timezone for time display throughout the work time tracker.
-                All times will be shown in your selected timezone while being stored accurately in UTC.
-            </p>
-        </div>
-
-        <!-- Current Timezone Display -->
-        <div class="mb-8 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
-            <h3 class="text-lg font-semibold text-blue-800 mb-2">Current Settings</h3>
-            <p class="text-blue-700">
-                <strong>Timezone:</strong> {{ current_timezone }}
-            </p>
-            <p class="text-blue-700 text-sm mt-1">
-                Current time in your timezone: <span id="current-time" class="font-mono"></span>
-            </p>
-        </div>
-
-        <!-- Timezone Selection Form -->
-        <form method="post" action="/worklog/timezone" class="space-y-6">
-            <div>
-                <label for="timezone" class="block text-sm font-medium text-gray-700 mb-2">
-                    Select Your Timezone
-                </label>
-                <select 
-                    name="timezone" 
-                    id="timezone" 
-                    required
-                    class="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                >
-                    {% for timezone in timezones %}
-                        <option value="{{ timezone.0 }}" {% if timezone.0 == current_timezone %}selected{% endif %}>
-                            {{ timezone.1 }}
-                        </option>
-                    {% endfor %}
-                </select>
-                <p class="mt-2 text-sm text-gray-500">
-                    Choose the timezone that matches your location for accurate time display.
-                </p>
-            </div>
-
-            <div class="flex space-x-4">
-                <button 
-                    type="submit" 
-                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
-                >
-                    Update Timezone
-                </button>
-                <a 
-                    href="/worklog/" 
-                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
-                >
-                    Cancel
-                </a>
-            </div>
-        </form>
-
-        <!-- Information Section -->
-        <div class="mt-8 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-            <h3 class="text-lg font-semibold text-yellow-800 mb-2">Important Information</h3>
-            <ul class="text-yellow-700 space-y-1 text-sm">
-                <li>• All work time entries are stored in UTC for accuracy</li>
-                <li>• Changing your timezone only affects how times are displayed</li>
-                <li>• Duration calculations remain accurate regardless of timezone changes</li>
-                <li>• Your preference is saved and will persist across sessions</li>
-            </ul>
-        </div>
+    <!-- Information Section -->
+    <div class="mt-10 p-6 rounded-2xl bg-yellow-500/10 border border-yellow-500/30 text-slate-300">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-info-circle text-yellow-400"></i> Important Information</h3>
+        <ul class="space-y-3 text-sm">
+            <li class="flex items-start gap-3"><i class="fas fa-caret-right text-yellow-400 mt-1"></i> <div>All work time entries are stored in UTC for accuracy</div></li>
+            <li class="flex items-start gap-3"><i class="fas fa-caret-right text-yellow-400 mt-1"></i> <div>Changing your timezone only affects how times are displayed</div></li>
+            <li class="flex items-start gap-3"><i class="fas fa-caret-right text-yellow-400 mt-1"></i> <div>Duration calculations remain accurate regardless of timezone changes</div></li>
+            <li class="flex items-start gap-3"><i class="fas fa-caret-right text-yellow-400 mt-1"></i> <div>Your preference is saved and will persist across sessions</div></li>
+        </ul>
     </div>
 </div>
 
+{% endblock %}
+
+{% block script %}
 <script>
-// Update current time display
 function updateCurrentTime() {
     const now = new Date();
     const timeString = now.toLocaleString('en-US', {
@@ -94,32 +87,36 @@ function updateCurrentTime() {
         second: '2-digit',
         hour12: false
     });
-    document.getElementById('current-time').textContent = timeString;
+    const element = document.getElementById('current-time');
+    if(element) element.textContent = timeString;
 }
 
-// Update time immediately and then every second
 updateCurrentTime();
 setInterval(updateCurrentTime, 1000);
 
-// Update preview when timezone selection changes
-document.getElementById('timezone').addEventListener('change', function() {
-    const selectedTimezone = this.value;
-    const now = new Date();
-    try {
-        const timeString = now.toLocaleString('en-US', {
-            timeZone: selectedTimezone,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
-        });
-        document.getElementById('current-time').textContent = timeString + ' (Preview)';
-    } catch (e) {
-        document.getElementById('current-time').textContent = 'Invalid timezone';
-    }
-});
+const timezoneSelect = document.getElementById('timezone');
+if(timezoneSelect) {
+    timezoneSelect.addEventListener('change', function() {
+        const selectedTimezone = this.value;
+        const now = new Date();
+        try {
+            const timeString = now.toLocaleString('en-US', {
+                timeZone: selectedTimezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            const element = document.getElementById('current-time');
+            if(element) element.textContent = timeString + ' (Preview)';
+        } catch (e) {
+            const element = document.getElementById('current-time');
+            if(element) element.textContent = 'Invalid timezone';
+        }
+    });
+}
 </script>
 {% endblock %}

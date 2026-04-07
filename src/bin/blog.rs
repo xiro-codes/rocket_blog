@@ -14,8 +14,8 @@ use app::{
     features::Features,
     middleware,
     services::{
-        AIProviderService, AuthService, BackgroundJobService, BlogService, CommentService,
-        CoordinatorService, OllamaService, OpenAIService, ReactionService, SettingsService,
+        AuthService, BackgroundJobService, BlogService, CommentService,
+        CoordinatorService, ReactionService, SettingsService,
         TagService, YoutubeDownloadService,
     },
     template_config,
@@ -35,21 +35,12 @@ impl BlogServiceRegistry {
     pub fn attach_all_services(rocket: Rocket<Build>) -> Rocket<Build> {
         log::info!("Registering blog application services...");
 
-        // Create AI provider service and add providers
-        log::debug!("Creating AI provider service with OpenAI and Ollama providers");
-        let mut ai_service = AIProviderService::new();
-        // ai_service.add_provider(Box::new(OpenAIService::new()));
-        ai_service.add_provider(Box::new(OllamaService::new()));
-
-        log::debug!("Attaching blog services: Auth, Blog, Comment, OpenAI, Ollama, AIProvider, Reaction, Settings, Tag, Coordinator, YouTube, BackgroundJob");
+        log::debug!("Attaching blog services: Auth, Blog, Comment, Reaction, Settings, Tag, Coordinator, YouTube, BackgroundJob");
 
         rocket
             .manage(AuthService::new())
             .manage(BlogService::new())
             .manage(CommentService::new())
-            .manage(OpenAIService::new()) // Keep for backwards compatibility
-            .manage(OllamaService::new())
-            .manage(ai_service)
             .manage(ReactionService::new())
             .manage(SettingsService::new())
             .manage(TagService::new())

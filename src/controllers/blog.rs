@@ -3,7 +3,7 @@ use crate::{
     controllers::base::ControllerBase,
     dto::post::FormDTO,
     pool::Db,
-    services::{AuthService, BlogService, CommentService, AIProviderService, ReactionService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService},
+    services::{AuthService, BlogService, CommentService, ReactionService, TagService, CoordinatorService, YoutubeDownloadService, BackgroundJobService},
     types::{HttpRange, StreamedFile},
 };
 use models::{dto::SearchFormDTO, post_reaction::ReactionType, background_job};
@@ -423,22 +423,16 @@ async fn video(
 
 #[get("/create")]
 async fn create_view(
-    conn: Connection<'_, Db>,
-    ai_service: &State<AIProviderService>,
+    _conn: Connection<'_, Db>,
     flash: Option<FlashMessage<'_>>,
     _admin: crate::guards::admin::Admin,
 ) -> Result<Template, Status> {
     log::info!("Route accessed: GET /blog/create - Create blog post page requested");
-    let db = conn.into_inner();
-    
-    // Check if any AI service is available
-    let ai_available = ai_service.is_any_available(db).await;
     
     Ok(Template::render(
         "blog/create",
         context! {
             form_url: "create",
-            ai_available,
             flash: ControllerBase::extract_flash(flash)
         },
     ))
@@ -471,8 +465,8 @@ async fn create(
                 Err(_) => return Err(Status::InternalServerError),
             };
             
-            debug!("Created post with form data: title={}, ai_generate={:?}", 
-                   form.title, form.ai_generate);
+            debug!("Created post with form data: title={}", 
+                   form.title);
             
             if let Some(tags_str) = form.tags {
                 for tag_name in tags_str.split(",") {
@@ -503,7 +497,6 @@ async fn create(
 async fn edit_view(
     conn: Connection<'_, Db>,
     service: &State<BlogService>,
-    ai_service: &State<AIProviderService>,
     tag_service: &State<TagService>,
     id: i32,
     _admin: crate::guards::admin::Admin,
@@ -521,15 +514,11 @@ async fn edit_view(
         Err(_) => return Err(Status::InternalServerError),
     };
     
-    // Check if any AI service is available
-    let ai_available = ai_service.is_any_available(db).await;
-    
     Ok(Template::render(
         "blog/edit",
         context! {
             post,
             tags,
-            ai_available,
             form_url: ""
         },
     ))
@@ -798,121 +787,6 @@ async fn get_reactions(
     Ok(Json(json!(summary)))
 }
 
-/// Generate AI content for a blog post
-#[post("/generate-content", data = "<generation_request>")]
-async fn generate_ai_content(
-    conn: Connection<'_, Db>,
-    auth_service: &State<AuthService>,
-    ai_service: &State<AIProviderService>,
-    jar: &CookieJar<'_>,
-    generation_request: Json<Value>,
-) -> Result<Json<Value>, Status> {
-    log::info!("Route accessed: POST /blog/generate-content - AI content generation requested");
-    // Check authentication
-    let token = ControllerBase::check_auth(jar)?;
-    let db = conn.into_inner();
-    
-    if let Some(token_str) = token {
-        if let Ok(token_uuid) = uuid::Uuid::parse_str(&token_str) {
-            if auth_service.check_token(db, token_uuid).await.is_none() {
-                return Err(Status::Unauthorized);
-            }
-        } else {
-            return Err(Status::Unauthorized);
-        }
-    } else {
-        return Err(Status::Unauthorized);
-    }
-
-    let request = generation_request.into_inner();
-    
-    // Get provider preference (optional parameter)
-    let provider_preference = request.get("provider")
-        .and_then(|v| v.as_str());
-
-    // Get an available AI provider
-    let provider = if let Some(pref) = provider_preference {
-        // User requested specific provider
-        ai_service.get_available_providers(db).await
-            .into_iter()
-            .find(|p| p.provider_name().to_lowercase() == pref.to_lowercase())
-    } else {
-        // Use first available provider
-        ai_service.get_available_provider(db).await
-    };
-
-    let provider = match provider {
-        Some(p) => p,
-        None => {
-            return Ok(Json(json!({
-                "error": "No AI service configured or available"
-            })));
-        }
-    };
-
-    let title = request.get("title")
-        .and_then(|v| v.as_str())
-        .unwrap_or("")
-        .to_string();
-    
-    let prompt = request.get("prompt")
-        .and_then(|v| v.as_str());
-    
-    let generation_type = request.get("type")
-        .and_then(|v| v.as_str())
-        .unwrap_or("content");
-
-    match generation_type {
-        "content" => {
-            match provider.generate_post_content(db, &title, prompt).await {
-                Ok(content) => Ok(Json(json!({
-                    "success": true,
-                    "content": content,
-                    "provider": provider.provider_name()
-                }))),
-                Err(error) => Ok(Json(json!({
-                    "error": error
-                })))
-            }
-        },
-        "excerpt" => {
-            let content = request.get("content")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
-            
-            match provider.generate_excerpt(db, content).await {
-                Ok(excerpt) => Ok(Json(json!({
-                    "success": true,
-                    "excerpt": excerpt,
-                    "provider": provider.provider_name()
-                }))),
-                Err(error) => Ok(Json(json!({
-                    "error": error
-                })))
-            }
-        },
-        "tags" => {
-            let content = request.get("content")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
-            
-            match provider.generate_tags(db, &title, content).await {
-                Ok(tags) => Ok(Json(json!({
-                    "success": true,
-                    "tags": tags.join(", "),
-                    "provider": provider.provider_name()
-                }))),
-                Err(error) => Ok(Json(json!({
-                    "error": error
-                })))
-            }
-        },
-        _ => Ok(Json(json!({
-            "error": "Invalid generation type"
-        })))
-    }
-}
-
 #[get("/<id>/background-job-status")]
 async fn get_background_job_status(
     conn: Connection<'_, Db>,
@@ -993,7 +867,6 @@ fn routes() -> Vec<Route> {
         add_reaction,
         remove_reaction,
         get_reactions,
-        generate_ai_content,
         get_background_job_status
     ]
 }

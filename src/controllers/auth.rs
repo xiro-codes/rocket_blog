@@ -61,7 +61,9 @@ async fn login(
     
     let db = conn.into_inner();
     if let Ok(token) = service.login(db, form_data).await {
-        jar.add_private(Cookie::new("token", token.to_string()));
+        let mut cookie = Cookie::new("token", token.to_string());
+        cookie.set_path("/");
+        jar.add_private(cookie);
         log::info!("Login successful - redirecting to blog");
         ControllerBase::success_redirect("/blog/", "Login successful.")
     } else {
@@ -73,7 +75,9 @@ async fn login(
 #[get("/logout")]
 async fn logout(jar: &CookieJar<'_>) -> Flash<Redirect> {
     log::info!("Route accessed: GET /auth/logout - User logout requested");
-    jar.remove_private(Cookie::from("token"));
+    let mut cookie = Cookie::from("token");
+    cookie.set_path("/");
+    jar.remove_private(cookie);
     log::info!("User logged out successfully");
     ControllerBase::success_redirect("/blog/", "Logout successful.")
 }

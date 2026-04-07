@@ -1,153 +1,145 @@
 {% extends "worktime_base" %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-0">
-        <i class="fas fa-calendar-alt me-2"></i>Pay Periods
+<div class="flex justify-between items-center mb-8 animate-fade-in-up">
+    <h1 class="text-3xl font-black text-white tracking-tighter">
+        <i class="fas fa-calendar-alt me-2 text-hypr-cyan"></i>Pay Periods
     </h1>
-    <a href="/worklog/" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    <a href="/worklog/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
+        <i class="fas fa-arrow-left me-2"></i>Dashboard
     </a>
 </div>
 
-<!-- Create New Pay Period -->
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
-        <h3 class="mb-0">
-            <i class="fas fa-plus me-2"></i>Create New Pay Period
+<!-- Create New Pay Period Section -->
+<div class="glass-panel border-white/10 rounded-3xl p-8 mb-8 relative overflow-hidden shadow-2xl">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-hypr-cyan/10 blur-[80px] -z-10 rounded-full"></div>
+    <div class="px-6 py-5 border-b border-white/10 mb-6 flex items-center">
+        <h3 class="text-xl font-bold tracking-tight text-white flex items-center gap-3">
+            <i class="fas fa-plus text-hypr-cyan"></i> Create New Pay Period
         </h3>
     </div>
     
-    <form method="post" action="/worklog/payperiods/create" class="row g-3">
-        <div class="col-md-4">
-            <label for="name" class="form-label">
-                <i class="fas fa-tag me-1"></i>Period Name
-            </label>
-            <input type="text" class="form-control" id="name" name="name" placeholder="e.g., January 2024" required>
-            <small class="form-text text-muted">Choose a descriptive name for this pay period</small>
+    <form method="post" action="/worklog/payperiods" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-3 w-full">
+                <label for="period_name" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-tag me-1 text-hypr-cyan"></i>Period Name
+                </label>
+                <input type="text" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all" id="period_name" name="period_name" placeholder="e.g., December 2024" required>
+                <p class="text-xs text-slate-500 mt-1">Descriptive name for this period</p>
+            </div>
+            <div class="space-y-3 w-full">
+                <label for="start_date" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-play me-1 text-hypr-cyan"></i>Start Date
+                </label>
+                <input type="date" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all [color-scheme:dark]" id="start_date" name="start_date" required>
+            </div>
+            <div class="space-y-3 w-full">
+                <label for="end_date" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-stop me-1 text-hypr-cyan"></i>End Date
+                </label>
+                <input type="date" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all [color-scheme:dark]" id="end_date" name="end_date" required>
+            </div>
         </div>
-        <div class="col-md-4">
-            <label for="start_date" class="form-label">
-                <i class="fas fa-play me-1"></i>Start Date
-            </label>
-            <input type="date" class="form-control" id="start_date" name="start_date" required>
-        </div>
-        <div class="col-md-4">
-            <label for="end_date" class="form-label">
-                <i class="fas fa-stop me-1"></i>End Date
-            </label>
-            <input type="date" class="form-control" id="end_date" name="end_date" required>
-        </div>
-        <div class="col-12 text-center">
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-plus me-2"></i>Create Pay Period
+        <div class="flex justify-end pt-4 border-t border-white/10">
+            <button type="submit" class="glow-btn px-8 py-3 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)] inline-flex items-center gap-2">
+                <i class="fas fa-calendar-plus text-hypr-cyan"></i> Create Period
             </button>
         </div>
     </form>
 </div>
 
 <!-- Auto-assign Unassigned Entries -->
-{% if unassigned_count > 0 %}
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
-        <h3 class="mb-0">
-            <i class="fas fa-magic me-2"></i>Auto-assign Entries
+{% if unassigned_count is defined and unassigned_count > 0 %}
+<div class="glass-panel border-yellow-500/30 bg-yellow-500/5 rounded-3xl p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div>
+        <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+            <i class="fas fa-magic text-yellow-400"></i> Auto-assign Entries
         </h3>
+        <p class="text-slate-300">You have <strong class="text-white">{{ unassigned_count }}</strong> unassigned time entries.</p>
+        <p class="text-xs text-slate-400 mt-1">Automatically assign them to appropriate pay periods based on their dates.</p>
     </div>
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <p class="mb-1">You have <strong>{{ unassigned_count }}</strong> unassigned time entries.</p>
-            <small class="text-muted">Automatically assign them to appropriate pay periods based on their dates.</small>
-        </div>
-        <form method="post" action="/worklog/payperiods/assign" class="d-inline">
-            <button type="submit" class="btn btn-warning">
-                <i class="fas fa-magic me-2"></i>Auto-assign Entries
-            </button>
-        </form>
-    </div>
+    <form method="post" action="/worklog/payperiods/assign">
+        <button type="submit" class="px-6 py-3 rounded-full bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/50 text-yellow-200 font-bold transition-all shadow-[0_0_20px_rgba(234,179,8,0.2)] inline-flex items-center gap-2">
+            <i class="fas fa-magic"></i> Auto-Assign
+        </button>
+    </form>
 </div>
 {% endif %}
 
 <!-- Existing Pay Periods -->
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
-        <h3 class="mb-0">
-            <i class="fas fa-list me-2"></i>Your Pay Periods
+<div class="glass-panel border-white/10 rounded-3xl p-8 shadow-xl">
+    <div class="px-6 py-5 border-b border-white/10 mb-6 flex items-center">
+        <h3 class="text-xl font-bold tracking-tight text-white flex items-center gap-3">
+            <i class="fas fa-list text-hypr-cyan"></i> Your Pay Periods
         </h3>
     </div>
     
     {% if pay_periods %}
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
+        <div class="overflow-x-auto rounded-xl border border-white/5 bg-black/20">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead class="uppercase tracking-wider text-xs text-slate-400 bg-white/5 border-b border-white/10">
                     <tr>
-                        <th>Period Name</th>
-                        <th>Date Range</th>
-                        <th>Status</th>
-                        <th class="d-none d-md-table-cell">Hours</th>
-                        <th class="d-none d-md-table-cell">Earnings</th>
-                        <th class="d-none d-lg-table-cell">Entries</th>
-                        <th>Actions</th>
+                        <th class="px-6 py-4 font-semibold">Period Name</th>
+                        <th class="px-6 py-4 font-semibold">Date Range</th>
+                        <th class="px-6 py-4 font-semibold">Status</th>
+                        <th class="px-6 py-4 font-semibold hidden md:table-cell">Hours</th>
+                        <th class="px-6 py-4 font-semibold hidden md:table-cell">Earnings</th>
+                        <th class="px-6 py-4 font-semibold hidden lg:table-cell">Entries</th>
+                        <th class="px-6 py-4 font-semibold text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-white/5 text-slate-300">
                     {% for period in pay_periods %}
-                    <tr>
-                        <td>
-                            <strong>{{ period.period_name }}</strong>
+                    <tr class="hover:bg-white/5 transition-colors {% if period.is_current %}bg-green-500/5{% endif %}">
+                        <td class="px-6 py-4 font-medium text-white">
+                            {{ period.period_name }}
                             {% if period.is_current %}
-                                <span class="status-badge status-active ms-2">
-                                    <i class="fas fa-circle"></i>Current
+                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-widest border border-green-500/30 ml-2">
+                                    <i class="fas fa-circle animate-pulse text-[6px]"></i>Current
                                 </span>
                             {% endif %}
                         </td>
-                        <td>
-                            <small>
-                                {{ period.start_date | date(format='%m/%d/%Y') }} - 
-                                {{ period.end_date | date(format='%m/%d/%Y') }}
-                            </small>
+                        <td class="px-6 py-4 text-slate-400 font-mono text-xs">
+                            {{ period.start_date | date(format='%m/%d/%Y') }} - {{ period.end_date | date(format='%m/%d/%Y') }}
                         </td>
-                        <td>
-                            {% if period.is_current %}
-                                <span class="badge" style="background-color: var(--success); color: var(--text-primary);">
-                                    <i class="fas fa-calendar-check me-1"></i>Active
+                        <td class="px-6 py-4">
+                            {% if period.is_current or period.is_active %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold uppercase tracking-widest border border-green-500/30">
+                                    <i class="fas fa-calendar-check"></i>Active
                                 </span>
                             {% else %}
                                 {% set now = date() %}
                                 {% set end_date = period.end_date %}
                                 {% if end_date < now %}
-                                    <span class="badge" style="background-color: var(--text-muted); color: var(--text-white);">
-                                        <i class="fas fa-archive me-1"></i>Completed
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 text-slate-400 text-xs font-bold uppercase tracking-widest border border-white/20">
+                                        <i class="fas fa-archive"></i>Completed
                                     </span>
                                 {% else %}
-                                    <span class="badge" style="background-color: var(--info); color: var(--text-primary);">
-                                        <i class="fas fa-clock me-1"></i>Upcoming
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-hypr-cyan/20 text-hypr-cyan text-xs font-bold uppercase tracking-widest border border-hypr-cyan/30">
+                                        <i class="fas fa-clock"></i>Upcoming
                                     </span>
                                 {% endif %}
                             {% endif %}
                         </td>
-                        <td class="d-none d-md-table-cell">
-                            <strong>{{ period.total_hours | round(precision=1) }}h</strong>
+                        <td class="px-6 py-4 hidden md:table-cell font-mono">
+                            {{ period.total_hours | round(precision=1) }}h
                         </td>
-                        <td class="d-none d-md-table-cell">
-                            <strong class="text-success">${{ period.total_earnings | round(precision=2) }}</strong>
+                        <td class="px-6 py-4 hidden md:table-cell font-mono text-green-400 font-medium">
+                            {{ period.currency | default("$") }} {{ period.total_earnings | round(precision=2) }}
                         </td>
-                        <td class="d-none d-lg-table-cell text-muted">
-                            {{ period.entries_count }}
+                        <td class="px-6 py-4 hidden lg:table-cell text-slate-400">
+                            {{ period.entries_count }} entries
                         </td>
-                        <td>
-                            <div class="d-flex gap-1">
-                                <button class="btn btn-info btn-sm" 
-                                        onclick="viewPeriodDetails({{ period.id }}, '{{ period.period_name }}')">
-                                    <i class="fas fa-eye"></i>
+                        <td class="px-6 py-4 text-right space-x-2">
+                            <button type="button" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-hypr-cyan/10 border border-hypr-cyan/30 hover:bg-hypr-cyan/20 text-hypr-cyan transition-all" onclick="viewPeriodDetails('{{ period.id }}', '{{ period.period_name }}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <form method="post" action="/worklog/payperiods/delete/{{ period.id }}" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this pay period?')">
+                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 transition-all">
+                                    <i class="fas fa-trash"></i>
                                 </button>
-                                <form method="post" action="/worklog/payperiods/delete/{{ period.id }}" class="d-inline" 
-                                      onsubmit="return confirm('Are you sure you want to delete this pay period?')">
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
@@ -155,201 +147,49 @@
             </table>
         </div>
     {% else %}
-        <div class="text-center">
-            <i class="fas fa-calendar-alt text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-            <p class="text-muted mt-3">No pay periods created yet. Create your first pay period to organize your work time!</p>
+        <div class="text-center py-12">
+            <i class="fas fa-calendar-alt text-slate-700 text-5xl mb-4"></i>
+            <h4 class="text-xl font-bold text-white mb-2">No Pay Periods Yet</h4>
+            <p class="text-slate-400 font-mono text-sm max-w-md mx-auto mb-6">// Create your first pay period to start organizing your work time entries. They help you track earnings over specific time ranges.</p>
         </div>
     {% endif %}
 </div>
 
 {% if flash %}
-<div class="alert alert-{{ flash[0] }} mt-3">
-    <i class="fas fa-info-circle me-2"></i>{{ flash[1] }}
+<div class="mt-6 p-4 rounded-xl glass-panel {% if flash[0] == 'success' %}border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)]{% else %}border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]{% endif %} animate-fade-in-up">
+    <p class="font-mono text-sm {% if flash[0] == 'success' %}text-green-400{% else %}text-red-400{% endif %} mb-1">// SYSTEM NOTICE</p>
+    <p class="text-white">{{ flash[1] }}</p>
 </div>
 {% endif %}
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <h1>📅 Pay Period Management</h1>
-            <p class="text-muted">Manage your work time pay periods, {{ username }}!</p>
-        </div>
-    </div>
-
-    <!-- Create New Pay Period Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card p-3 mb-4">
-                <h3>➕ Create New Pay Period</h3>
-                <form method="post" action="/worklog/payperiods" class="row g-3">
-                    <div class="col-md-4">
-                        <label for="period_name" class="form-label">Period Name</label>
-                        <input type="text" class="form-control" id="period_name" name="period_name" 
-                               placeholder="e.g., December 2024, Week 1-2 Jan 2025" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="start_date" class="form-label">Start Date</label>
-                        <input type="date" class="form-control" id="start_date" name="start_date" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="end_date" class="form-label">End Date</label>
-                        <input type="date" class="form-control" id="end_date" name="end_date" required>
-                    </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary">📅 Create Pay Period</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Auto-Assign Unassigned Entries -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card p-3 mb-4">
-                <h3>🔄 Auto-Assign Entries</h3>
-                <p>Automatically assign unassigned work time entries to appropriate pay periods based on their dates.</p>
-                <form method="post" action="/worklog/payperiods/assign" class="d-inline">
-                    <button type="submit" class="btn btn-warning">🔄 Auto-Assign All Unassigned Entries</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Existing Pay Periods -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card p-3 mb-4">
-                <h3>📋 Your Pay Periods</h3>
-                {% if pay_periods %}
-                    <div class="table-responsive">
-                        <table class="table table-dark table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Period Name</th>
-                                    <th>Date Range</th>
-                                    <th>Status</th>
-                                    <th>Total Hours</th>
-                                    <th>Total Earnings</th>
-                                    <th>Entries</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for period in pay_periods %}
-                                <tr{% if period.is_current %} class="table-success"{% endif %}>
-                                    <td>
-                                        <strong>{{ period.period_name }}</strong>
-                                        {% if period.is_current %}
-                                            <span class="badge bg-success ms-2">Current</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ period.start_date | date(format='%Y-%m-%d') }} to {{ period.end_date | date(format='%Y-%m-%d') }}</td>
-                                    <td>
-                                        {% if period.is_active %}
-                                            <span class="badge bg-success">Active</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">Inactive</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ period.total_hours | round(precision=2) }} hrs</td>
-                                    <td>{{ period.currency }} {{ period.total_earnings | round(precision=2) }}</td>
-                                    <td>{{ period.entries_count }} entries</td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-outline-info" 
-                                                    onclick="viewPeriodDetails('{{ period.id }}')">
-                                                👁️ View
-                                            </button>
-                                            <form method="post" action="/worklog/payperiods/{{ period.id }}/delete" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
-                                                        onclick="return confirm('Are you sure you want to delete this pay period?')">
-                                                    🗑️ Delete
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        <h4>🏁 No Pay Periods Yet!</h4>
-                        <p>Create your first pay period to start organizing your work time entries.</p>
-                        <p><strong>Tip:</strong> Pay periods help you track earnings over specific time ranges like weekly, bi-weekly, or monthly periods.</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Navigation -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card p-3 mb-4">
-                <h3>🚀 Quick Actions</h3>
-                <div class="d-flex gap-2 flex-wrap">
-                    <a href="/worklog/" class="btn btn-outline-primary">🏠 Dashboard</a>
-                    <a href="/worklog/roles" class="btn btn-outline-secondary">⚙️ Manage Roles</a>
-                    <a href="/worklog/entries" class="btn btn-outline-secondary">📊 View All Entries</a>
-                    <a href="/worklog/notifications" class="btn btn-outline-secondary">🔔 Notifications</a>
-                    <a href="/worklog/settings" class="btn btn-outline-success">⚙️ Settings</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
-
 
 {% block script %}
 <script>
 function viewPeriodDetails(id, name) {
-    // For now, show an alert with basic info
-    // In the future, this could open a modal with detailed breakdown
     alert(`Pay Period: ${name}\n\nClick OK to view detailed breakdown.`);
-    // Redirect to detailed view (if implemented)
-    // window.location.href = `/payperiods/${id}`;
+    // window.location.href = `/worklog/entries?period=${id}`;
 }
 
-// Set today's date as default for start date
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
     const startDateInput = document.getElementById('start_date');
     const endDateInput = document.getElementById('end_date');
     
-    if (!startDateInput.value) {
+    if (startDateInput && !startDateInput.value) {
         startDateInput.value = today;
     }
     
-    // Update end date when start date changes
-    startDateInput.addEventListener('change', function() {
-        const startDate = new Date(this.value);
-        if (startDate) {
-            // Default to end of month
-            const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
-            endDateInput.value = endDate.toISOString().split('T')[0];
-        }
-    });
-});
-function viewPeriodDetails(periodId) {
-    // You can implement a modal or redirect to a detailed view
-    window.location.href = '/entries?period=' + periodId;
-}
-
-// Auto-set current date for end date when start date changes
-document.getElementById('start_date').addEventListener('change', function() {
-    const startDate = new Date(this.value);
-    const endDate = document.getElementById('end_date');
-    
-    if (!endDate.value) {
-        // Set end date to start date + 13 days (2 weeks) by default
-        const defaultEndDate = new Date(startDate);
-        defaultEndDate.setDate(defaultEndDate.getDate() + 13);
-        endDate.value = defaultEndDate.toISOString().split('T')[0];
+    if(startDateInput) {
+        startDateInput.addEventListener('change', function() {
+            const startDate = new Date(this.value);
+            if (startDate && endDateInput && !endDateInput.value) {
+                const endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + 13); // Default 2 weeks
+                endDateInput.value = endDate.toISOString().split('T')[0];
+            }
+        });
     }
 });
 </script>
-{% endblock script %}
+{% endblock %}

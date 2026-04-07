@@ -1,248 +1,216 @@
 {# 
    Work Time Template Macros
-   
-   This file contains reusable macros for work time templates to reduce duplication
-   and improve maintainability.
 #}
 
-{# Navigation component with quick actions #}
 {% macro quick_nav(current_page="", show_mobile_menu=true) %}
-    {% if show_mobile_menu %}
-    <!-- Mobile Menu Toggle -->
-    <button class="menu-toggle" id="menu-toggle">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <!-- Side Menu Overlay -->
-    <div class="side-menu-overlay" id="side-menu-overlay"></div>
-
-    <!-- Side Menu -->
-    <div class="side-menu" id="side-menu">
-        <div class="side-menu-header">
-            <h4 class="side-menu-title">
-                <i class="fas fa-compass me-2"></i>Quick Actions
-            </h4>
-            <button class="close-menu" id="close-menu">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        {{ nav_buttons(current_page=current_page, class="w-100 mb-2") }}
-    </div>
-    {% endif %}
-
     <!-- Quick Actions Navigation -->
-    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm flex flex-wrap p-2 gap-2 my-6" style="margin: 1rem 0;">
-        <div class="text-center mb-3">
-            <h4 class="mt-2 text-lg text-gray-600 dark:text-gray-400">
-                <i class="fas fa-compass me-2"></i>Quick Actions
+    <div class="glass-panel border-white/10 rounded-2xl flex flex-col p-6 my-6 relative overflow-hidden shadow-2xl shadow-hypr-cyan/5">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-hypr-cyan/10 blur-[40px] -z-10 rounded-full"></div>
+        <div class="text-center mb-6">
+            <h4 class="text-xl font-bold tracking-tight text-white uppercase tracking-widest">
+                <i class="fas fa-compass me-2 text-hypr-cyan"></i>Quick Actions
             </h4>
         </div>
-        <div class="row g-2">
-            {{ nav_buttons(current_page=current_page, class="btn-outline-primary w-100", wrapper_class="col-sm-6 col-lg-3") }}
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {{ nav_buttons(current_page=current_page) }}
         </div>
     </div>
 {% endmacro %}
 
-{# Navigation buttons helper macro #}
-{% macro nav_buttons(current_page="", class="btn btn-primary", wrapper_class="") %}
+{% macro nav_buttons(current_page="") %}
     {% set nav_items = [
-        {"url": "/", "icon": "fas fa-home", "text": "Dashboard", "key": "dashboard"},
-        {"url": "/entries", "icon": "fas fa-list-ul", "text": "View Entries", "key": "entries"},
-        {"url": "/roles", "icon": "fas fa-user-tag", "text": "Manage Roles", "key": "roles"},
-        {"url": "/settings", "icon": "fas fa-cog", "text": "Settings", "key": "settings"},
-        {"url": "/notifications", "icon": "fas fa-bell", "text": "Notifications", "key": "notifications"}
+        {"url": "/worklog", "icon": "fas fa-home", "text": "Dashboard", "key": "dashboard"},
+        {"url": "/worklog/entries", "icon": "fas fa-list-ul", "text": "Entries", "key": "entries"},
+        {"url": "/worklog/roles", "icon": "fas fa-user-tag", "text": "Roles", "key": "roles"},
+        {"url": "/worklog/settings", "icon": "fas fa-cog", "text": "Settings", "key": "settings"},
+        {"url": "/worklog/notifications", "icon": "fas fa-bell", "text": "Alerts", "key": "notifications"}
     ] %}
     
     {% for item in nav_items %}
-        {% if wrapper_class %}
-        <div class="{{ wrapper_class }}">
-        {% endif %}
-            <a href="{{ item.url }}" 
-               class="{{ class }}{% if current_page == item.key %} active{% endif %}" 
-               style="margin: 0.25rem 0;">
-                <i class="{{ item.icon }} me-2"></i>{{ item.text }}
-            </a>
-        {% if wrapper_class %}
-        </div>
-        {% endif %}
+        <a href="{{ item.url }}" 
+           class="px-4 py-3 rounded-xl border transition-all flex flex-col items-center justify-center gap-2 text-sm font-medium {% if current_page == item.key %}glow-btn bg-hypr-dark border-hypr-cyan text-white shadow-[0_0_15px_rgba(0,168,244,0.3)]{% else %}bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white hover:border-hypr-cyan/50{% endif %}">
+            <i class="{{ item.icon }} text-lg {% if current_page == item.key %}text-hypr-cyan{% endif %}"></i>
+            {{ item.text }}
+        </a>
     {% endfor %}
 {% endmacro %}
 
-{# Stats grid display component #}
 {% macro stats_grid(stats) %}
-    <div class="stats-grid">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 my-8">
         {% if stats.pay_period_hours is defined %}
-        <div class="stat-card">
-            <span class="stat-value">{{ stats.pay_period_hours | round(2)}}</span>
-            <span class="stat-label">
-                <i class="fas fa-calendar-week me-1"></i>Pay Period Hours
+        <div class="glass-panel border-white/10 rounded-xl p-6 flex flex-col items-center justify-center">
+            <span class="text-3xl font-black text-white">{{ stats.pay_period_hours | round(2)}}</span>
+            <span class="text-xs font-mono text-hypr-cyan mt-2 text-center uppercase tracking-wider">
+                <i class="fas fa-calendar-week me-1"></i>Period Hrs
             </span>
         </div>
         {% endif %}
         
         {% if stats.total_hours is defined %}
-        <div class="stat-card">
-            <span class="stat-value">{{ stats.total_hours | round(2) }}</span>
-            <span class="stat-label">
-                <i class="fas fa-clock me-1"></i>Total Hours
+        <div class="glass-panel border-white/10 rounded-xl p-6 flex flex-col items-center justify-center">
+            <span class="text-3xl font-black text-white">{{ stats.total_hours | round(2) }}</span>
+            <span class="text-xs font-mono text-hypr-cyan mt-2 text-center uppercase tracking-wider">
+                <i class="fas fa-clock me-1"></i>Total Hrs
             </span>
         </div>
         {% endif %}
         
         {% if stats.total_earnings is defined %}
-        <div class="stat-card">
-            <span class="stat-value">${{ stats.total_earnings | round(2) }}</span>
-            <span class="stat-label">
-                <i class="fas fa-dollar-sign me-1"></i>Total Earnings
+        <div class="glass-panel border-white/10 rounded-xl p-6 flex flex-col items-center justify-center">
+            <span class="text-3xl font-black text-white">${{ stats.total_earnings | round(2) }}</span>
+            <span class="text-xs font-mono text-hypr-cyan mt-2 text-center uppercase tracking-wider">
+                <i class="fas fa-dollar-sign me-1"></i>Total Earned
             </span>
         </div>
         {% endif %}
         
         {% if stats.current_shift_earnings is defined %}
-        <div class="stat-card">
-            <span class="stat-value">${{ stats.current_shift_earnings | round(2) }}</span>
-            <span class="stat-label">
+        <div class="glass-panel border-white/10 rounded-xl p-6 flex flex-col items-center justify-center">
+            <span class="text-3xl font-black text-white">${{ stats.current_shift_earnings | round(2) }}</span>
+            <span class="text-xs font-mono text-hypr-cyan mt-2 text-center uppercase tracking-wider">
                 <i class="fas fa-coins me-1"></i>Current Shift
             </span>
         </div>
         {% endif %}
         
         {% if stats.entries_count is defined %}
-        <div class="stat-card">
-            <span class="stat-value">{{ stats.entries_count }}</span>
-            <span class="stat-label">
-                <i class="fas fa-briefcase me-1"></i>Total Entries
+        <div class="glass-panel border-white/10 rounded-xl p-6 flex flex-col items-center justify-center">
+            <span class="text-3xl font-black text-white">{{ stats.entries_count }}</span>
+            <span class="text-xs font-mono text-hypr-cyan mt-2 text-center uppercase tracking-wider">
+                <i class="fas fa-briefcase me-1"></i>Entries
             </span>
         </div>
         {% endif %}
     </div>
 {% endmacro %}
 
-{# Timer display component #}
 {% macro timer_display(active_entry, roles) %}
     {% if active_entry %}
-        <div class="alert alert-success">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="mb-1">
-                        <span class="status-badge status-active">
-                            <i class="fas fa-circle"></i>Timer Running
+        <div class="glass-panel border-green-500/30 bg-green-900/10 rounded-2xl p-6 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-64 h-64 bg-green-500/10 blur-[80px] -z-10 rounded-full"></div>
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex-1">
+                    <h5 class="mb-4">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold uppercase tracking-widest border border-green-500/30">
+                            <i class="fas fa-circle animate-pulse text-[8px]"></i> Timer Running
                         </span>
                     </h5>
-                    <p class="mb-1"><strong>Started:</strong> {{ active_entry.start_time | date('%B %d, %Y at %I:%M %p') }}</p>
-                    {% if active_entry.description %}
-                    <p class="mb-1"><strong>Description:</strong> {{ active_entry.description }}</p>
-                    {% endif %}
-                    {% if active_entry.project %}
-                    <p class="mb-1"><strong>Project:</strong> {{ active_entry.project }}</p>
-                    {% endif %}
-                    {% if active_entry.role_name %}
-                    <p class="mb-1"><strong>Role:</strong> {{ active_entry.role_name }} ({{ active_entry.hourly_wage }} {{ active_entry.currency }}/hr)</p>
-                    {% endif %}
+                    <div class="space-y-2 text-slate-300 text-sm">
+                        <p><strong class="text-white">Started:</strong> {{ active_entry.start_time | date('%B %d, %Y at %I:%M %p') }}</p>
+                        {% if active_entry.description %}
+                        <p><strong class="text-white">Task:</strong> {{ active_entry.description }}</p>
+                        {% endif %}
+                        {% if active_entry.project %}
+                        <p><strong class="text-white">Project:</strong> <span class="text-hypr-cyan">{{ active_entry.project }}</span></p>
+                        {% endif %}
+                        {% if active_entry.role_name %}
+                        <p><strong class="text-white">Role:</strong> {{ active_entry.role_name }} ({{ active_entry.hourly_wage }} {{ active_entry.currency }}/hr)</p>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="timer-display" id="live-timer" data-start-time="{{ active_entry.start_time }}">
-                    00:00:00
+                <div class="flex flex-col items-center gap-4">
+                    <div class="font-mono text-5xl font-black text-white tracking-tighter" id="live-timer" data-start-time="{{ active_entry.start_time }}">
+                        00:00:00
+                    </div>
+                    <form method="post" action="/worklog/stop">
+                        <button type="submit" class="px-8 py-3 rounded-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-100 font-bold transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                            <i class="fas fa-stop"></i> Stop Timer
+                        </button>
+                    </form>
                 </div>
-            </div>
-            <div class="mt-3">
-                <form method="post" action="/worklog/stop" class="d-inline">
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-stop me-2"></i>Stop Timer
-                    </button>
-                </form>
             </div>
         </div>
     {% else %}
-        <div class="text-center mb-4">
-            <p class="text-muted">No active timer. Start tracking your productive work time.</p>
+        <div class="text-center mb-8">
+            <p class="text-slate-400 font-mono text-sm">// No active timer. Initialize sequence.</p>
         </div>
         
         {{ timer_start_form(roles=roles) }}
     {% endif %}
 {% endmacro %}
 
-{# Timer start form component #}
 {% macro timer_start_form(roles) %}
-    <form method="post" action="/worklog/start" class="row g-2">
-        <div class="col-12">
-            <label for="user_role_id" class="form-label">
-                <i class="fas fa-user-tag me-1"></i>Role
-            </label>
-            <select class="form-control" id="user_role_id" name="user_role_id" required>
-                <option value="">Select a role...</option>
-                {% for role in roles %}
-                    <option value="{{ role.id }}">{{ role.role_name }} (${{ role.hourly_wage }}/hr)</option>
-                {% endfor %}
-            </select>
+    <form method="post" action="/worklog/start" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+                <label for="user_role_id" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-user-tag me-1 text-hypr-cyan"></i> Role
+                </label>
+                <select class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all" id="user_role_id" name="user_role_id" required>
+                    <option value="">Select a role...</option>
+                    {% for role in roles %}
+                        <option value="{{ role.id }}">{{ role.role_name }} (${{ role.hourly_wage }}/hr)</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="space-y-3">
+                <label for="project" class="block text-sm font-bold text-white tracking-widest uppercase">
+                    <i class="fas fa-folder me-1 text-hypr-cyan"></i> Project (optional)
+                </label>
+                <input type="text" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-600" id="project" name="project" placeholder="Project name">
+            </div>
         </div>
-        <div class="col-12">
-            <label for="description" class="form-label">
-                <i class="fas fa-clipboard-list me-1"></i>Description (optional)
+        <div class="space-y-3">
+            <label for="description" class="block text-sm font-bold text-white tracking-widest uppercase">
+                <i class="fas fa-clipboard-list me-1 text-hypr-cyan"></i> Description (optional)
             </label>
-            <input type="text" class="form-control" id="description" name="description" placeholder="What are you working on?">
+            <input type="text" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-600" id="description" name="description" placeholder="What are you working on?">
         </div>
-        <div class="col-12">
-            <label for="project" class="form-label">
-                <i class="fas fa-folder me-1"></i>Project (optional)
-            </label>
-            <input type="text" class="form-control" id="project" name="project" placeholder="Project name">
-        </div>
-        <div class="col-12 text-center">
-            <button type="submit" class="btn btn-success btn-lg">
-                <i class="fas fa-play me-2"></i>Start Timer
+        <div class="text-center pt-4">
+            <button type="submit" class="glow-btn px-10 py-4 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)] inline-flex items-center gap-2">
+                <i class="fas fa-play text-hypr-cyan"></i> Start Timer
             </button>
         </div>
     </form>
 {% endmacro %}
 
-{# Entries table component #}
 {% macro entries_table(entries, show_actions=false) %}
     {% if entries %}
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
+        <div class="overflow-x-auto rounded-xl border border-white/5 bg-black/20">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead class="uppercase tracking-wider text-xs text-slate-400 bg-white/5 border-b border-white/10">
                     <tr>
-                        <th>Date & Time</th>
-                        <th>Role</th>
-                        <th>Duration</th>
-                        <th class="d-none d-sm-table-cell">Description</th>
-                        <th>Earnings</th>
+                        <th class="px-6 py-4 font-semibold">Date & Time</th>
+                        <th class="px-6 py-4 font-semibold">Role</th>
+                        <th class="px-6 py-4 font-semibold">Duration</th>
+                        <th class="px-6 py-4 font-semibold hidden sm:table-cell">Description</th>
+                        <th class="px-6 py-4 font-semibold">Earnings</th>
                         {% if show_actions %}
-                        <th>Actions</th>
+                        <th class="px-6 py-4 font-semibold text-right">Actions</th>
                         {% endif %}
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-white/5 text-slate-300">
                     {% for entry in entries %}
-                    <tr>
-                        <td>{{ entry.start_time_display }}</td>
-                        <td>{{ entry.role_name }}</td>
-                        <td>
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">{{ entry.start_time_display }}</td>
+                        <td class="px-6 py-4 font-medium text-white">{{ entry.role_name }}</td>
+                        <td class="px-6 py-4 font-mono text-hypr-cyan">
                             {% if entry.duration and not entry.is_active %}
                                 {{ format_duration(entry.duration) }}
                             {% elif entry.is_active %}
-                                <span class="status-badge status-active">
-                                    <i class="fas fa-circle"></i>Active
+                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-hypr-cyan/20 text-hypr-cyan text-[10px] font-bold uppercase tracking-widest border border-hypr-cyan/30">
+                                    <i class="fas fa-circle animate-pulse text-[6px]"></i>Active
                                 </span>
                             {% else %}
-                                —
+                                <span class="text-slate-600">—</span>
                             {% endif %}
                         </td>
-                        <td class="d-none d-sm-table-cell">{{ entry.description | default("—") | truncate(20) }}</td>
-                        <td>
+                        <td class="px-6 py-4 hidden sm:table-cell text-slate-400">{{ entry.description | default("—") | truncate(20) }}</td>
+                        <td class="px-6 py-4 font-medium text-green-400">
                             {% if entry.earnings %}
                                 {{ format_currency(entry.earnings) }}
                             {% else %}
-                                —
+                                <span class="text-slate-600">—</span>
                             {% endif %}
                         </td>
                         {% if show_actions %}
-                        <td>
-                            <a href="/worklog/entries/{{ entry.id }}/edit" class="btn btn-sm btn-outline-primary">
+                        <td class="px-6 py-4 text-right space-x-2">
+                            <a href="/worklog/entries/{{ entry.id }}/edit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:border-hypr-cyan hover:text-white transition-all">
                                 <i class="fas fa-edit"></i>
                             </a>
                             {% if entry.can_add_tips %}
-                            <a href="/worklog/entries/{{ entry.id }}/tips" class="btn btn-sm btn-outline-success">
+                            <a href="/worklog/entries/{{ entry.id }}/tips" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-500/10 border border-green-500/30 hover:bg-green-500/20 text-green-400 transition-all">
                                 <i class="fas fa-coins"></i>
                             </a>
                             {% endif %}
@@ -254,14 +222,13 @@
             </table>
         </div>
     {% else %}
-        <div class="text-center">
-            <i class="fas fa-clock text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-            <p class="text-muted mt-3">No entries found.</p>
+        <div class="text-center py-12">
+            <i class="fas fa-clock text-slate-700 text-5xl mb-4"></i>
+            <p class="text-slate-400 font-mono text-sm">// No entries found in current sequence.</p>
         </div>
     {% endif %}
 {% endmacro %}
 
-{# Format currency helper macro #}
 {% macro format_currency(amount, currency="USD") %}
     {%- if currency == "USD" -%}
         ${{ amount | round(2) }}
@@ -276,7 +243,6 @@
     {%- endif -%}
 {% endmacro %}
 
-{# Format duration helper macro #}
 {% macro format_duration(minutes) %}
     {%- set hours = minutes // 60 -%}
     {%- set mins = minutes % 60 -%}
@@ -291,7 +257,6 @@
     {%- endif -%}
 {% endmacro %}
 
-{# Format time display helper #}
 {% macro format_time_display(datetime_str, timezone=null) %}
     {%- if timezone -%}
         {{ datetime_str | date(format='%B %d, %Y at %I:%M %p %Z', timezone=timezone) }}
@@ -300,78 +265,71 @@
     {%- endif -%}
 {% endmacro %}
 
-{# Status badge helper #}
 {% macro status_badge(status, text=null) %}
     {%- set badge_text = text or status -%}
-    {%- if status == "active" -%}
-        <span class="status-badge status-active">
-            <i class="fas fa-circle"></i>{{ badge_text }}
+    {%- if status == "active" or status == "running" -%}
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-hypr-cyan/20 text-hypr-cyan text-xs font-bold uppercase tracking-widest border border-hypr-cyan/30">
+            <i class="fas fa-circle animate-pulse text-[8px]"></i>{{ badge_text }}
         </span>
     {%- elif status == "complete" -%}
-        <span class="status-badge" style="background-color: var(--success); color: var(--text-primary);">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold uppercase tracking-widest border border-green-500/30">
             <i class="fas fa-check"></i>{{ badge_text }}
         </span>
-    {%- elif status == "running" -%}
-        <span class="status-badge status-active">
-            <i class="fas fa-play"></i>{{ badge_text }}
-        </span>
     {%- elif status == "pending" -%}
-        <span class="status-badge" style="background-color: var(--warning); color: var(--text-primary);">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-xs font-bold uppercase tracking-widest border border-yellow-500/30">
             <i class="fas fa-clock"></i>{{ badge_text }}
         </span>
     {%- else -%}
-        <span class="status-badge">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 text-slate-300 text-xs font-bold uppercase tracking-widest border border-white/20">
             <i class="fas fa-info"></i>{{ badge_text }}
         </span>
     {%- endif -%}
 {% endmacro %}
 
-{# Card wrapper component #}
 {% macro worktime_card(title, icon="fas fa-clock") %}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
-            <h3 class="mb-0">
-                <i class="{{ icon }} me-2"></i>{{ title }}
+    <div class="glass-panel rounded-3xl border border-white/10 overflow-hidden shadow-xl mb-8 relative">
+        <div class="px-8 py-6 border-b border-white/5 bg-black/20">
+            <h3 class="text-xl font-bold tracking-tight text-white flex items-center gap-3">
+                <i class="{{ icon }} text-hypr-cyan"></i>{{ title }}
             </h3>
         </div>
-        {{ caller() }}
+        <div class="p-8">
+            {{ caller() }}
+        </div>
     </div>
 {% endmacro %}
 
-{# Hero section component #}
 {% macro worktime_hero(title, subtitle, username, show_install=true) %}
-    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-8 md:p-12 rounded-xl shadow-md mb-8 text-center">
-        <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-3">
-            <i class="fas fa-clock me-2"></i>{{ title }}
+    <header class="mb-12 text-center animate-fade-in-up">
+        <h1 class="text-4xl md:text-5xl font-black text-white tracking-tighter flex items-center justify-center gap-4">
+            <i class="fas fa-clock text-hypr-cyan opacity-80"></i>{{ title }}
         </h1>
-        <p class="mb-0">{{ subtitle }}{% if username %}, <strong>{{ username }}</strong>{% endif %}!</p>
+        <p class="text-hypr-cyan font-mono mt-4">>> {{ subtitle }}{% if username %}, <strong>{{ username }}</strong>{% endif %}!</p>
         {% if show_install %}
-        <button id="install-btn" class="btn btn-light mt-3" style="display: none;">
+        <button id="install-btn" class="mt-6 px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md" style="display: none;">
             <i class="fas fa-download me-2"></i>Install App
         </button>
         {% endif %}
-    </div>
+    </header>
 {% endmacro %}
 
-{# Form field component - simplified #}
 {% macro form_field_simple(type, name, label, icon="", placeholder="", required=false) %}
-    <div class="col-12">
-        <label for="{{ name }}" class="form-label">
-            {% if icon %}<i class="{{ icon }} me-1"></i>{% endif %}{{ label }}
+    <div class="space-y-3 w-full">
+        <label for="{{ name }}" class="block text-sm font-bold text-white tracking-widest uppercase">
+            {% if icon %}<i class="{{ icon }} me-1 text-hypr-cyan"></i>{% endif %}{{ label }}
         </label>
-        <input type="{{ type }}" class="form-control" id="{{ name }}" name="{{ name }}"
+        <input type="{{ type }}" class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-600" id="{{ name }}" name="{{ name }}"
                {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
                {% if required %}required{% endif %}>
     </div>
 {% endmacro %}
 
-{# Select field component #}
 {% macro select_field(name, label, options, icon="", placeholder="", required=false) %}
-    <div class="col-12">
-        <label for="{{ name }}" class="form-label">
-            {% if icon %}<i class="{{ icon }} me-1"></i>{% endif %}{{ label }}
+    <div class="space-y-3 w-full">
+        <label for="{{ name }}" class="block text-sm font-bold text-white tracking-widest uppercase">
+            {% if icon %}<i class="{{ icon }} me-1 text-hypr-cyan"></i>{% endif %}{{ label }}
         </label>
-        <select class="form-control" id="{{ name }}" name="{{ name }}"{% if required %} required{% endif %}>
+        <select class="w-full px-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all" id="{{ name }}" name="{{ name }}"{% if required %} required{% endif %}>
             {% if placeholder %}
             <option value="">{{ placeholder }}</option>
             {% endif %}

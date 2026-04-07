@@ -1,108 +1,100 @@
 {% extends "worktime_base" %}
+{% import "worktime_macros" as wt %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-0">
-        <i class="fas fa-hand-holding-usd me-2"></i>Enter Tips
+<div class="flex justify-between items-center mb-8 animate-fade-in-up">
+    <h1 class="text-3xl font-black text-white tracking-tighter">
+        <i class="fas fa-hand-holding-usd me-2 text-hypr-cyan"></i>Enter Tips
     </h1>
-    <a href="/worklog/" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    <a href="/worklog/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
+        <i class="fas fa-arrow-left me-2"></i>Dashboard
     </a>
 </div>
 
 <!-- Shift Summary -->
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
-        <h3 class="mb-0">
-            <i class="fas fa-receipt me-2"></i>Shift Summary
-        </h3>
-    </div>
-    
-    <div class="row">
-        <div class="col-md-6">
-            <h5>Shift Details</h5>
-            <p><strong>Role:</strong> {{ role.role_name }}</p>
-            <p><strong>Duration:</strong> {{ duration_hours | round(precision=2) }} hours</p>
-            <p><strong>Start Time:</strong> {{ entry.start_time | date(format='%B %d, %Y at %I:%M %p') }}</p>
-            {% if entry.end_time %}<p><strong>End Time:</strong> {{ entry.end_time | date(format='%B %d, %Y at %I:%M %p') }}</p>{% endif %}
+{% call wt.worktime_card(title="Shift Summary", icon="fas fa-receipt") %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="space-y-4">
+            <h5 class="text-lg font-bold text-white uppercase tracking-widest text-xs mb-4">Shift Details</h5>
+            <div class="space-y-2 text-slate-300">
+                <p><strong class="text-white">Role:</strong> <span class="text-hypr-cyan">{{ role.role_name }}</span></p>
+                <p><strong class="text-white">Duration:</strong> {{ duration_hours | round(precision=2) }} hours</p>
+                <p><strong class="text-white">Start Time:</strong> {{ entry.start_time | date(format='%B %d, %Y at %I:%M %p') }}</p>
+                {% if entry.end_time %}<p><strong class="text-white">End Time:</strong> {{ entry.end_time | date(format='%B %d, %Y at %I:%M %p') }}</p>{% endif %}
+            </div>
         </div>
-        <div class="col-md-6">
-            <h5>Earnings Breakdown</h5>
-            <p><strong>Base Rate:</strong> ${{ role.hourly_wage }}/hour</p>
-            <p><strong>Base Earnings:</strong> ${{ base_earnings | round(precision=2) }}</p>
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>This role is configured for tips. Please enter any tips you received during this shift.
+        <div class="space-y-4">
+            <h5 class="text-lg font-bold text-white uppercase tracking-widest text-xs mb-4">Earnings Breakdown</h5>
+            <div class="space-y-2 text-slate-300">
+                <p><strong class="text-white">Base Rate:</strong> <span class="text-green-400">${{ role.hourly_wage }}/hour</span></p>
+                <p><strong class="text-white">Base Earnings:</strong> <span class="text-green-400 font-bold">${{ base_earnings | round(precision=2) }}</span></p>
+            </div>
+            <div class="mt-4 p-4 rounded-xl bg-hypr-cyan/10 border border-hypr-cyan/30 text-hypr-cyan text-sm flex items-start gap-3">
+                <i class="fas fa-info-circle mt-1"></i>
+                <p>This role is configured for tips. Please enter any tips you received during this shift.</p>
             </div>
         </div>
     </div>
-</div>
+{% endcall %}
 
 <!-- Tips Entry Form -->
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
-        <h3 class="mb-0">
-            <i class="fas fa-dollar-sign me-2"></i>Add Tips
-        </h3>
-    </div>
-    
-    <form method="post" action="/worklog/entries/{{ entry.id }}/tips" class="row g-3">
-        <div class="col-md-6">
-            <label for="tip_amount" class="form-label">
-                <i class="fas fa-hand-holding-usd me-1"></i>Tip Amount
+{% call wt.worktime_card(title="Add Tips", icon="fas fa-dollar-sign") %}
+    <form method="post" action="/worklog/entries/{{ entry.id }}/tips" class="space-y-8">
+        <div class="space-y-3 max-w-md mx-auto">
+            <label for="tip_amount" class="block text-sm font-bold text-white tracking-widest uppercase text-center">
+                <i class="fas fa-hand-holding-usd me-1 text-hypr-cyan"></i>Tip Amount
             </label>
-            <div class="input-group">
-                <span class="input-group-text">$</span>
-                <input type="number" step="0.01" min="0" class="form-control" id="tip_amount" name="tip_amount" placeholder="0.00" required>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <span class="text-slate-400 font-bold">$</span>
+                </div>
+                <input type="number" step="0.01" min="0" class="w-full pl-10 pr-5 py-4 bg-black/50 border border-white/10 rounded-xl text-white font-mono text-xl focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all text-center" id="tip_amount" name="tip_amount" placeholder="0.00" required>
             </div>
-            <small class="form-text text-muted">Enter the total amount of tips received during this shift</small>
+            <p class="text-xs text-slate-500 text-center mt-2">Enter the total amount of tips received during this shift</p>
         </div>
         
-        <div class="col-12">
-            <div class="d-flex gap-3 justify-content-center">
-                <button type="submit" class="btn btn-success btn-lg">
-                    <i class="fas fa-save me-2"></i>Save Tips
-                </button>
-                <a href="/worklog/" class="btn btn-outline-secondary btn-lg">
-                    <i class="fas fa-times me-2"></i>Skip Tips
-                </a>
-            </div>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center pt-6 border-t border-white/10">
+            <button type="submit" class="glow-btn px-8 py-3 rounded-full bg-green-600/20 hover:bg-green-600/30 border border-green-500/50 text-green-400 font-bold transition-all shadow-[0_0_20px_rgba(34,197,94,0.2)] inline-flex items-center justify-center gap-2">
+                <i class="fas fa-save"></i> Save Tips
+            </button>
+            <a href="/worklog/" class="px-8 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all font-medium inline-flex items-center justify-center gap-2">
+                <i class="fas fa-forward text-slate-400"></i> Skip Tips
+            </a>
         </div>
     </form>
-</div>
+{% endcall %}
 
 <!-- Tips Info -->
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mt-4">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
-        <h4 class="mb-0">
-            <i class="fas fa-lightbulb me-2"></i>Tips Tracking
-        </h4>
-    </div>
-    
-    <div class="row">
-        <div class="col-md-6">
-            <h6>Why track tips?</h6>
-            <ul>
-                <li>Complete earnings record</li>
-                <li>Tax reporting accuracy</li>
-                <li>Performance insights</li>
-                <li>Shift comparison</li>
+<div class="glass-panel border-white/10 rounded-3xl p-8 shadow-xl mt-8">
+    <h4 class="text-xl font-bold tracking-tight text-white flex items-center gap-3 mb-6">
+        <i class="fas fa-lightbulb text-yellow-400"></i> Tips Tracking
+    </h4>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-slate-300">
+        <div class="space-y-3">
+            <h6 class="font-bold text-white uppercase tracking-widest text-xs mb-3">Why track tips?</h6>
+            <ul class="space-y-2 list-none">
+                <li class="flex items-start gap-2"><i class="fas fa-check text-hypr-cyan mt-1"></i> Complete earnings record</li>
+                <li class="flex items-start gap-2"><i class="fas fa-check text-hypr-cyan mt-1"></i> Tax reporting accuracy</li>
+                <li class="flex items-start gap-2"><i class="fas fa-check text-hypr-cyan mt-1"></i> Performance insights</li>
+                <li class="flex items-start gap-2"><i class="fas fa-check text-hypr-cyan mt-1"></i> Shift comparison</li>
             </ul>
         </div>
-        <div class="col-md-6">
-            <h6>Tips Guidelines</h6>
-            <ul>
-                <li>Enter cash and card tips</li>
-                <li>Round to nearest cent</li>
-                <li>Include tip pooling amounts</li>
-                <li>Update immediately after shift</li>
+        <div class="space-y-3">
+            <h6 class="font-bold text-white uppercase tracking-widest text-xs mb-3">Tips Guidelines</h6>
+            <ul class="space-y-2 list-none">
+                <li class="flex items-start gap-2"><i class="fas fa-info-circle text-hypr-cyan mt-1"></i> Enter cash and card tips</li>
+                <li class="flex items-start gap-2"><i class="fas fa-info-circle text-hypr-cyan mt-1"></i> Round to nearest cent</li>
+                <li class="flex items-start gap-2"><i class="fas fa-info-circle text-hypr-cyan mt-1"></i> Include tip pooling amounts</li>
+                <li class="flex items-start gap-2"><i class="fas fa-info-circle text-hypr-cyan mt-1"></i> Update immediately after shift</li>
             </ul>
         </div>
     </div>
 </div>
 
 {% if flash %}
-<div class="alert alert-{{ flash[0] }} mt-3">
-    <i class="fas fa-info-circle me-2"></i>{{ flash[1] }}
+<div class="mt-6 p-4 rounded-xl glass-panel {% if flash[0] == 'success' %}border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.2)]{% else %}border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]{% endif %} animate-fade-in-up">
+    <p class="font-mono text-sm {% if flash[0] == 'success' %}text-green-400{% else %}text-red-400{% endif %} mb-1">// SYSTEM NOTICE</p>
+    <p class="text-white">{{ flash[1] }}</p>
 </div>
 {% endif %}
 
@@ -110,14 +102,16 @@
 
 {% block script %}
 <script>
-// Auto-focus tip amount field
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('tip_amount').focus();
+    const tipInput = document.getElementById('tip_amount');
+    if(tipInput) tipInput.focus();
 });
 
-// Form validation
 document.querySelector('form').addEventListener('submit', function(e) {
-    const tipAmount = parseFloat(document.getElementById('tip_amount').value);
+    const tipInput = document.getElementById('tip_amount');
+    if(!tipInput) return;
+    
+    const tipAmount = parseFloat(tipInput.value);
     
     if (isNaN(tipAmount) || tipAmount < 0) {
         e.preventDefault();
@@ -125,7 +119,6 @@ document.querySelector('form').addEventListener('submit', function(e) {
         return false;
     }
     
-    // Confirm large tip amounts
     if (tipAmount > 500) {
         if (!confirm(`Are you sure you want to enter $${tipAmount.toFixed(2)} in tips? This seems unusually high.`)) {
             e.preventDefault();

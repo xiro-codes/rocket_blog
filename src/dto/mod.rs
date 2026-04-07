@@ -43,8 +43,6 @@ pub mod post {
     /// * `youtube_url` - Optional YouTube URL for content embedding
     /// * `tags` - Comma-separated list of tags
     /// * `action` - Post action: "draft" or "publish"
-    /// * `ai_generate` - AI generation type: "content", "excerpt", "tags"
-    /// * `ai_prompt` - Additional prompt for AI content generation
     #[derive(FromForm, Debug)]
     pub struct FormDTO<'r> {
         pub title: String,
@@ -54,7 +52,5 @@ pub mod post {
         pub youtube_url: Option<String>, // YouTube URL for downloading
         pub tags: Option<String>,
         pub action: Option<String>, // "draft" or "publish"
-        pub ai_generate: Option<String>, // "content", "excerpt", "tags"
-        pub ai_prompt: Option<String>, // Additional prompt for AI generation
     }
 }

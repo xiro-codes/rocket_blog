@@ -1,240 +1,224 @@
 {% extends "worktime_base" %}
+{% import "worktime_macros" as wt %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-0">
-        <i class="fas fa-bell me-2"></i>Notification Settings
+<div class="flex justify-between items-center mb-8 animate-fade-in-up">
+    <h1 class="text-3xl font-black text-white tracking-tighter">
+        <i class="fas fa-bell me-2 text-hypr-cyan"></i>Notification Settings
     </h1>
-    <a href="/worklog/" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    <a href="/worklog/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
+        <i class="fas fa-arrow-left me-2"></i>Dashboard
     </a>
 </div>
 
-<!-- Quick Actions -->
-<div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm flex flex-wrap p-2 gap-2 my-6" style="margin: 1rem 0;">
-    <div class="text-center mb-3">
-        <h4 class="mt-2 text-lg text-gray-600 dark:text-gray-400">
-            <i class="fas fa-compass me-2"></i>Quick Actions
-        </h4>
-    </div>
-    <div class="row g-2">
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worklog/" class="btn btn-outline-primary w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-home me-2"></i>Dashboard
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worklog/roles" class="btn btn-outline-primary w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-user-tag me-2"></i>Manage Roles
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worklog/entries" class="btn btn-outline-info w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-list-ul me-2"></i>View Entries
-            </a>
-        </div>
-        <div class="col-sm-6 col-lg-3">
-            <a href="/worklog/settings" class="btn btn-outline-success w-100" style="margin: 0.25rem 0;">
-                <i class="fas fa-cog me-2"></i>Settings
-            </a>
-        </div>
-    </div>
-</div>
+{{ wt.quick_nav(current_page="notifications", show_mobile_menu=false) }}
 
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 font-semibold">
-        <h3 class="mb-0">
-            <i class="fas fa-cog me-2"></i>Notification Preferences
-        </h3>
-    </div>
-    
-    <form method="post" action="/worklog/notifications">
-        <!-- Time-based notifications -->
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5><i class="fas fa-clock me-2"></i>Time-Based Notifications</h5>
-            </div>
-            <div class="card-body">
-                <div class="form-check mb-3">
-                    <input 
-                        class="form-check-input" 
-                        type="checkbox" 
-                        id="time_based_enabled" 
-                        name="time_based_enabled" 
-                        value="true"
-                        {% if settings and settings.time_based_enabled %}checked{% endif %}
-                    >
-                    <label class="form-check-label" for="time_based_enabled">
-                        Enable time-based notifications
-                    </label>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2">
+        {% call wt.worktime_card(title="Notification Preferences", icon="fas fa-cog") %}
+            <form method="post" action="/worklog/notifications" class="space-y-8">
+                <!-- Time-based notifications -->
+                <div class="glass-panel border-white/10 rounded-2xl p-6 bg-black/20">
+                    <h5 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-clock text-hypr-cyan"></i> Time-Based Notifications</h5>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <input 
+                                class="w-5 h-5 rounded border-white/10 bg-black/50 text-hypr-cyan focus:ring-hypr-cyan/50 focus:ring-offset-0 transition-colors" 
+                                type="checkbox" 
+                                id="time_based_enabled" 
+                                name="time_based_enabled" 
+                                value="true"
+                                {% if settings and settings.time_based_enabled %}checked{% endif %}
+                            >
+                            <label class="text-sm font-bold text-white uppercase tracking-wider cursor-pointer" for="time_based_enabled">
+                                Enable time-based notifications
+                            </label>
+                        </div>
+                        <div class="space-y-2 w-full">
+                            <label for="time_threshold_minutes" class="block text-xs font-bold text-white tracking-widest uppercase">
+                                Notify after (minutes):
+                            </label>
+                            <input 
+                                type="number" 
+                                class="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all" 
+                                id="time_threshold_minutes" 
+                                name="time_threshold_minutes" 
+                                min="15" 
+                                max="480" 
+                                step="15"
+                                value="{% if settings and settings.time_threshold_minutes %}{{ settings.time_threshold_minutes }}{% endif %}"
+                                placeholder="120"
+                            >
+                            <p class="text-xs text-slate-500 mt-1">Get notified after working for this many minutes (15-480 minutes)</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="time_threshold_minutes" class="form-label">
-                        Notify after (minutes):
-                    </label>
-                    <input 
-                        type="number" 
-                        class="form-control" 
-                        id="time_threshold_minutes" 
-                                    name="time_threshold_minutes" 
-                                    min="15" 
-                                    max="480" 
-                                    step="15"
-                                    value="{% if settings and settings.time_threshold_minutes %}{{ settings.time_threshold_minutes }}{% endif %}"
-                                    placeholder="120"
-                                >
-                                <small class="form-text text-muted">Get notified after working for this many minutes (15-480 minutes)</small>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Earnings-based notifications -->
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h5>💰 Earnings-Based Notifications</h5>
+                <!-- Earnings-based notifications -->
+                <div class="glass-panel border-white/10 rounded-2xl p-6 bg-black/20">
+                    <h5 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-coins text-yellow-400"></i> Earnings-Based Notifications</h5>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <input 
+                                class="w-5 h-5 rounded border-white/10 bg-black/50 text-hypr-cyan focus:ring-hypr-cyan/50 focus:ring-offset-0 transition-colors" 
+                                type="checkbox" 
+                                id="earnings_based_enabled" 
+                                name="earnings_based_enabled" 
+                                value="true"
+                                {% if settings and settings.earnings_based_enabled %}checked{% endif %}
+                            >
+                            <label class="text-sm font-bold text-white uppercase tracking-wider cursor-pointer" for="earnings_based_enabled">
+                                Enable earnings-based notifications
+                            </label>
                         </div>
-                        <div class="card-body">
-                            <div class="form-check mb-3">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    id="earnings_based_enabled" 
-                                    name="earnings_based_enabled" 
-                                    value="true"
-                                    {% if settings and settings.earnings_based_enabled %}checked{% endif %}
-                                >
-                                <label class="form-check-label" for="earnings_based_enabled">
-                                    Enable earnings-based notifications
-                                </label>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <label for="earnings_threshold" class="form-label">
-                                        Notify after earning:
-                                    </label>
-                                    <input 
-                                        type="number" 
-                                        class="form-control" 
-                                        id="earnings_threshold" 
-                                        name="earnings_threshold" 
-                                        min="1" 
-                                        step="0.01"
-                                        value="{% if settings and settings.earnings_threshold %}{{ settings.earnings_threshold }}{% endif %}"
-                                        placeholder="100.00"
-                                    >
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="currency" class="form-label">Currency:</label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        id="currency" 
-                                        name="currency" 
-                                        maxlength="3"
-                                        value="{% if settings and settings.currency %}{{ settings.currency }}{% else %}USD{% endif %}"
-                                        placeholder="USD"
-                                    >
-                                </div>
-                            </div>
-                            <small class="form-text text-muted">Get notified when you earn this amount in a single session</small>
-                        </div>
-                    </div>
-
-                    <!-- Daily goal notifications -->
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h5>🎯 Daily Goal Notifications</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-check mb-3">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    id="daily_goal_enabled" 
-                                    name="daily_goal_enabled" 
-                                    value="true"
-                                    {% if settings and settings.daily_goal_enabled %}checked{% endif %}
-                                >
-                                <label class="form-check-label" for="daily_goal_enabled">
-                                    Enable daily goal notifications
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label for="daily_hours_goal" class="form-label">
-                                    Daily hours goal:
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="sm:col-span-2 space-y-2">
+                                <label for="earnings_threshold" class="block text-xs font-bold text-white tracking-widest uppercase">
+                                    Notify after earning:
                                 </label>
                                 <input 
                                     type="number" 
-                                    class="form-control" 
-                                    id="daily_hours_goal" 
-                                    name="daily_hours_goal" 
-                                    min="0.5" 
-                                    max="16" 
-                                    step="0.5"
-                                    value="{% if settings and settings.daily_hours_goal %}{{ settings.daily_hours_goal }}{% endif %}"
-                                    placeholder="8.0"
+                                    class="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all" 
+                                    id="earnings_threshold" 
+                                    name="earnings_threshold" 
+                                    min="1" 
+                                    step="0.01"
+                                    value="{% if settings and settings.earnings_threshold %}{{ settings.earnings_threshold }}{% endif %}"
+                                    placeholder="100.00"
                                 >
-                                <small class="form-text text-muted">Get notified when you reach your daily hours goal (0.5-16 hours)</small>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="currency" class="block text-xs font-bold text-white tracking-widest uppercase">Currency:</label>
+                                <input 
+                                    type="text" 
+                                    class="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all" 
+                                    id="currency" 
+                                    name="currency" 
+                                    maxlength="3"
+                                    value="{% if settings and settings.currency %}{{ settings.currency }}{% else %}USD{% endif %}"
+                                    placeholder="USD"
+                                >
                             </div>
                         </div>
+                        <p class="text-xs text-slate-500 mt-1">Get notified when you earn this amount in a single session</p>
                     </div>
+                </div>
 
-                    <div class="d-flex justify-content-between">
-                        <button type="submit" class="btn btn-success">💾 Save Settings</button>
-                        <a href="/worklog/" class="btn btn-secondary">🔙 Back to Dashboard</a>
+                <!-- Daily goal notifications -->
+                <div class="glass-panel border-white/10 rounded-2xl p-6 bg-black/20">
+                    <h5 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-bullseye text-red-400"></i> Daily Goal Notifications</h5>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <input 
+                                class="w-5 h-5 rounded border-white/10 bg-black/50 text-hypr-cyan focus:ring-hypr-cyan/50 focus:ring-offset-0 transition-colors" 
+                                type="checkbox" 
+                                id="daily_goal_enabled" 
+                                name="daily_goal_enabled" 
+                                value="true"
+                                {% if settings and settings.daily_goal_enabled %}checked{% endif %}
+                            >
+                            <label class="text-sm font-bold text-white uppercase tracking-wider cursor-pointer" for="daily_goal_enabled">
+                                Enable daily goal notifications
+                            </label>
+                        </div>
+                        <div class="space-y-2 w-full">
+                            <label for="daily_hours_goal" class="block text-xs font-bold text-white tracking-widest uppercase">
+                                Daily hours goal:
+                            </label>
+                            <input 
+                                type="number" 
+                                class="w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan transition-all" 
+                                id="daily_hours_goal" 
+                                name="daily_hours_goal" 
+                                min="0.5" 
+                                max="16" 
+                                step="0.5"
+                                value="{% if settings and settings.daily_hours_goal %}{{ settings.daily_hours_goal }}{% endif %}"
+                                placeholder="8.0"
+                            >
+                            <p class="text-xs text-slate-500 mt-1">Get notified when you reach your daily hours goal (0.5-16 hours)</p>
+                        </div>
                     </div>
-                </form>
+                </div>
+
+                <div class="flex justify-between items-center pt-4 border-t border-white/10">
+                    <a href="/worklog/" class="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all text-sm font-medium inline-flex items-center gap-2">
+                        <i class="fas fa-arrow-left"></i> Dashboard
+                    </a>
+                    <button type="submit" class="glow-btn px-8 py-3 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)] inline-flex items-center gap-2">
+                        <i class="fas fa-save text-hypr-cyan"></i> Save Settings
+                    </button>
+                </div>
+            </form>
+        {% endcall %}
+    </div>
+
+    <div class="lg:col-span-1">
+        <div class="glass-panel border-white/10 rounded-3xl p-8 sticky top-24">
+            <h4 class="text-xl font-bold text-white mb-4"><i class="fas fa-mobile-alt me-2 text-hypr-cyan"></i> Browser Permissions</h4>
+            <p class="text-slate-400 text-sm mb-6">To receive notifications, you need to grant permission to your browser:</p>
+            
+            <button id="request-permission" class="w-full px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all font-medium mb-4 flex justify-center items-center gap-2">
+                <i class="fas fa-bell"></i> Enable Notifications
+            </button>
+            
+            <div id="permission-status" class="glass-panel border-white/10 rounded-xl p-4 text-center mb-8">
+                <p class="text-sm font-mono text-slate-300">Status: <span id="permission-text" class="text-hypr-cyan font-bold">Checking...</span></p>
             </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card p-3 mb-4">
-                <h4>📱 Browser Permissions</h4>
-                <p class="text-muted">To receive notifications, you need to grant permission:</p>
-                <button id="request-permission" class="btn btn-primary mb-2">🔔 Enable Notifications</button>
-                <div id="permission-status" class="alert alert-info">
-                    <small>Status: <span id="permission-text">Checking...</span></small>
-                </div>
-                
-                <h5>ℹ️ How it works</h5>
-                <ul class="list-unstyled">
-                    <li>⏰ <strong>Time notifications:</strong> Remind you to take breaks</li>
-                    <li>💰 <strong>Earnings notifications:</strong> Celebrate reaching earning milestones</li>
-                    <li>🎯 <strong>Daily goals:</strong> Track progress toward daily targets</li>
-                </ul>
-                
-                <div class="alert alert-warning">
-                    <small><strong>Note:</strong> Notifications work even when the app is in the background!</small>
-                </div>
+            
+            <h5 class="font-bold text-white mb-4 uppercase tracking-widest text-sm"><i class="fas fa-info-circle me-2 text-hypr-cyan"></i> How it works</h5>
+            <ul class="space-y-4 text-slate-300 text-sm">
+                <li class="flex items-start gap-3">
+                    <i class="fas fa-clock text-hypr-cyan mt-1"></i>
+                    <div><strong class="text-white block">Time notifications</strong> Remind you to take breaks after a set time.</div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <i class="fas fa-coins text-yellow-400 mt-1"></i>
+                    <div><strong class="text-white block">Earnings notifications</strong> Celebrate reaching earning milestones.</div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <i class="fas fa-bullseye text-red-400 mt-1"></i>
+                    <div><strong class="text-white block">Daily goals</strong> Track progress toward daily targets.</div>
+                </li>
+            </ul>
+            
+            <div class="mt-8 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-200 text-xs">
+                <i class="fas fa-exclamation-triangle me-1"></i> <strong class="text-yellow-400">Note:</strong> Notifications work even when the app is in the background!
             </div>
         </div>
     </div>
 </div>
 
+{% endblock %}
+
+{% block script %}
 <script>
-// Check and request notification permission
 function checkPermission() {
     const permissionText = document.getElementById('permission-text');
     const permissionStatus = document.getElementById('permission-status');
     
     if (!('Notification' in window)) {
         permissionText.textContent = 'Not supported';
-        permissionStatus.className = 'alert alert-danger';
+        permissionText.className = 'text-red-400 font-bold';
+        permissionStatus.className = 'glass-panel border-red-500/30 bg-red-500/5 rounded-xl p-4 text-center mb-8';
         return;
     }
     
     switch (Notification.permission) {
         case 'granted':
             permissionText.textContent = 'Granted ✅';
-            permissionStatus.className = 'alert alert-success';
+            permissionText.className = 'text-green-400 font-bold';
+            permissionStatus.className = 'glass-panel border-green-500/30 bg-green-500/5 rounded-xl p-4 text-center mb-8';
             break;
         case 'denied':
             permissionText.textContent = 'Denied ❌';
-            permissionStatus.className = 'alert alert-danger';
+            permissionText.className = 'text-red-400 font-bold';
+            permissionStatus.className = 'glass-panel border-red-500/30 bg-red-500/5 rounded-xl p-4 text-center mb-8';
             break;
         default:
             permissionText.textContent = 'Not requested';
-            permissionStatus.className = 'alert alert-warning';
+            permissionText.className = 'text-yellow-400 font-bold';
+            permissionStatus.className = 'glass-panel border-yellow-500/30 bg-yellow-500/5 rounded-xl p-4 text-center mb-8';
             break;
     }
 }
@@ -253,43 +237,43 @@ document.getElementById('request-permission').addEventListener('click', function
     }
 });
 
-// Check permission on page load
 checkPermission();
-
-// Test notification button (for development)
-function testNotification() {
-    if (Notification.permission === 'granted') {
-        new Notification('Test Notification', {
-            body: 'This is a test notification from Work Time Tracker',
-            icon: '/static/icon-192x192.png'
-        });
-    }
-}
 
 // Auto-enable/disable threshold inputs based on checkboxes
 document.getElementById('time_based_enabled').addEventListener('change', function() {
-    document.getElementById('time_threshold_minutes').disabled = !this.checked;
+    const input = document.getElementById('time_threshold_minutes');
+    input.disabled = !this.checked;
+    if(!this.checked) input.classList.add('opacity-50');
+    else input.classList.remove('opacity-50');
 });
 
 document.getElementById('earnings_based_enabled').addEventListener('change', function() {
-    document.getElementById('earnings_threshold').disabled = !this.checked;
-    document.getElementById('currency').disabled = !this.checked;
+    const input = document.getElementById('earnings_threshold');
+    const currency = document.getElementById('currency');
+    input.disabled = !this.checked;
+    currency.disabled = !this.checked;
+    
+    if(!this.checked) {
+        input.classList.add('opacity-50');
+        currency.classList.add('opacity-50');
+    } else {
+        input.classList.remove('opacity-50');
+        currency.classList.remove('opacity-50');
+    }
 });
 
 document.getElementById('daily_goal_enabled').addEventListener('change', function() {
-    document.getElementById('daily_hours_goal').disabled = !this.checked;
+    const input = document.getElementById('daily_hours_goal');
+    input.disabled = !this.checked;
+    if(!this.checked) input.classList.add('opacity-50');
+    else input.classList.remove('opacity-50');
 });
 
-// Initialize disabled state on page load
 document.addEventListener('DOMContentLoaded', function() {
-    const timeCheckbox = document.getElementById('time_based_enabled');
-    const earningsCheckbox = document.getElementById('earnings_based_enabled');
-    const dailyCheckbox = document.getElementById('daily_goal_enabled');
-    
-    document.getElementById('time_threshold_minutes').disabled = !timeCheckbox.checked;
-    document.getElementById('earnings_threshold').disabled = !earningsCheckbox.checked;
-    document.getElementById('currency').disabled = !earningsCheckbox.checked;
-    document.getElementById('daily_hours_goal').disabled = !dailyCheckbox.checked;
+    // trigger change events to set initial disabled state styles
+    document.getElementById('time_based_enabled').dispatchEvent(new Event('change'));
+    document.getElementById('earnings_based_enabled').dispatchEvent(new Event('change'));
+    document.getElementById('daily_goal_enabled').dispatchEvent(new Event('change'));
 });
 </script>
 {% endblock %}

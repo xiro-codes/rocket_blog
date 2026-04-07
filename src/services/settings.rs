@@ -168,81 +168,6 @@ impl SettingsService {
         self.set_setting(db, "openai_api_key", api_key, true).await
     }
 
-    /// Test if an OpenAI API key is valid by making a simple API call
-    pub async fn test_openai_api_key(api_key: &str) -> Result<bool, String> {
-        use async_openai::{Client, types::{
-            ChatCompletionRequestMessage, ChatCompletionRequestUserMessage, 
-            CreateChatCompletionRequestArgs, Role
-        }};
-
-        let client = Client::with_config(
-            async_openai::config::OpenAIConfig::new().with_api_key(api_key)
-        );
-
-        let messages = vec![
-            ChatCompletionRequestMessage::User(
-                ChatCompletionRequestUserMessage {
-                    content: async_openai::types::ChatCompletionRequestUserMessageContent::Text("Hello".to_string()),
-                    role: Role::User,
-                    name: None,
-                }
-            ),
-        ];
-
-        let request = CreateChatCompletionRequestArgs::default()
-            .model("gpt-3.5-turbo")
-            .messages(messages)
-            .max_tokens(1u16)
-            .build()
-            .map_err(|e| format!("Failed to build test request: {}", e))?;
-
-        match client.chat().create(request).await {
-            Ok(_) => Ok(true),
-            Err(e) => {
-                let error_msg = format!("{}", e);
-                if error_msg.contains("unauthorized") || error_msg.contains("invalid_api_key") {
-                    Ok(false)
-                } else {
-                    Err(format!("API test error: {}", e))
-                }
-            }
-        }
-    }
-
-    /// Get Ollama URL
-    pub async fn get_ollama_url(&self, db: &DatabaseConnection) -> Result<Option<String>, String> {
-        self.get_setting(db, "ollama_url").await
-    }
-
-    /// Set Ollama URL
-    pub async fn set_ollama_url(&self, db: &DatabaseConnection, url: &str) -> Result<(), String> {
-        self.set_setting(db, "ollama_url", url, false).await
-    }
-
-    /// Get Ollama model
-    pub async fn get_ollama_model(&self, db: &DatabaseConnection) -> Result<Option<String>, String> {
-        self.get_setting(db, "ollama_model").await
-    }
-
-    /// Set Ollama model
-    pub async fn set_ollama_model(&self, db: &DatabaseConnection, model: &str) -> Result<(), String> {
-        self.set_setting(db, "ollama_model", model, false).await
-    }
-
-    /// Get Ollama enabled status
-    pub async fn get_ollama_enabled(&self, db: &DatabaseConnection) -> Result<bool, String> {
-        match self.get_setting(db, "ollama_enabled").await? {
-            Some(value) => Ok(value == "true"),
-            None => Ok(false),
-        }
-    }
-
-    /// Set Ollama enabled status
-    pub async fn set_ollama_enabled(&self, db: &DatabaseConnection, enabled: bool) -> Result<(), String> {
-        let value = if enabled { "true" } else { "false" };
-        self.set_setting(db, "ollama_enabled", value, false).await
-    }
-
     /// Get user timezone preference by account ID
     pub async fn get_user_timezone(&self, db: &DatabaseConnection, account_id: Uuid) -> Result<Option<String>, String> {
         let key = format!("user_timezone_{}", account_id);
@@ -280,19 +205,6 @@ impl SettingsService {
         self.set_setting(db, &period_length_key, &settings.period_length.to_string(), false).await?;
         
         Ok(())
-    }
-
-    /// Test Ollama connection
-    pub async fn test_ollama_connection(&self, url: &str) -> Result<bool, String> {
-        use reqwest::Client;
-        
-        let client = Client::new();
-        let test_url = format!("{}/api/tags", url);
-        
-        match client.get(&test_url).send().await {
-            Ok(response) => Ok(response.status().is_success()),
-            Err(e) => Err(format!("Ollama connection test failed: {}", e)),
-        }
     }
 }
 

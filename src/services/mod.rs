@@ -54,18 +54,6 @@ mod comment;
 /// Comment system and moderation service
 pub use comment::Service as CommentService;
 
-mod ai_provider;
-/// AI provider abstraction and management service
-pub use ai_provider::{AIProvider, AIProviderService};
-
-mod openai;
-/// OpenAI API integration service
-pub use openai::OpenAIService;
-
-mod ollama;
-/// Local Ollama model integration service
-pub use ollama::OllamaService;
-
 mod reaction;
 /// Post reaction and engagement tracking service
 pub use reaction::{PostReactionSummary, Service as ReactionService};

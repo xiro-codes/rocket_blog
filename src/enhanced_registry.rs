@@ -5,8 +5,8 @@
 
 use crate::{create_service_registry, create_controller_registry};
 use crate::services::{
-    AuthService, BlogService, CommentService, OpenAIService, OllamaService, 
-    AIProviderService, ReactionService, SettingsService, TagService, 
+    AuthService, BlogService, CommentService, 
+    ReactionService, SettingsService, TagService, 
     CoordinatorService, YoutubeDownloadService, BackgroundJobService, 
     WorkTimeService, PayPeriodService
 };
@@ -22,8 +22,6 @@ create_service_registry!(
         AuthService,
         BlogService,
         CommentService,
-        OpenAIService,
-        OllamaService,
         ReactionService,
         SettingsService,
         TagService,
@@ -58,19 +56,6 @@ create_controller_registry!(
 
 // Example of how to use the registries
 impl NewServiceRegistry {
-    /// Enhanced service registration with AI provider setup
-    pub fn attach_all_services_with_ai(rocket: rocket::Rocket<rocket::Build>) -> rocket::Rocket<rocket::Build> {
-        log::info!("Registering enhanced services with AI provider setup...");
-        
-        // Create AI provider service and add providers
-        log::debug!("Creating AI provider service with Ollama provider");
-        let mut ai_service = AIProviderService::new();
-        ai_service.add_provider(Box::new(OllamaService::new()));
-        
-        // Use the auto-generated registry and add the configured AI service
-        Self::attach_all_services(rocket)
-            .manage(ai_service)
-    }
 }
 
 #[cfg(test)]
@@ -97,15 +82,5 @@ mod tests {
         // The controllers are attached via fairings, so we can't directly test state
         // but we can verify the registry was created
         let _registry = BlogControllerRegistry;
-    }
-    
-    #[test] 
-    fn test_enhanced_ai_service_registry() {
-        let rocket = rocket::build();
-        let rocket = NewServiceRegistry::attach_all_services_with_ai(rocket);
-        
-        // Verify enhanced setup
-        assert!(rocket.state::<AIProviderService>().is_some());
-        assert!(rocket.state::<OpenAIService>().is_some());
     }
 }
