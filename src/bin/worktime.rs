@@ -76,7 +76,7 @@ impl WorkTimeControllerRegistry {
         log::debug!("Attaching controllers: WorkTime (/)");
         
         rocket
-            .attach(controllers::WorkTimeController::new("/".to_owned()))
+            .attach(controllers::WorkTimeController::new("/worklog".to_owned()))
     }
 }
 
@@ -172,6 +172,6 @@ async fn rocket() -> Rocket<Build> {
     
     // Attach work time controllers and static file server
     WorkTimeControllerRegistry::attach_all_controllers(rocket)
-        .mount("/", rocket::routes![offline_page])
+        .mount("/worklog", rocket::routes![offline_page])
         .mount("/static", FileServer::from("./static/"))
 }

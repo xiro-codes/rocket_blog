@@ -19,7 +19,7 @@ in {
     domain = mkOption {
       type = types.str;
       default = "_";
-      description = "The primary domain for the blog (e.g., blog.example.com). Use '_' for default host.";
+      description = "The primary domain for the applications (e.g., tdavis.dev).";
     };
 
     worktimeDomain = mkOption {
@@ -213,7 +213,18 @@ in {
       enable = true;
       
       virtualHosts.${cfg.domain} = {
-        locations."/" = {
+        locations."/" = mkIf (cfg.portfolioDomain != null) {
+          proxyPass = "http://127.0.0.1:${toString cfg.portfolioPort}";
+          extraConfig = ''
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+          '';
+        };
+
+        # Blog routes
+        locations."/blog" = {
           proxyPass = "http://127.0.0.1:${toString cfg.blogPort}";
           extraConfig = ''
             proxy_set_header Host $host;
@@ -222,11 +233,8 @@ in {
             proxy_set_header X-Forwarded-Proto $scheme;
           '';
         };
-      };
-      
-      virtualHosts.${if cfg.worktimeDomain != null then cfg.worktimeDomain else "worktime.${cfg.domain}"} = {
-        locations."/" = {
-          proxyPass = "http://127.0.0.1:${toString cfg.worktimePort}";
+        locations."/auth" = {
+          proxyPass = "http://127.0.0.1:${toString cfg.blogPort}";
           extraConfig = ''
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
@@ -234,11 +242,39 @@ in {
             proxy_set_header X-Forwarded-Proto $scheme;
           '';
         };
-      };
+        locations."/comment" = {
+          proxyPass = "http://127.0.0.1:${toString cfg.blogPort}";
+          extraConfig = ''
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+          '';
+        };
+        locations."/feed" = {
+          proxyPass = "http://127.0.0.1:${toString cfg.blogPort}";
+          extraConfig = ''
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+          '';
+        };
+        
+        # Shared static folder (served by blog for simplicity)
+        locations."/static" = {
+          proxyPass = "http://127.0.0.1:${toString cfg.blogPort}";
+          extraConfig = ''
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+          '';
+        };
 
-      virtualHosts.${cfg.portfolioDomain} = mkIf (cfg.portfolioDomain != null) {
-        locations."/" = {
-          proxyPass = "http://127.0.0.1:${toString cfg.portfolioPort}";
+        # Worktime Tracker routes
+        locations."/worklog" = mkIf (cfg.worktimeDomain != null) {
+          proxyPass = "http://127.0.0.1:${toString cfg.worktimePort}";
           extraConfig = ''
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
