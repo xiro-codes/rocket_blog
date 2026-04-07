@@ -113,11 +113,7 @@
                     <a href="/auth/logout" class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all">Logout</a>
                 {% else %}
                     <a href="/blog/search" class="text-slate-300 hover:text-white transition-colors">Search</a>
-                    {% if not has_accounts %}
-                    <a href="/auth/create-admin" class="glow-btn px-5 py-2 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white transition-all hover:scale-105">Setup Admin</a>
-                    {% else %}
                     <a href="/auth/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all backdrop-blur-md">Login</a>
-                    {% endif %}
                 {% endif %}
             </div>
         </nav>

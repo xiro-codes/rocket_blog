@@ -11,16 +11,6 @@
 		<p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 font-light">
 			Insights, updates, and deep dives into technology, development, and more. Explore the latest articles below.
 		</p>
-		{% if not has_accounts and not token %}
-		<div class="glass-panel p-6 rounded-2xl max-w-lg border-hypr-cyan/30 flex flex-col items-center">
-			<h4 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
-				<span class="w-2 h-2 rounded-full bg-hypr-cyan animate-pulse"></span>
-				System Initialization
-			</h4>
-			<p class="text-slate-400 text-sm mb-4">No administrator account detected. Initialize the system to begin.</p>
-			<a href="/auth/create-admin" class="glow-btn px-6 py-3 rounded-full bg-hypr-dark text-white font-medium hover:scale-105 transition-transform">Initialize Admin</a>
-		</div>
-		{% endif %}
 	</div>
 
 	{% if flash %}

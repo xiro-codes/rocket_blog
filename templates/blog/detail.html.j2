@@ -142,14 +142,13 @@
 					hx-on::after-request="location.reload()">
 				<span class="text-xl group-hover:scale-110 transition-transform">{{reaction_type.emoji}}</span>
 				<span class="font-mono text-sm">
-					{% set found_count = 0 %}
+					{% set ns = namespace(count=0) %}
 					{% for reaction in reaction_summary.reactions %}
 						{% if reaction.reaction_type == reaction_type.type %}
-							{{reaction.count}}
-							{% set found_count = reaction.count %}
+							{% set ns.count = reaction.count %}
 						{% endif %}
 					{% endfor %}
-					{% if found_count == 0 %}0{% endif %}
+					{{ ns.count }}
 				</span>
 			</button>
 			{% endfor %}
@@ -165,7 +164,7 @@
 		<div class="glass-panel rounded-3xl p-6 md:p-8 border border-white/10 mb-10 relative overflow-hidden">
 			<div class="absolute top-0 right-0 w-32 h-32 bg-hypr-teal/10 blur-[50px] -z-10"></div>
 			
-			<form action="/comment/create/{{post.id}}" method="post" class="flex flex-col gap-4 relative z-10">
+			<form action="/comment/create/{{post.id}}" method="post" class="flex flex-col gap-4 relative z-10 max-w-3xl mx-auto">
 				{% if not token %}
 				<div>
 					<input type="text" id="username" name="username" class="w-full px-5 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-500" placeholder="Identify yourself (Alias)" />
@@ -174,7 +173,7 @@
 				<div>
 					<textarea required id="text" name="text" class="w-full px-5 py-4 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-hypr-cyan focus:ring-1 focus:ring-hypr-cyan transition-all placeholder:text-slate-500 min-h-[120px] resize-y" placeholder="Initiate transmission sequence..."></textarea>
 				</div>
-				<div class="flex justify-end mt-2">
+				<div class="flex justify-center mt-2">
 					<button class="glow-btn px-8 py-3 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-medium transition-transform hover:scale-105" type="submit">Broadcast</button>
 				</div>
 			</form>
