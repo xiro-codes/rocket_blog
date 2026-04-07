@@ -28,6 +28,12 @@ in {
       description = "The domain for the worktime app. Defaults to worktime.<domain>.";
     };
 
+    portfolioDomain = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "The domain for the portfolio app.";
+    };
+
     blogPort = mkOption {
       type = types.port;
       default = 8000;
@@ -38,6 +44,12 @@ in {
       type = types.port;
       default = 8001;
       description = "Port for the worktime service to listen on.";
+    };
+
+    portfolioPort = mkOption {
+      type = types.port;
+      default = 8002;
+      description = "Port for the portfolio service to listen on.";
     };
 
     databaseUrl = mkOption {
@@ -175,6 +187,26 @@ in {
       };
     };
 
+    # Systemd Service for Portfolio
+    systemd.services.rocket-portfolio = mkIf (cfg.portfolioDomain != null) {
+      description = "Rocket Portfolio Service";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+      
+      environment = {
+        ROCKET_PROFILE = cfg.rocketProfile;
+        ROCKET_PORT = toString cfg.portfolioPort;
+        ROCKET_ADDRESS = "127.0.0.1";
+      };
+
+      serviceConfig = {
+        ExecStart = "${cfg.package}/bin/portfolio";
+        WorkingDirectory = cfg.workingDirectory;
+        Restart = "always";
+        DynamicUser = true;
+      };
+    };
+
     # Nginx Configuration
     services.nginx = {
       enable = true;
@@ -194,6 +226,18 @@ in {
       virtualHosts.${if cfg.worktimeDomain != null then cfg.worktimeDomain else "worktime.${cfg.domain}"} = {
         locations."/" = {
           proxyPass = "http://127.0.0.1:${toString cfg.worktimePort}";
+          extraConfig = ''
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+          '';
+        };
+      };
+
+      virtualHosts.${cfg.portfolioDomain} = mkIf (cfg.portfolioDomain != null) {
+        locations."/" = {
+          proxyPass = "http://127.0.0.1:${toString cfg.portfolioPort}";
           extraConfig = ''
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
