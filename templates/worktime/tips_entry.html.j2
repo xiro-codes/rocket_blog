@@ -39,7 +39,7 @@
 
 <!-- Tips Entry Form -->
 {% call wt.worktime_card(title="Add Tips", icon="fas fa-dollar-sign") %}
-    <form method="post" action="/worklog/entries/{{ entry.id }}/tips" class="space-y-8">
+    <form method="post" action="/worklog/entries/{{ entry.id }}/tips" class="space-y-8 mx-auto max-w-2xl">
         <div class="space-y-3 max-w-md mx-auto">
             <label for="tip_amount" class="block text-sm font-bold text-white tracking-widest uppercase text-center">
                 <i class="fas fa-hand-holding-usd me-1 text-hypr-cyan"></i>Tip Amount

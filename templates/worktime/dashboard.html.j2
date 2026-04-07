@@ -22,9 +22,9 @@
 {% call wt.worktime_card(title="Recent Entries", icon="fas fa-history") %}
     {{ wt.entries_table(entries=recent_entries) }}
     {% if recent_entries %}
-        <div class="text-center">
-            <a href="/worklog/entries" class="btn btn-primary">
-                <i class="fas fa-arrow-right me-2"></i>View All Entries
+        <div class="text-center mt-6">
+            <a href="/worklog/entries" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium">
+                <i class="fas fa-arrow-right"></i> View All Entries
             </a>
         </div>
     {% endif %}

@@ -15,7 +15,7 @@
 
 <!-- Add New Role -->
 {% call wt.worktime_card(title="Add New Role", icon="fas fa-plus") %}
-    <form method="post" action="/worklog/roles" class="space-y-6">
+    <form method="post" action="/worklog/roles" class="space-y-6 mx-auto max-w-2xl">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             {{ wt.form_field_simple(
                 type="text", 
@@ -139,7 +139,7 @@
                 <i class="fas fa-times text-xl"></i>
             </button>
         </div>
-        <form method="post" id="editRoleForm" class="space-y-6">
+        <form method="post" id="editRoleForm" class="space-y-6 mx-auto max-w-2xl">
             <div class="p-6 space-y-4">
                 <div class="space-y-2">
                     <label for="edit_role_name" class="block text-sm font-bold text-white tracking-widest uppercase text-xs">Role Name</label>

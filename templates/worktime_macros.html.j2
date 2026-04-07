@@ -112,7 +112,7 @@
                     <div class="font-mono text-5xl font-black text-white tracking-tighter" id="live-timer" data-start-time="{{ active_entry.start_time }}">
                         00:00:00
                     </div>
-                    <form method="post" action="/worklog/stop">
+                    <form method="post" action="/worklog/stop" class="mx-auto max-w-2xl">
                         <button type="submit" class="px-8 py-3 rounded-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-100 font-bold transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
                             <i class="fas fa-stop"></i> Stop Timer
                         </button>
@@ -130,7 +130,7 @@
 {% endmacro %}
 
 {% macro timer_start_form(roles) %}
-    <form method="post" action="/worklog/start" class="space-y-6">
+    <form method="post" action="/worklog/start" class="space-y-6 mx-auto max-w-2xl">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-3">
                 <label for="user_role_id" class="block text-sm font-bold text-white tracking-widest uppercase">
