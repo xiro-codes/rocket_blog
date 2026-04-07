@@ -16,6 +16,7 @@ pub fn catch_default() -> Redirect {
 fn index() -> Template {
     log::info!("Route accessed: GET / - Portfolio home page accessed");
     Template::render("portfolio", json!({
+        "is_portfolio": true,
         "contact": {
             "first": "Travis O.",
             "last": "Davis",

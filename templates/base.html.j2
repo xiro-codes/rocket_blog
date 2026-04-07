@@ -103,19 +103,21 @@
                 <span class="opacity-90 group-hover:opacity-100 transition-opacity">Rocket<span class="text-hypr-cyan">Blog</span></span>
             </a>
             
-            <div class="flex items-center gap-4 text-sm font-medium">
-                {% if token %}
-                    {% if is_admin %}
-                    <a href="/blog/create" class="text-slate-300 hover:text-white transition-colors">Create</a>
-                    <a href="/settings" class="text-slate-300 hover:text-white transition-colors">Settings</a>
-                    {% endif %}
-                    <a href="/blog/search" class="text-slate-300 hover:text-white transition-colors">Search</a>
-                    <a href="/auth/logout" class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all">Logout</a>
-                {% else %}
-                    <a href="/blog/search" class="text-slate-300 hover:text-white transition-colors">Search</a>
-                    <a href="/auth/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all backdrop-blur-md">Login</a>
+    <div class="flex items-center gap-4 text-sm font-medium">
+        {% if not is_portfolio %}
+            {% if token %}
+                {% if is_admin %}
+                <a href="/blog/create" class="text-slate-300 hover:text-white transition-colors">Create</a>
+                <a href="/settings" class="text-slate-300 hover:text-white transition-colors">Settings</a>
                 {% endif %}
-            </div>
+                <a href="/blog/search" class="text-slate-300 hover:text-white transition-colors">Search</a>
+                <a href="/auth/logout" class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all">Logout</a>
+            {% else %}
+                <a href="/blog/search" class="text-slate-300 hover:text-white transition-colors">Search</a>
+                <a href="/auth/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all backdrop-blur-md">Login</a>
+            {% endif %}
+        {% endif %}
+    </div>
         </nav>
 
 		<div class="container mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 flex-grow relative z-10">
