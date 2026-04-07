@@ -61,10 +61,12 @@ impl Fairing for Seeding {
         log::info!("Database is empty, creating seed data with {} posts...", self.count);
         
         log::debug!("Creating admin account");
-        let pw = bcrypt::hash("pass").unwrap();
+        let admin_username = std::env::var("DEFAULT_ADMIN_USERNAME").unwrap_or_else(|_| "admin".to_owned());
+        let admin_password = std::env::var("DEFAULT_ADMIN_PASSWORD").unwrap_or_else(|_| "pass".to_owned());
+        let pw = bcrypt::hash(admin_password).unwrap();
         let ac = account::ActiveModel {
             id: Set(uuid::Uuid::new_v4()),
-            username: Set("admin".to_owned()),
+            username: Set(admin_username),
             password: Set(pw),
             email: Set("admin@tdavis.dev".to_owned()),
             admin: Set(true),

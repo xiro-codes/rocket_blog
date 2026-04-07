@@ -35,9 +35,14 @@ impl Features {
     ///
     /// # Returns
     ///
-    /// Returns `true` in debug builds, `false` in release builds.
-    pub const fn enable_seeding() -> bool {
-        true
+    /// Returns `true` if ENABLE_SEEDING env var is "true" or "1".
+    /// Otherwise returns `true` in debug builds, `false` in release builds.
+    pub fn enable_seeding() -> bool {
+        if let Ok(val) = std::env::var("ENABLE_SEEDING") {
+            val == "true" || val == "1"
+        } else {
+            cfg!(debug_assertions)
+        }
     }
     
     /// Check if detailed logging should be enabled.

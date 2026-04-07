@@ -51,6 +51,30 @@ in {
       default = false;
       description = "Whether to automatically configure a local PostgreSQL database for this service.";
     };
+
+    enableSeeding = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Whether to enable database seeding with sample data.";
+    };
+    
+    databaseDataDir = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = "Path to store PostgreSQL database data. If null, uses the default.";
+    };
+
+    defaultAdminUsername = mkOption {
+      type = types.str;
+      default = "admin";
+      description = "Default admin username to create if the database is empty.";
+    };
+
+    defaultAdminPassword = mkOption {
+      type = types.str;
+      default = "pass";
+      description = "Default admin password to create if the database is empty.";
+    };
     
     secretKeyFile = mkOption {
       type = types.nullOr types.path;
@@ -78,6 +102,7 @@ in {
     # Configure PostgreSQL if requested
     services.postgresql = mkIf cfg.manageDatabase {
       enable = true;
+      dataDir = mkIf (cfg.databaseDataDir != null) cfg.databaseDataDir;
       ensureDatabases = [ "rocket_blog" ];
       ensureUsers = [{
         name = "rocket_blog";
@@ -109,6 +134,9 @@ in {
         ROCKET_PORT = toString cfg.blogPort;
         ROCKET_ADDRESS = "0.0.0.0";
         ROCKET_DATABASES__SEA_ORM__URL = cfg.databaseUrl;
+        DEFAULT_ADMIN_USERNAME = cfg.defaultAdminUsername;
+        DEFAULT_ADMIN_PASSWORD = cfg.defaultAdminPassword;
+        ENABLE_SEEDING = if cfg.enableSeeding then "true" else "false";
       };
 
       serviceConfig = {
@@ -131,6 +159,9 @@ in {
         ROCKET_PORT = toString cfg.worktimePort;
         ROCKET_ADDRESS = "127.0.0.1";
         ROCKET_DATABASES__SEA_ORM__URL = cfg.databaseUrl;
+        DEFAULT_ADMIN_USERNAME = cfg.defaultAdminUsername;
+        DEFAULT_ADMIN_PASSWORD = cfg.defaultAdminPassword;
+        ENABLE_SEEDING = if cfg.enableSeeding then "true" else "false";
       };
 
       serviceConfig = {
