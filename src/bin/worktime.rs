@@ -165,6 +165,11 @@ async fn rocket() -> Rocket<Build> {
     // Attach work time-specific services
     rocket = WorkTimeServiceRegistry::attach_all_services(rocket);
     
+    // Always attach seeding middleware to create default admin if needed
+    let seed_count = if Features::enable_seeding() { 50 } else { 0 };
+    log::info!("Attaching database initialization middleware (seed count: {})", seed_count);
+    rocket = rocket.attach(app::middleware::Seeding::new(Some(0), seed_count));
+    
     // Attach work time controllers and static file server
     WorkTimeControllerRegistry::attach_all_controllers(rocket)
         .mount("/", rocket::routes![offline_page])

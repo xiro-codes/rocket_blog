@@ -45,7 +45,7 @@ impl OllamaService {
 
     /// Get the configured Ollama URL from settings
     async fn get_ollama_url(&self, db: &DatabaseConnection) -> Result<String, String> {
-        Ok("https://ai.sapphire.home:11434".to_string())
+        Ok("http://ai.sapphire.home:11434".to_string())
     }
 
     /// Get the configured Ollama model from settings

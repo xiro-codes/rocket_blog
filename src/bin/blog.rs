@@ -98,11 +98,10 @@ async fn rocket() -> Rocket<Build> {
     // Attach blog-specific services
     rocket = BlogServiceRegistry::attach_all_services(rocket);
 
-    // Only attach seeding in debug builds (development mode)
-    if Features::enable_seeding() {
-        log::info!("Attaching database seeding middleware");
-        rocket = rocket.attach(middleware::Seeding::new(Some(0), 50));
-    }
+    // Always attach seeding middleware to create default admin if needed
+    let seed_count = if Features::enable_seeding() { 50 } else { 0 };
+    log::info!("Attaching database initialization middleware (seed count: {})", seed_count);
+    rocket = rocket.attach(middleware::Seeding::new(Some(0), seed_count));
 
     log::info!("Attaching blog controllers and static file server");
     // Attach blog controllers

@@ -81,6 +81,11 @@ impl Fairing for Seeding {
         
         log::debug!("Admin account created: {} ({})", ac.username, ac.id);
 
+        if self.count <= 1 {
+            log::info!("Database seeding completed successfully (admin only)");
+            return Ok(rocket);
+        }
+
         // Create sample tags
         log::debug!("Creating sample tags");
         let sample_tags = vec![

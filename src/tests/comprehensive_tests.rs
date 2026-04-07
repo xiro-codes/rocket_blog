@@ -328,7 +328,6 @@ mod comprehensive_tests {
             assert!(rocket.state::<CommentService>().is_some());
             assert!(rocket.state::<TagService>().is_some());
             assert!(rocket.state::<AIProviderService>().is_some());
-            assert!(rocket.state::<OpenAIService>().is_some());
             assert!(rocket.state::<OllamaService>().is_some());
             assert!(rocket.state::<ReactionService>().is_some());
             assert!(rocket.state::<SettingsService>().is_some());

@@ -12,18 +12,16 @@ impl ServiceRegistry {
         log::info!("Registering application services...");
         
         // Create AI provider service and add providers
-        log::debug!("Creating AI provider service with OpenAI and Ollama providers");
+        log::debug!("Creating AI provider service with Ollama provider");
         let mut ai_service = AIProviderService::new();
-        ai_service.add_provider(Box::new(OpenAIService::new()));
         ai_service.add_provider(Box::new(OllamaService::new()));
         
-        log::debug!("Attaching services: Auth, Blog, Comment, OpenAI, Ollama, AIProvider, Reaction, Settings, Tag, Coordinator, YouTube, BackgroundJob, WorkTime, PayPeriod");
+        log::debug!("Attaching services: Auth, Blog, Comment, Ollama, AIProvider, Reaction, Settings, Tag, Coordinator, YouTube, BackgroundJob, WorkTime, PayPeriod");
         
         rocket
             .manage(AuthService::new())
             .manage(BlogService::new())
             .manage(CommentService::new())
-            .manage(OpenAIService::new()) // Keep for backwards compatibility
             .manage(OllamaService::new())
             .manage(ai_service)
             .manage(ReactionService::new())

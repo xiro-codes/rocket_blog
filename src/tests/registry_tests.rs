@@ -26,7 +26,6 @@ mod tests {
         assert!(rocket_with_services.state::<CommentService>().is_some());
         assert!(rocket_with_services.state::<TagService>().is_some());
         assert!(rocket_with_services.state::<AIProviderService>().is_some());
-        assert!(rocket_with_services.state::<OpenAIService>().is_some());
         assert!(rocket_with_services.state::<OllamaService>().is_some());
         assert!(rocket_with_services.state::<ReactionService>().is_some());
         assert!(rocket_with_services.state::<SettingsService>().is_some());
@@ -94,7 +93,6 @@ mod tests {
         let comment_service = CommentService::new();
         let tag_service = TagService::new();
         let ai_service = AIProviderService::new();
-        let openai_service = OpenAIService::new();
         let ollama_service = OllamaService::new();
         let reaction_service = ReactionService::new();
         let settings_service = SettingsService::new();
@@ -106,7 +104,6 @@ mod tests {
         assert_eq!(std::mem::size_of_val(&comment_service), std::mem::size_of::<CommentService>());
         assert_eq!(std::mem::size_of_val(&tag_service), std::mem::size_of::<TagService>());
         assert_eq!(std::mem::size_of_val(&ai_service), std::mem::size_of::<AIProviderService>());
-        assert_eq!(std::mem::size_of_val(&openai_service), std::mem::size_of::<OpenAIService>());
         assert_eq!(std::mem::size_of_val(&ollama_service), std::mem::size_of::<OllamaService>());
         assert_eq!(std::mem::size_of_val(&reaction_service), std::mem::size_of::<ReactionService>());
         assert_eq!(std::mem::size_of_val(&settings_service), std::mem::size_of::<SettingsService>());
@@ -143,7 +140,6 @@ mod tests {
         assert!(rocket.state::<CommentService>().is_some());
         assert!(rocket.state::<TagService>().is_some());
         assert!(rocket.state::<AIProviderService>().is_some());
-        assert!(rocket.state::<OpenAIService>().is_some());
         assert!(rocket.state::<OllamaService>().is_some());
         assert!(rocket.state::<ReactionService>().is_some());
         assert!(rocket.state::<SettingsService>().is_some());
@@ -196,11 +192,10 @@ mod tests {
 
     #[test]
     fn test_backward_compatibility() {
-        // Test backward compatibility with individual OpenAI service
+        // Test backward compatibility
         let rocket = ServiceRegistry::attach_all_services(rocket::build());
         
-        // Both individual and provider-based OpenAI services should be available
-        assert!(rocket.state::<OpenAIService>().is_some());
+        // AIProviderService should be available
         assert!(rocket.state::<AIProviderService>().is_some());
     }
 }

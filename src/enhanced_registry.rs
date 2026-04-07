@@ -63,9 +63,8 @@ impl NewServiceRegistry {
         log::info!("Registering enhanced services with AI provider setup...");
         
         // Create AI provider service and add providers
-        log::debug!("Creating AI provider service with OpenAI and Ollama providers");
+        log::debug!("Creating AI provider service with Ollama provider");
         let mut ai_service = AIProviderService::new();
-        ai_service.add_provider(Box::new(OpenAIService::new()));
         ai_service.add_provider(Box::new(OllamaService::new()));
         
         // Use the auto-generated registry and add the configured AI service
