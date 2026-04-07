@@ -1,0 +1,73 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ contact.first }} {{ contact.last }} - Portfolio{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+  <div class="text-center mb-16 animate-fade-in-up">
+    <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-hypr-cyan to-hypr-teal mb-4">{{ contact.first }} {{ contact.last }}</h1>
+    <h2 class="text-2xl text-gray-400 font-mono">{{ contact.position }}</h2>
+    <div class="mt-4 text-gray-500 font-mono text-sm">
+      {{ contact.email }} &bull; github.com/{{ contact.github }} &bull; {{ contact.address }}
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 animate-fade-in-up" style="animation-delay: 0.2s">
+    <a href="https://blog.tdavis.dev" class="group block p-8 rounded-2xl bg-hypr-panel border border-hypr-border hover:border-hypr-cyan transition-all duration-300 transform hover:-translate-y-1">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-2xl font-bold text-white group-hover:text-hypr-cyan transition-colors">Rust/HTMX Blog</h3>
+        <svg class="w-6 h-6 text-gray-500 group-hover:text-hypr-cyan transform group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </div>
+      <p class="text-gray-400 font-mono text-sm">A hyper-modern blog platform built with Rust, Rocket framework, and HTMX. Features AI integrations and dynamic server-side rendering.</p>
+    </a>
+
+    <a href="https://worklog.tdavis.dev" class="group block p-8 rounded-2xl bg-hypr-panel border border-hypr-border hover:border-hypr-teal transition-all duration-300 transform hover:-translate-y-1">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-2xl font-bold text-white group-hover:text-hypr-teal transition-colors">Work Time Tracker</h3>
+        <svg class="w-6 h-6 text-gray-500 group-hover:text-hypr-teal transform group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </div>
+      <p class="text-gray-400 font-mono text-sm">A comprehensive time tracking application managing work sessions, authentication, and productivity metrics.</p>
+    </a>
+  </div>
+
+  <div class="mb-16 animate-fade-in-up" style="animation-delay: 0.4s">
+    <h3 class="text-2xl font-bold mb-6 flex items-center"><span class="text-hypr-teal mr-3">_</span>Technical Skills</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-sm">
+      <div class="p-6 rounded-xl bg-hypr-panel border border-hypr-border">
+        <h4 class="text-white font-bold mb-3 border-b border-gray-800 pb-2">Systems</h4>
+        <p class="text-gray-400 leading-relaxed">{{ all_skills.systems }}</p>
+      </div>
+      <div class="p-6 rounded-xl bg-hypr-panel border border-hypr-border">
+        <h4 class="text-white font-bold mb-3 border-b border-gray-800 pb-2">Backend</h4>
+        <p class="text-gray-400 leading-relaxed">{{ all_skills.backend }}</p>
+      </div>
+      <div class="p-6 rounded-xl bg-hypr-panel border border-hypr-border">
+        <h4 class="text-white font-bold mb-3 border-b border-gray-800 pb-2">Web / Frontend</h4>
+        <p class="text-gray-400 leading-relaxed">{{ all_skills.web }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="animate-fade-in-up" style="animation-delay: 0.6s">
+    <h3 class="text-2xl font-bold mb-6 flex items-center"><span class="text-hypr-cyan mr-3">&gt;</span>Experience</h3>
+    <div class="space-y-8">
+      {% for job in experience %}
+      <div class="relative pl-8 border-l border-hypr-border">
+        <div class="absolute w-4 h-4 bg-hypr-cyan rounded-full -left-[9px] top-1 shadow-[0_0_10px_#00a8f4]"></div>
+        <div class="flex flex-col md:flex-row md:items-baseline justify-between mb-2">
+          <h4 class="text-xl font-bold text-white">{{ job.title }} <span class="text-hypr-teal text-base font-normal ml-2">@ {{ job.org }}</span></h4>
+          <span class="text-gray-500 font-mono text-sm mt-1 md:mt-0">{{ job.date }} | {{ job.location }}</span>
+        </div>
+        <ul class="list-none text-gray-400 space-y-2 mt-4 font-mono text-sm">
+          {% for item in job.items %}
+          <li class="flex items-start">
+            <span class="text-hypr-teal mr-2">&raquo;</span>
+            <span>{{ item }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

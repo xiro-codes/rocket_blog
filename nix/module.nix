@@ -71,8 +71,8 @@ in {
     };
 
     defaultAdminPassword = mkOption {
-      type = types.str;
-      default = "pass";
+      type = types.nullOr types.str;
+      default = null;
       description = "Default admin password to create if the database is empty.";
     };
     
@@ -135,8 +135,9 @@ in {
         ROCKET_ADDRESS = "0.0.0.0";
         ROCKET_DATABASES__SEA_ORM__URL = cfg.databaseUrl;
         DEFAULT_ADMIN_USERNAME = cfg.defaultAdminUsername;
-        DEFAULT_ADMIN_PASSWORD = cfg.defaultAdminPassword;
         ENABLE_SEEDING = if cfg.enableSeeding then "true" else "false";
+      } // lib.optionalAttrs (cfg.defaultAdminPassword != null) {
+        DEFAULT_ADMIN_PASSWORD = cfg.defaultAdminPassword;
       };
 
       serviceConfig = {
@@ -160,8 +161,9 @@ in {
         ROCKET_ADDRESS = "127.0.0.1";
         ROCKET_DATABASES__SEA_ORM__URL = cfg.databaseUrl;
         DEFAULT_ADMIN_USERNAME = cfg.defaultAdminUsername;
-        DEFAULT_ADMIN_PASSWORD = cfg.defaultAdminPassword;
         ENABLE_SEEDING = if cfg.enableSeeding then "true" else "false";
+      } // lib.optionalAttrs (cfg.defaultAdminPassword != null) {
+        DEFAULT_ADMIN_PASSWORD = cfg.defaultAdminPassword;
       };
 
       serviceConfig = {
