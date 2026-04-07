@@ -1,15 +1,20 @@
 #[cfg(test)]
 mod tests {
-    use crate::registry::{ServiceRegistry, ControllerRegistry};
-    use crate::services::{AuthService, BlogService, CommentService, TagService, ReactionService, SettingsService, CoordinatorService};
-    use crate::controllers::{IndexController, AuthController, BlogController, CommentController, FeedController};
-    use rocket::{Build, Rocket, fairing::Fairing};
+    use crate::controllers::{
+        AuthController, BlogController, CommentController, FeedController, IndexController,
+    };
+    use crate::registry::{ControllerRegistry, ServiceRegistry};
+    use crate::services::{
+        AuthService, BlogService, CommentService, CoordinatorService, ReactionService,
+        SettingsService, TagService,
+    };
+    use rocket::{fairing::Fairing, Build, Rocket};
 
     #[test]
     fn test_service_registry_creation() {
         // Test that ServiceRegistry can be created (it's a zero-sized type)
         let _registry = ServiceRegistry;
-        
+
         // ServiceRegistry should have the expected methods
         assert!(true); // Placeholder to verify structure
     }
@@ -19,14 +24,12 @@ mod tests {
         // Test that attach_all_services creates a rocket instance with all services
         let rocket = rocket::build();
         let rocket_with_services = ServiceRegistry::attach_all_services(rocket);
-        
+
         // Verify that services are managed (we can check their types exist)
         assert!(rocket_with_services.state::<AuthService>().is_some());
         assert!(rocket_with_services.state::<BlogService>().is_some());
         assert!(rocket_with_services.state::<CommentService>().is_some());
         assert!(rocket_with_services.state::<TagService>().is_some());
-        assert!(rocket_with_services.state::<AIProviderService>().is_some());
-        assert!(rocket_with_services.state::<OllamaService>().is_some());
         assert!(rocket_with_services.state::<ReactionService>().is_some());
         assert!(rocket_with_services.state::<SettingsService>().is_some());
         assert!(rocket_with_services.state::<CoordinatorService>().is_some());
@@ -37,17 +40,19 @@ mod tests {
         // Test that ServiceRegistry fairing can be created
         let fairing = ServiceRegistry::fairing();
         let info = fairing.info();
-        
+
         assert_eq!(info.name, "Service Registry");
         // Check that the fairing has the correct kind (we'll just check it's not empty)
-        assert!(format!("{:?}", info.kind).contains("Ignite") || format!("{:?}", info.kind).len() > 0);
+        assert!(
+            format!("{:?}", info.kind).contains("Ignite") || format!("{:?}", info.kind).len() > 0
+        );
     }
 
     #[test]
     fn test_controller_registry_creation() {
         // Test that ControllerRegistry can be created (it's a zero-sized type)
         let _registry = ControllerRegistry;
-        
+
         // ControllerRegistry should have the expected methods
         assert!(true); // Placeholder to verify structure
     }
@@ -57,7 +62,7 @@ mod tests {
         // Test that attach_all_controllers creates a rocket instance with all controllers
         let rocket = rocket::build();
         let _rocket_with_controllers = ControllerRegistry::attach_all_controllers(rocket);
-        
+
         // We can't easily test attached fairings, but we can verify the rocket was modified
         // In a real test, this might involve inspecting the attached fairings list
         assert!(true); // Controllers should be attached
@@ -68,10 +73,12 @@ mod tests {
         // Test that ControllerRegistry fairing can be created
         let fairing = ControllerRegistry::fairing();
         let info = fairing.info();
-        
+
         assert_eq!(info.name, "Controller Registry");
         // Check that the fairing has the correct kind (we'll just check it's not empty)
-        assert!(format!("{:?}", info.kind).contains("Ignite") || format!("{:?}", info.kind).len() > 0);
+        assert!(
+            format!("{:?}", info.kind).contains("Ignite") || format!("{:?}", info.kind).len() > 0
+        );
     }
 
     #[test]
@@ -84,15 +91,36 @@ mod tests {
         let reaction_service = ReactionService::new();
         let settings_service = SettingsService::new();
         let coordinator_service = CoordinatorService::new();
-        
+
         // All services should be created successfully
-        assert_eq!(std::mem::size_of_val(&auth_service), std::mem::size_of::<AuthService>());
-        assert_eq!(std::mem::size_of_val(&blog_service), std::mem::size_of::<BlogService>());
-        assert_eq!(std::mem::size_of_val(&comment_service), std::mem::size_of::<CommentService>());
-        assert_eq!(std::mem::size_of_val(&tag_service), std::mem::size_of::<TagService>());
-        assert_eq!(std::mem::size_of_val(&reaction_service), std::mem::size_of::<ReactionService>());
-        assert_eq!(std::mem::size_of_val(&settings_service), std::mem::size_of::<SettingsService>());
-        assert_eq!(std::mem::size_of_val(&coordinator_service), std::mem::size_of::<CoordinatorService>());
+        assert_eq!(
+            std::mem::size_of_val(&auth_service),
+            std::mem::size_of::<AuthService>()
+        );
+        assert_eq!(
+            std::mem::size_of_val(&blog_service),
+            std::mem::size_of::<BlogService>()
+        );
+        assert_eq!(
+            std::mem::size_of_val(&comment_service),
+            std::mem::size_of::<CommentService>()
+        );
+        assert_eq!(
+            std::mem::size_of_val(&tag_service),
+            std::mem::size_of::<TagService>()
+        );
+        assert_eq!(
+            std::mem::size_of_val(&reaction_service),
+            std::mem::size_of::<ReactionService>()
+        );
+        assert_eq!(
+            std::mem::size_of_val(&settings_service),
+            std::mem::size_of::<SettingsService>()
+        );
+        assert_eq!(
+            std::mem::size_of_val(&coordinator_service),
+            std::mem::size_of::<CoordinatorService>()
+        );
     }
 
     #[test]
@@ -103,13 +131,28 @@ mod tests {
         let blog_controller = BlogController::new("/blog".to_owned());
         let comment_controller = CommentController::new("/comment".to_owned());
         let feed_controller = FeedController::new("/feed".to_owned());
-        
+
         // All controllers should be created successfully
-        assert_eq!(std::mem::size_of_val(&index_controller), std::mem::size_of::<IndexController>());
-        assert_eq!(std::mem::size_of_val(&auth_controller), std::mem::size_of::<AuthController>());
-        assert_eq!(std::mem::size_of_val(&blog_controller), std::mem::size_of::<BlogController>());
-        assert_eq!(std::mem::size_of_val(&comment_controller), std::mem::size_of::<CommentController>());
-        assert_eq!(std::mem::size_of_val(&feed_controller), std::mem::size_of::<FeedController>());
+        assert_eq!(
+            std::mem::size_of_val(&index_controller),
+            std::mem::size_of::<IndexController>()
+        );
+        assert_eq!(
+            std::mem::size_of_val(&auth_controller),
+            std::mem::size_of::<AuthController>()
+        );
+        assert_eq!(
+            std::mem::size_of_val(&blog_controller),
+            std::mem::size_of::<BlogController>()
+        );
+        assert_eq!(
+            std::mem::size_of_val(&comment_controller),
+            std::mem::size_of::<CommentController>()
+        );
+        assert_eq!(
+            std::mem::size_of_val(&feed_controller),
+            std::mem::size_of::<FeedController>()
+        );
     }
 
     #[test]
@@ -118,7 +161,7 @@ mod tests {
         let rocket = rocket::build();
         let rocket = ServiceRegistry::attach_all_services(rocket);
         let rocket = ControllerRegistry::attach_all_controllers(rocket);
-        
+
         // Application should be fully configured
         assert!(rocket.state::<AuthService>().is_some());
         assert!(rocket.state::<BlogService>().is_some());
@@ -135,7 +178,7 @@ mod tests {
         let _rocket = rocket::build()
             .attach(ServiceRegistry::fairing())
             .attach(ControllerRegistry::fairing());
-        
+
         // Rocket should have both fairings attached
         assert!(true); // Fairings attached successfully
     }
@@ -146,7 +189,7 @@ mod tests {
         // This is more of a behavioral test since we can't easily capture logs
         let rocket = rocket::build();
         let _rocket_with_services = ServiceRegistry::attach_all_services(rocket);
-        
+
         // The function should complete without panicking
         assert!(true);
     }
@@ -156,7 +199,7 @@ mod tests {
         // Test that controller registration includes logging
         let rocket = rocket::build();
         let _rocket_with_controllers = ControllerRegistry::attach_all_controllers(rocket);
-        
+
         // The function should complete without panicking
         assert!(true);
     }
@@ -166,10 +209,11 @@ mod tests {
         // Test that each service maintains separate state
         let rocket1 = ServiceRegistry::attach_all_services(rocket::build());
         let rocket2 = ServiceRegistry::attach_all_services(rocket::build());
-        
+
         // Each rocket instance should have its own service instances
         assert!(rocket1.state::<AuthService>().is_some());
         assert!(rocket2.state::<AuthService>().is_some());
         // Note: Can't easily test that they're different instances without more complex setup
     }
 }
+
