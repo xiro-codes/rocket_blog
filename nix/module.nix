@@ -35,6 +35,12 @@ in
       description = "The domain for the portfolio app.";
     };
 
+    handymanDomain = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = "The domain for the handyman app.";
+    };
+
     blogPort = mkOption {
       type = types.port;
       default = 8000;
@@ -51,6 +57,12 @@ in
       type = types.port;
       default = 8002;
       description = "Port for the portfolio service to listen on.";
+    };
+
+    handymanPort = mkOption {
+      type = types.port;
+      default = 8003;
+      description = "Port for the handyman service to listen on.";
     };
 
     databaseUrl = mkOption {
@@ -209,6 +221,27 @@ in
       };
     };
 
+    # Systemd Service for Handyman
+    systemd.services.rocket-handyman = mkIf (cfg.handymanDomain != null) {
+      description = "Rocket Handyman Service";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+
+      environment = {
+        ROCKET_PROFILE = cfg.rocketProfile;
+        ROCKET_PORT = toString cfg.handymanPort;
+        ROCKET_ADDRESS = "127.0.0.1";
+      };
+
+      serviceConfig = {
+        ExecStart = "${cfg.package}/bin/handyman";
+        WorkingDirectory = cfg.workingDirectory;
+        EnvironmentFile = mkIf (cfg.secretKeyFile != null) cfg.secretKeyFile;
+        Restart = "always";
+        DynamicUser = true;
+      };
+    };
+
     # Nginx Configuration
     services.nginx = {
       enable = true;
@@ -276,6 +309,17 @@ in
         # Worktime Tracker routes
         locations."/worklog" = mkIf (cfg.worktimeDomain != null) {
           proxyPass = "http://127.0.0.1:${toString cfg.worktimePort}";
+          extraConfig = ''
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+          '';
+        };
+
+        # Handyman routes
+        locations."/handyman" = mkIf (cfg.handymanDomain != null) {
+          proxyPass = "http://127.0.0.1:${toString cfg.handymanPort}";
           extraConfig = ''
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;

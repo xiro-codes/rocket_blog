@@ -15,6 +15,14 @@ path = "src/bin/blog.rs"
 name = "worktime"
 path = "src/bin/worktime.rs"
 
+[[bin]]
+name = "handyman"
+path = "src/bin/handyman.rs"
+
+[[bin]]
+name = "portfolio"
+path = "src/bin/portfolio.rs"
+
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
