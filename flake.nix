@@ -100,7 +100,10 @@
             system.stateVersion = "23.11";
             services.rocket-blog = {
               enable = true;
-              domain = "localhost";
+              domain = "blog.localhost";
+              worktimeDomain = "worktime.localhost";
+              portfolioDomain = "localhost";
+              handymanDomain = "handyman.localhost";
               manageDatabase = true;
               secretKeyFile = ./.rocket_secret_key;
               package = self.packages.x86_64-linux.rocket-blog-debug;
