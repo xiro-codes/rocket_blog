@@ -1,8 +1,7 @@
-use app::{
-    features::Features,
-    template_config,
+use app::{features::Features, template_config};
+use rocket::{
+    catch, catchers, fs::FileServer, get, launch, response::Redirect, routes, Build, Rocket,
 };
-use rocket::{catch, catchers, fs::FileServer, get, launch, response::Redirect, routes, Build, Rocket};
 use rocket_dyn_templates::{context, Template};
 
 #[catch(default)]
@@ -11,7 +10,7 @@ pub fn catch_default() -> Redirect {
     Redirect::to("/")
 }
 
-#[get("/")]
+#[get("/handyman")]
 fn index() -> Template {
     log::info!("Route accessed: GET / - Handyman home page accessed");
     Template::render("handyman", context! {})
