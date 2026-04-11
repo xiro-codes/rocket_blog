@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickFix Handyman</title>
+    <script src="/static/tailwindcss.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Roboto', 'sans-serif'],
+                        heading: ['Roboto Condensed', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            red: '#e11d48',
+                            yellow: '#facc15',
+                            dark: '#1e293b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+    
+    <!-- Top Bar -->
+    <div class="bg-brand-dark text-white text-center py-2 text-sm font-bold uppercase tracking-wider">
+        Emergency Service Available 24/7 • Call Now: <a href="tel:5551234567" class="text-brand-yellow hover:underline">(555) 123-4567</a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex flex-shrink-0 items-center">
+                    <div class="bg-brand-red text-white p-2 rounded transform -skew-x-12 mr-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <span class="text-3xl font-heading font-black text-brand-dark uppercase italic">QuickFix</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#services" class="text-gray-800 font-bold hover:text-brand-red hidden md:block">SERVICES</a>
+                    <a href="#contact" class="bg-brand-red text-white font-bold uppercase px-6 py-2 rounded shadow hover:bg-red-700 transition transform hover:-translate-y-1">Book Now</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section (Centered, Action-Oriented) -->
+    <div class="bg-brand-yellow py-20 border-b-8 border-brand-red pattern-diagonal-lines">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h1 class="text-5xl md:text-7xl font-heading font-black text-brand-dark uppercase italic mb-6 shadow-text">
+                Got a Problem? <br> <span class="text-brand-red">Fixed Fast.</span>
+            </h1>
+            <p class="text-xl md:text-2xl font-medium text-brand-dark mb-10">
+                Same-day service for most minor home repairs. We don't waste time, we just fix it.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#contact" class="bg-brand-red text-white font-bold text-xl uppercase px-10 py-4 rounded shadow-lg hover:bg-red-700 transition">
+                    Get it Fixed Today
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Banner -->
+    <div id="services" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-heading font-black text-brand-dark uppercase">What's Broken?</h2>
+                <div class="h-2 w-24 bg-brand-red mx-auto mt-2 rounded"></div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-6 text-center">
+                <div class="p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 hover:border-brand-red hover:bg-red-50 transition cursor-pointer">
+                    <div class="text-5xl mb-4">🚰</div>
+                    <h3 class="font-bold text-lg uppercase">Leaky Pipes</h3>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 hover:border-brand-red hover:bg-red-50 transition cursor-pointer">
+                    <div class="text-5xl mb-4">📺</div>
+                    <h3 class="font-bold text-lg uppercase">TV Mounting</h3>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 hover:border-brand-red hover:bg-red-50 transition cursor-pointer">
+                    <div class="text-5xl mb-4">🚪</div>
+                    <h3 class="font-bold text-lg uppercase">Door Repair</h3>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 hover:border-brand-red hover:bg-red-50 transition cursor-pointer">
+                    <div class="text-5xl mb-4">🪑</div>
+                    <h3 class="font-bold text-lg uppercase">Furniture Build</h3>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 hover:border-brand-red hover:bg-red-50 transition cursor-pointer">
+                    <div class="text-5xl mb-4">💡</div>
+                    <h3 class="font-bold text-lg uppercase">Light Fixtures</h3>
+                </div>
+                <div class="p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 hover:border-brand-red hover:bg-red-50 transition cursor-pointer">
+                    <div class="text-5xl mb-4">🧱</div>
+                    <h3 class="font-bold text-lg uppercase">Drywall Holes</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Form (High Urgency) -->
+    <div id="contact" class="bg-brand-dark py-16 text-white">
+        <div class="max-w-3xl mx-auto px-4">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl text-gray-800 border-t-8 border-brand-red">
+                <h2 class="text-3xl font-heading font-black text-center uppercase mb-2">Request Service Now</h2>
+                <p class="text-center text-gray-600 font-bold mb-8">We reply within 15 minutes during business hours.</p>
+                <form action="#" method="POST" class="space-y-4">
+                    <input type="text" placeholder="Your Name" class="w-full p-4 bg-gray-100 rounded border border-gray-200 font-bold focus:ring-4 focus:ring-red-200 outline-none">
+                    <input type="tel" placeholder="Phone Number" class="w-full p-4 bg-gray-100 rounded border border-gray-200 font-bold focus:ring-4 focus:ring-red-200 outline-none">
+                    <select class="w-full p-4 bg-gray-100 rounded border border-gray-200 font-bold focus:ring-4 focus:ring-red-200 outline-none">
+                        <option>What do you need?</option>
+                        <option>Plumbing</option>
+                        <option>Electrical</option>
+                        <option>Assembly/Mounting</option>
+                        <option>Other</option>
+                    </select>
+                    <button type="submit" class="w-full bg-brand-red text-white font-black text-xl uppercase p-4 rounded shadow-lg hover:bg-red-700 transition">
+                        SEND REQUEST
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-8 text-center text-gray-400 font-bold">
+        <p>&copy; 2026 QuickFix Handyman. Fast & Reliable.</p>
+    </footer>
+</body>
+</html>

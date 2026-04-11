@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Pro Handyman</title>
+    <script src="/static/tailwindcss.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            green: '#10b981',
+                            darkGreen: '#047857',
+                            earth: '#8b5cf6',
+                            beige: '#fdfbf7',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-beige text-gray-700 font-sans antialiased">
+    
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-100 py-3">
+        <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-brand-green p-2 rounded-full text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                </div>
+                <span class="text-2xl font-extrabold text-gray-800 tracking-tight">Local Pro</span>
+            </div>
+            <div class="hidden md:flex space-x-6 text-gray-600 font-semibold">
+                <a href="#services" class="hover:text-brand-green transition">How We Help</a>
+                <a href="#about" class="hover:text-brand-green transition">Our Neighbors</a>
+                <a href="#contact" class="hover:text-brand-green transition">Get in Touch</a>
+            </div>
+            <div>
+                <a href="tel:5551234567" class="bg-brand-green text-white font-bold px-5 py-2.5 rounded-full shadow-sm hover:bg-brand-darkGreen transition">Call (555) 123-4567</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section (Reverse Layout) -->
+    <div class="max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row-reverse items-center gap-12">
+        <div class="md:w-1/2">
+            <div class="relative">
+                <div class="absolute inset-0 bg-brand-green rounded-3xl transform translate-x-4 translate-y-4 opacity-20"></div>
+                <img src="/static/hero.jpg" alt="Friendly Handyman" class="relative rounded-3xl shadow-xl border-4 border-white z-10 w-full h-80 object-cover">
+            </div>
+        </div>
+        <div class="md:w-1/2 text-center md:text-left">
+            <div class="inline-block bg-green-100 text-brand-darkGreen font-bold px-4 py-1 rounded-full mb-6 text-sm">
+                👋 Your neighborhood helper
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight mb-6">
+                Friendly, local help for your home to-do list.
+            </h1>
+            <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                We treat your home like our own. Honest pricing, punctual service, and a friendly smile for every job in our community.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                <a href="#contact" class="bg-brand-earth text-white font-bold px-8 py-3.5 rounded-full shadow hover:bg-purple-700 transition">
+                    Book a Visit
+                </a>
+                <a href="#services" class="bg-white text-gray-800 border-2 border-gray-200 font-bold px-8 py-3.5 rounded-full hover:border-brand-green hover:text-brand-green transition">
+                    See Services
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Area -->
+    <div class="bg-white py-16">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-extrabold text-center mb-12 text-gray-900">Why neighbors choose us</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center p-6">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-brand-green">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Always On Time</h3>
+                    <p class="text-gray-600">We respect your schedule and show up exactly when promised.</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-brand-earth">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4V5a2 2 0 00-2-2H9a2 2 0 00-2 2v14a2 2 0 002 2h6a2 2 0 002-2v-6"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Upfront Pricing</h3>
+                    <p class="text-gray-600">No hidden fees or surprises. We quote before we start the work.</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Satisfaction Guaranteed</h3>
+                    <p class="text-gray-600">We don't leave until you are completely happy with the result.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Friendly Contact Section -->
+    <div id="contact" class="bg-brand-green py-20 text-white">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-4xl font-extrabold mb-4">Let's cross off that list</h2>
+            <p class="text-green-100 mb-10 text-lg">Send us a quick message about what you need done around the house.</p>
+            
+            <form action="#" method="POST" class="bg-white p-8 rounded-3xl shadow-lg max-w-2xl mx-auto text-left">
+                <div class="mb-5">
+                    <label class="block text-gray-700 font-bold mb-2">Hi, my name is</label>
+                    <input type="text" class="w-full border-b-2 border-gray-300 focus:border-brand-green outline-none py-2 text-gray-800 text-lg" placeholder="Jane Doe">
+                </div>
+                <div class="mb-5">
+                    <label class="block text-gray-700 font-bold mb-2">You can reach me at (Email)</label>
+                    <input type="email" class="w-full border-b-2 border-gray-300 focus:border-brand-green outline-none py-2 text-gray-800 text-lg" placeholder="jane@example.com">
+                </div>
+                <div class="mb-8">
+                    <label class="block text-gray-700 font-bold mb-2">I need help with...</label>
+                    <textarea class="w-full border-b-2 border-gray-300 focus:border-brand-green outline-none py-2 text-gray-800 text-lg resize-none" rows="2" placeholder="Hanging some shelves and fixing a door..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-brand-earth text-white font-bold text-lg py-4 rounded-full shadow-md hover:bg-purple-700 transition">
+                    Send Message
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white py-8 border-t border-gray-200 text-center">
+        <p class="text-gray-500 font-semibold">&copy; 2026 Local Pro Handyman. Proudly serving the community.</p>
+    </footer>
+</body>
+</html>

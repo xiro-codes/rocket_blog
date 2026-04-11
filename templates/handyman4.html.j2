@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MasterCraft Handyman</title>
+    <script src="/static/tailwindcss.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Open Sans', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            wood: '#8B5A2B',
+                            charcoal: '#333333',
+                            slate: '#708090',
+                            paper: '#F5F5F0',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-paper text-brand-charcoal font-sans antialiased border-t-8 border-brand-wood">
+    
+    <!-- Header/Nav -->
+    <header class="bg-white shadow-sm py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <div class="text-3xl font-serif font-black tracking-tight text-brand-wood">MASTERCRAFT</div>
+                <div class="text-xs uppercase tracking-[0.3em] text-brand-slate mt-1 font-bold">Reliable Handyman Services</div>
+            </div>
+            
+            <nav class="flex space-x-6">
+                <a href="#services" class="text-brand-charcoal hover:text-brand-wood font-semibold border-b-2 border-transparent hover:border-brand-wood pb-1 transition">Craftsmanship</a>
+                <a href="#about" class="text-brand-charcoal hover:text-brand-wood font-semibold border-b-2 border-transparent hover:border-brand-wood pb-1 transition">Our Heritage</a>
+            </nav>
+
+            <div>
+                <a href="#contact" class="bg-brand-charcoal text-white px-6 py-2 rounded shadow-sm hover:bg-brand-wood transition font-bold text-sm tracking-wider uppercase">Request Service</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Traditional Hero -->
+    <div class="py-16 md:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-lg shadow-xl overflow-hidden flex flex-col md:flex-row border border-gray-200">
+                <div class="md:w-1/2 p-10 md:p-16 flex flex-col justify-center">
+                    <h1 class="text-4xl md:text-5xl font-serif font-bold text-brand-charcoal leading-tight mb-6">
+                        Old-fashioned quality for the modern home.
+                    </h1>
+                    <p class="text-lg text-brand-slate mb-8 leading-relaxed">
+                        We bring decades of experience, precision tools, and a dedication to craftsmanship to every repair, installation, and maintenance task.
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <a href="#contact" class="bg-brand-wood text-white px-8 py-3 rounded font-bold hover:bg-opacity-90 transition">Get an Estimate</a>
+                        <span class="text-brand-slate text-sm font-semibold italic">Fully Licensed & Insured</span>
+                    </div>
+                </div>
+                <div class="md:w-1/2 bg-gray-200 relative min-h-[300px]">
+                    <img src="/static/hero.jpg" alt="Master Craftsman" class="absolute inset-0 w-full h-full object-cover grayscale mix-blend-multiply opacity-80">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Structured Services List -->
+    <div id="services" class="py-16 bg-white border-y border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-serif font-bold text-center mb-16 text-brand-charcoal">Dedicated Services</h2>
+            
+            <div class="space-y-12 max-w-4xl mx-auto">
+                <!-- Row 1 -->
+                <div class="flex flex-col md:flex-row gap-8 items-start">
+                    <div class="md:w-1/3 border-t-4 border-brand-wood pt-4">
+                        <h3 class="text-2xl font-serif font-bold mb-2">Woodwork & Carpentry</h3>
+                    </div>
+                    <div class="md:w-2/3">
+                        <p class="text-brand-slate leading-relaxed mb-4">From custom shelving and cabinet repairs to molding installation and door trimming. We respect the grain and measure twice.</p>
+                        <ul class="grid grid-cols-2 gap-2 text-sm font-semibold text-brand-charcoal">
+                            <li>✓ Trim Installation</li>
+                            <li>✓ Cabinet Hardware</li>
+                            <li>✓ Door Repair</li>
+                            <li>✓ Custom Shelves</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Row 2 -->
+                <div class="flex flex-col md:flex-row gap-8 items-start">
+                    <div class="md:w-1/3 border-t-4 border-brand-slate pt-4">
+                        <h3 class="text-2xl font-serif font-bold mb-2">Home Infrastructure</h3>
+                    </div>
+                    <div class="md:w-2/3">
+                        <p class="text-brand-slate leading-relaxed mb-4">Addressing the bones of your home with precision. Minor plumbing, fixture replacement, and structural drywall patching.</p>
+                        <ul class="grid grid-cols-2 gap-2 text-sm font-semibold text-brand-charcoal">
+                            <li>✓ Fixture Swaps</li>
+                            <li>✓ Drywall Patching</li>
+                            <li>✓ Faucet Repair</li>
+                            <li>✓ Caulking</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section with Classic Form -->
+    <div id="contact" class="py-20 bg-brand-paper">
+        <div class="max-w-3xl mx-auto px-4">
+            <div class="bg-white p-10 border border-gray-300 shadow-sm rounded-sm">
+                <h2 class="text-3xl font-serif font-bold mb-6 text-brand-charcoal">Inquire About Services</h2>
+                <hr class="mb-8 border-gray-200">
+                <form action="#" method="POST">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold text-brand-slate uppercase tracking-wider mb-2">Full Name</label>
+                            <input type="text" class="w-full border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-brand-wood focus:ring-1 focus:ring-brand-wood bg-brand-paper">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-brand-slate uppercase tracking-wider mb-2">Phone Number</label>
+                            <input type="tel" class="w-full border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-brand-wood focus:ring-1 focus:ring-brand-wood bg-brand-paper">
+                        </div>
+                    </div>
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-brand-slate uppercase tracking-wider mb-2">Nature of Project</label>
+                        <textarea rows="5" class="w-full border border-gray-300 p-3 rounded-sm focus:outline-none focus:border-brand-wood focus:ring-1 focus:ring-brand-wood bg-brand-paper"></textarea>
+                    </div>
+                    <button type="submit" class="bg-brand-charcoal text-white px-8 py-4 rounded-sm font-bold text-sm tracking-widest uppercase hover:bg-brand-wood transition w-full md:w-auto">
+                        Submit Inquiry
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-brand-charcoal text-white py-12 text-center">
+        <div class="font-serif font-black text-2xl tracking-widest mb-4">MASTERCRAFT</div>
+        <p class="text-brand-slate text-sm">&copy; 2026 MasterCraft Handyman Services.</p>
+    </footer>
+</body>
+</html>

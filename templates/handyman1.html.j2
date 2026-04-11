@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Handyman Services</title>
+    <script src="/static/tailwindcss.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            gold: '#d4af37',
+                            dark: '#111827',
+                            light: '#f3f4f6',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-dark text-gray-200 font-sans antialiased">
+    
+    <!-- Navigation -->
+    <nav class="bg-black shadow-sm sticky top-0 z-50 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-3xl font-serif text-brand-gold tracking-wider uppercase">Elite Handyman</span>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="#services" class="text-gray-300 hover:text-brand-gold px-3 py-2 text-sm uppercase tracking-widest transition">Services</a>
+                    <a href="#about" class="text-gray-300 hover:text-brand-gold px-3 py-2 text-sm uppercase tracking-widest transition">About</a>
+                    <a href="#contact" class="text-gray-300 hover:text-brand-gold px-3 py-2 text-sm uppercase tracking-widest transition">Contact</a>
+                </div>
+                <div>
+                    <a href="tel:5551234567" class="border border-brand-gold text-brand-gold px-6 py-2 uppercase tracking-wide text-sm hover:bg-brand-gold hover:text-black transition duration-300">(555) 123-4567</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section (Background Image) -->
+    <div class="relative bg-gray-900 overflow-hidden h-screen flex items-center">
+        <div class="absolute inset-0">
+            <img class="w-full h-full object-cover opacity-30 mix-blend-overlay" src="/static/hero.jpg" alt="Luxury Home Maintenance">
+            <div class="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
+        </div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+            <div class="text-left max-w-3xl">
+                <h1 class="text-5xl tracking-tight font-serif text-white sm:text-6xl md:text-7xl mb-6">
+                    <span class="block">Impeccable Service.</span>
+                    <span class="block text-brand-gold italic mt-2">Uncompromising Quality.</span>
+                </h1>
+                <p class="mt-4 text-xl text-gray-300 font-light tracking-wide leading-relaxed mb-10">
+                    Bespoke property maintenance and premium repair services for discerning homeowners. Experience the elite difference.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#contact" class="px-8 py-4 bg-brand-gold text-black uppercase tracking-wider font-semibold hover:bg-white transition duration-300">
+                        Request Consultation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Section -->
+    <div id="services" class="py-24 bg-brand-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-brand-gold font-serif text-4xl mb-4 italic">Our Expertise</h2>
+                <div class="h-1 w-20 bg-brand-gold mx-auto"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Cards -->
+                <div class="bg-gray-900 p-8 border border-gray-800 hover:border-brand-gold transition duration-500 group">
+                    <h3 class="text-xl font-serif text-white mb-4 group-hover:text-brand-gold transition">Fine Installations</h3>
+                    <p class="text-gray-400 font-light leading-relaxed">Precision mounting of fine art, high-end electronics, and custom fixtures.</p>
+                </div>
+                <div class="bg-gray-900 p-8 border border-gray-800 hover:border-brand-gold transition duration-500 group">
+                    <h3 class="text-xl font-serif text-white mb-4 group-hover:text-brand-gold transition">Premium Assembly</h3>
+                    <p class="text-gray-400 font-light leading-relaxed">Careful unboxing and meticulous assembly of designer furniture pieces.</p>
+                </div>
+                <div class="bg-gray-900 p-8 border border-gray-800 hover:border-brand-gold transition duration-500 group">
+                    <h3 class="text-xl font-serif text-white mb-4 group-hover:text-brand-gold transition">Luxury Upgrades</h3>
+                    <p class="text-gray-400 font-light leading-relaxed">Upgrading hardware, smart home integrations, and bespoke finishes.</p>
+                </div>
+                <div class="bg-gray-900 p-8 border border-gray-800 hover:border-brand-gold transition duration-500 group">
+                    <h3 class="text-xl font-serif text-white mb-4 group-hover:text-brand-gold transition">White-Glove Repair</h3>
+                    <p class="text-gray-400 font-light leading-relaxed">Discreet, clean, and flawless repair work matching existing premium materials.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div id="contact" class="bg-black py-24">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="bg-gray-900 p-12 border border-gray-800 relative">
+                <div class="absolute top-0 left-0 w-2 h-full bg-brand-gold"></div>
+                <h2 class="text-3xl font-serif text-white mb-8">Schedule an Appointment</h2>
+                <form action="#" method="POST" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <input type="text" placeholder="Full Name" class="w-full bg-black border-b border-gray-700 text-white py-3 focus:outline-none focus:border-brand-gold transition placeholder-gray-600">
+                        </div>
+                        <div>
+                            <input type="email" placeholder="Email Address" class="w-full bg-black border-b border-gray-700 text-white py-3 focus:outline-none focus:border-brand-gold transition placeholder-gray-600">
+                        </div>
+                    </div>
+                    <div>
+                        <textarea rows="4" placeholder="How may we assist you?" class="w-full bg-black border-b border-gray-700 text-white py-3 focus:outline-none focus:border-brand-gold transition placeholder-gray-600 resize-none"></textarea>
+                    </div>
+                    <button type="submit" class="bg-brand-gold text-black px-10 py-3 uppercase tracking-wider font-semibold hover:bg-white transition duration-300 w-full md:w-auto">
+                        Submit Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-gray-900 py-10 text-center">
+        <span class="text-2xl font-serif text-brand-gold mb-4 block">Elite Handyman</span>
+        <p class="text-gray-600 text-sm tracking-wider">&copy; 2026 Elite Handyman Services. All rights reserved.</p>
+    </footer>
+</body>
+</html>

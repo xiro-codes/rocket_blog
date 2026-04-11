@@ -16,6 +16,26 @@ fn index() -> Template {
     Template::render("handyman", context! {})
 }
 
+#[get("/handyman1")]
+fn handyman1() -> Template {
+    Template::render("handyman1", context! {})
+}
+
+#[get("/handyman2")]
+fn handyman2() -> Template {
+    Template::render("handyman2", context! {})
+}
+
+#[get("/handyman3")]
+fn handyman3() -> Template {
+    Template::render("handyman3", context! {})
+}
+
+#[get("/handyman4")]
+fn handyman4() -> Template {
+    Template::render("handyman4", context! {})
+}
+
 #[launch]
 async fn rocket() -> Rocket<Build> {
     log::info!("Starting Handyman application...");
@@ -27,6 +47,6 @@ async fn rocket() -> Rocket<Build> {
         .attach(template_config::create_template_fairing());
 
     rocket
-        .mount("/", routes![index])
+        .mount("/", routes![index, handyman1, handyman2, handyman3, handyman4])
         .mount("/static", FileServer::from("./static/"))
 }

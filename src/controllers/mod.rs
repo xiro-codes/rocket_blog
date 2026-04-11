@@ -53,5 +53,9 @@ mod worktime;
 /// Work time tracking and management controller
 pub use worktime::Controller as WorkTimeController;
 
+mod worktime_api;
+/// Work time tracking JSON API controller
+pub use worktime_api::Controller as WorkTimeApiController;
+
 /// Work time authentication module
 pub mod worktime_auth;

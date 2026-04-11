@@ -73,10 +73,11 @@ pub struct WorkTimeControllerRegistry;
 impl WorkTimeControllerRegistry {
     pub fn attach_all_controllers(rocket: Rocket<Build>) -> Rocket<Build> {
         log::info!("Registering work time application controllers...");
-        log::debug!("Attaching controllers: WorkTime (/)");
+        log::debug!("Attaching controllers: WorkTime (/), WorkTimeApi (/api/worklog)");
         
         rocket
             .attach(controllers::WorkTimeController::new("/worklog".to_owned()))
+            .attach(controllers::WorkTimeApiController::new("/api/worklog".to_owned()))
     }
 }
 
