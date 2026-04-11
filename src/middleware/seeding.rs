@@ -153,6 +153,7 @@ impl Fairing for Seeding {
 
             let p = post::ActiveModel {
                 id: Set(uuid::Uuid::new_v4()),
+                seq_id: Set(i as i32),
                 title: Set(lipsum_words_with_rng(title_rng, 5)),
                 text: Set(lipsum_words_with_rng(
                     text_rng,

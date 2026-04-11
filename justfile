@@ -124,50 +124,25 @@ run:
 [group('Dev')]
 dev: run
 
-# Build and run the app in a NixOS container
+# Build and run a NixOS container (e.g. blog, worktime, portfolio, handyman)
 [group('Container')]
-container-run:
-	sudo nixos-container create rocket-blog --flake .#rocket-container || true
-	sudo nixos-container start rocket-blog
-	@echo "🚀 Container 'rocket-blog' started. Access at http://$(sudo nixos-container show-ip rocket-blog)"
-	@echo "IP address: $(sudo nixos-container show-ip rocket-blog)"
+container-run APP:
+	sudo nixos-container create {{APP}} --flake .#rocket-{{APP}}-container || true
+	sudo nixos-container start {{APP}}
+	@echo "🚀 Container '{{APP}}' started. Access at http://$(sudo nixos-container show-ip {{APP}})"
 
 # Stop and destroy the container
 [group('Container')]
-container-clean:
-	sudo nixos-container destroy rocket-blog
+container-clean APP:
+	sudo nixos-container destroy {{APP}}
 
 # Update the container with latest changes
 [group('Container')]
-container-update:
-	sudo nixos-container update rocket-blog --flake .#rocket-container
-	sudo nixos-container restart rocket-blog
+container-update APP:
+	sudo nixos-container update {{APP}} --flake .#rocket-{{APP}}-container
+	sudo nixos-container restart {{APP}}
 
 # View container logs
 [group('Container')]
-container-logs:
-	sudo nixos-container run rocket-blog -- journalctl -u rocket-blog -u rocket-worktime -f
-
-# Build and run the dev container with local directory mounted
-[group('Container')]
-container-dev:
-	sudo nixos-container create rocket-dev --flake .#rocket-dev-container || true
-	sudo nixos-container start rocket-dev
-	@echo "🚀 Dev container 'rocket-dev' started. Access at http://$(sudo nixos-container show-ip rocket-dev)"
-	@echo "Local directory mounted at /host inside the container."
-
-# Stop and destroy the dev container
-[group('Container')]
-container-dev-clean:
-	sudo nixos-container destroy rocket-dev
-
-# Update the dev container with latest changes
-[group('Container')]
-container-dev-update:
-	sudo nixos-container update rocket-dev --flake .#rocket-dev-container
-	sudo nixos-container restart rocket-dev
-
-# View dev container logs
-[group('Container')]
-container-dev-logs:
-	sudo nixos-container run rocket-dev -- journalctl -u rocket-blog -u rocket-worktime -f
+container-logs APP:
+	sudo nixos-container run {{APP}} -- journalctl -u rocket-{{APP}} -f

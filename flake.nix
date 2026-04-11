@@ -32,7 +32,7 @@
           ];
 
           app = rustPlatform.buildRustPackage {
-            pname = "rocket-blog";
+            pname = "rocket-forge";
             version = "0.1.0";
             src = ./.;
             cargoLock = { lockFile = ./Cargo.lock; };
@@ -56,8 +56,8 @@
         {
           packages = {
             default = app;
-            rocket-blog = app;
-            rocket-blog-debug = app-debug;
+            rocket-forge = app;
+            rocket-forge-debug = app-debug;
           };
 
           devShells.default = pkgs.mkShell {
@@ -71,7 +71,8 @@
           };
         }) // {
       nixosModules.default = import ./nix/module.nix { inherit self; };
-      nixosConfigurations.rocket-container = nixpkgs.lib.nixosSystem {
+
+      nixosConfigurations.rocket-blog-container = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           ({ config, pkgs, ... }: {
@@ -79,18 +80,18 @@
             boot.isNspawnContainer = true;
             imports = [ self.nixosModules.default ];
             system.stateVersion = "23.11";
-            services.rocket-blog = {
-              enable = true;
-              domain = "_";
+            services.rocket-forge = {
               manageDatabase = true;
               secretKeyFile = ./.rocket_secret_key;
+              blog.enable = true;
             };
-            networking.nameservers = [ "10.0.0.65" ];
+            networking.nameservers = [ "192.168.1.65" ];
             networking.firewall.allowedTCPPorts = [ 80 ];
           })
         ];
       };
-      nixosConfigurations.rocket-dev-container = nixpkgs.lib.nixosSystem {
+
+      nixosConfigurations.rocket-worktime-container = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           ({ config, pkgs, ... }: {
@@ -98,22 +99,50 @@
             boot.isNspawnContainer = true;
             imports = [ self.nixosModules.default ];
             system.stateVersion = "23.11";
-            services.rocket-blog = {
-              enable = true;
-              domain = "blog.localhost";
-              worktimeDomain = "worktime.localhost";
-              portfolioDomain = "localhost";
-              handymanDomain = "handyman.localhost";
+            services.rocket-forge = {
               manageDatabase = true;
               secretKeyFile = ./.rocket_secret_key;
-              package = self.packages.x86_64-linux.rocket-blog-debug;
-              rocketProfile = "debug";
+              worktime.enable = true;
             };
-            # Allow the service to read files from the host mount
-            systemd.services.rocket-blog.serviceConfig.DynamicUser = pkgs.lib.mkForce false;
-            systemd.services.rocket-worktime.serviceConfig.DynamicUser = pkgs.lib.mkForce false;
-            systemd.services.rocket-handyman.serviceConfig.DynamicUser = pkgs.lib.mkForce false;
-            networking.nameservers = [ "10.0.0.65" ];
+            networking.nameservers = [ "192.168.1.65" ];
+            networking.firewall.allowedTCPPorts = [ 80 ];
+          })
+        ];
+      };
+
+      nixosConfigurations.rocket-portfolio-container = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ({ config, pkgs, ... }: {
+            boot.isContainer = true;
+            boot.isNspawnContainer = true;
+            imports = [ self.nixosModules.default ];
+            system.stateVersion = "23.11";
+            services.rocket-forge = {
+              manageDatabase = true;
+              secretKeyFile = ./.rocket_secret_key;
+              portfolio.enable = true;
+            };
+            networking.nameservers = [ "192.168.1.65" ];
+            networking.firewall.allowedTCPPorts = [ 80 ];
+          })
+        ];
+      };
+
+      nixosConfigurations.rocket-handyman-container = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ({ config, pkgs, ... }: {
+            boot.isContainer = true;
+            boot.isNspawnContainer = true;
+            imports = [ self.nixosModules.default ];
+            system.stateVersion = "23.11";
+            services.rocket-forge = {
+              manageDatabase = true;
+              secretKeyFile = ./.rocket_secret_key;
+              handyman.enable = true;
+            };
+            networking.nameservers = [ "192.168.1.65" ];
             networking.firewall.allowedTCPPorts = [ 80 ];
           })
         ];
