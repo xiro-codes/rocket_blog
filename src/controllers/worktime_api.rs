@@ -1,11 +1,12 @@
 use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, TipEntryFormDTO, WorkTimeEntryDisplayDTO, AccountFormDTO};
 use sea_orm::EntityTrait;
 use rocket::{
-    routes, Build, Rocket, State,
+    get, post, routes, Build, Rocket, State,
     serde::json::{Json, Value},
     fairing::{self, Fairing, Kind, Info},
     http::{Cookie, CookieJar},
 };
+use rocket_dyn_templates::{context, Template};
 use sea_orm_rocket::Connection;
 use uuid::Uuid;
 use serde_json::json;
@@ -28,6 +29,16 @@ impl Controller {
             base: ControllerBase::new(path),
         }
     }
+}
+
+#[get("/playground")]
+async fn playground() -> Template {
+    Template::render(
+        "worktime/api_playground",
+        context! {
+            page_title: "API Playground",
+        }
+    )
 }
 
 #[post("/login", data = "<data>")]
@@ -176,6 +187,7 @@ async fn add_tips(
 
 fn routes() -> Vec<rocket::Route> {
     routes![
+        playground,
         login,
         api_stats,
         get_roles,

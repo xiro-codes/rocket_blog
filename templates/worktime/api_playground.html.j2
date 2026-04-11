@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Work Time API Playground</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; color: #333; }
+        h1 { border-bottom: 2px solid #ccc; padding-bottom: 10px; }
+        .endpoint { background: #fff; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .endpoint h3 { margin-top: 0; color: #2c3e50; }
+        .response { background: #1e1e1e; color: #d4d4d4; padding: 15px; white-space: pre-wrap; font-family: monospace; margin-top: 15px; border-radius: 5px; max-height: 400px; overflow-y: auto; }
+        button { background: #3498db; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #2980b9; }
+        input { padding: 10px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .flex { display: flex; gap: 10px; align-items: center; }
+    </style>
+</head>
+<body>
+    <h1>API Playground</h1>
+    <p>Test the Work Time Tracker JSON API endpoints below. You must log in first to receive a session token.</p>
+    
+    <div class="endpoint">
+        <h3>POST /api/worklog/login</h3>
+        <div class="flex">
+            <input type="text" id="login-user" placeholder="Username" value="admin">
+            <input type="password" id="login-pass" placeholder="Password" value="password">
+            <button onclick="doLogin()">Login</button>
+        </div>
+        <div id="login-res" class="response">Response will appear here...</div>
+    </div>
+
+    <div class="endpoint">
+        <h3>GET /api/worklog/stats</h3>
+        <button onclick="doGet('/api/worklog/stats', 'stats-res')">Get Stats</button>
+        <div id="stats-res" class="response">Response will appear here...</div>
+    </div>
+
+    <div class="endpoint">
+        <h3>GET /api/worklog/roles</h3>
+        <button onclick="doGet('/api/worklog/roles', 'roles-res')">Get Roles</button>
+        <div id="roles-res" class="response">Response will appear here...</div>
+    </div>
+
+    <div class="endpoint">
+        <h3>POST /api/worklog/start</h3>
+        <p><small>Hint: Get your Role ID from the Get Roles endpoint above</small></p>
+        <div class="flex">
+            <input type="text" id="start-role" placeholder="Role ID (UUID)" style="width: 300px;">
+            <button onclick="doStart()">Start Tracking</button>
+        </div>
+        <div id="start-res" class="response">Response will appear here...</div>
+    </div>
+
+    <div class="endpoint">
+        <h3>POST /api/worklog/stop</h3>
+        <button onclick="doPost('/api/worklog/stop', {}, 'stop-res')">Stop Tracking</button>
+        <div id="stop-res" class="response">Response will appear here...</div>
+    </div>
+
+    <div class="endpoint">
+        <h3>GET /api/worklog/entries</h3>
+        <button onclick="doGet('/api/worklog/entries', 'entries-res')">Get Recent Entries</button>
+        <div id="entries-res" class="response">Response will appear here...</div>
+    </div>
+
+    <script>
+        async function doLogin() {
+            const u = document.getElementById('login-user').value;
+            const p = document.getElementById('login-pass').value;
+            await doPost('/api/worklog/login', {username: u, password: p}, 'login-res');
+        }
+
+        async function doStart() {
+            const r = document.getElementById('start-role').value;
+            if (!r) return alert("Please enter a Role ID");
+            await doPost('/api/worklog/start', {user_role_id: r}, 'start-res');
+        }
+
+        async function doGet(url, resId) {
+            document.getElementById(resId).innerText = "Loading...";
+            try {
+                const r = await fetch(url);
+                const text = await r.text();
+                try {
+                    document.getElementById(resId).innerText = JSON.stringify(JSON.parse(text), null, 2);
+                } catch {
+                    document.getElementById(resId).innerText = text;
+                }
+            } catch(e) {
+                document.getElementById(resId).innerText = e.toString();
+            }
+        }
+
+        async function doPost(url, body, resId) {
+            document.getElementById(resId).innerText = "Loading...";
+            try {
+                const r = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(body)
+                });
+                const text = await r.text();
+                try {
+                    document.getElementById(resId).innerText = JSON.stringify(JSON.parse(text), null, 2);
+                } catch {
+                    document.getElementById(resId).innerText = text;
+                }
+            } catch(e) {
+                document.getElementById(resId).innerText = e.toString();
+            }
+        }
+    </script>
+</body>
+</html>
