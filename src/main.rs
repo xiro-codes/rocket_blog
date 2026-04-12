@@ -1,32 +1,33 @@
-//! Work Time Tracker Application Binary
-//! 
-//! This binary contains the Progressive Web App for work time tracking including:
-//! - Time tracking with role-based wages
-//! - Configurable notifications
-//! - Pay period management
-//! - PWA capabilities with offline support
-//! - Independent authentication and operation
-
 use app::{
-    features::Features,
+    controllers::{
+        AuthController, BlogController, CommentController, FeedController, IndexController,
+        SeoController, WorkTimeApiController, WorkTimeController, HandymanController, PortfolioController,
+    },
+    create_base_rocket_with_database,
     database::parse_database_args_with_fallback,
-    controllers,
-    services::{AuthService, WorkTimeService, PayPeriodService, SettingsService},
+    features::Features,
+    middleware,
+    services::{
+        AuthService, BackgroundJobService, BlogService, CommentService, CoordinatorService,
+        PayPeriodService, ReactionService, SettingsService, TagService, WorkTimeService,
+        YoutubeDownloadService,
+    },
     template_config,
-    create_base_rocket_with_database
 };
-use rocket::{fs::FileServer, response::Redirect, Build, Rocket, Request, Response, catchers, catch, launch, get};
-use rocket::{http::Header, fairing::{Fairing, Info, Kind}};
+use rocket::{
+    catch, catchers, fairing::{Fairing, Info, Kind}, fs::FileServer, get, http::Header, launch,
+    response::Redirect, Build, Request, Response, Rocket,
+};
 
 #[catch(default)]
 pub fn catch_default() -> Redirect {
-    log::warn!("Unhandled route accessed - redirecting to dashboard");
+    log::warn!("Unhandled route accessed - redirecting to home page");
     Redirect::to("/")
 }
 
 #[catch(401)]
 pub fn catch_unauthorized() -> Redirect {
-    log::info!("Unauthorized access detected - redirecting to login");
+    log::info!("Unauthorized access detected - redirecting to home");
     Redirect::to("/")
 }
 
@@ -38,7 +39,7 @@ impl Fairing for CORS {
     fn info(&self) -> Info {
         Info {
             name: "Add CORS headers",
-            kind: Kind::Response
+            kind: Kind::Response,
         }
     }
 
@@ -50,42 +51,7 @@ impl Fairing for CORS {
     }
 }
 
-/// Work Time-specific service registry
-pub struct WorkTimeServiceRegistry;
-
-impl WorkTimeServiceRegistry {
-    pub fn attach_all_services(rocket: Rocket<Build>) -> Rocket<Build> {
-        log::info!("Registering work time application services...");
-        
-        log::debug!("Attaching work time services: Auth, WorkTime, PayPeriod, Settings");
-        
-        rocket
-            .manage(AuthService::new())
-            .manage(WorkTimeService::new())
-            .manage(PayPeriodService::new())
-            .manage(SettingsService::new())
-    }
-}
-
-/// Work Time-specific controller registry  
-pub struct WorkTimeControllerRegistry;
-
-impl WorkTimeControllerRegistry {
-    pub fn attach_all_controllers(rocket: Rocket<Build>) -> Rocket<Build> {
-        log::info!("Registering work time application controllers...");
-        log::debug!("Attaching controllers: WorkTime (/), WorkTimeApi (/api/worklog)");
-        
-        rocket
-            .attach(controllers::WorkTimeController::new("/worklog".to_owned()))
-            .attach(controllers::WorkTimeApiController::new("/api/worklog".to_owned()))
-    }
-}
-
-
-
-
-
-/// Offline page route
+/// Offline page route for Work Time Tracker PWA
 #[get("/offline.html")]
 pub fn offline_page() -> (rocket::http::ContentType, String) {
     let offline_html = "<!DOCTYPE html>
@@ -148,31 +114,58 @@ pub fn offline_page() -> (rocket::http::ContentType, String) {
 
 #[launch]
 async fn rocket() -> Rocket<Build> {
-    log::info!("Starting Work Time Tracker PWA application...");
+    log::info!("Starting Rocket Web Application...");
     log::debug!("Development mode: {}", Features::is_development());
+    log::debug!("Seeding enabled: {}", Features::enable_seeding());
     log::debug!("Log level: {:?}", Features::log_level());
-    
+
     // Parse command line arguments for database configuration
     let db_config = parse_database_args_with_fallback();
     log::info!("Database configuration: {:?}", db_config);
-    
+
     // Build the base rocket instance with database auto-detection
-    log::info!("Building Work Time Tracker Rocket instance and configuring database...");
-    let mut rocket = create_base_rocket_with_database(db_config).await
+    log::info!("Building Rocket instance and configuring database...");
+    let mut rocket = create_base_rocket_with_database(db_config)
+        .await
         .register("/", catchers![catch_default, catch_unauthorized])
         .attach(template_config::create_template_fairing())
         .attach(CORS);
-    
-    // Attach work time-specific services
-    rocket = WorkTimeServiceRegistry::attach_all_services(rocket);
-    
+
+    // Attach all services
+    rocket = rocket
+        .manage(AuthService::new())
+        .manage(BlogService::new())
+        .manage(CommentService::new())
+        .manage(ReactionService::new())
+        .manage(SettingsService::new())
+        .manage(TagService::new())
+        .manage(CoordinatorService::new())
+        .manage(YoutubeDownloadService::new())
+        .manage(BackgroundJobService::new())
+        .manage(WorkTimeService::new())
+        .manage(PayPeriodService::new());
+
     // Always attach seeding middleware to create default admin if needed
     let seed_count = if Features::enable_seeding() { 50 } else { 0 };
     log::info!("Attaching database initialization middleware (seed count: {})", seed_count);
-    rocket = rocket.attach(app::middleware::Seeding::new(Some(0), seed_count));
+    rocket = rocket.attach(middleware::Seeding::new(Some(0), seed_count));
+
+    log::info!("Attaching controllers and static file server");
     
-    // Attach work time controllers and static file server
-    WorkTimeControllerRegistry::attach_all_controllers(rocket)
+    // Attach all controllers
+    rocket = rocket
+        .attach(IndexController::new("/".to_owned()))
+        .attach(AuthController::new("/auth".to_owned()))
+        .attach(BlogController::new("/blog".to_owned()))
+        .attach(CommentController::new("/comment".to_owned()))
+        .attach(FeedController::new("/feed".to_owned()))
+        .attach(SeoController::new("/".to_owned()))
+        .attach(WorkTimeController::new("/worklog".to_owned()))
+        .attach(WorkTimeApiController::new("/api/worklog".to_owned()))
+        .attach(HandymanController::new("/handyman".to_owned()))
+        .attach(PortfolioController::new("/portfolio".to_owned()));
+
+    rocket
         .mount("/worklog", rocket::routes![offline_page])
         .mount("/static", FileServer::from("./static/"))
 }

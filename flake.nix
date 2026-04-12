@@ -72,7 +72,7 @@
         }) // {
       nixosModules.default = import ./nix/module.nix { inherit self; };
 
-      nixosConfigurations.rocket-blog-container = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.rocket-forge-container = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           ({ config, pkgs, ... }: {
@@ -81,66 +81,9 @@
             imports = [ self.nixosModules.default ];
             system.stateVersion = "23.11";
             services.rocket-forge = {
+              enable = true;
               manageDatabase = true;
               secretKeyFile = ./.rocket_secret_key;
-              blog.enable = true;
-            };
-            networking.nameservers = [ "192.168.1.65" ];
-            networking.firewall.allowedTCPPorts = [ 80 ];
-          })
-        ];
-      };
-
-      nixosConfigurations.rocket-worktime-container = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          ({ config, pkgs, ... }: {
-            boot.isContainer = true;
-            boot.isNspawnContainer = true;
-            imports = [ self.nixosModules.default ];
-            system.stateVersion = "23.11";
-            services.rocket-forge = {
-              manageDatabase = true;
-              secretKeyFile = ./.rocket_secret_key;
-              worktime.enable = true;
-            };
-            networking.nameservers = [ "192.168.1.65" ];
-            networking.firewall.allowedTCPPorts = [ 80 ];
-          })
-        ];
-      };
-
-      nixosConfigurations.rocket-portfolio-container = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          ({ config, pkgs, ... }: {
-            boot.isContainer = true;
-            boot.isNspawnContainer = true;
-            imports = [ self.nixosModules.default ];
-            system.stateVersion = "23.11";
-            services.rocket-forge = {
-              manageDatabase = true;
-              secretKeyFile = ./.rocket_secret_key;
-              portfolio.enable = true;
-            };
-            networking.nameservers = [ "192.168.1.65" ];
-            networking.firewall.allowedTCPPorts = [ 80 ];
-          })
-        ];
-      };
-
-      nixosConfigurations.rocket-handyman-container = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          ({ config, pkgs, ... }: {
-            boot.isContainer = true;
-            boot.isNspawnContainer = true;
-            imports = [ self.nixosModules.default ];
-            system.stateVersion = "23.11";
-            services.rocket-forge = {
-              manageDatabase = true;
-              secretKeyFile = ./.rocket_secret_key;
-              handyman.enable = true;
             };
             networking.nameservers = [ "192.168.1.65" ];
             networking.firewall.allowedTCPPorts = [ 80 ];

@@ -57,5 +57,13 @@ mod worktime_api;
 /// Work time tracking JSON API controller
 pub use worktime_api::Controller as WorkTimeApiController;
 
+mod handyman;
+/// Handyman controller
+pub use handyman::Controller as HandymanController;
+
+mod portfolio;
+/// Portfolio controller
+pub use portfolio::Controller as PortfolioController;
+
 /// Work time authentication module
 pub mod worktime_auth;

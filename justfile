@@ -124,25 +124,25 @@ run:
 [group('Dev')]
 dev: run
 
-# Build and run a NixOS container (e.g. blog, worktime, portfolio, handyman)
+# Build and run the NixOS container
 [group('Container')]
-container-run APP:
-	sudo nixos-container create {{APP}} --flake .#rocket-{{APP}}-container || true
-	sudo nixos-container start {{APP}}
-	@echo "🚀 Container '{{APP}}' started. Access at http://$(sudo nixos-container show-ip {{APP}})"
+container-run:
+	sudo nixos-container create forge --flake .#rocket-forge-container || true
+	sudo nixos-container start forge
+	@echo "🚀 Container 'forge' started. Access at http://$(sudo nixos-container show-ip forge)"
 
 # Stop and destroy the container
 [group('Container')]
-container-clean APP:
-	sudo nixos-container destroy {{APP}}
+container-clean:
+	sudo nixos-container destroy forge
 
 # Update the container with latest changes
 [group('Container')]
-container-update APP:
-	sudo nixos-container update {{APP}} --flake .#rocket-{{APP}}-container
-	sudo nixos-container restart {{APP}}
+container-update:
+	sudo nixos-container update forge --flake .#rocket-forge-container
+	sudo nixos-container restart forge
 
 # View container logs
 [group('Container')]
-container-logs APP:
-	sudo nixos-container run {{APP}} -- journalctl -u rocket-{{APP}} -f
+container-logs:
+	sudo nixos-container run forge -- journalctl -u rocket-forge -f

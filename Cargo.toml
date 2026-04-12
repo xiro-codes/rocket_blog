@@ -8,20 +8,8 @@ name = "app"
 path = "src/lib.rs"
 
 [[bin]]
-name = "blog"
-path = "src/bin/blog.rs"
-
-[[bin]]
-name = "worktime"
-path = "src/bin/worktime.rs"
-
-[[bin]]
-name = "handyman"
-path = "src/bin/handyman.rs"
-
-[[bin]]
-name = "portfolio"
-path = "src/bin/portfolio.rs"
+name = "app"
+path = "src/main.rs"
 
 
 
