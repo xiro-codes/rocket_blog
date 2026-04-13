@@ -33,6 +33,11 @@ use sea_orm_rocket;
 /// Admin-specific request guards
 pub mod admin;
 
+/// API-specific request guards using Authorization header
+pub mod api;
+
+pub use api::{ApiUser, OptionalApiUser, ApiAdmin};
+
 /// Request guard for authenticated users.
 ///
 /// Validates that the request contains a valid session token and extracts

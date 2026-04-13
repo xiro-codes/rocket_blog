@@ -5,7 +5,7 @@
     <h1 class="text-3xl font-black text-white tracking-tighter">
         <i class="fas fa-edit me-2 text-hypr-cyan"></i>Edit Entry
     </h1>
-    <a href="/worklog/entries" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
+    <a href="/worktime/entries" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
         <i class="fas fa-arrow-left me-2"></i>Back to Entries
     </a>
 </div>
@@ -19,7 +19,7 @@
         </h3>
     </div>
     
-    <form method="post" action="/worklog/entries/{{ entry.id }}/edit" class="space-y-6 mx-auto max-w-2xl">
+    <form method="post" action="/worktime/entries/{{ entry.id }}/edit" class="space-y-6 mx-auto max-w-2xl">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-3 w-full">
                 <label for="user_role_id" class="block text-sm font-bold text-white tracking-widest uppercase">
@@ -55,7 +55,7 @@
             <button type="submit" class="glow-btn px-8 py-3 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)] inline-flex items-center gap-2">
                 <i class="fas fa-save text-hypr-cyan"></i> Update Entry
             </button>
-            <a href="/worklog/entries" class="px-8 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all font-medium inline-flex items-center gap-2">
+            <a href="/worktime/entries" class="px-8 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all font-medium inline-flex items-center gap-2">
                 <i class="fas fa-times text-slate-400"></i> Cancel
             </a>
         </div>

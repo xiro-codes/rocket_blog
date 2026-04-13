@@ -6,7 +6,7 @@
     <h1 class="text-3xl font-black text-white tracking-tighter">
         <i class="fas fa-bell me-2 text-hypr-cyan"></i>Notification Settings
     </h1>
-    <a href="/worklog/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
+    <a href="/worktime/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
         <i class="fas fa-arrow-left me-2"></i>Dashboard
     </a>
 </div>
@@ -16,7 +16,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <div class="lg:col-span-2">
         {% call wt.worktime_card(title="Notification Preferences", icon="fas fa-cog") %}
-            <form method="post" action="/worklog/notifications" class="space-y-8 mx-auto max-w-2xl">
+            <form method="post" action="/worktime/notifications" class="space-y-8 mx-auto max-w-2xl">
                 <!-- Time-based notifications -->
                 <div class="glass-panel border-white/10 rounded-2xl p-6 bg-black/20">
                     <h5 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-clock text-hypr-cyan"></i> Time-Based Notifications</h5>
@@ -142,7 +142,7 @@
                 </div>
 
                 <div class="flex justify-between items-center pt-4 border-t border-white/10">
-                    <a href="/worklog/" class="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all text-sm font-medium inline-flex items-center gap-2">
+                    <a href="/worktime/" class="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all text-sm font-medium inline-flex items-center gap-2">
                         <i class="fas fa-arrow-left"></i> Dashboard
                     </a>
                     <button type="submit" class="glow-btn px-8 py-3 rounded-full bg-hypr-dark border border-hypr-cyan/50 text-white font-bold transition-transform hover:scale-105 shadow-[0_0_20px_rgba(0,168,244,0.3)] inline-flex items-center gap-2">

@@ -6,7 +6,7 @@
     <h1 class="text-3xl font-black text-white tracking-tighter">
         <i class="fas fa-user-tag me-2 text-hypr-cyan"></i>Manage Roles
     </h1>
-    <a href="/worklog/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
+    <a href="/worktime/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
         <i class="fas fa-arrow-left me-2"></i>Dashboard
     </a>
 </div>
@@ -15,7 +15,7 @@
 
 <!-- Add New Role -->
 {% call wt.worktime_card(title="Add New Role", icon="fas fa-plus") %}
-    <form method="post" action="/worklog/roles" class="space-y-6 mx-auto max-w-2xl">
+    <form method="post" action="/worktime/roles" class="space-y-6 mx-auto max-w-2xl">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             {{ wt.form_field_simple(
                 type="text", 
@@ -107,7 +107,7 @@
                             <button class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-yellow-500/10 border border-yellow-500/30 hover:bg-yellow-500/20 text-yellow-400 transition-all" onclick="editRole('{{ role.id }}', '{{ role.role_name }}', {{ role.hourly_wage }}, '{{ role.currency }}', {{ role.is_tipped | lower }})">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <form method="post" action="/worklog/roles/delete/{{ role.id }}" class="inline-block" 
+                            <form method="post" action="/worktime/roles/delete/{{ role.id }}" class="inline-block" 
                                   onsubmit="return confirm('Are you sure you want to delete this role?')">
                                 <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 transition-all">
                                     <i class="fas fa-trash"></i>
@@ -213,7 +213,7 @@ function editRole(id, name, wage, currency, isTipped) {
     const modal = document.getElementById('editRoleModal');
     const form = document.getElementById('editRoleForm');
     
-    form.action = `/worklog/roles/edit/${id}`;
+    form.action = `/worktime/roles/edit/${id}`;
     document.getElementById('edit_role_name').value = name;
     document.getElementById('edit_hourly_wage').value = wage;
     document.getElementById('edit_currency').value = currency;

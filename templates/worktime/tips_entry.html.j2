@@ -6,7 +6,7 @@
     <h1 class="text-3xl font-black text-white tracking-tighter">
         <i class="fas fa-hand-holding-usd me-2 text-hypr-cyan"></i>Enter Tips
     </h1>
-    <a href="/worklog/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
+    <a href="/worktime/" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all text-sm font-medium backdrop-blur-md">
         <i class="fas fa-arrow-left me-2"></i>Dashboard
     </a>
 </div>
@@ -39,7 +39,7 @@
 
 <!-- Tips Entry Form -->
 {% call wt.worktime_card(title="Add Tips", icon="fas fa-dollar-sign") %}
-    <form method="post" action="/worklog/entries/{{ entry.id }}/tips" class="space-y-8 mx-auto max-w-2xl">
+    <form method="post" action="/worktime/entries/{{ entry.id }}/tips" class="space-y-8 mx-auto max-w-2xl">
         <div class="space-y-3 max-w-md mx-auto">
             <label for="tip_amount" class="block text-sm font-bold text-white tracking-widest uppercase text-center">
                 <i class="fas fa-hand-holding-usd me-1 text-hypr-cyan"></i>Tip Amount
@@ -57,7 +57,7 @@
             <button type="submit" class="glow-btn px-8 py-3 rounded-full bg-green-600/20 hover:bg-green-600/30 border border-green-500/50 text-green-400 font-bold transition-all shadow-[0_0_20px_rgba(34,197,94,0.2)] inline-flex items-center justify-center gap-2">
                 <i class="fas fa-save"></i> Save Tips
             </button>
-            <a href="/worklog/" class="px-8 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all font-medium inline-flex items-center justify-center gap-2">
+            <a href="/worktime/" class="px-8 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all font-medium inline-flex items-center justify-center gap-2">
                 <i class="fas fa-forward text-slate-400"></i> Skip Tips
             </a>
         </div>

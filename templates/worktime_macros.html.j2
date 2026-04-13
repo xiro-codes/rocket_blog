@@ -19,11 +19,11 @@
 
 {% macro nav_buttons(current_page="") %}
     {% set nav_items = [
-        {"url": "/worklog", "icon": "fas fa-home", "text": "Dashboard", "key": "dashboard"},
-        {"url": "/worklog/entries", "icon": "fas fa-list-ul", "text": "Entries", "key": "entries"},
-        {"url": "/worklog/roles", "icon": "fas fa-user-tag", "text": "Roles", "key": "roles"},
-        {"url": "/worklog/settings", "icon": "fas fa-cog", "text": "Settings", "key": "settings"},
-        {"url": "/worklog/notifications", "icon": "fas fa-bell", "text": "Alerts", "key": "notifications"}
+        {"url": "/worktime", "icon": "fas fa-home", "text": "Dashboard", "key": "dashboard"},
+        {"url": "/worktime/entries", "icon": "fas fa-list-ul", "text": "Entries", "key": "entries"},
+        {"url": "/worktime/roles", "icon": "fas fa-user-tag", "text": "Roles", "key": "roles"},
+        {"url": "/worktime/settings", "icon": "fas fa-cog", "text": "Settings", "key": "settings"},
+        {"url": "/worktime/notifications", "icon": "fas fa-bell", "text": "Alerts", "key": "notifications"}
     ] %}
     
     {% for item in nav_items %}
@@ -112,7 +112,7 @@
                     <div class="font-mono text-5xl font-black text-white tracking-tighter" id="live-timer" data-start-time="{{ active_entry.start_time }}">
                         00:00:00
                     </div>
-                    <form method="post" action="/worklog/stop" class="mx-auto max-w-2xl">
+                    <form method="post" action="/worktime/stop" class="mx-auto max-w-2xl">
                         <button type="submit" class="px-8 py-3 rounded-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-100 font-bold transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
                             <i class="fas fa-stop"></i> Stop Timer
                         </button>
@@ -130,7 +130,7 @@
 {% endmacro %}
 
 {% macro timer_start_form(roles) %}
-    <form method="post" action="/worklog/start" class="space-y-6 mx-auto max-w-2xl">
+    <form method="post" action="/worktime/start" class="space-y-6 mx-auto max-w-2xl">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-3">
                 <label for="user_role_id" class="block text-sm font-bold text-white tracking-widest uppercase">
@@ -206,11 +206,11 @@
                         </td>
                         {% if show_actions %}
                         <td class="px-6 py-4 text-right space-x-2">
-                            <a href="/worklog/entries/{{ entry.id }}/edit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:border-hypr-cyan hover:text-white transition-all">
+                            <a href="/worktime/entries/{{ entry.id }}/edit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:border-hypr-cyan hover:text-white transition-all">
                                 <i class="fas fa-edit"></i>
                             </a>
                             {% if entry.can_add_tips %}
-                            <a href="/worklog/entries/{{ entry.id }}/tips" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-500/10 border border-green-500/30 hover:bg-green-500/20 text-green-400 transition-all">
+                            <a href="/worktime/entries/{{ entry.id }}/tips" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-500/10 border border-green-500/30 hover:bg-green-500/20 text-green-400 transition-all">
                                 <i class="fas fa-coins"></i>
                             </a>
                             {% endif %}

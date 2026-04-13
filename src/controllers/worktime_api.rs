@@ -1,7 +1,12 @@
-use models::dto::{UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, WorkTimeSummaryDTO, TipEntryFormDTO, WorkTimeEntryDisplayDTO, AccountFormDTO};
+use models::dto::{
+    UserRoleFormDTO, WorkTimeEntryFormDTO, TimeTrackingControlDTO, 
+    WorkTimeSummaryDTO, TipEntryFormDTO, WorkTimeEntryDisplayDTO, AccountFormDTO,
+    NotificationSettingsFormDTO, TimezoneSettingsFormDTO, PayPeriodSettingsFormDTO,
+    PayPeriodFormDTO,
+};
 use sea_orm::EntityTrait;
 use rocket::{
-    get, post, routes, Build, Rocket, State,
+    get, post, delete, routes, Build, Rocket, State,
     serde::json::{Json, Value},
     fairing::{self, Fairing, Kind, Info},
     http::{Cookie, CookieJar},
@@ -13,9 +18,9 @@ use serde_json::json;
 
 use crate::{
     controllers::base::ControllerBase,
-    guards::{AuthenticatedUser, OptionalUser},
+    guards::{ApiUser, OptionalApiUser},
     pool::Db,
-    services::{WorkTimeService, SettingsService, AuthService},
+    services::{WorkTimeService, SettingsService, AuthService, PayPeriodService, TimezoneService},
 };
 
 /// Controller for work time tracking JSON API
@@ -62,7 +67,7 @@ async fn login(
 #[get("/stats")]
 async fn api_stats(
     conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
+    user: ApiUser,
     service: &State<WorkTimeService>,
 ) -> Json<WorkTimeSummaryDTO> {
     let db = conn.into_inner();
@@ -84,7 +89,7 @@ async fn api_stats(
 #[get("/roles")]
 async fn get_roles(
     conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
+    user: ApiUser,
     service: &State<WorkTimeService>,
 ) -> Result<Json<Vec<models::user_role::Model>>, Json<Value>> {
     let db = conn.into_inner();
@@ -97,7 +102,7 @@ async fn get_roles(
 #[post("/roles", data = "<data>")]
 async fn create_role(
     conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
+    user: ApiUser,
     service: &State<WorkTimeService>,
     data: Json<UserRoleFormDTO>,
 ) -> Result<Json<models::user_role::Model>, Json<Value>> {
@@ -108,10 +113,39 @@ async fn create_role(
     }
 }
 
+#[post("/roles/<role_id>/edit", data = "<data>")]
+async fn edit_role(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    service: &State<WorkTimeService>,
+    role_id: Uuid,
+    data: Json<UserRoleFormDTO>,
+) -> Result<Json<Value>, Json<Value>> {
+    let db = conn.into_inner();
+    match service.update_user_role(db, role_id, user.account_id, data.into_inner()).await {
+        Ok(_) => Ok(Json(json!({"status": "success"}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
+#[delete("/roles/<role_id>")]
+async fn delete_role(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    service: &State<WorkTimeService>,
+    role_id: Uuid,
+) -> Result<Json<Value>, Json<Value>> {
+    let db = conn.into_inner();
+    match service.delete_user_role(db, role_id, user.account_id).await {
+        Ok(_) => Ok(Json(json!({"status": "success"}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
 #[post("/start", data = "<data>")]
 async fn start_tracking(
     conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
+    user: ApiUser,
     service: &State<WorkTimeService>,
     data: Json<TimeTrackingControlDTO>,
 ) -> Result<Json<models::work_time_entry::Model>, Json<Value>> {
@@ -125,7 +159,7 @@ async fn start_tracking(
 #[post("/stop")]
 async fn stop_tracking(
     conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
+    user: ApiUser,
     service: &State<WorkTimeService>,
 ) -> Result<Json<Value>, Json<Value>> {
     let db = conn.into_inner();
@@ -141,7 +175,7 @@ async fn stop_tracking(
 #[get("/entries")]
 async fn get_entries(
     conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
+    user: ApiUser,
     service: &State<WorkTimeService>,
     settings_service: &State<SettingsService>,
 ) -> Result<Json<Vec<WorkTimeEntryDisplayDTO>>, Json<Value>> {
@@ -156,10 +190,25 @@ async fn get_entries(
     }
 }
 
+#[get("/entries/<entry_id>")]
+async fn get_entry(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    service: &State<WorkTimeService>,
+    entry_id: Uuid,
+) -> Result<Json<models::work_time_entry::Model>, Json<Value>> {
+    let db = conn.into_inner();
+    match service.get_work_entry_by_id(db, entry_id, user.account_id).await {
+        Ok(Some(entry)) => Ok(Json(entry)),
+        Ok(None) => Err(Json(json!({"error": "Entry not found"}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
 #[post("/entries", data = "<data>")]
 async fn create_entry(
     conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
+    user: ApiUser,
     service: &State<WorkTimeService>,
     data: Json<WorkTimeEntryFormDTO>,
 ) -> Result<Json<models::work_time_entry::Model>, Json<Value>> {
@@ -170,10 +219,39 @@ async fn create_entry(
     }
 }
 
+#[post("/entries/<entry_id>/edit", data = "<data>")]
+async fn edit_entry(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    service: &State<WorkTimeService>,
+    entry_id: Uuid,
+    data: Json<WorkTimeEntryFormDTO>,
+) -> Result<Json<Value>, Json<Value>> {
+    let db = conn.into_inner();
+    match service.update_work_entry(db, entry_id, user.account_id, data.into_inner()).await {
+        Ok(_) => Ok(Json(json!({"status": "success"}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
+#[delete("/entries/<entry_id>")]
+async fn delete_entry(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    service: &State<WorkTimeService>,
+    entry_id: Uuid,
+) -> Result<Json<Value>, Json<Value>> {
+    let db = conn.into_inner();
+    match service.delete_work_entry(db, entry_id, user.account_id).await {
+        Ok(_) => Ok(Json(json!({"status": "success"}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
 #[post("/entries/<entry_id>/tips", data = "<data>")]
 async fn add_tips(
     conn: Connection<'_, Db>,
-    user: AuthenticatedUser,
+    user: ApiUser,
     service: &State<WorkTimeService>,
     entry_id: Uuid,
     data: Json<TipEntryFormDTO>,
@@ -185,6 +263,163 @@ async fn add_tips(
     }
 }
 
+#[get("/notifications")]
+async fn get_notifications(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    service: &State<WorkTimeService>,
+) -> Result<Json<models::notification_settings::Model>, Json<Value>> {
+    let db = conn.into_inner();
+    match service.get_notification_settings(db, user.account_id).await {
+        Ok(Some(settings)) => Ok(Json(settings)),
+        Ok(None) => Err(Json(json!({"error": "Settings not found"}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
+#[post("/notifications", data = "<data>")]
+async fn update_notifications(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    service: &State<WorkTimeService>,
+    data: Json<NotificationSettingsFormDTO>,
+) -> Result<Json<Value>, Json<Value>> {
+    let db = conn.into_inner();
+    match service.create_or_update_notification_settings(db, user.account_id, data.into_inner()).await {
+        Ok(_) => Ok(Json(json!({"status": "success"}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
+#[get("/settings/timezone")]
+async fn get_timezone(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    settings_service: &State<SettingsService>,
+) -> Result<Json<Value>, Json<Value>> {
+    let db = conn.into_inner();
+    let timezone = settings_service.get_user_timezone(db, user.account_id).await
+        .unwrap_or_else(|_| None)
+        .unwrap_or_else(|| "UTC".to_string());
+    Ok(Json(json!({"timezone": timezone})))
+}
+
+#[post("/settings/timezone", data = "<data>")]
+async fn update_timezone(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    settings_service: &State<SettingsService>,
+    data: Json<TimezoneSettingsFormDTO>,
+) -> Result<Json<Value>, Json<Value>> {
+    let db = conn.into_inner();
+    let form_data = data.into_inner();
+    
+    if !TimezoneService::is_valid_timezone(&form_data.timezone) {
+        return Err(Json(json!({"error": "Invalid timezone"})));
+    }
+    
+    match settings_service.set_user_timezone(db, user.account_id, &form_data.timezone).await {
+        Ok(_) => Ok(Json(json!({"status": "success"}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
+#[get("/settings/payperiod")]
+async fn get_payperiod_settings(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    settings_service: &State<SettingsService>,
+) -> Result<Json<models::dto::PayPeriodSettingsDTO>, Json<Value>> {
+    let db = conn.into_inner();
+    match settings_service.get_user_pay_period_settings(db, user.account_id).await {
+        Ok(Some(settings)) => Ok(Json(settings)),
+        Ok(None) => Ok(Json(models::dto::PayPeriodSettingsDTO {
+            start_day: "monday".to_string(),
+            period_length: 2,
+        })),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
+#[post("/settings/payperiod", data = "<data>")]
+async fn update_payperiod_settings(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    settings_service: &State<SettingsService>,
+    data: Json<PayPeriodSettingsFormDTO>,
+) -> Result<Json<Value>, Json<Value>> {
+    let db = conn.into_inner();
+    let form_data = data.into_inner();
+    
+    let valid_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    if !valid_days.contains(&form_data.start_day.as_str()) {
+        return Err(Json(json!({"error": "Invalid start day"})));
+    }
+    
+    if ![1, 2, 4].contains(&form_data.period_length) {
+        return Err(Json(json!({"error": "Invalid period length"})));
+    }
+    
+    match settings_service.set_user_pay_period_settings(db, user.account_id, &form_data).await {
+        Ok(_) => Ok(Json(json!({"status": "success"}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
+#[get("/payperiods")]
+async fn get_payperiods(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    pay_period_service: &State<PayPeriodService>,
+) -> Result<Json<Vec<models::dto::PayPeriodWithSummaryDTO>>, Json<Value>> {
+    let db = conn.into_inner();
+    match pay_period_service.get_pay_periods_with_summary(db, user.account_id).await {
+        Ok(periods) => Ok(Json(periods)),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
+#[post("/payperiods", data = "<data>")]
+async fn create_payperiod(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    pay_period_service: &State<PayPeriodService>,
+    data: Json<PayPeriodFormDTO>,
+) -> Result<Json<models::pay_period::Model>, Json<Value>> {
+    let db = conn.into_inner();
+    match pay_period_service.create_pay_period(db, user.account_id, data.into_inner()).await {
+        Ok(period) => Ok(Json(period)),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
+#[delete("/payperiods/<period_id>")]
+async fn delete_payperiod(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    pay_period_service: &State<PayPeriodService>,
+    period_id: Uuid,
+) -> Result<Json<Value>, Json<Value>> {
+    let db = conn.into_inner();
+    match pay_period_service.delete_pay_period(db, period_id, user.account_id).await {
+        Ok(_) => Ok(Json(json!({"status": "success"}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
+#[post("/payperiods/assign")]
+async fn auto_assign_entries(
+    conn: Connection<'_, Db>,
+    user: ApiUser,
+    pay_period_service: &State<PayPeriodService>,
+) -> Result<Json<Value>, Json<Value>> {
+    let db = conn.into_inner();
+    match pay_period_service.auto_assign_entries_to_pay_periods(db, user.account_id).await {
+        Ok(count) => Ok(Json(json!({"status": "success", "assigned_count": count}))),
+        Err(e) => Err(Json(json!({"error": e.to_string()})))
+    }
+}
+
 fn routes() -> Vec<rocket::Route> {
     routes![
         playground,
@@ -192,11 +427,26 @@ fn routes() -> Vec<rocket::Route> {
         api_stats,
         get_roles,
         create_role,
+        edit_role,
+        delete_role,
         start_tracking,
         stop_tracking,
         get_entries,
+        get_entry,
         create_entry,
+        edit_entry,
+        delete_entry,
         add_tips,
+        get_notifications,
+        update_notifications,
+        get_timezone,
+        update_timezone,
+        get_payperiod_settings,
+        update_payperiod_settings,
+        get_payperiods,
+        create_payperiod,
+        delete_payperiod,
+        auto_assign_entries,
     ]
 }
 

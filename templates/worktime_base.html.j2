@@ -132,7 +132,7 @@
 
         <!-- Navigation Bar -->
         <nav class="fixed top-0 w-full z-50 glass-panel border-x-0 border-t-0 py-4 px-6 md:px-12 flex justify-between items-center transition-all duration-300">
-            <a href="/worklog" class="text-2xl font-bold tracking-tight text-white flex items-center gap-2 group">
+            <a href="/worktime" class="text-2xl font-bold tracking-tight text-white flex items-center gap-2 group">
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-hypr-teal to-hypr-cyan flex items-center justify-center shadow-[0_0_15px_rgba(0,168,244,0.5)] group-hover:shadow-[0_0_25px_rgba(0,168,244,0.8)] transition-all">
                     <span class="text-black font-black text-lg"><i class="fa-solid fa-clock"></i></span>
                 </div>
@@ -141,13 +141,13 @@
             
             <div class="flex items-center gap-4 text-sm font-medium">
                 {% if username %}
-                    <a href="/worklog" class="text-slate-300 hover:text-white transition-colors">Dashboard</a>
-                    <a href="/worklog/entries" class="text-slate-300 hover:text-white transition-colors">Entries</a>
-                    <a href="/worklog/roles" class="text-slate-300 hover:text-white transition-colors">Roles</a>
-                    <a href="/worklog/settings" class="text-slate-300 hover:text-white transition-colors">Settings</a>
-                    <a href="/worklog/logout" class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all">Logout ({{ username }})</a>
+                    <a href="/worktime" class="text-slate-300 hover:text-white transition-colors">Dashboard</a>
+                    <a href="/worktime/entries" class="text-slate-300 hover:text-white transition-colors">Entries</a>
+                    <a href="/worktime/roles" class="text-slate-300 hover:text-white transition-colors">Roles</a>
+                    <a href="/worktime/settings" class="text-slate-300 hover:text-white transition-colors">Settings</a>
+                    <a href="/worktime/logout" class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all">Logout ({{ username }})</a>
                 {% else %}
-                    <a href="/worklog/login" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all backdrop-blur-md">Login</a>
+                    <a href="/worktime/login" class="px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all backdrop-blur-md">Login</a>
                 {% endif %}
             </div>
         </nav>

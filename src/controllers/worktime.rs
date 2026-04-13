@@ -83,7 +83,7 @@ async fn home(
                 }
                 Err(e) => {
                     log::error!("Failed to load work time dashboard: {}", e);
-                    return Err(Flash::error(Redirect::to("/worklog/"), "Failed to load dashboard"));
+                    return Err(Flash::error(Redirect::to("/worktime/"), "Failed to load dashboard"));
                 }
             }
         }
@@ -93,7 +93,7 @@ async fn home(
     // Check if any accounts exist, return 404 if none
     if !auth_service.has_any_accounts(db).await {
         log::info!("No accounts exist in system - worktime login page not available");
-        return Err(Flash::error(Redirect::to("/worklog/"), "No accounts available"));
+        return Err(Flash::error(Redirect::to("/worktime/"), "No accounts available"));
     }
     
     log::debug!("Worktime login page served successfully");
@@ -122,13 +122,13 @@ async fn login(
         cookies.add_private(cookie);
         log::info!("Worktime authentication successful - Redirecting to worktime dashboard");
         Flash::success(
-            Redirect::to("/worklog/"),
+            Redirect::to("/worktime/"),
             "Login successful! Welcome to your work time tracker.",
         )
     } else {
         log::warn!("Worktime authentication failed - Redirecting back to login form");
         Flash::error(
-            Redirect::to("/worklog/"),
+            Redirect::to("/worktime/"),
             "Invalid username or password. Please try again.",
         )
     }
@@ -144,7 +144,7 @@ async fn logout(cookies: &CookieJar<'_>) -> Flash<Redirect> {
     
     log::debug!("Worktime user successfully logged out - Redirecting to worktime login");
     Flash::success(
-        Redirect::to("/worklog/"),
+        Redirect::to("/worktime/"),
         "Logout successful.",
     )
 }
@@ -175,14 +175,14 @@ async fn register(
         Ok(account) => {
             log::info!("Worktime user account created successfully for username: {} - Redirecting to worktime login", account.username);
             Flash::success(
-                Redirect::to("/worklog/"),
+                Redirect::to("/worktime/"),
                 "Account created successfully! You can now log in to access the work time tracker.",
             )
         }
         Err(e) => {
             log::warn!("Failed to create worktime user account for username: {} - Error: {}", username, e);
             Flash::error(
-                Redirect::to("/worklog/register"),
+                Redirect::to("/worktime/register"),
                 "Failed to create account. Username may already exist or be invalid.",
             )
         }
@@ -234,7 +234,7 @@ async fn dashboard(
         }
         Err(e) => {
             log::error!("Failed to load work time dashboard: {}", e);
-            Err(Flash::error(Redirect::to("/worklog/"), "Failed to load dashboard"))
+            Err(Flash::error(Redirect::to("/worktime/"), "Failed to load dashboard"))
         }
     }
 }
@@ -259,7 +259,7 @@ async fn roles_view(
         )),
         Err(e) => {
             log::error!("Failed to load user roles: {}", e);
-            Err(Flash::error(Redirect::to("/worklog/"), "Failed to load roles"))
+            Err(Flash::error(Redirect::to("/worktime/"), "Failed to load roles"))
         }
     }
 }
@@ -275,10 +275,10 @@ async fn create_role(
     let db = conn.into_inner();
     
     match service.create_user_role(db, user.account_id, form.into_inner()).await {
-        Ok(_) => Flash::success(Redirect::to("/worklog/roles"), "Role created successfully"),
+        Ok(_) => Flash::success(Redirect::to("/worktime/roles"), "Role created successfully"),
         Err(e) => {
             log::error!("Failed to create user role: {}", e);
-            Flash::error(Redirect::to("/worklog/roles"), "Failed to create role")
+            Flash::error(Redirect::to("/worktime/roles"), "Failed to create role")
         }
     }
 }
@@ -295,10 +295,10 @@ async fn edit_role(
     let db = conn.into_inner();
     
     match service.update_user_role(db, role_id, user.account_id, form.into_inner()).await {
-        Ok(_) => Flash::success(Redirect::to("/worklog/roles"), "Role updated successfully"),
+        Ok(_) => Flash::success(Redirect::to("/worktime/roles"), "Role updated successfully"),
         Err(e) => {
             log::error!("Failed to update user role: {}", e);
-            Flash::error(Redirect::to("/worklog/roles"), "Failed to update role")
+            Flash::error(Redirect::to("/worktime/roles"), "Failed to update role")
         }
     }
 }
@@ -314,10 +314,10 @@ async fn delete_role(
     let db = conn.into_inner();
     
     match service.delete_user_role(db, role_id, user.account_id).await {
-        Ok(_) => Flash::success(Redirect::to("/worklog/roles"), "Role deleted successfully"),
+        Ok(_) => Flash::success(Redirect::to("/worktime/roles"), "Role deleted successfully"),
         Err(e) => {
             log::error!("Failed to delete user role: {}", e);
-            Flash::error(Redirect::to("/worklog/roles"), "Failed to delete role")
+            Flash::error(Redirect::to("/worktime/roles"), "Failed to delete role")
         }
     }
 }
@@ -333,10 +333,10 @@ async fn start_tracking(
     let db = conn.into_inner();
     
     match service.start_time_tracking(db, user.account_id, form.into_inner()).await {
-        Ok(_) => Flash::success(Redirect::to("/worklog/"), "Time tracking started"),
+        Ok(_) => Flash::success(Redirect::to("/worktime/"), "Time tracking started"),
         Err(e) => {
             log::error!("Failed to start time tracking: {}", e);
-            Flash::error(Redirect::to("/worklog/"), &format!("Failed to start tracking: {}", e))
+            Flash::error(Redirect::to("/worktime/"), &format!("Failed to start tracking: {}", e))
         }
     }
 }
@@ -357,12 +357,12 @@ async fn stop_tracking(
                 Flash::success(Redirect::to(format!("/entries/{}/tips", entry.id)), 
                               "Shift ended! Please enter your tips.")
             } else {
-                Flash::success(Redirect::to("/worklog/"), "Time tracking stopped")
+                Flash::success(Redirect::to("/worktime/"), "Time tracking stopped")
             }
         },
         Err(e) => {
             log::error!("Failed to stop time tracking: {}", e);
-            Flash::error(Redirect::to("/worklog/"), "Failed to stop tracking")
+            Flash::error(Redirect::to("/worktime/"), "Failed to stop tracking")
         }
     }
 }
@@ -415,7 +415,7 @@ async fn entries_view(
         }
         Err(e) => {
             log::error!("Failed to load work time entries: {}", e);
-            Err(Flash::error(Redirect::to("/worklog/"), "Failed to load entries"))
+            Err(Flash::error(Redirect::to("/worktime/"), "Failed to load entries"))
         }
     }
 }
@@ -431,10 +431,10 @@ async fn create_manual_entry(
     let db = conn.into_inner();
     
     match service.create_manual_entry(db, user.account_id, form.into_inner()).await {
-        Ok(_) => Flash::success(Redirect::to("/worklog/entries"), "Manual entry created successfully"),
+        Ok(_) => Flash::success(Redirect::to("/worktime/entries"), "Manual entry created successfully"),
         Err(e) => {
             log::error!("Failed to create manual entry: {}", e);
-            Flash::error(Redirect::to("/worklog/entries"), "Failed to create entry")
+            Flash::error(Redirect::to("/worktime/entries"), "Failed to create entry")
         }
     }
 }
@@ -450,10 +450,10 @@ async fn delete_entry(
     let db = conn.into_inner();
     
     match service.delete_work_entry(db, entry_id, user.account_id).await {
-        Ok(_) => Flash::success(Redirect::to("/worklog/entries"), "Entry deleted successfully"),
+        Ok(_) => Flash::success(Redirect::to("/worktime/entries"), "Entry deleted successfully"),
         Err(e) => {
             log::error!("Failed to delete work entry: {}", e);
-            Flash::error(Redirect::to("/worklog/entries"), "Failed to delete entry")
+            Flash::error(Redirect::to("/worktime/entries"), "Failed to delete entry")
         }
     }
 }
@@ -469,10 +469,10 @@ async fn delete_entry_post(
     let db = conn.into_inner();
     
     match service.delete_work_entry(db, entry_id, user.account_id).await {
-        Ok(_) => Flash::success(Redirect::to("/worklog/entries"), "Entry deleted successfully"),
+        Ok(_) => Flash::success(Redirect::to("/worktime/entries"), "Entry deleted successfully"),
         Err(e) => {
             log::error!("Failed to delete work entry: {}", e);
-            Flash::error(Redirect::to("/worklog/entries"), "Failed to delete entry")
+            Flash::error(Redirect::to("/worktime/entries"), "Failed to delete entry")
         }
     }
 }
@@ -507,10 +507,10 @@ async fn edit_entry_view(
                 }
             ))
         }
-        Ok(None) => Err(Flash::error(Redirect::to("/worklog/entries"), "Entry not found")),
+        Ok(None) => Err(Flash::error(Redirect::to("/worktime/entries"), "Entry not found")),
         Err(e) => {
             log::error!("Failed to load work entry: {}", e);
-            Err(Flash::error(Redirect::to("/worklog/entries"), "Failed to load entry"))
+            Err(Flash::error(Redirect::to("/worktime/entries"), "Failed to load entry"))
         }
     }
 }
@@ -527,7 +527,7 @@ async fn edit_entry(
     let db = conn.into_inner();
     
     match service.update_work_entry(db, entry_id, user.account_id, form.into_inner()).await {
-        Ok(_) => Flash::success(Redirect::to("/worklog/entries"), "Entry updated successfully"),
+        Ok(_) => Flash::success(Redirect::to("/worktime/entries"), "Entry updated successfully"),
         Err(e) => {
             log::error!("Failed to update work entry: {}", e);
             Flash::error(Redirect::to(format!("/entries/{}/edit", entry_id)), "Failed to update entry")
@@ -555,7 +555,7 @@ async fn notifications_view(
         )),
         Err(e) => {
             log::error!("Failed to load notification settings: {}", e);
-            Err(Flash::error(Redirect::to("/worklog/"), "Failed to load notification settings"))
+            Err(Flash::error(Redirect::to("/worktime/"), "Failed to load notification settings"))
         }
     }
 }
@@ -571,10 +571,10 @@ async fn update_notifications(
     let db = conn.into_inner();
     
     match service.create_or_update_notification_settings(db, user.account_id, form.into_inner()).await {
-        Ok(_) => Flash::success(Redirect::to("/worklog/notifications"), "Notification settings updated successfully"),
+        Ok(_) => Flash::success(Redirect::to("/worktime/notifications"), "Notification settings updated successfully"),
         Err(e) => {
             log::error!("Failed to update notification settings: {}", e);
-            Flash::error(Redirect::to("/worklog/notifications"), "Failed to update notification settings")
+            Flash::error(Redirect::to("/worktime/notifications"), "Failed to update notification settings")
         }
     }
 }
@@ -585,7 +585,7 @@ async fn payperiods_view(
     _user: AuthenticatedUser,
 ) -> Flash<Redirect> {
     log::info!("Route accessed: GET /payperiods - Redirecting to settings page");
-    Flash::success(Redirect::to("/worklog/settings"), "Pay period settings are now available in the Settings page")
+    Flash::success(Redirect::to("/worktime/settings"), "Pay period settings are now available in the Settings page")
 }
 
 #[post("/payperiods", data = "<_form>")]
@@ -594,7 +594,7 @@ async fn create_pay_period(
     _form: Form<PayPeriodFormDTO>,
 ) -> Flash<Redirect> {
     log::info!("Route accessed: POST /payperiods - Redirecting to settings page");
-    Flash::success(Redirect::to("/worklog/settings"), "Pay period configuration is now available in the Settings page")
+    Flash::success(Redirect::to("/worktime/settings"), "Pay period configuration is now available in the Settings page")
 }
 
 #[post("/payperiods/assign")]
@@ -608,12 +608,12 @@ async fn auto_assign_entries(
     
     match pay_period_service.auto_assign_entries_to_pay_periods(db, user.account_id).await {
         Ok(count) => Flash::success(
-            Redirect::to("/worklog/payperiods"), 
+            Redirect::to("/worktime/payperiods"), 
             &format!("Successfully assigned {} work entries to pay periods", count)
         ),
         Err(e) => {
             log::error!("Failed to auto-assign entries: {}", e);
-            Flash::error(Redirect::to("/worklog/payperiods"), "Failed to auto-assign entries")
+            Flash::error(Redirect::to("/worktime/payperiods"), "Failed to auto-assign entries")
         }
     }
 }
@@ -624,7 +624,7 @@ async fn delete_pay_period(
     _period_id: Uuid,
 ) -> Flash<Redirect> {
     log::info!("Route accessed: POST /payperiods/delete - Redirecting to settings page");
-    Flash::success(Redirect::to("/worklog/settings"), "Pay period management is now available in the Settings page")
+    Flash::success(Redirect::to("/worktime/settings"), "Pay period management is now available in the Settings page")
 }
 
 #[get("/timezone")]
@@ -653,7 +653,7 @@ async fn timezone_settings_view(
         },
         Err(e) => {
             log::error!("Failed to load timezone settings: {}", e);
-            Err(Flash::error(Redirect::to("/worklog/"), "Failed to load timezone settings"))
+            Err(Flash::error(Redirect::to("/worktime/"), "Failed to load timezone settings"))
         }
     }
 }
@@ -672,17 +672,17 @@ async fn update_timezone_settings(
     // Validate timezone
     if !TimezoneService::is_valid_timezone(&form_data.timezone) {
         log::warn!("Invalid timezone submitted: {}", form_data.timezone);
-        return Flash::error(Redirect::to("/worklog/timezone"), "Invalid timezone selection");
+        return Flash::error(Redirect::to("/worktime/timezone"), "Invalid timezone selection");
     }
     
     match settings_service.set_user_timezone(db, user.account_id, &form_data.timezone).await {
         Ok(_) => {
             log::info!("Timezone updated successfully for user {} to {}", user.username, form_data.timezone);
-            Flash::success(Redirect::to("/worklog/timezone"), "Timezone settings updated successfully")
+            Flash::success(Redirect::to("/worktime/timezone"), "Timezone settings updated successfully")
         },
         Err(e) => {
             log::error!("Failed to update timezone settings: {}", e);
-            Flash::error(Redirect::to("/worklog/timezone"), "Failed to update timezone settings")
+            Flash::error(Redirect::to("/worktime/timezone"), "Failed to update timezone settings")
         }
     }
 }
@@ -738,17 +738,17 @@ async fn update_timezone_settings_from_settings(
     // Validate timezone
     if !TimezoneService::is_valid_timezone(&form_data.timezone) {
         log::warn!("Invalid timezone submitted: {}", form_data.timezone);
-        return Flash::error(Redirect::to("/worklog/settings"), "Invalid timezone selection");
+        return Flash::error(Redirect::to("/worktime/settings"), "Invalid timezone selection");
     }
     
     match settings_service.set_user_timezone(db, user.account_id, &form_data.timezone).await {
         Ok(_) => {
             log::info!("Timezone updated successfully for user {} to {}", user.username, form_data.timezone);
-            Flash::success(Redirect::to("/worklog/settings"), "Timezone settings updated successfully")
+            Flash::success(Redirect::to("/worktime/settings"), "Timezone settings updated successfully")
         },
         Err(e) => {
             log::error!("Failed to update timezone settings: {}", e);
-            Flash::error(Redirect::to("/worklog/settings"), "Failed to update timezone settings")
+            Flash::error(Redirect::to("/worktime/settings"), "Failed to update timezone settings")
         }
     }
 }
@@ -768,22 +768,22 @@ async fn update_pay_period_settings(
     let valid_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
     if !valid_days.contains(&form_data.start_day.as_str()) {
         log::warn!("Invalid start day submitted: {}", form_data.start_day);
-        return Flash::error(Redirect::to("/worklog/settings"), "Invalid start day selection");
+        return Flash::error(Redirect::to("/worktime/settings"), "Invalid start day selection");
     }
     
     if ![1, 2, 4].contains(&form_data.period_length) {
         log::warn!("Invalid period length submitted: {}", form_data.period_length);
-        return Flash::error(Redirect::to("/worklog/settings"), "Invalid period length selection");
+        return Flash::error(Redirect::to("/worktime/settings"), "Invalid period length selection");
     }
     
     match settings_service.set_user_pay_period_settings(db, user.account_id, &form_data).await {
         Ok(_) => {
             log::info!("Pay period settings updated successfully for user {}", user.username);
-            Flash::success(Redirect::to("/worklog/settings"), "Pay period settings updated successfully")
+            Flash::success(Redirect::to("/worktime/settings"), "Pay period settings updated successfully")
         },
         Err(e) => {
             log::error!("Failed to update pay period settings: {}", e);
-            Flash::error(Redirect::to("/worklog/settings"), "Failed to update pay period settings")
+            Flash::error(Redirect::to("/worktime/settings"), "Failed to update pay period settings")
         }
     }
 }
@@ -826,11 +826,11 @@ async fn tips_entry_view(
             let role = user_role::Entity::find_by_id(entry.user_role_id)
                 .one(db)
                 .await
-                .map_err(|_| Flash::error(Redirect::to("/worklog/"), "Failed to load role"))?
-                .ok_or(Flash::error(Redirect::to("/worklog/"), "Role not found"))?;
+                .map_err(|_| Flash::error(Redirect::to("/worktime/"), "Failed to load role"))?
+                .ok_or(Flash::error(Redirect::to("/worktime/"), "Role not found"))?;
                 
             if !role.is_tipped {
-                return Err(Flash::error(Redirect::to("/worklog/"), "This role is not configured for tips"));
+                return Err(Flash::error(Redirect::to("/worktime/"), "This role is not configured for tips"));
             }
             
             // Calculate base earnings
@@ -849,10 +849,10 @@ async fn tips_entry_view(
                 }
             ))
         }
-        Ok(None) => Err(Flash::error(Redirect::to("/worklog/"), "Entry not found")),
+        Ok(None) => Err(Flash::error(Redirect::to("/worktime/"), "Entry not found")),
         Err(e) => {
             log::error!("Failed to load work entry: {}", e);
-            Err(Flash::error(Redirect::to("/worklog/"), "Failed to load entry"))
+            Err(Flash::error(Redirect::to("/worktime/"), "Failed to load entry"))
         }
     }
 }
@@ -869,7 +869,7 @@ async fn submit_tips(
     let db = conn.into_inner();
     
     match service.add_tips_to_entry(db, entry_id, user.account_id, form.into_inner()).await {
-        Ok(_) => Flash::success(Redirect::to("/worklog/"), "Tips added successfully!"),
+        Ok(_) => Flash::success(Redirect::to("/worktime/"), "Tips added successfully!"),
         Err(e) => {
             log::error!("Failed to add tips: {}", e);
             Flash::error(Redirect::to(format!("/entries/{}/tips", entry_id)), "Failed to add tips")

@@ -77,13 +77,13 @@ async fn worktime_login(
         cookies.add_private(Cookie::new("token", token.to_string()));
         log::info!("Worktime authentication successful - Redirecting to worktime dashboard");
         Flash::success(
-            Redirect::to("/worklog/"),
+            Redirect::to("/worktime/"),
             "Login successful! Welcome to your work time tracker.",
         )
     } else {
         log::warn!("Worktime authentication failed - Redirecting back to login form");
         Flash::error(
-            Redirect::to("/worklog/auth"),
+            Redirect::to("/worktime/auth"),
             "Invalid username or password. Please try again.",
         )
     }
@@ -97,7 +97,7 @@ async fn worktime_logout(cookies: &CookieJar<'_>) -> Flash<Redirect> {
     
     log::debug!("Worktime user successfully logged out - Redirecting to worktime login");
     Flash::success(
-        Redirect::to("/worklog/auth"),
+        Redirect::to("/worktime/auth"),
         "Logout successful.",
     )
 }
@@ -126,14 +126,14 @@ async fn worktime_register(
         Ok(account) => {
             log::info!("Worktime user account created successfully for username: {} - Redirecting to worktime login", account.username);
             Flash::success(
-                Redirect::to("/worklog/auth"),
+                Redirect::to("/worktime/auth"),
                 "Account created successfully! You can now log in to access the work time tracker.",
             )
         }
         Err(e) => {
             log::warn!("Failed to create worktime user account for username: {} - Error: {}", username, e);
             Flash::error(
-                Redirect::to("/worklog/auth/register"),
+                Redirect::to("/worktime/auth/register"),
                 "Failed to create account. Username may already exist or be invalid.",
             )
         }

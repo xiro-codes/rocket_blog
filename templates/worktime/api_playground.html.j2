@@ -19,7 +19,7 @@
     <p>Test the Work Time Tracker JSON API endpoints below. You must log in first to receive a session token.</p>
     
     <div class="endpoint">
-        <h3>POST /api/worklog/login</h3>
+        <h3>POST /api/worktime/login</h3>
         <div class="flex">
             <input type="text" id="login-user" placeholder="Username" value="admin">
             <input type="password" id="login-pass" placeholder="Password" value="password">
@@ -29,19 +29,19 @@
     </div>
 
     <div class="endpoint">
-        <h3>GET /api/worklog/stats</h3>
-        <button onclick="doGet('/api/worklog/stats', 'stats-res')">Get Stats</button>
+        <h3>GET /api/worktime/stats</h3>
+        <button onclick="doGet('/api/worktime/stats', 'stats-res')">Get Stats</button>
         <div id="stats-res" class="response">Response will appear here...</div>
     </div>
 
     <div class="endpoint">
-        <h3>GET /api/worklog/roles</h3>
-        <button onclick="doGet('/api/worklog/roles', 'roles-res')">Get Roles</button>
+        <h3>GET /api/worktime/roles</h3>
+        <button onclick="doGet('/api/worktime/roles', 'roles-res')">Get Roles</button>
         <div id="roles-res" class="response">Response will appear here...</div>
     </div>
 
     <div class="endpoint">
-        <h3>POST /api/worklog/start</h3>
+        <h3>POST /api/worktime/start</h3>
         <p><small>Hint: Get your Role ID from the Get Roles endpoint above</small></p>
         <div class="flex">
             <input type="text" id="start-role" placeholder="Role ID (UUID)" style="width: 300px;">
@@ -51,14 +51,14 @@
     </div>
 
     <div class="endpoint">
-        <h3>POST /api/worklog/stop</h3>
-        <button onclick="doPost('/api/worklog/stop', {}, 'stop-res')">Stop Tracking</button>
+        <h3>POST /api/worktime/stop</h3>
+        <button onclick="doPost('/api/worktime/stop', {}, 'stop-res')">Stop Tracking</button>
         <div id="stop-res" class="response">Response will appear here...</div>
     </div>
 
     <div class="endpoint">
-        <h3>GET /api/worklog/entries</h3>
-        <button onclick="doGet('/api/worklog/entries', 'entries-res')">Get Recent Entries</button>
+        <h3>GET /api/worktime/entries</h3>
+        <button onclick="doGet('/api/worktime/entries', 'entries-res')">Get Recent Entries</button>
         <div id="entries-res" class="response">Response will appear here...</div>
     </div>
 
@@ -66,13 +66,13 @@
         async function doLogin() {
             const u = document.getElementById('login-user').value;
             const p = document.getElementById('login-pass').value;
-            await doPost('/api/worklog/login', {username: u, password: p}, 'login-res');
+            await doPost('/api/worktime/login', {username: u, password: p}, 'login-res');
         }
 
         async function doStart() {
             const r = document.getElementById('start-role').value;
             if (!r) return alert("Please enter a Role ID");
-            await doPost('/api/worklog/start', {user_role_id: r}, 'start-res');
+            await doPost('/api/worktime/start', {user_role_id: r}, 'start-res');
         }
 
         async function doGet(url, resId) {

@@ -173,12 +173,12 @@ async fn rocket() -> Rocket<Build> {
         .attach(CommentController::new("/comment".to_owned()))
         .attach(FeedController::new("/feed".to_owned()))
         .attach(SeoController::new("/".to_owned()))
-        .attach(WorkTimeController::new("/worklog".to_owned()))
-        .attach(WorkTimeApiController::new("/api/worklog".to_owned()))
+        .attach(WorkTimeController::new("/worktime".to_owned()))
+        .attach(WorkTimeApiController::new("/api/worktime".to_owned()))
         .attach(HandymanController::new("/handyman".to_owned()))
         .attach(PortfolioController::new("/".to_owned()));
 
     rocket
-        .mount("/worklog", rocket::routes![offline_page])
+        .mount("/worktime", rocket::routes![offline_page])
         .mount("/static", FileServer::from("./static/"))
 }
