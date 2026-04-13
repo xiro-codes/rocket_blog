@@ -1,7 +1,8 @@
 use app::{
     controllers::{
-        AuthController, BlogController, CommentController, FeedController, IndexController,
-        SeoController, WorkTimeApiController, WorkTimeController, HandymanController, PortfolioController,
+        AuthController, BlogController, CommentController, FeedController, HandymanController,
+        IndexController, PortfolioController, SeoController, WorkTimeApiController,
+        WorkTimeController,
     },
     create_base_rocket_with_database,
     database::parse_database_args_with_fallback,
@@ -15,8 +16,14 @@ use app::{
     template_config,
 };
 use rocket::{
-    catch, catchers, fairing::{Fairing, Info, Kind}, fs::FileServer, get, http::Header, launch,
-    response::Redirect, Build, Request, Response, Rocket,
+    catch, catchers,
+    fairing::{Fairing, Info, Kind},
+    fs::FileServer,
+    get,
+    http::Header,
+    launch,
+    response::Redirect,
+    Build, Request, Response, Rocket,
 };
 
 #[catch(default)]
@@ -45,7 +52,10 @@ impl Fairing for CORS {
 
     async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
         response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
-        response.set_header(Header::new("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS"));
+        response.set_header(Header::new(
+            "Access-Control-Allow-Methods",
+            "POST, GET, PATCH, OPTIONS",
+        ));
         response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
         response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
     }
@@ -108,7 +118,8 @@ pub fn offline_page() -> (rocket::http::ContentType, String) {
         <button class=\"retry-btn\" onclick=\"window.location.href='/'\">Go to Dashboard</button>
     </div>
 </body>
-</html>".to_string();
+</html>"
+        .to_string();
     (rocket::http::ContentType::HTML, offline_html)
 }
 
@@ -147,14 +158,16 @@ async fn rocket() -> Rocket<Build> {
 
     // Always attach seeding middleware to create default admin if needed
     let seed_count = if Features::enable_seeding() { 50 } else { 0 };
-    log::info!("Attaching database initialization middleware (seed count: {})", seed_count);
+    log::info!(
+        "Attaching database initialization middleware (seed count: {})",
+        seed_count
+    );
     rocket = rocket.attach(middleware::Seeding::new(Some(0), seed_count));
 
     log::info!("Attaching controllers and static file server");
-    
+
     // Attach all controllers
     rocket = rocket
-        .attach(IndexController::new("/".to_owned()))
         .attach(AuthController::new("/auth".to_owned()))
         .attach(BlogController::new("/blog".to_owned()))
         .attach(CommentController::new("/comment".to_owned()))
@@ -163,7 +176,7 @@ async fn rocket() -> Rocket<Build> {
         .attach(WorkTimeController::new("/worklog".to_owned()))
         .attach(WorkTimeApiController::new("/api/worklog".to_owned()))
         .attach(HandymanController::new("/handyman".to_owned()))
-        .attach(PortfolioController::new("/portfolio".to_owned()));
+        .attach(PortfolioController::new("/".to_owned()));
 
     rocket
         .mount("/worklog", rocket::routes![offline_page])

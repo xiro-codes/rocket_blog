@@ -22,16 +22,19 @@ impl Controller {
 #[get("/")]
 fn index() -> Redirect {
     log::info!("Route accessed: GET / - Home page accessed, redirecting to blog");
-    Redirect::to("/blog/?page=1")
+    Redirect::to("/portfolio")
 }
 
 #[get("/offline")]
 fn offline() -> Template {
     log::info!("Route accessed: GET /offline - PWA offline page");
-    Template::render("offline", context! {
-        page_title: "Offline - Work Time Tracker",
-        page_description: "Work Time Tracker is currently offline but still functional"
-    })
+    Template::render(
+        "offline",
+        context! {
+            page_title: "Offline - Work Time Tracker",
+            page_description: "Work Time Tracker is currently offline but still functional"
+        },
+    )
 }
 
 fn routes() -> Vec<Route> {
