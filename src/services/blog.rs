@@ -64,8 +64,14 @@ impl Service {
             data.action
         );
 
-        log::debug!("Converting markdown to HTML");
-        let text = markdown::to_html(data.text.as_str());
+        log::debug!("Converting markdown to HTML with dangerous HTML allowed");
+        let text = markdown::to_html_with_options(data.text.as_str(), &markdown::Options {
+            compile: markdown::CompileOptions {
+                allow_dangerous_html: true,
+                ..markdown::CompileOptions::default()
+            },
+            ..markdown::Options::default()
+        }).unwrap_or_else(|_| data.text.to_string());
         let excerpt = Self::generate_excerpt(&data.text, data.excerpt.clone());
         let post_id = BaseService::generate_id();
 
@@ -192,7 +198,13 @@ impl Service {
             .first(db)
             .await?;
         let mut p: post::ActiveModel = BaseService::handle_not_found(result, "Post")?.into();
-        let text = markdown::to_html(data.text.as_str());
+        let text = markdown::to_html_with_options(data.text.as_str(), &markdown::Options {
+            compile: markdown::CompileOptions {
+                allow_dangerous_html: true,
+                ..markdown::CompileOptions::default()
+            },
+            ..markdown::Options::default()
+        }).unwrap_or_else(|_| data.text.to_string());
         let excerpt = Self::generate_excerpt(&data.text, data.excerpt);
 
         // Handle draft/publish action if provided

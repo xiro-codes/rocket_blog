@@ -57,7 +57,7 @@
 <article class="max-w-4xl mx-auto animate-fade-in-up">
 	<header class="mb-16 text-center max-w-4xl mx-auto flex flex-col items-center">
 		<h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight mb-6 leading-tight max-w-3xl" style="word-break: break-word;">
-			{{post.title}}
+			{{post.title | safe}}
 		</h1>
 		
 		{% if tags %}
