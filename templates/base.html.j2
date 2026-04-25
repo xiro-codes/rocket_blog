@@ -4,13 +4,13 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		
+
 		<title>{% if page_title %}{{ page_title }}{% else %}Rocket Blog - Hyper Modern{% endif %}</title>
 		<meta name="description" content="{% if page_description %}{{ page_description }}{% else %}A hyper-modern blog platform built with Rust and Rocket framework.{% endif %}">
 		<meta name="keywords" content="{% if page_keywords %}{{ page_keywords }}{% else %}blog, rust, rocket, programming, technology, articles{% endif %}">
-		
+
 		<link rel="canonical" href="{% if canonical_url %}{{ canonical_url }}{% else %}/{% endif %}">
-		
+
 		<script src="/static/tailwindcss.js"></script>
 		<script src="/static/htmx.min.js"></script>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -86,11 +86,11 @@
 	</head>
 
 	<body class="text-slate-300 font-sans antialiased selection:bg-hypr-cyan/30 selection:text-white min-h-screen relative overflow-x-hidden flex flex-col">
-		
+
         <!-- Background Elements -->
         <div class="fixed top-[-20%] left-1/2 -translate-x-1/2 w-[80vw] h-[80vh] rounded-full bg-hypr-cyan/10 blur-[120px] pointer-events-none -z-20 animate-pulse-slow"></div>
         <div class="fixed bottom-[-20%] right-[-10%] w-[60vw] h-[60vh] rounded-full bg-purple-600/10 blur-[120px] pointer-events-none -z-20 animate-pulse-slow" style="animation-delay: 2s;"></div>
-        
+
         <!-- Grid Pattern -->
         <div class="fixed inset-0 pointer-events-none -z-30 opacity-[0.03]" style="background-image: linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px); background-size: 50px 50px;"></div>
 
@@ -102,13 +102,12 @@
                 </div>
                 <span class="opacity-90 group-hover:opacity-100 transition-opacity">Rocket<span class="text-hypr-cyan">Blog</span></span>
             </a>
-            
+
     <div class="flex items-center gap-4 text-sm font-medium">
         {% if not is_portfolio %}
             {% if token %}
                 {% if is_admin %}
                 <a href="/blog/create" class="text-slate-300 hover:text-white transition-colors">Create</a>
-                <a href="/settings" class="text-slate-300 hover:text-white transition-colors">Settings</a>
                 {% endif %}
                 <a href="/blog/search" class="text-slate-300 hover:text-white transition-colors">Search</a>
                 <a href="/auth/logout" class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all">Logout</a>
@@ -124,7 +123,7 @@
 			{% block content %}
 			{% endblock %}
 		</div>
-		
+
         <footer class="mt-auto border-t border-white/5 py-8 text-center text-slate-500 text-sm glass-panel border-b-0 border-x-0 relative z-10">
             <p>&copy; 2026 Rocket Blog. Hyper-modern theme.</p>
         </footer>
